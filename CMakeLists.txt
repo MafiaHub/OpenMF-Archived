@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 project (OpenMF)
 message(STATUS "Configuring OpenMF...")
 
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
+find_package(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
