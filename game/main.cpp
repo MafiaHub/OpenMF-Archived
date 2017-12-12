@@ -1,14 +1,16 @@
 #include <iostream>
+#include <fstream>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
-#include <osg/Shape>
-#include <osg/ShapeDrawable>
+#include <osg_loader.hpp>
 
 int main( int argc, char** argv )
 {
-    std::cout << "test" << std::endl;
+    MFFormat::Loader loader;
+
     osgViewer::Viewer viewer;
-    osg::ref_ptr<osg::ShapeDrawable> s = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),1));
-    viewer.setSceneData(s);
+
+    std::ifstream f;
+    viewer.setSceneData( loader.load4ds(f) );
     return viewer.run();
 }

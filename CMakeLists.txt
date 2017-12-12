@@ -14,4 +14,5 @@ set(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
+include_directories(components)
 add_subdirectory(game)
