@@ -1,8 +1,0 @@
-To build `game`, you need to compile required OSG version.
-
-VS project assumes you've set up environment variables:
-
-OSG_INCLUDE_DIR, which should point to `<path_to_osg>\include;<path_to_osg>\build\include`
-OSG_LIB_DIR,     which should point to `<path_to_osg>\build\lib`
-
-Make sure you copy all required DLLs to be able to launch it afterwards.
