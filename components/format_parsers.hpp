@@ -1,3 +1,6 @@
+#ifndef FORMAT_PARSERS_H
+#define FORMAT_PARSERS_H
+
 #include <iostream>
 #include <cstdint>
 #include <vector>
@@ -23,62 +26,62 @@ class DataFormat4DS: public DataFormat
 public:
     typedef enum
     {
-        MaterialFlag_TextureDiffuse = 0x00040000,
-        MaterialFlag_Colored = 0x08000000,
-        MaterialFlag_MipMapping = 0x00800000,
-        MaterialFlag_AnimatedTextureDiffuse = 0x04000000,
-        MaterialFlag_AnimatedTextureAlpha = 0x02000000,
-        MaterialFlag_DoubleSidedMaterial = 0x10000000,
-        MaterialFlag_EnvironmentMap = 0x00080000,
-        MaterialFlag_NormalTextureBlend = 0x00000100,
-        MaterialFlag_MultiplyTextureBlend = 0x00000200,
-        MaterialFlag_AdditiveTextureBlend = 0x00000400,
-        MaterialFlag_CalcReflectTextureY = 0x00001000,
-        MaterialFlag_ProjectReflectTextureY = 0x00002000,
-        MaterialFlag_ProjectReflectTextureZ = 0x00004000,
-        MaterialFlag_AdditionalEffect = 0x00008000,
-        MaterialFlag_AlphaTexture = 0x40000000,
-        MaterialFlag_ColorKey = 0x20000000,
-        MaterialFlag_AdditiveMixing = 0x80000000
-    };
+        MATERIALFLAG_TEXTUREDIFFUSE = 0x00040000,
+        MATERIALFLAG_COLORED = 0x08000000,
+        MATERIALFLAG_MIPMAPPING = 0x00800000,
+        MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE = 0x04000000,
+        MATERIALFLAG_ANIMATEXTEXTUREALPHA = 0x02000000,
+        MATERIALFLAG_DOUBLESIDEDMATERIAL = 0x10000000,
+        MATERIALFLAG_ENVIRONMENTMAP = 0x00080000,
+        MATERIALFLAG_NORMALTEXTUREBLEND = 0x00000100,
+        MATERIALFLAG_MULTIPLYTEXTUREBLEND = 0x00000200,
+        MATERIALFLAG_ADDITIVETEXTUREBLEND = 0x00000400,
+        MATERIALFLAG_CALCREFLECTTEXTUREY = 0x00001000,
+        MATERIALFLAG_PROJECTREFLECTTEXTUREY = 0x00002000,
+        MATERIALFLAG_PROJECTREFLECTTEXTUREZ = 0x00004000,
+        MATERIALFLAG_ADDITIONALEFFECT = 0x00008000,
+        MATERIALFLAG_ALPHATEXTURE = 0x40000000,
+        MATERIALFLAG_COLORKEY = 0x20000000,
+        MATERIALFLAG_ADDITIVEMIXING = 0x80000000
+    } MaterialFlag;
 
     typedef enum
     {
-        MeshType_Standard = 0x01,
-        MeshType_Sector = 0x05,
-        MeshType_Dummy = 0x06,
-        MeshType_Target = 0x07,
-        MeshType_Bone = 0x0a
-    };
+        MESHTYPE_STANDARD = 0x01,
+        MESHTYPE_SECTOR = 0x05,
+        MESHTYPE_DUMMY = 0x06,
+        MESHTYPE_TARGET = 0x07,
+        MESHTYPE_BONE = 0x0a
+    } MeshType;
 
     typedef enum
     {
-        VisualMeshType_Standard = 0x0,
-        VisualMeshType_SingleMesh = 0x02,
-        VisualMeshType_SingleMorph = 0x03,
-        VisualMeshType_Billboard = 0x04,
-        VisualMeshType_Morph = 0x05,
-        VisualMeshType_Glow = 0x06,
-        VisualMeshType_Mirror = 0x08
-    };
+        VISUALMESHTYPE_STANDARD = 0x0,
+        VISUALMESHTYPE_SINGLEMESH = 0x02,
+        VISUALMESHTYPE_SINGLEMORPH = 0x03,
+        VISUALMESHTYPE_BILLBOARD = 0x04,
+        VISUALMESHTYPE_MORPH = 0x05,
+        VISUALMESHTYPE_GLOW = 0x06,
+        VISUALMESHTYPE_MIRROR = 0x08
+    } VisualMeshType;
 
     typedef enum
     {
-        MeshRenderFlag_UseDepthBias = 0x0001,
-        MeshRenderFlag_UseShadows = 0x0002,
-        MeshRenderFlag_Unknown = 0x0008,
-        MeshRenderFlag_UseProjection = 0x0020,
-        MeshRenderFlag_ForbidFog = 0x0080
-    };
+        MESHRENDERFLAG_USEDEPTHBIAS = 0x0001,
+        MESHRENDERFLAG_USESHADOWS = 0x0002,
+        MESHRENDERFLAG_UNKNOWN = 0x0008,
+        MESHRENDERFLAG_USEPROJECTION = 0x0020,
+        MESHRENDERFLAG_FORBIDFOG = 0x0080
+    } MeshRenderFlag;
 
     typedef enum
     {
-        MeshOccludingFlag_Normal = 0x09,
-        MeshOccludingFlag_Sector = 0x7D,
-        MeshOccludingFlag_Wall = 0x3D, // NOTE(zaklaus): Mesh in sector (walls).
-        MeshOccludingFlag_Portal = 0x1D,   // NOTE(zaklaus): Mesh in portal.
-        MeshOccludingFlag_Inactive = 0x11
-    };
+        MESHOCCLUDINGFLAG_NORMAL = 0x09,
+        MESHOCCLUDINGFLAG_SECTOR = 0x7D,
+        MESHOCCLUDINGFLAG_WALL = 0x3D,     // mesh in sector (walls)
+        MESHOCCLUDINGFLAG_PORTAL = 0x1D,   // mesh in portal
+        MESHOCCLUDINGFLAG_INACTIVE = 0x11
+    } MeshOccludingFlag;
 
     typedef struct
     {
@@ -109,18 +112,18 @@ public:
         Vec3 mEmission;
         float mTransparency; // 0.0 - invisible; 1.0 - solid
 
-                             // NOTE(zaklaus): Environment map
+                             // environment map
         float mEnvRatio;
         char mEnvMapNameLength;
         char mEnvMapName[255];
         char mDiffuseMapNameLength;
         char mDiffuseMapName[255];
 
-        // NOTE(zaklaus): Alpha map
+        // alpha map
         char mAlphaMapNameLength;
         char mAlphaMapName[255];
 
-        // NOTE(zaklaus): Anim map
+        // anim map
         uint32_t mAnimSequenceLength;
         uint16_t mUnk0;
         uint32_t mFramePeriod;
@@ -161,7 +164,7 @@ public:
     typedef struct
     {
         uint16_t mInstanced;
-        // NOTE(zaklaus): For non-instanced mesh
+        // for non-instanced mesh
         uint8_t mLODLevel;
         Lod *mLODs;
     } Standard;
@@ -182,15 +185,15 @@ public:
     typedef struct
     {
         uint8_t mVertexCount;
-        uint32_t mUnk0; // NOTE(zaklaus): Always 4.
+        uint32_t mUnk0; // always 4.
         uint32_t mUnk1[6];
         Vec3 *mVertices;
     } Portal;
 
     typedef struct
     {
-        uint32_t mUnk0; // NOTE(zaklaus): Always 2049.
-        uint32_t mUnk1; // NOTE(zaklaus): Always 0.
+        uint32_t mUnk0; // always 2049.
+        uint32_t mUnk1; // always 0.
         uint32_t mVertexCount;
         uint32_t mFaceCount;
         Vec3 *mVertices;
@@ -210,7 +213,7 @@ public:
 
     typedef struct
     {
-        // NOTE(zaklaus): Bounding box
+        // bounding box
         Vec3 mMinBox;
         Vec3 mMaxBox;
     } Dummy;
@@ -252,14 +255,14 @@ public:
         uint16_t mVertexCount;
         MorphLodVertex *mVertices;
         uint8_t mUnk0;
-        uint16_t *mVertexLinks; // NOTE(zaklaus): Addresses vertices from Standard's LOD mesh.  
+        uint16_t *mVertexLinks; // addresses vertices from Standard's LOD mesh  
     } MorphLod;
 
     typedef struct
     {
         Standard mStandard;
         uint8_t mFrameCount;
-        uint8_t mLODLevel; // NOTE(zaklaus): Should be equal to Standard.LODLevel.
+        uint8_t mLODLevel;      // should be equal to Standard.LODLevel
         uint8_t mUnk0;
         MorphLod *mLODs;
         Vec3 mMinBox;
@@ -290,19 +293,19 @@ public:
     typedef struct
     {
         Standard mStandard;
-        SingleMeshLod *mLODs; // NOTE(zaklaus): LODLevel == Standard.LODLevel.
+        SingleMeshLod *mLODs; // LODLevel == Standard.LODLevel.
     } SingleMesh;
 
     typedef struct
     {
         SingleMesh mSingleMesh;
-        Morph mMorph; // NOTE(zaklaus): Morph without Standard Mesh!
+        Morph mMorph;         // Morph without Standard Mesh!
     } SingleMorph;
 
     typedef struct
     {
         uint8_t mMeshType;
-        // NOTE(zaklaus): Standard mesh type
+        // standard mesh type
         uint8_t mVisualMeshType;
         uint16_t mMeshRenderFlags;
         uint16_t mParentID; // 0 - not connected
@@ -342,7 +345,7 @@ public:
     virtual bool load(std::ifstream &srcFile) override;
     virtual bool save(std::ofstream &dstFile) override;
     Model* getModel();
-private:
+protected:
     template<typename T>
     void read(std::ifstream & stream, T* a, size_t size = sizeof(T))
     {
@@ -376,8 +379,25 @@ class DataFormatDTA: public DataFormat
 public:
     virtual bool load(std::ifstream &srcFile) override; ///< Loads the file table from the DTA file.
     void setDecryptKeys(uint32_t key1, uint32_t key2);  ///< Decrypting keys have to be set before load(...) is called.
+    void setDecryptKeys(uint32_t keys[2]);
     unsigned int getNumFiles();                         ///< Get the number of files inside the DTA.
+    unsigned int getFileSize(unsigned int index);
     std::string getFileName(unsigned int index);
+    void getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length);   ///< Get the concrete file from within the DST file into a buffer.
+
+    static uint32_t A0_KEYS[2];   // decrypting keys
+    static uint32_t A1_KEYS[2];
+    static uint32_t A2_KEYS[2];
+    static uint32_t A3_KEYS[2];
+    static uint32_t A4_KEYS[2];
+    static uint32_t A5_KEYS[2];
+    static uint32_t A6_KEYS[2];
+    static uint32_t A7_KEYS[2];
+    // TODO: A8 ?
+    static uint32_t A9_KEYS[2];
+    static uint32_t AA_KEYS[2];
+    static uint32_t AB_KEYS[2];
+    static uint32_t AC_KEYS[2];
 
     typedef struct
     {
@@ -389,7 +409,7 @@ public:
 
     typedef struct
     {
-        uint32_t mUnknown;
+        uint32_t mUnknown;         // ID or seq number?
         uint32_t mDataOffset;
         uint32_t mDataEnd;
         char mName[16];
@@ -417,15 +437,6 @@ protected:
     uint32_t mKey1;
     uint32_t mKey2;
 };
-
-std::streamsize DataFormat::fileLength(std::ifstream &f)
-{
-    std::streampos fsize = f.tellg();
-    f.seekg( 0, std::ios::end );
-    fsize = f.tellg() - fsize;
-    f.seekg( 0, std::ios_base::beg );
-    return fsize;
-}
 
 bool DataFormatDTA::load(std::ifstream &srcFile)
 {
@@ -464,8 +475,8 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     {
         DataHeader h;
         srcFile.seekg(mContentHeaders[i].mDataOffset);
-        srcFile.read((char *) &h,sizeof(DataHeader));
-        decrypt((char *) &h,sizeof(DataHeader),mKey1,mKey2);
+        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        decrypt(reinterpret_cast<char *>(&h),sizeof(DataHeader),mKey1,mKey2);
         h.mName[h.mNameLength] = 0;    // terminate the string
         mDataHeaders.push_back(h);
     }
@@ -473,10 +484,47 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     return true;
 }
 
+uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
+uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e};
+uint32_t DataFormatDTA::A2_KEYS[2] = {0x1417d340, 0xb6399e19};
+uint32_t DataFormatDTA::A3_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+uint32_t DataFormatDTA::A5_KEYS[2] = {0x4f4bb0c6, 0xea340420};
+uint32_t DataFormatDTA::A6_KEYS[2] = {0x728e2db9, 0x5055da68};
+uint32_t DataFormatDTA::A7_KEYS[2] = {0xf4f03a72, 0xe266fe62};
+uint32_t DataFormatDTA::A9_KEYS[2] = {0x959d1117, 0x5b763446};
+uint32_t DataFormatDTA::AA_KEYS[2] = {0xd4ad90c6, 0x67da216e};
+uint32_t DataFormatDTA::AB_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
+uint32_t DataFormatDTA::AC_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+
+void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length)
+{
+    length = getFileSize(index);
+    *dstBuffer = (char *) malloc(length);
+
+    unsigned int fileOffset = 0;   // TODO: where is the file?
+
+    srcFile.clear();
+    srcFile.seekg(fileOffset);
+    srcFile.read(*dstBuffer,length);
+    decrypt(*dstBuffer,length,mKey1,mKey2);
+}
+
+unsigned int DataFormatDTA::getFileSize(unsigned int index)
+{
+    return mDataHeaders[index].mSize;
+}
+
 void DataFormatDTA::setDecryptKeys(uint32_t key1, uint32_t key2)
 {
     mKey1 = key1;
     mKey2 = key2;
+}
+
+void DataFormatDTA::setDecryptKeys(uint32_t keys[2])
+{
+    mKey1 = keys[0];
+    mKey2 = keys[1];
 }
 
 unsigned int DataFormatDTA::getNumFiles()
@@ -486,7 +534,7 @@ unsigned int DataFormatDTA::getNumFiles()
 
 std::string DataFormatDTA::getFileName(unsigned int index)
 {
-    return std::string((char *) mDataHeaders[index].mName);
+    return std::string(reinterpret_cast<char *>(mDataHeaders[index].mName));
 }
     
 void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, uint32_t key1, uint32_t key2)
@@ -495,12 +543,12 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, uint32_t key1,
     key2 ^= 0x34985762;
 
     uint32_t keys[2] = {key1, key2};
-    unsigned char *keyBytes = (unsigned char *) keys;
+    char *keyBytes = reinterpret_cast<char *>(keys);
 
     for (unsigned int i = 0; i < bufferLen; ++i)
     {
-        unsigned char dataByte = (unsigned char) buffer[i];
-        unsigned char keyByte = keyBytes[i % sizeof(keys)];
+        char dataByte = buffer[i];
+        char keyByte = keyBytes[i % sizeof(keys)];
 
         buffer[i] = (char) ( ~((~dataByte) ^ keyByte) );
     }
@@ -520,7 +568,7 @@ void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
         read(file, &mat.mEmission);
         read(file, &mat.mTransparency);
 
-        if(mat.mFlags & MaterialFlag_EnvironmentMap) 
+        if(mat.mFlags & MATERIALFLAG_ENVIRONMENTMAP) 
         {
             read(file, &mat.mEnvRatio);
             read(file, &mat.mEnvMapNameLength);
@@ -531,13 +579,13 @@ void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
         read(file, mat.mDiffuseMapName, mat.mDiffuseMapNameLength);
        
             
-        if(mat.mFlags & MaterialFlag_AlphaTexture)
+        if(mat.mFlags & MATERIALFLAG_ALPHATEXTURE)
         {
             read(file, &mat.mAlphaMapNameLength);
             read(file, mat.mAlphaMapName, mat.mAlphaMapNameLength);
         }
         
-        if(mat.mFlags & MaterialFlag_AnimatedTextureDiffuse)
+        if(mat.mFlags & MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE)
         {
             read(file, &mat.mAnimSequenceLength);
             read(file, &mat.mUnk0);
@@ -808,7 +856,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
         Mesh new_mesh = {};
         read(file, &new_mesh.mMeshType);
 
-        if(new_mesh.mMeshType == MeshType_Standard)
+        if(new_mesh.mMeshType == MESHTYPE_STANDARD)
         {
             read(file, &new_mesh.mVisualMeshType);
             read(file, &new_mesh.mMeshRenderFlags);
@@ -830,11 +878,11 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
 
         switch(new_mesh.mMeshType)
         {
-            case MeshType_Standard:
+            case MESHTYPE_STANDARD:
             {
                 switch(new_mesh.mVisualMeshType)
                 {
-                    case VisualMeshType_Standard:
+                    case VISUALMESHTYPE_STANDARD:
                     {
                         Standard new_standard = {};
                         new_standard = loadStandard(file);
@@ -842,7 +890,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     } 
                     break;
 
-                    case VisualMeshType_Mirror:
+                    case VISUALMESHTYPE_MIRROR:
                     {
                         Mirror new_mirror = {};
                         new_mirror = loadMirror(file);
@@ -850,7 +898,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     } 
                     break;
 
-                    case VisualMeshType_Glow:
+                    case VISUALMESHTYPE_GLOW:
                     {
                         Glow new_glow = {};
                         new_glow = loadGlow(file);
@@ -858,7 +906,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     } 
                     break;
 
-                    case VisualMeshType_Billboard:
+                    case VISUALMESHTYPE_BILLBOARD:
                     {
                         Billboard new_billboard = {};
                         new_billboard.mStandard = loadStandard(file);
@@ -868,7 +916,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     } 
                     break;
                     
-                    case VisualMeshType_Morph:
+                    case VISUALMESHTYPE_MORPH:
                     {
                         Morph new_morph = {};
                         new_morph = loadMorph(file, 0);
@@ -876,7 +924,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     }
                     break;
                                 
-                    case VisualMeshType_SingleMesh:
+                    case VISUALMESHTYPE_SINGLEMESH:
                     {
                         SingleMesh new_single_mesh = {};
                         new_single_mesh = loadSingleMesh(file);
@@ -884,7 +932,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     }
                     break;
                     
-                    case VisualMeshType_SingleMorph:
+                    case VISUALMESHTYPE_SINGLEMORPH:
                     {
                         SingleMorph new_single_morph = {};
                         new_single_morph = loadSingleMorph(file);
@@ -900,7 +948,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             }
             break;
 
-            case MeshType_Dummy:
+            case MESHTYPE_DUMMY:
             {
                 Dummy new_dummy = {};
                 read(file, &new_dummy.mMinBox);
@@ -909,7 +957,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             }
             break;
             
-            case MeshType_Sector:
+            case MESHTYPE_SECTOR:
             {
                 Sector new_sector = {};
                 new_sector = loadSector(file);
@@ -917,7 +965,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             }
             break;
             
-            case MeshType_Target:
+            case MESHTYPE_TARGET:
             {
                 Target new_target = {};
                 new_target = loadTarget(file);
@@ -925,7 +973,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             }
             break;
             
-            case MeshType_Bone:
+            case MESHTYPE_BONE:
             {
                 Bone new_bone = {};
                 read(file, &new_bone.mTransform);
@@ -977,3 +1025,5 @@ DataFormat4DS::Model* DataFormat4DS::getModel()
 }
 
 }
+
+#endif
