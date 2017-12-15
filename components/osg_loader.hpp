@@ -162,7 +162,25 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             std::cout << "  loading texture: " << texturePath << std::endl;
     
             osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
+
             osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
+
+            if (!img)         // FIXME: better non-case-sensitive filename solution
+            {
+                // try again with lowercase filename
+                for (int j = 0; j < 255; j++)
+                {
+                    diffuseTextureName[j] = tolower(diffuseTextureName[j]);
+
+                    texturePath = mTextureDir + "/" + diffuseTextureName;
+
+                    if (diffuseTextureName[j] == 0)
+                        break;
+                }
+
+                img = osgDB::readImageFile( texturePath );
+            }
+
             tex->setImage(img);
 
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
