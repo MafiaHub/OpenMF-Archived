@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-namespace MFformat
+namespace MFFormat
 {
 
 /// Abstract class representing a game data format.
@@ -112,10 +112,11 @@ public:
         Vec3 mEmission;
         float mTransparency; // 0.0 - invisible; 1.0 - solid
 
-                             // environment map
+        // environment map
         float mEnvRatio;
         char mEnvMapNameLength;
         char mEnvMapName[255];
+
         char mDiffuseMapNameLength;
         char mDiffuseMapName[255];
 
@@ -345,6 +346,7 @@ public:
     virtual bool load(std::ifstream &srcFile) override;
     virtual bool save(std::ofstream &dstFile) override;
     Model* getModel();
+
 protected:
     template<typename T>
     void read(std::ifstream & stream, T* a, size_t size = sizeof(T))

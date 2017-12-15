@@ -14,10 +14,10 @@ int main( int argc, char** argv )
 
     std::ifstream f;
 
-    MFformat::DataFormatDTA dta;
+    MFFormat::DataFormatDTA dta;
     std::ifstream dtaFile("../mafia/A5.dta",std::ios::in|std::ios::binary);
 
-dta.setDecryptKeys(MFformat::DataFormatDTA::A5_KEYS);
+dta.setDecryptKeys(MFFormat::DataFormatDTA::A5_KEYS);
 dta.load(dtaFile);
 
 std::cout << dta.getNumFiles() << std::endl;
