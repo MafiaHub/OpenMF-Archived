@@ -12,7 +12,7 @@
 void printHelp()
 {
     std::cout << "4DS model viewer" << std::endl << std::endl;
-    std::cout << "usage: viewer 4dsfile [texturefile]" << std::endl;
+    std::cout << "usage: viewer 4dsfile [texturedir]" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -37,18 +37,23 @@ int main(int argc, char** argv)
     MFFormat::Loader loader;
     osgViewer::Viewer viewer;
 
+    if (argc > 2)
+        loader.setTextureDir(argv[2]);
+
     osg::ref_ptr<osg::Node> n = loader.load4ds(f);
-    osg::ref_ptr<osg::Texture2D> t = new osg::Texture2D();
-
-    osg::ref_ptr<osg::Image> i = osgDB::readImageFile( argc > 2 ? argv[2] : "../resources/test.tga");
-
-    t->setImage(i);
-    t->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
-    t->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
     f.close();
 
-    n->getOrCreateStateSet()->setTextureAttributeAndModes(0,t.get());
+    if (argc <= 2)    // apply test texture
+    {
+        osg::ref_ptr<osg::Texture2D> t = new osg::Texture2D();
+        osg::ref_ptr<osg::Image> i = osgDB::readImageFile("../resources/test.tga");
+        t->setImage(i);
+        t->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
+        t->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
+        n->getOrCreateStateSet()->setTextureAttributeAndModes(0,t.get());
+    }
+    
     osg::ref_ptr<osg::LightModel> light = new osg::LightModel();
     light->setAmbientIntensity(osg::Vec4f(1.0,1.0,1.0,1.0));
     n->getOrCreateStateSet()->setAttributeAndModes(light,osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);                  

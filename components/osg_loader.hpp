@@ -2,6 +2,7 @@
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
+#include <osg/Texture2D>
 #include <fstream>
 #include <format_parsers.hpp>
 
@@ -13,16 +14,25 @@ class Loader
 public:
     osg::ref_ptr<osg::Node> load4ds(std::ifstream &srcFile);
 
+    void setTextureDir(std::string textureDir);
+
 protected:
     osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh);
     osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD);
+
+    std::string mTextureDir;
 };
+
+void Loader::setTextureDir(std::string textureDir)
+{
+    mTextureDir = textureDir;
+}
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
     std::cout << "LODs: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
 
-    const float maxDistance = 50.0;
+    const float maxDistance = 1000.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
@@ -85,8 +95,34 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
         auto model = format.getModel();
         
         std::cout << "meshes: " << model->mMeshCount << std::endl;
+        std::cout << "materials: " << model->mMaterialCount << std::endl;
 
-        for (int i = 0; i < model->mMeshCount; ++i)
+        std::vector<osg::ref_ptr<osg::StateSet>> materials;
+
+        for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
+        {
+            materials.push_back(new osg::StateSet());
+
+            osg::StateSet *stateSet = materials[i].get();
+
+            char diffuseTextureName[255];
+            memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
+            diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
+
+            std::string texturePath = mTextureDir + "/" + diffuseTextureName;    // FIXME: platform independent path concat
+
+            std::cout << "  texture: " << texturePath << std::endl;
+    
+            osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
+            osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
+            tex->setImage(img);
+
+            stateSet->setTextureAttributeAndModes(i,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        }
+
+        group->setStateSet(materials[0].get());   // tmp
+
+        for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
             osg::Matrixd mat;
