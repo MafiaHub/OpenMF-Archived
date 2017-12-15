@@ -43,6 +43,8 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Image> i = osgDB::readImageFile( argc > 2 ? argv[2] : "../resources/test.tga");
 
     t->setImage(i);
+    t->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
+    t->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
     f.close();
 

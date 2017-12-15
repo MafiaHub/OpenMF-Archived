@@ -1,5 +1,6 @@
 #include <osg/Node>
 #include <osg/Geometry>
+#include <osg/MatrixTransform>
 #include <osg/Geode>
 #include <fstream>
 #include <format_parsers.hpp>
@@ -19,7 +20,9 @@ protected:
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
-    const float maxDistance = 1000.0;
+    std::cout << "LODs: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
+
+    const float maxDistance = 50.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
@@ -75,14 +78,38 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 {
     MFFormat::DataFormat4DS format;
 
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+
     if (format.load(srcFile))
     {
         auto model = format.getModel();
-        return make4dsMesh(&(model->mMeshes[0]));
+        
+        std::cout << "meshes: " << model->mMeshCount << std::endl;
+
+        for (int i = 0; i < model->mMeshCount; ++i)
+        {
+            osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+            osg::Matrixd mat;
+
+            MFFormat::DataFormat4DS::Vec3 p, s;
+            MFFormat::DataFormat4DS::Quat r;
+
+            p = model->mMeshes[i].mPos;
+            s = model->mMeshes[i].mScale;
+            r = model->mMeshes[i].mRot;
+
+            mat.preMultTranslate(osg::Vec3f(p.x,p.y,p.z));
+            mat.preMultScale(osg::Vec3f(s.x,s.y,s.z));
+            mat.preMultRotate(osg::Quat(r.x,r.y,r.z,r.w)); 
+
+            transform->setMatrix(mat);
+
+            transform->addChild(make4dsMesh(&(model->mMeshes[i])));
+            group->addChild(transform);
+        }
     }
 
-    osg::ref_ptr<osg::Node> node = new osg::Node;
-    return node;
+    return group;
 }
 
 }
