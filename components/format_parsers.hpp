@@ -31,8 +31,25 @@ class DataFormatDTA: public DataFormat
 public:
     virtual bool load(std::ifstream &srcFile) override; ///< Loads the file table from the DTA file.
     void setDecryptKeys(uint32_t key1, uint32_t key2);  ///< Decrypting keys have to be set before load(...) is called.
+    void setDecryptKeys(uint32_t keys[2]);
     unsigned int getNumFiles();                         ///< Get the number of files inside the DTA.
+    unsigned int getFileSize(unsigned int index);
     std::string getFileName(unsigned int index);
+    void getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length);   ///< Get the concrete file from within the DST file into a buffer.
+
+    static uint32_t A0_KEYS[2];   // decrypting keys
+    static uint32_t A1_KEYS[2];
+    static uint32_t A2_KEYS[2];
+    static uint32_t A3_KEYS[2];
+    static uint32_t A4_KEYS[2];
+    static uint32_t A5_KEYS[2];
+    static uint32_t A6_KEYS[2];
+    static uint32_t A7_KEYS[2];
+    // TODO: A8 ?
+    static uint32_t A9_KEYS[2];
+    static uint32_t AA_KEYS[2];
+    static uint32_t AB_KEYS[2];
+    static uint32_t AC_KEYS[2];
 
     typedef struct
     {
@@ -44,7 +61,7 @@ public:
 
     typedef struct
     {
-        uint32_t mUnknown;
+        uint32_t mUnknown;         // ID or seq number?
         uint32_t mDataOffset;
         uint32_t mDataEnd;
         char mName[16];
@@ -72,15 +89,6 @@ protected:
     uint32_t mKey1;
     uint32_t mKey2;
 };
-
-std::streamsize DataFormat::fileLength(std::ifstream &f)
-{
-    std::streampos fsize = f.tellg();
-    f.seekg( 0, std::ios::end );
-    fsize = f.tellg() - fsize;
-    f.seekg( 0, std::ios_base::beg );
-    return fsize;
-}
 
 bool DataFormatDTA::load(std::ifstream &srcFile)
 {
@@ -119,8 +127,8 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     {
         DataHeader h;
         srcFile.seekg(mContentHeaders[i].mDataOffset);
-        srcFile.read((char *) &h,sizeof(DataHeader));
-        decrypt((char *) &h,sizeof(DataHeader),mKey1,mKey2);
+        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        decrypt(reinterpret_cast<char *>(&h),sizeof(DataHeader),mKey1,mKey2);
         h.mName[h.mNameLength] = 0;    // terminate the string
         mDataHeaders.push_back(h);
     }
@@ -128,10 +136,47 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     return true;
 }
 
+uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
+uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e};
+uint32_t DataFormatDTA::A2_KEYS[2] = {0x1417d340, 0xb6399e19};
+uint32_t DataFormatDTA::A3_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+uint32_t DataFormatDTA::A5_KEYS[2] = {0x4f4bb0c6, 0xea340420};
+uint32_t DataFormatDTA::A6_KEYS[2] = {0x728e2db9, 0x5055da68};
+uint32_t DataFormatDTA::A7_KEYS[2] = {0xf4f03a72, 0xe266fe62};
+uint32_t DataFormatDTA::A9_KEYS[2] = {0x959d1117, 0x5b763446};
+uint32_t DataFormatDTA::AA_KEYS[2] = {0xd4ad90c6, 0x67da216e};
+uint32_t DataFormatDTA::AB_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
+uint32_t DataFormatDTA::AC_KEYS[2] = {0xa94b8d3c, 0x771f3888};
+
+void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length)
+{
+    length = getFileSize(index);
+    *dstBuffer = (char *) malloc(length);
+
+    unsigned int fileOffset = 0;   // TODO: where is the file?
+
+    srcFile.clear();
+    srcFile.seekg(fileOffset);
+    srcFile.read(*dstBuffer,length);
+    decrypt(*dstBuffer,length,mKey1,mKey2);
+}
+
+unsigned int DataFormatDTA::getFileSize(unsigned int index)
+{
+    return mDataHeaders[index].mSize;
+}
+
 void DataFormatDTA::setDecryptKeys(uint32_t key1, uint32_t key2)
 {
     mKey1 = key1;
     mKey2 = key2;
+}
+
+void DataFormatDTA::setDecryptKeys(uint32_t keys[2])
+{
+    mKey1 = keys[0];
+    mKey2 = keys[1];
 }
 
 unsigned int DataFormatDTA::getNumFiles()
@@ -141,7 +186,7 @@ unsigned int DataFormatDTA::getNumFiles()
 
 std::string DataFormatDTA::getFileName(unsigned int index)
 {
-    return std::string((char *) mDataHeaders[index].mName);
+    return std::string(reinterpret_cast<char *>(mDataHeaders[index].mName));
 }
     
 void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, uint32_t key1, uint32_t key2)
@@ -150,12 +195,12 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, uint32_t key1,
     key2 ^= 0x34985762;
 
     uint32_t keys[2] = {key1, key2};
-    unsigned char *keyBytes = (unsigned char *) keys;
+    char *keyBytes = reinterpret_cast<char *>(keys);
 
     for (unsigned int i = 0; i < bufferLen; ++i)
     {
-        unsigned char dataByte = (unsigned char) buffer[i];
-        unsigned char keyByte = keyBytes[i % sizeof(keys)];
+        char dataByte = buffer[i];
+        char keyByte = keyBytes[i % sizeof(keys)];
 
         buffer[i] = (char) ( ~((~dataByte) ^ keyByte) );
     }
