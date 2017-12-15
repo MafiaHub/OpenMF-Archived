@@ -30,17 +30,17 @@ void Loader::setTextureDir(std::string textureDir)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
-    std::cout << "LODs: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
+    std::cout << "  LODs: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
 
-    const float maxDistance = 1000.0;
+    const float maxDistance = 100.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
     for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
     {
-        nodeLOD->addChild( make4dsMeshLOD(&(mesh->mStandard.mLODs[i])));
-        nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
+        nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i])));
+        nodeLOD->setRange(i,0, (i + 1) * stepLOD);
     }
 
     return nodeLOD; 
@@ -48,6 +48,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 {
+    std::cout << "  vertices: " << meshLOD->mVertexCount << std::endl;
+
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
