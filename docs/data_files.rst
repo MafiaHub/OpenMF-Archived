@@ -4,7 +4,7 @@ WORK IN PROGRESS
 Mafia Data Files
 ================
 
-Game data are stored in ``*.dta`` files in the main folder of the game, in non-compressed format.
+Game data are stored in ``*.dta`` files in the main folder of the game, in encrypted format.
 
 - ``ANIMS``: Contains animations in ``5ds`` and ``tck`` formats.
 - ``DIFF``
