@@ -1,3 +1,6 @@
+#ifndef FORMAT_PARSERS_H
+#define FORMAT_PARSERS_H
+
 #include <iostream>
 #include <cstdint>
 #include <vector>
@@ -40,7 +43,7 @@ public:
         MaterialFlag_AlphaTexture = 0x40000000,
         MaterialFlag_ColorKey = 0x20000000,
         MaterialFlag_AdditiveMixing = 0x80000000
-    };
+    } MaterialFlag;
 
     typedef enum
     {
@@ -49,7 +52,7 @@ public:
         MeshType_Dummy = 0x06,
         MeshType_Target = 0x07,
         MeshType_Bone = 0x0a
-    };
+    } MeshType;
 
     typedef enum
     {
@@ -60,7 +63,7 @@ public:
         VisualMeshType_Morph = 0x05,
         VisualMeshType_Glow = 0x06,
         VisualMeshType_Mirror = 0x08
-    };
+    } VisualMeshType;
 
     typedef enum
     {
@@ -69,7 +72,7 @@ public:
         MeshRenderFlag_Unknown = 0x0008,
         MeshRenderFlag_UseProjection = 0x0020,
         MeshRenderFlag_ForbidFog = 0x0080
-    };
+    } MeshRenderFlag;
 
     typedef enum
     {
@@ -78,7 +81,7 @@ public:
         MeshOccludingFlag_Wall = 0x3D, // NOTE(zaklaus): Mesh in sector (walls).
         MeshOccludingFlag_Portal = 0x1D,   // NOTE(zaklaus): Mesh in portal.
         MeshOccludingFlag_Inactive = 0x11
-    };
+    } MeshOccludingFlag;
 
     typedef struct
     {
@@ -1022,3 +1025,5 @@ DataFormat4DS::Model* DataFormat4DS::getModel()
 }
 
 }
+
+#endif
