@@ -30,7 +30,8 @@ void Loader::setTextureDir(std::string textureDir)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
-    std::cout << "  LODs: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
+    std::cout << "  loading mesh..." << std::endl;
+    std::cout << "  LOD level: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
 
     const float maxDistance = 100.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
@@ -40,7 +41,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
     for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
     {
         nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i])));
-        nodeLOD->setRange(i,0, (i + 1) * stepLOD);
+        nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
     }
 
     return nodeLOD; 
@@ -48,7 +49,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 {
-    std::cout << "  vertices: " << meshLOD->mVertexCount << std::endl;
+    std::cout << "    loading LOD" << std::endl;
+    std::cout << "    vertices: " << meshLOD->mVertexCount << std::endl;
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -88,6 +90,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 
 osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 {
+    std::cout << "loading model..." << std::endl;
+
     MFFormat::DataFormat4DS format;
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
@@ -113,7 +117,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
             std::string texturePath = mTextureDir + "/" + diffuseTextureName;    // FIXME: platform independent path concat
 
-            std::cout << "  texture: " << texturePath << std::endl;
+            std::cout << "  loading texture: " << texturePath << std::endl;
     
             osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
             osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
