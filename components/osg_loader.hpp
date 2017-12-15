@@ -30,8 +30,9 @@ void Loader::setTextureDir(std::string textureDir)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
-    std::cout << "  loading mesh..." << std::endl;
-    std::cout << "  LOD level: " << ((int) mesh->mStandard.mLODLevel) << std::endl;
+    std::cout << "  loading mesh";
+    std::cout << ", LOD level: " << ((int) mesh->mStandard.mLODLevel);
+    std::cout << ", type: " << ((int) mesh->mMeshType) << std::endl;
 
     const float maxDistance = 100.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
@@ -49,8 +50,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 
 osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 {
-    std::cout << "    loading LOD" << std::endl;
-    std::cout << "    vertices: " << meshLOD->mVertexCount << std::endl;
+    std::cout << "    loading LOD";
+    std::cout << ", vertices: " << meshLOD->mVertexCount << ", face groups: " << ((int) meshLOD->mFaceGroupCount) << std::endl;
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -67,15 +68,16 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
         uvs->push_back(osg::Vec2f(vertex.mUV.x, vertex.mUV.y));
     }
 
-    osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES, 6);
+    osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
-    for (size_t i = 0; i < meshLOD->mFaceGroups[0].mFaceCount; ++i)
-    {
-        auto face = meshLOD->mFaceGroups[0].mFaces[i];
-        indices->push_back(face.mA);
-        indices->push_back(face.mB);
-        indices->push_back(face.mC);
-    }
+    for (size_t j = 0; j < meshLOD->mFaceGroupCount; ++j)
+        for (size_t i = 0; i < meshLOD->mFaceGroups[j].mFaceCount; ++i)
+        {
+            auto face = meshLOD->mFaceGroups[j].mFaces[i];
+            indices->push_back(face.mA);
+            indices->push_back(face.mB);
+            indices->push_back(face.mC);
+        }
 
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
     geom->setVertexArray(vertices.get());
@@ -90,7 +92,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 
 osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 {
-    std::cout << "loading model..." << std::endl;
+    std::cout << "loading model";
 
     MFFormat::DataFormat4DS format;
 
@@ -100,8 +102,8 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
     {
         auto model = format.getModel();
         
-        std::cout << "meshes: " << model->mMeshCount << std::endl;
-        std::cout << "materials: " << model->mMaterialCount << std::endl;
+        std::cout << ", meshes: " << model->mMeshCount;
+        std::cout << ", materials: " << model->mMaterialCount << std::endl;
 
         std::vector<osg::ref_ptr<osg::StateSet>> materials;
 
