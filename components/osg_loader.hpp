@@ -4,6 +4,7 @@
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <fstream>
+#include <algorithm>
 #include <format_parsers.hpp>
 
 namespace MFFormat
@@ -17,8 +18,10 @@ public:
     void setTextureDir(std::string textureDir);
 
 protected:
-    osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh);
-    osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD);
+    typedef std::vector<osg::ref_ptr<osg::StateSet>> MaterialList;
+
+    osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh, MaterialList &materials);
+    osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD, MaterialList &materials);
     osg::ref_ptr<osg::Node> make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
@@ -39,7 +42,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup)
 {
-    std::cout << "      loading facegroup" << std::endl;
+    std::cout << "      loading facegroup";
+    std::cout << ", material: " << faceGroup->mMaterialID << std::endl;
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -64,7 +68,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
     return geode;
 }
 
-osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
+osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
     std::cout << "  loading mesh";
     std::cout << ", LOD level: " << ((int) mesh->mStandard.mLODLevel);
@@ -77,14 +81,14 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 
     for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
     {
-        nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i])));
+        nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i]),materials));
         nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
     }
 
     return nodeLOD; 
 }
 
-osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
+osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, MaterialList &materials)
 {
     std::cout << "    loading LOD";
     std::cout << ", vertices: " << meshLOD->mVertexCount << ", face groups: " << ((int) meshLOD->mFaceGroupCount) << std::endl;
@@ -107,11 +111,21 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
     for (size_t i = 0; i < meshLOD->mFaceGroupCount; ++i)
-        group->addChild(make4dsFaceGroup(
+    {
+        osg::ref_ptr<osg::Node> faceGroup = make4dsFaceGroup(
             vertices.get(),
             normals.get(),
             uvs.get(),
-            &(meshLOD->mFaceGroups[i])));
+            &(meshLOD->mFaceGroups[i]));
+
+        const int materialID = std::max(0,std::min(
+            static_cast<int>(materials.size() - 1),
+            meshLOD->mFaceGroups[i].mMaterialID - 1));
+
+        faceGroup->setStateSet(materials[materialID]);
+
+        group->addChild(faceGroup);
+    }
 
     return group;
 }
@@ -131,7 +145,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
         std::cout << ", meshes: " << model->mMeshCount;
         std::cout << ", materials: " << model->mMaterialCount << std::endl;
 
-        std::vector<osg::ref_ptr<osg::StateSet>> materials;
+        MaterialList materials;
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
@@ -151,10 +165,8 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
             tex->setImage(img);
 
-            stateSet->setTextureAttributeAndModes(i,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
-
-        group->setStateSet(materials[0].get());   // tmp
 
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
@@ -174,7 +186,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
             transform->setMatrix(mat);
 
-            transform->addChild(make4dsMesh(&(model->mMeshes[i])));
+            transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
             group->addChild(transform);
         }
     }
