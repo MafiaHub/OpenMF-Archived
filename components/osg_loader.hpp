@@ -19,6 +19,11 @@ public:
 protected:
     osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh);
     osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD);
+    osg::ref_ptr<osg::Node> make4dsFaceGroup(
+        osg::Vec3Array *vertices,
+        osg::Vec3Array *normals,
+        osg::Vec2Array *uvs,
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup);
 
     std::string mTextureDir;
 };
@@ -26,6 +31,37 @@ protected:
 void Loader::setTextureDir(std::string textureDir)
 {
     mTextureDir = textureDir;
+}
+
+osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
+        osg::Vec3Array *vertices,
+        osg::Vec3Array *normals,
+        osg::Vec2Array *uvs,
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup)
+{
+    std::cout << "      loading facegroup" << std::endl;
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+
+    osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
+
+    for (size_t i = 0; i < faceGroup->mFaceCount; ++i)
+    {
+        auto face = faceGroup->mFaces[i];
+        indices->push_back(face.mA);
+        indices->push_back(face.mB);
+        indices->push_back(face.mC);
+    }
+
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    geom->setVertexArray(vertices);
+    geom->setNormalArray(normals);
+    geom->setTexCoordArray(0,uvs);
+
+    geom->addPrimitiveSet(indices.get());
+    geode->addDrawable(geom.get());
+
+    return geode;
 }
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
@@ -53,7 +89,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
     std::cout << "    loading LOD";
     std::cout << ", vertices: " << meshLOD->mVertexCount << ", face groups: " << ((int) meshLOD->mFaceGroupCount) << std::endl;
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    osg::ref_ptr<osg::Group> group = new osg::Group();
 
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
@@ -70,24 +106,14 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
 
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
-    for (size_t j = 0; j < meshLOD->mFaceGroupCount; ++j)
-        for (size_t i = 0; i < meshLOD->mFaceGroups[j].mFaceCount; ++i)
-        {
-            auto face = meshLOD->mFaceGroups[j].mFaces[i];
-            indices->push_back(face.mA);
-            indices->push_back(face.mB);
-            indices->push_back(face.mC);
-        }
+    for (size_t i = 0; i < meshLOD->mFaceGroupCount; ++i)
+        group->addChild(make4dsFaceGroup(
+            vertices.get(),
+            normals.get(),
+            uvs.get(),
+            &(meshLOD->mFaceGroups[i])));
 
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-    geom->setVertexArray(vertices.get());
-    geom->setNormalArray(normals.get());
-    geom->setTexCoordArray(0,uvs.get());
-
-    geom->addPrimitiveSet(indices.get());
-    geode->addDrawable(geom.get());
-
-    return geode;
+    return group;
 }
 
 osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
