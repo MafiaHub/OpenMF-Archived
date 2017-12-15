@@ -19,7 +19,18 @@ protected:
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh)
 {
-    
+    const float maxDistance = 1000.0;
+    const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
+
+    osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
+
+    for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
+    {
+        nodeLOD->addChild( make4dsMeshLOD(&(mesh->mStandard.mLODs[i])));
+        nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
+    }
+
+    return nodeLOD; 
 }
 
 osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD)
@@ -67,9 +78,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
     if (format.load(srcFile))
     {
         auto model = format.getModel();
-        auto lod = model->mMeshes[0].mStandard.mLODs[0];
-
-        return make4dsMeshLOD(&lod);
+        return make4dsMesh(&(model->mMeshes[0]));
     }
 
     osg::ref_ptr<osg::Node> node = new osg::Node;
