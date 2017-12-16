@@ -21,6 +21,10 @@ public:
     virtual void print_info(std::string str) override;
     virtual void print_warn(std::string str) override;
     virtual void print_fatal(std::string str) override;
+
+    static void info(std::string str);
+    static void warn(std::string str);
+    static void fatal(std::string str);
 };
 
 class FileLogger : Logger 
