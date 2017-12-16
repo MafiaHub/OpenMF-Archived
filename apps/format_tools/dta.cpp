@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <format_parser_dta.hpp>
 #include <utils.hpp>
+#include <logger_console.hpp>
 
 #define ALIGN 50
 
@@ -27,8 +28,8 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "ERROR: Expecting file name." << std::endl;
-        printHelp();
+        MFLogger::ConsoleLogger::fatal("Expected file.");
+        print_help();
         return 1;
     }
 
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        std::cerr << "ERROR: Could not open file " << argv[1] << "." << std::endl;
+        MFLogger::ConsoleLogger::fatal("Could not open file " + std::string(argv[1]) + ".");
         return 1;
     }
 
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        std::cerr << "ERROR: Could not parse file " << argv[1] << "." << std::endl;
+        MFLogger::ConsoleLogger::fatal("Could not parse file " + std::string(argv[1]) + ".");
         return 1;
     }
 
