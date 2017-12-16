@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
         MFLogger::ConsoleLogger::fatal("Expected file.");
-        print_help();
+        printHelp();
         return 1;
     }
 
