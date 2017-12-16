@@ -11,6 +11,11 @@
 *.gch
 *.pch
 
+# GTAGS
+GPATH
+GRTAGS
+GTAGS
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -33,3 +38,4 @@
 
 # Folders
 build/
+.vscode/
