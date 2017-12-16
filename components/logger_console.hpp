@@ -8,19 +8,34 @@
 namespace MFLogger
 {
 
-void ConsoleLogger::print_info(std::string str)
+void ConsoleLogger::info(std::string str)
 {
     std::cout << "[INFO] " << str << std::endl;
 }
 
-void ConsoleLogger::print_warn(std::string str)
+void ConsoleLogger::warn(std::string str)
 {
     std::cout << "[WARN] " << str << std::endl;
 }
 
-void ConsoleLogger::print_fatal(std::string str)
+void ConsoleLogger::fatal(std::string str)
 {
     std::cout << "[FATAL] " << str << std::endl;
+}
+
+void ConsoleLogger::print_info(std::string str)
+{
+    ConsoleLogger::info(str);
+}
+
+void ConsoleLogger::print_warn(std::string str)
+{
+    ConsoleLogger::warn(str);
+}
+
+void ConsoleLogger::print_fatal(std::string str)
+{
+    ConsoleLogger::fatal(str);
 }
 
 }
