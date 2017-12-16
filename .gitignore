@@ -11,10 +11,11 @@
 *.gch
 *.pch
 
-# GTAGS
+# Build metadata
 GPATH
 GRTAGS
 GTAGS
+compile_commands.json
 
 # Compiled Dynamic libraries
 *.so
