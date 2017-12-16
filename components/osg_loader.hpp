@@ -5,7 +5,7 @@
 #include <osg/Texture2D>
 #include <fstream>
 #include <algorithm>
-#include <format_parsers.hpp>
+#include <format_parser_4ds.hpp>
 
 namespace MFFormat
 {
@@ -72,7 +72,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialL
 {
     std::cout << "  loading mesh";
     std::cout << ", LOD level: " << ((int) mesh->mStandard.mLODLevel);
-    std::cout << ", type: " << ((int) mesh->mMeshType) << std::endl;
+    std::cout << ", type: " << ((int) mesh->mMeshType);
+    std::cout << ", instanced: " << mesh->mStandard.mInstanced << std::endl;
 
     const float maxDistance = 100.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
@@ -136,7 +137,9 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
     MFFormat::DataFormat4DS format;
 
-    osg::ref_ptr<osg::Group> group = new osg::Group();
+    osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
+
+    group->setMatrix( osg::Matrixd::scale(osg::Vec3f(1.0,1.0,-1.0)) );
 
     if (format.load(srcFile))
     {
