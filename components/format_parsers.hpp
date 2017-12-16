@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <logger_console.hpp>
 
 namespace MFFormat
 {
@@ -24,12 +26,30 @@ public:
         float x;
         float y;
         float z;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y << ", " << z;
+
+            return sstream.str();
+        }
     } Vec3;
 
     typedef struct
     {
         float x;
         float y;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y;
+
+            return sstream.str();
+        }
     } Vec2;
 
     typedef struct
@@ -38,6 +58,15 @@ public:
         float y;
         float z;
         float w;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y << ", " << z << ", " << w;
+
+            return sstream.str();
+        }
     } Quat;
 
     typedef struct
@@ -47,6 +76,7 @@ public:
         float c0, c1, c2, c3;
         float d0, d1, d2, d3;
     } Mat4;
+
     #pragma pack(pop)
 protected:
     template<typename T>
@@ -578,6 +608,7 @@ uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
 uint32_t DataFormatDTA::A5_KEYS[2] = {0x4f4bb0c6, 0xea340420};
 uint32_t DataFormatDTA::A6_KEYS[2] = {0x728e2db9, 0x5055da68};
 uint32_t DataFormatDTA::A7_KEYS[2] = {0xf4f03a72, 0xe266fe62};
+// TODO: A8
 uint32_t DataFormatDTA::A9_KEYS[2] = {0x959d1117, 0x5b763446};
 uint32_t DataFormatDTA::AA_KEYS[2] = {0xd4ad90c6, 0x67da216e};
 uint32_t DataFormatDTA::AB_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
