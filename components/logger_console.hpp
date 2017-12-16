@@ -8,6 +8,11 @@
 namespace MFLogger
 {
 
+void ConsoleLogger::raw(std::string str)
+{
+    std::cout << str << std::endl;
+}
+
 void ConsoleLogger::info(std::string str)
 {
     std::cout << "[INFO] " << str << std::endl;
@@ -21,6 +26,11 @@ void ConsoleLogger::warn(std::string str)
 void ConsoleLogger::fatal(std::string str)
 {
     std::cout << "[FATAL] " << str << std::endl;
+}
+
+void ConsoleLogger::print_raw(std::string str)
+{
+    ConsoleLogger::raw(str);
 }
 
 void ConsoleLogger::print_info(std::string str)

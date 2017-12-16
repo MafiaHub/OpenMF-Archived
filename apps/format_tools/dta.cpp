@@ -6,7 +6,7 @@
 
 #define ALIGN 50
 
-void print_help()
+void printHelp()
 {
     std::cout << "DTA format tool" << std::endl << std::endl;
 
