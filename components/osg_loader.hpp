@@ -6,6 +6,7 @@
 #include <fstream>
 #include <algorithm>
 #include <format_parser_4ds.hpp>
+#include <logger_console.hpp>
 
 namespace MFFormat
 {
@@ -42,8 +43,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup)
 {
-    std::cout << "      loading facegroup";
-    std::cout << ", material: " << faceGroup->mMaterialID << std::endl;
+    MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".");
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -70,10 +70,10 @@ osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
 
 osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
-    std::cout << "  loading mesh";
-    std::cout << ", LOD level: " << ((int) mesh->mStandard.mLODLevel);
-    std::cout << ", type: " << ((int) mesh->mMeshType);
-    std::cout << ", instanced: " << mesh->mStandard.mInstanced << std::endl;
+    MFLogger::ConsoleLogger::info(
+        "  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
+        ", type: " + std::to_string((int) mesh->mMeshType) +
+        ", instanced: " + std::to_string(mesh->mStandard.mInstanced));
 
     const float maxDistance = 100.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
@@ -91,8 +91,9 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialL
 
 osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, MaterialList &materials)
 {
-    std::cout << "    loading LOD";
-    std::cout << ", vertices: " << meshLOD->mVertexCount << ", face groups: " << ((int) meshLOD->mFaceGroupCount) << std::endl;
+    MFLogger::ConsoleLogger::info(
+        "    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
+        ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount));
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -133,7 +134,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, Mate
 
 osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 {
-    std::cout << "loading model";
+    std::string logStr = "loading model";
 
     MFFormat::DataFormat4DS format;
 
@@ -145,8 +146,10 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
     {
         auto model = format.getModel();
         
-        std::cout << ", meshes: " << model->mMeshCount;
-        std::cout << ", materials: " << model->mMaterialCount << std::endl;
+        logStr += ", meshes: " + std::to_string(model->mMeshCount);
+        logStr += ", materials: " + std::to_string(model->mMaterialCount);
+
+        MFLogger::ConsoleLogger::info(logStr);
 
         MaterialList materials;
 
@@ -162,7 +165,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
             std::string texturePath = mTextureDir + "/" + diffuseTextureName;    // FIXME: platform independent path concat
 
-            std::cout << "  loading texture: " << texturePath << std::endl;
+            MFLogger::ConsoleLogger::info("  loading texture: " + texturePath);
     
             osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
      
