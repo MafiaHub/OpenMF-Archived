@@ -105,7 +105,7 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, Mate
 
         vertices->push_back(osg::Vec3f(vertex.mPos.x, vertex.mPos.y, vertex.mPos.z));
         normals->push_back(osg::Vec3f(vertex.mNormal.x, vertex.mNormal.y, vertex.mNormal.z));
-        uvs->push_back(osg::Vec2f(vertex.mUV.x, vertex.mUV.y));
+        uvs->push_back(osg::Vec2f(vertex.mUV.x, 1.0 - vertex.mUV.y));
     }
 
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
@@ -162,6 +162,9 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             std::cout << "  loading texture: " << texturePath << std::endl;
     
             osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
+     
+            tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
+            tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
             osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
 
