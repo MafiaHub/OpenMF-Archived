@@ -4,7 +4,7 @@
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 #include <osg_loader.hpp>
-#include <format_parsers.hpp>
+#include <format_parser_4ds.hpp>
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
