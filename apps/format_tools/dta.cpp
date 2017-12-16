@@ -5,7 +5,7 @@
 
 #define ALIGN 50
 
-void print_help()
+void printHelp()
 {
     std::cout << "DTA format tool" << std::endl << std::endl;
 
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
         std::cerr << "ERROR: Expecting file name." << std::endl;
-        print_help();
+        printHelp();
         return 1;
     }
 

@@ -5,28 +5,10 @@
 
 using namespace MFLogger;
 
-void print_help()
+void printHelp()
 {
     std::cout << "Cache.bin format tool" << std::endl << std::endl;
     std::cout << "usage: cache_bin file" << std::endl;
-}
-
-std::string vec3_to_string(const MFFormat::DataFormat::Vec3 &vec)
-{
-    std::stringstream sstream;
-
-    sstream << vec.x << ", " << vec.y << ", " << vec.z;
-
-    return sstream.str();
-}
-
-std::string quat_to_string(const MFFormat::DataFormat::Quat &quat)
-{
-    std::stringstream sstream;
-
-    sstream << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w;
-
-    return sstream.str();
 }
 
 void dump(MFFormat::DataFormatCacheBIN cache_bin)
@@ -41,10 +23,10 @@ void dump(MFFormat::DataFormatCacheBIN cache_bin)
         for (auto instance : object.mInstances)
         {
             ConsoleLogger::raw("\t\tmodel name: " + std::string(instance.mModelName) + ",");
-            ConsoleLogger::raw("\t\tposition: [" + vec3_to_string(instance.mPos) + "],");
-            ConsoleLogger::raw("\t\trotation: [" + quat_to_string(instance.mRot) + "],");
-            ConsoleLogger::raw("\t\tscale: [" + vec3_to_string(instance.mScale) + "],");
-            ConsoleLogger::raw("\t\tscale2: [" + vec3_to_string(instance.mScale) + "],");
+            ConsoleLogger::raw("\t\tposition: [" + instance.mPos.str() + "],");
+            ConsoleLogger::raw("\t\trotation: [" + instance.mRot.str() + "],");
+            ConsoleLogger::raw("\t\tscale: [" + instance.mScale.str() + "],");
+            ConsoleLogger::raw("\t\tscale2: [" + instance.mScale2.str() + "],");
             ConsoleLogger::raw("\t\tunk0: " + std::to_string(instance.mUnk0) + ",");
             ConsoleLogger::raw("");
         }
@@ -58,7 +40,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
         ConsoleLogger::fatal("Expecting file name.");
-        print_help();
+        printHelp();
         return 1;
     }
 
