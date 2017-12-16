@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <logger_console.hpp>
 
 namespace MFFormat
 {
@@ -24,12 +26,30 @@ public:
         float x;
         float y;
         float z;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y << ", " << z;
+
+            return sstream.str();
+        }
     } Vec3;
 
     typedef struct
     {
         float x;
         float y;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y;
+
+            return sstream.str();
+        }
     } Vec2;
 
     typedef struct
@@ -38,6 +58,15 @@ public:
         float y;
         float z;
         float w;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << x << ", " << y << ", " << z << ", " << w;
+
+            return sstream.str();
+        }
     } Quat;
 
     typedef struct

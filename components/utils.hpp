@@ -43,6 +43,36 @@ std::vector<std::string> strSplit(const std::string &s, char delim)
     return elems;
 }
 
+template<typename T>
+std::string vecToString(const std::vector<T> &vec, std::string delim)
+{
+    std::stringstream sstream;
+
+    for (auto value : vec)
+    {
+        sstream << std::to_string(value) << delim;
+    }
+    
+    // TODO(zaklaus): erase last occurence of delimiter!
+
+    return sstream.str();
+}
+
+template<typename T>
+std::string arrayToString(T *array, size_t len, std::string delim)
+{
+    std::stringstream sstream;
+
+    for (int i = 0; i < len; i++)
+    {
+        sstream << std::to_string(array[i]) << delim;
+    }
+    
+    // TODO(zaklaus): erase last occurence of delimiter!
+
+    return sstream.str();
+}
+
 }
 
 #endif

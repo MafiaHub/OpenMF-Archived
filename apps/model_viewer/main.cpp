@@ -8,6 +8,7 @@
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
+#include <logger_console.hpp>
 
 void printHelp()
 {
@@ -19,7 +20,7 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "Error: expected filename." << std::endl;
+        MFLogger::ConsoleLogger::fatal("Expected filename.");
         printHelp();
         return 1;
     }
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        std::cerr << "Error: could not open file: " << argv[1] << "." << std::endl;
+        MFLogger::ConsoleLogger::fatal("Could not open file " + std::string(argv[1]) + ".");
         printHelp();
         return 1;
     }
