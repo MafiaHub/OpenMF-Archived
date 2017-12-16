@@ -58,6 +58,21 @@ std::vector<DataFormatCacheBIN::Object> DataFormatCacheBIN::getObjects()
 {
     return mObjects;
 }
+    
+ std::vector<DataFormatCacheBIN::Object> DataFormatCacheBIN::getObjects()
+ {
+     return mObjects;
+ }
+ 
+ size_t DataFormatCacheBIN::getNumObjects()
+ {
+     return mObjects.size();
+ }
+ 
+ DataFormatCacheBIN::Object* DataFormatCacheBIN::getObject(size_t index) 
+ {
+     return &mObjects.at(index);
+ }
 
 }
 
