@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_H
 
 #include <iostream>
+#include <fstream>
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -38,6 +39,15 @@ public:
         float z;
         float w;
     } Quat;
+
+    typedef struct
+    {
+        float a0, a1, a2, a3;
+        float b0, b1, b2, b3;
+        float c0, c1, c2, c3;
+        float d0, d1, d2, d3;
+    } Mat4;
+
     #pragma pack(pop)
 protected:
     template<typename T>
@@ -291,7 +301,7 @@ public:
         Vec3 mMinBox;
         Vec3 mMaxBox;
         float mUnk[4];
-        osg::Matrixf mReflectionMatrix;
+        Mat4 mReflectionMatrix;
         Vec3 mBackgroundColor;
         float mViewDistance;
         uint32_t mVertexCount;
