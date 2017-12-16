@@ -17,8 +17,82 @@ public:
     virtual bool load(std::ifstream &srcFile)=0;
     virtual bool save(std::ofstream &dstFile) { return false; /* optional */ };
 
+    #pragma pack(push, 1)
+    typedef struct
+    {
+        float x;
+        float y;
+        float z;
+    } Vec3;
+
+    typedef struct
+    {
+        float x;
+        float y;
+    } Vec2;
+
+    typedef struct
+    {
+        float x;
+        float y;
+        float z;
+        float w;
+    } Quat;
+    #pragma pack(pop)
 protected:
+    template<typename T>
+    void read(std::ifstream & stream, T* a, size_t size = sizeof(T))
+    {
+        stream.read((char*)a, size);
+    }
+
     std::streamsize fileLength(std::ifstream &f);
+};
+
+class DataFormatCacheBIN: public DataFormat
+{
+public:
+    #pragma pack(push, 1)
+    typedef struct
+    {
+        uint16_t mType;
+        uint32_t mSize;
+    } Header;
+    #pragma pack(pop)
+
+    typedef struct
+    {
+        Header mHeader;
+        uint32_t mModelNameLength;
+        char *mModelName;
+        Vec3 mPos;
+        Quat mRot;
+        Vec3 mScale;
+        uint32_t mUnk0;
+        Vec3 mScale2;
+    } Instance;
+
+    typedef struct
+    {
+        Header mHeader;
+        uint32_t mObjectNameLength;
+        char *mObjectName;
+        int8_t mBounds[0x4C];
+        size_t mInstanceCount;
+        std::vector<Instance> mInstances;
+    } Object;
+
+    typedef struct
+    {
+        uint32_t mVersion; // NOTE(zaklaus): Should always be 1.
+        //size_t mObjectCount;
+        //Object *mObjects;
+    } Chunk;
+
+    virtual bool load(std::ifstream &srcFile) override;
+    std::vector<Object> getObjects();
+private:
+    std::vector<Object> mObjects;
 };
 
 class DataFormat4DS: public DataFormat
@@ -82,27 +156,6 @@ public:
         MESHOCCLUDINGFLAG_PORTAL = 0x1D,   // mesh in portal
         MESHOCCLUDINGFLAG_INACTIVE = 0x11
     } MeshOccludingFlag;
-
-    typedef struct
-    {
-        float x;
-        float y;
-        float z;
-    } Vec3;
-
-    typedef struct
-    {
-        float x;
-        float y;
-    } Vec2;
-
-    typedef struct
-    {
-        float x;
-        float y;
-        float z;
-        float w;
-    } Quat;
 
     typedef struct
     {
@@ -344,16 +397,9 @@ public:
     } Model;
 
     virtual bool load(std::ifstream &srcFile) override;
-    virtual bool save(std::ofstream &dstFile) override;
     Model* getModel();
 
 protected:
-    template<typename T>
-    void read(std::ifstream & stream, T* a, size_t size = sizeof(T))
-    {
-        stream.read((char*)a, size);
-    }
-
     void loadMaterial(Model *model, std::ifstream &file);
     Lod loadLod(std::ifstream &file);
     Standard loadStandard(std::ifstream &file);
@@ -1012,18 +1058,66 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
 
 bool DataFormat4DS::load(std::ifstream &srcFile)
 {
-	mLodedModel = loadModel(srcFile);
-	return mLodedModel != nullptr;
-}
-
-bool DataFormat4DS::save(std::ofstream &dstFile)
-{
-	return false;
+    mLodedModel = loadModel(srcFile);
+    return mLodedModel != nullptr;
 }
 
 DataFormat4DS::Model* DataFormat4DS::getModel() 
 { 
     return mLodedModel; 
+}
+
+bool DataFormatCacheBIN::load(std::ifstream &srcFile) 
+{
+    Header new_header = {};
+    read(srcFile, &new_header);
+
+    Chunk new_chunk = {};
+    read(srcFile, &new_chunk.mVersion);
+
+    while(srcFile.tellg() < new_header.mSize - sizeof(uint32_t)) 
+    {
+        Object new_object = {};
+        read(srcFile, &new_object.mHeader);
+        read(srcFile, &new_object.mObjectNameLength);
+        new_object.mObjectName = reinterpret_cast<char*>(malloc(new_object.mObjectNameLength + 1));
+        read(srcFile, new_object.mObjectName, new_object.mObjectNameLength);
+        new_object.mObjectName[new_object.mObjectNameLength] = '\0';
+        read(srcFile, new_object.mBounds, 0x4C);
+
+        size_t current_pos = srcFile.tellg();
+        size_t header_size = sizeof(Header) + sizeof(uint32_t) + new_object.mObjectNameLength + 0x4C;
+        while(srcFile.tellg() < current_pos + new_object.mHeader.mSize - header_size)
+        {
+            Instance new_instance = {};
+
+            read(srcFile, &new_instance.mHeader);
+            read(srcFile, &new_instance.mModelNameLength);
+
+            new_instance.mModelName = reinterpret_cast<char*>(malloc(new_instance.mModelNameLength + 1));
+            read(srcFile, new_instance.mModelName, new_instance.mModelNameLength);
+            new_instance.mModelName[new_instance.mModelNameLength - 4] = '\0';
+
+            sprintf(new_instance.mModelName, "%s.4ds", new_instance.mModelName);
+            new_instance.mModelName[new_instance.mModelNameLength] = '\0';
+
+            read(srcFile, &new_instance.mPos);
+            read(srcFile, &new_instance.mRot);
+            read(srcFile, &new_instance.mScale);
+            read(srcFile, &new_instance.mUnk0);
+            read(srcFile, &new_instance.mScale2);
+            new_object.mInstances.push_back(new_instance);
+        }
+
+        mObjects.push_back(new_object);
+    }
+
+    return true;
+}
+
+std::vector<DataFormatCacheBIN::Object> DataFormatCacheBIN::getObjects()
+{
+    return mObjects;
 }
 
 }
