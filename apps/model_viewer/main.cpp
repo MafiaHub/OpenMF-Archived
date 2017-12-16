@@ -54,10 +54,6 @@ int main(int argc, char** argv)
         n->getOrCreateStateSet()->setTextureAttributeAndModes(0,t.get());
     }
     
-    osg::ref_ptr<osg::LightModel> light = new osg::LightModel();
-    light->setAmbientIntensity(osg::Vec4f(1.0,1.0,1.0,1.0));
-    n->getOrCreateStateSet()->setAttributeAndModes(light,osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);                  
-
     viewer.setSceneData(n);
 
     return viewer.run();
