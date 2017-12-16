@@ -104,15 +104,20 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialL
     std::cout << ", type: " << ((int) mesh->mMeshType);
     std::cout << ", instanced: " << mesh->mStandard.mInstanced << std::endl;
 
-    const float maxDistance = 100.0;
+    const float maxDistance = 10000000.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
+    float previousDist = 0.0;
+
     for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
     {
+        float distLOD = mesh->mStandard.mLODLevel == 1 ? maxDistance : mesh->mStandard.mLODs[i].mRelativeDistance;
+
         nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i]),materials));
-        nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
+        nodeLOD->setRange(i,previousDist,distLOD);
+        previousDist = distLOD;
     }
 
     return nodeLOD; 
@@ -203,12 +208,11 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
-            char alphaTextureName[255];
-            memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
-            alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
-
-//            osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
-// TODO: apply alpha texture
+                char alphaTextureName[255];
+                memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
+                alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
+    //            osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
+    // TODO: apply alpha texture
             }
 
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
