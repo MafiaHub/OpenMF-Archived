@@ -23,11 +23,19 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     // read the content headers:
         
     srcFile.seekg(mFileHeader.mContentOffset);
+
+    if (!srcFile.good())
+        return false;
+
     mContentHeaders.clear();
 
     unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(ContentHeader);
     ContentHeader *headerArray = (ContentHeader *) malloc(headerArraySize);
     srcFile.read((char *) headerArray,headerArraySize);
+
+    if (!srcFile.good())
+        return false;
+
     decrypt((char *) headerArray,headerArraySize,mKey1,mKey2);
 
     for (int i = 0; i < mFileHeader.mFileCount; ++i)
@@ -44,6 +52,10 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
         DataHeader h;
         srcFile.seekg(mContentHeaders[i].mDataOffset);
         srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+
+        if (!srcFile.good())
+            return false;
+
         decrypt(reinterpret_cast<char *>(&h),sizeof(DataHeader),mKey1,mKey2);
         h.mName[h.mNameLength] = 0;    // terminate the string
         mDataHeaders.push_back(h);

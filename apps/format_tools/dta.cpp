@@ -1,8 +1,9 @@
 #include <iostream>
 #include <iomanip>
 #include <format_parser_dta.hpp>
+#include <utils.hpp>
 
-#define ALIGN 30
+#define ALIGN 50
 
 void print_help()
 {
@@ -18,7 +19,7 @@ void dump(MFFormat::DataFormatDTA &dta)
 
     for (int i = 0; i < dta.getNumFiles(); ++i)
     {
-        std::cout << std::setw(ALIGN) << dta.getFileName(i) << dta.getFileSize(i) << std::endl;
+        std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B" << std::endl;
     }
 }
 
@@ -43,7 +44,33 @@ int main(int argc, char** argv)
 
     MFFormat::DataFormatDTA dta;
 
-return 0;   // tmp, TODO: supply key or the application freezes!
+    std::vector<std::string> filePath = MFUtil::strSplit(argv[1],'/');  // FIXME: platform-independece needed 
+    std::string fileName = MFUtil::strToLower(filePath.back());
+
+    if (fileName.compare("a0.dta") == 0)
+        dta.setDecryptKeys(dta.A0_KEYS);
+    else if (fileName.compare("a1.dta") == 0)
+        dta.setDecryptKeys(dta.A1_KEYS);
+    else if (fileName.compare("a2.dta") == 0)
+        dta.setDecryptKeys(dta.A2_KEYS);
+    else if (fileName.compare("a3.dta") == 0)
+        dta.setDecryptKeys(dta.A3_KEYS);
+    else if (fileName.compare("a4.dta") == 0)
+        dta.setDecryptKeys(dta.A4_KEYS);
+    else if (fileName.compare("a5.dta") == 0)
+        dta.setDecryptKeys(dta.A5_KEYS);
+    else if (fileName.compare("a6.dta") == 0)
+        dta.setDecryptKeys(dta.A6_KEYS);
+    else if (fileName.compare("a7.dta") == 0)
+        dta.setDecryptKeys(dta.A7_KEYS);
+    else if (fileName.compare("a9.dta") == 0)
+        dta.setDecryptKeys(dta.A9_KEYS);
+    else if (fileName.compare("aa.dta") == 0)
+        dta.setDecryptKeys(dta.AA_KEYS);
+    else if (fileName.compare("ab.dta") == 0)
+        dta.setDecryptKeys(dta.AB_KEYS);
+    else if (fileName.compare("ac.dta") == 0)
+        dta.setDecryptKeys(dta.AC_KEYS);
 
     bool success = dta.load(f);
 
