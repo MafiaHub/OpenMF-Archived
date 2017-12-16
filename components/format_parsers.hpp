@@ -69,6 +69,9 @@ public:
         Quat mRot;
         Vec3 mScale;
         uint32_t mUnk0;
+
+        // NOTE(zaklaus): This field is rarely used for some instances
+        // around the docks or right next to Central Hoboken station.
         Vec3 mScale2;
     } Instance;
 
@@ -78,19 +81,18 @@ public:
         uint32_t mObjectNameLength;
         char *mObjectName;
         int8_t mBounds[0x4C];
-        size_t mInstanceCount;
         std::vector<Instance> mInstances;
     } Object;
 
     typedef struct
     {
         uint32_t mVersion; // NOTE(zaklaus): Should always be 1.
-        //size_t mObjectCount;
-        //Object *mObjects;
     } Chunk;
 
     virtual bool load(std::ifstream &srcFile) override;
     std::vector<Object> getObjects();
+    size_t              getNumObjects();
+    Object*             getObject(size_t index);
 private:
     std::vector<Object> mObjects;
 };
@@ -1118,6 +1120,16 @@ bool DataFormatCacheBIN::load(std::ifstream &srcFile)
 std::vector<DataFormatCacheBIN::Object> DataFormatCacheBIN::getObjects()
 {
     return mObjects;
+}
+
+size_t DataFormatCacheBIN::getNumObjects()
+{
+    return mObjects.size();
+}
+
+DataFormatCacheBIN::Object* DataFormatCacheBIN::getObject(size_t index) 
+{
+    return &mObjects.at(index);
 }
 
 }
