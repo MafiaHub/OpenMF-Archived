@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <logger_console.hpp>
 
 namespace MFFormat
 {
