@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <format_parser_4ds.hpp>
 #include <logger_console.hpp>
+#include <utils.hpp>
 
 namespace MFFormat
 {
@@ -28,6 +29,7 @@ protected:
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup);
+    osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName);
 
     std::string mTextureDir;
 };
@@ -35,6 +37,32 @@ protected:
 void Loader::setTextureDir(std::string textureDir)
 {
     mTextureDir = textureDir;
+}
+
+osg::ref_ptr<osg::Texture2D> Loader::loadTexture(std::string fileName)
+{
+    MFLogger::ConsoleLogger::info("loading texture " + fileName);
+
+    osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
+     
+    tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
+    tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
+
+    std::string texturePath = mTextureDir + "/" + fileName;    // FIXME: platform independent path concat
+
+    osg::ref_ptr<osg::Image> img = osgDB::readImageFile(texturePath);
+
+    if (!img)         // FIXME: better non-case-sensitive filename solution
+    {
+        // try again with lowercase filename
+        fileName = MFUtil::strToLower(fileName);
+        texturePath = mTextureDir + "/" + fileName;
+        img = osgDB::readImageFile( texturePath );
+    }
+
+    tex->setImage(img);
+
+    return tex;
 }
 
 osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
@@ -75,15 +103,20 @@ osg::ref_ptr<osg::Node> Loader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialL
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", instanced: " + std::to_string(mesh->mStandard.mInstanced));
 
-    const float maxDistance = 100.0;
+    const float maxDistance = 10000000.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
+    float previousDist = 0.0;
+
     for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
     {
+        float distLOD = mesh->mStandard.mLODLevel == 1 ? maxDistance : mesh->mStandard.mLODs[i].mRelativeDistance;
+
         nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i]),materials));
-        nodeLOD->setRange(i,i * stepLOD, (i + 1) * stepLOD);
+        nodeLOD->setRange(i,previousDist,distLOD);
+        previousDist = distLOD;
     }
 
     return nodeLOD; 
@@ -163,34 +196,26 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
             diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
 
-            std::string texturePath = mTextureDir + "/" + diffuseTextureName;    // FIXME: platform independent path concat
+            osg::ref_ptr<osg::Light> light = new osg::Light();
 
-            MFLogger::ConsoleLogger::info("  loading texture: " + texturePath);
-    
-            osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
-     
-            tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
-            tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
+            MFFormat::DataFormat::Vec3 col = model->mMaterials[i].mAmbient;
+            light->setAmbient( osg::Vec4f(col.x,col.y,col.z,1.0) );
 
-            osg::ref_ptr<osg::Image> img = osgDB::readImageFile( texturePath );
+            col = model->mMaterials[i].mDiffuse;
+            light->setDiffuse( osg::Vec4f(col.x,col.y,col.z,1.0) );
 
-            if (!img)         // FIXME: better non-case-sensitive filename solution
+            stateSet->setAttributeAndModes(light, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName);
+
+            if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
-                // try again with lowercase filename
-                for (int j = 0; j < 255; j++)
-                {
-                    diffuseTextureName[j] = tolower(diffuseTextureName[j]);
-
-                    texturePath = mTextureDir + "/" + diffuseTextureName;
-
-                    if (diffuseTextureName[j] == 0)
-                        break;
-                }
-
-                img = osgDB::readImageFile( texturePath );
+                char alphaTextureName[255];
+                memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
+                alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
+    //            osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
+    // TODO: apply alpha texture
             }
-
-            tex->setImage(img);
 
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
