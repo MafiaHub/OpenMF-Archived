@@ -3,9 +3,11 @@
 #include <osg/MatrixTransform>
 #include <osg/Geode>
 #include <osg/Texture2D>
+#include <osg/ShapeDrawable>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
+#include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
 
@@ -16,6 +18,7 @@ class Loader
 {
 public:
     osg::ref_ptr<osg::Node> load4ds(std::ifstream &srcFile);
+    osg::ref_ptr<osg::Node> loadScene2Bin(std::ifstream &srcFile);
 
     void setTextureDir(std::string textureDir);
 
@@ -31,8 +34,75 @@ protected:
         MFFormat::DataFormat4DS::FaceGroup *faceGroup);
     osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName);
 
+    osg::Matrixd makeTransformMatrix(
+        MFFormat::DataFormat::Vec3 p,
+        MFFormat::DataFormat::Vec3 s,
+        MFFormat::DataFormat::Quat r);
+
     std::string mTextureDir;
 };
+
+osg::Matrixd Loader::makeTransformMatrix(
+    MFFormat::DataFormat::Vec3 p,
+    MFFormat::DataFormat::Vec3 s,
+    MFFormat::DataFormat::Quat r)
+{
+    osg::Matrixd mat;
+    mat.preMultTranslate(osg::Vec3f(p.x,p.y,p.z));
+    mat.preMultScale(osg::Vec3f(s.x,s.y,s.z));
+    mat.preMultRotate(osg::Quat(r.x,r.y,r.z,r.w)); 
+    return mat;
+}
+
+osg::ref_ptr<osg::Node> Loader::loadScene2Bin(std::ifstream &srcFile)
+{
+    osg::ref_ptr<osg::Group> group = new osg::Group();
+
+    MFLogger::ConsoleLogger::info("loading scene2.bin");
+
+    MFFormat::DataFormatScene2BIN parser;
+
+    bool success = parser.load(srcFile);
+
+    if (success)
+    {
+        for (auto pair : parser.getObjects())
+            {
+                auto object = pair.second;
+
+                osg::ref_ptr<osg::Node> objectNode;
+
+                switch (object.mType)
+                {
+                    case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
+                    {
+                        MFLogger::ConsoleLogger::info("object: light");
+
+                        osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
+                            new osg::Sphere(osg::Vec3f(0,0,0),0.1));
+
+                        objectNode = lightNode;
+                        break;
+                    }
+                    default:
+                    {
+                        MFLogger::ConsoleLogger::warn("unknown object type: " + std::to_string(object.mType));
+                        break;
+                    }
+                }
+
+                if (objectNode.get())
+                {
+                    osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
+                    objectTransform->setMatrix(makeTransformMatrix(object.mPos,object.mScale,object.mRot));
+                    objectTransform->addChild(objectNode);
+                    group->addChild(objectTransform);
+                }
+            }
+    }
+
+    return group;
+}
 
 void Loader::setTextureDir(std::string textureDir)
 {
@@ -201,16 +271,6 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
             diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
 
-            osg::ref_ptr<osg::Light> light = new osg::Light();
-
-            MFFormat::DataFormat::Vec3 col = model->mMaterials[i].mAmbient;
-            light->setAmbient( osg::Vec4f(col.x,col.y,col.z,1.0) );
-
-            col = model->mMaterials[i].mDiffuse;
-            light->setDiffuse( osg::Vec4f(col.x,col.y,col.z,1.0) );
-
-            stateSet->setAttributeAndModes(light, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
             osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName);
 
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
@@ -239,11 +299,7 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             s = model->mMeshes[i].mScale;
             r = model->mMeshes[i].mRot;
 
-            mat.preMultTranslate(osg::Vec3f(p.x,p.y,p.z));
-            mat.preMultScale(osg::Vec3f(s.x,s.y,s.z));
-            mat.preMultRotate(osg::Quat(r.x,r.y,r.z,r.w)); 
-
-            transform->setMatrix(mat);
+            transform->setMatrix(makeTransformMatrix(p,s,r));
 
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
