@@ -110,17 +110,17 @@ private:
 
 bool DataFormatScene2BIN::load(std::ifstream &srcFile)
 {
-    Header new_header = {};
-    read(srcFile, &new_header);
+    Header newHeader = {};
+    read(srcFile, &newHeader);
     uint32_t position = 6;
 
-    while(position + 6 < new_header.mSize)
+    while(position + 6 < newHeader.mSize)
     {
         srcFile.seekg(position, srcFile.beg);
-        Header current_header = {};
-        read(srcFile, &current_header);
-        readHeader(srcFile, &current_header, position + 6);
-        position += current_header.mSize;
+        Header nextHeader = {};
+        read(srcFile, &nextHeader);
+        readHeader(srcFile, &nextHeader, position + 6);
+        position += nextHeader.mSize;
     }
 
     return true;
@@ -135,11 +135,11 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
             uint32_t position = offset;
             while(position + 6 < offset + header->mSize)
             {
-                Header next_header = {};
+                Header nextHeader = {};
                 srcFile.seekg(position, srcFile.beg);
-                read(srcFile, &next_header);
-                readHeader(srcFile, &next_header, position + 6);
-                position += next_header.mSize;
+                read(srcFile, &nextHeader);
+                readHeader(srcFile, &nextHeader, position + 6);
+                position += nextHeader.mSize;
             }
         }
         break;
@@ -165,17 +165,17 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
         case HEADER_OBJECT:
         {
             uint32_t position = offset;
-            Object new_object = {};
+            Object newObject = {};
             while(position + 6 < offset + header->mSize)
             {
-                Header next_header = {};
+                Header nextHeader = {};
                 srcFile.seekg(position, srcFile.beg);
-                read(srcFile, &next_header);
-                readObject(srcFile, &next_header, &new_object);
-                position += next_header.mSize;
+                read(srcFile, &nextHeader);
+                readObject(srcFile, &nextHeader, &newObject);
+                position += nextHeader.mSize;
             }
 
-            mObjects.insert(make_pair(new_object.mName, new_object));
+            mObjects.insert(make_pair(newObject.mName, newObject));
         } 
         break;
     }
@@ -198,50 +198,52 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
             name[header->mSize] = '\0';
 
             object->mName = std::string(name);
+            free(name);
         }
         break;
 
         case OBJECT_MODEL:
         {
-            char *model_name = reinterpret_cast<char*>(malloc(header->mSize + 1));
-            read(srcFile, model_name, header->mSize);
-            model_name[strlen(model_name) - 4] = '\0';
-            sprintf(model_name, "%s.4ds", model_name);
-            model_name[header->mSize] = '\0';
+            char *modelName = reinterpret_cast<char*>(malloc(header->mSize + 1));
+            read(srcFile, modelName, header->mSize);
+            modelName[strlen(modelName) - 4] = '\0';
+            sprintf(modelName, "%s.4ds", modelName);
+            modelName[header->mSize] = '\0';
 
-            object->mModelName = std::string(model_name);
+            object->mModelName = std::string(modelName);
+            free(modelName);
         }
         break;
 
         case OBJECT_POSITION:
         {
-            Vec3 new_position = {};
-            read(srcFile, &new_position);
-            object->mPos = new_position;
+            Vec3 newPosition = {};
+            read(srcFile, &newPosition);
+            object->mPos = newPosition;
         } 
         break;
 
         case OBJECT_ROTATION:
         {
-            Quat new_rotation = {};
-            read(srcFile, &new_rotation);
-            object->mRot = new_rotation;
+            Quat newRotation = {};
+            read(srcFile, &newRotation);
+            object->mRot = newRotation;
         } 
         break;
 
         case OBJECT_POSITION_2:
         {
-            Vec3 new_position = {};
-            read(srcFile, &new_position);
-            object->mPos2 = new_position;
+            Vec3 newPosition = {};
+            read(srcFile, &newPosition);
+            object->mPos2 = newPosition;
         } 
         break;
 
         case OBJECT_SCALE:
         {
-            Vec3 new_scale = {};
-            read(srcFile, &new_scale);
-            object->mScale = new_scale;
+            Vec3 newScale = {};
+            read(srcFile, &newScale);
+            object->mScale = newScale;
         } 
         break;
 

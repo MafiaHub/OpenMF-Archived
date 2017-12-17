@@ -6,10 +6,10 @@
 
 using namespace MFLogger;
 
-void dump(MFFormat::DataFormatCacheBIN cache_bin)
+void dump(MFFormat::DataFormatCacheBIN cacheBin)
 {
-    ConsoleLogger::raw("number of objects: " + std::to_string(cache_bin.getNumObjects()) + ".");
-    for (auto object : cache_bin.getObjects())
+    ConsoleLogger::raw("number of objects: " + std::to_string(cacheBin.getNumObjects()) + ".");
+    for (auto object : cacheBin.getObjects())
     {
         ConsoleLogger::raw("object name: " + object.mObjectName + ":");
         ConsoleLogger::raw("\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",");
@@ -66,9 +66,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    MFFormat::DataFormatCacheBIN cache_bin;
+    MFFormat::DataFormatCacheBIN cacheBin;
 
-    bool success = cache_bin.load(f);
+    bool success = cacheBin.load(f);
 
     if (!success)
     {
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    dump(cache_bin);
+    dump(cacheBin);
 
     return 0;
 }

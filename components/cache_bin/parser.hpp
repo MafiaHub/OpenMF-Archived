@@ -55,51 +55,53 @@ private:
 
 bool DataFormatCacheBIN::load(std::ifstream &srcFile) 
 {
-    Header new_header = {};
-    read(srcFile, &new_header);
+    Header newHeader = {};
+    read(srcFile, &newHeader);
 
-    Chunk new_chunk = {};
-    read(srcFile, &new_chunk.mVersion);
+    Chunk newChunk = {};
+    read(srcFile, &newChunk.mVersion);
 
-    while(srcFile.tellg() < new_header.mSize - sizeof(uint32_t)) 
+    while(srcFile.tellg() < newHeader.mSize - sizeof(uint32_t)) 
     {
-        Object new_object = {};
-        uint32_t object_name_length, model_name_length;
+        Object newObject = {};
+        uint32_t objectNameLength, modelNameLength;
         
-        read(srcFile, &new_object.mHeader);
-        read(srcFile, &object_name_length);
-        char *object_name = reinterpret_cast<char*>(malloc(object_name_length + 1));
-        read(srcFile, object_name, object_name_length);
-        object_name[object_name_length] = '\0';
-        new_object.mObjectName = std::string(object_name);
+        read(srcFile, &newObject.mHeader);
+        read(srcFile, &objectNameLength);
+        char *objectName = reinterpret_cast<char*>(malloc(objectNameLength + 1));
+        read(srcFile, objectName, objectNameLength);
+        objectName[objectNameLength] = '\0';
+        newObject.mObjectName = std::string(objectName);
+        free(objectName);
 
-        read(srcFile, new_object.mBounds, 0x4C);
+        read(srcFile, newObject.mBounds, 0x4C);
 
         size_t current_pos = srcFile.tellg();
-        size_t header_size = sizeof(Header) + sizeof(uint32_t) + object_name_length + 0x4C;
-        while(srcFile.tellg() < current_pos + new_object.mHeader.mSize - header_size)
+        size_t header_size = sizeof(Header) + sizeof(uint32_t) + objectNameLength + 0x4C;
+        while(srcFile.tellg() < current_pos + newObject.mHeader.mSize - header_size)
         {
-            Instance new_instance = {};
+            Instance newInstance = {};
 
-            read(srcFile, &new_instance.mHeader);
+            read(srcFile, &newInstance.mHeader);
 
-            read(srcFile, &model_name_length);
-            char *model_name = reinterpret_cast<char*>(malloc(model_name_length + 1));
-            read(srcFile, model_name, model_name_length);
-            model_name[model_name_length - 4] = '\0';
-            sprintf(model_name, "%s.4ds", model_name);
-            model_name[model_name_length] = '\0';
-            new_instance.mModelName = std::string(model_name);
+            read(srcFile, &modelNameLength);
+            char *modelName = reinterpret_cast<char*>(malloc(modelNameLength + 1));
+            read(srcFile, modelName, modelNameLength);
+            modelName[modelNameLength - 4] = '\0';
+            sprintf(modelName, "%s.4ds", modelName);
+            modelName[modelNameLength] = '\0';
+            newInstance.mModelName = std::string(modelName);
+            free(modelName);
 
-            read(srcFile, &new_instance.mPos);
-            read(srcFile, &new_instance.mRot);
-            read(srcFile, &new_instance.mScale);
-            read(srcFile, &new_instance.mUnk0);
-            read(srcFile, &new_instance.mScale2);
-            new_object.mInstances.push_back(new_instance);
+            read(srcFile, &newInstance.mPos);
+            read(srcFile, &newInstance.mRot);
+            read(srcFile, &newInstance.mScale);
+            read(srcFile, &newInstance.mUnk0);
+            read(srcFile, &newInstance.mScale2);
+            newObject.mInstances.push_back(newInstance);
         }
 
-        mObjects.push_back(new_object);
+        mObjects.push_back(newObject);
     }
 
     return true;
