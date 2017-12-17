@@ -7,17 +7,29 @@
 
 #define ALIGN 50
 
-void dump(MFFormat::DataFormatDTA &dta, bool displaySize)
+void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 {
     std::cout << "number of files: " << dta.getNumFiles() << std::endl;
     std::cout << "file list:" << std::endl;
 
+    std::vector<MFFormat::DataFormatDTA::ContentHeader> ch = dta.getContentHeaders();
+    std::vector<MFFormat::DataFormatDTA::DataHeader> dh = dta.getDataHeaders();
+
     for (int i = 0; i < dta.getNumFiles(); ++i)
     {
-        if (displaySize)
-            std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B" << std::endl;
+        if (displaySize || verbose)
+            std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B";
         else
-            std::cout << dta.getFileName(i) << std::endl;
+            std::cout << dta.getFileName(i);
+
+        std::cout << std::endl;
+
+        if (verbose)
+        {
+            std::cout << "  " << ch[i].mUnknown << " " << ch[i].mDataOffset << " " << ch[i].mDataEnd << " " <<
+            dh[i].mUnknown << " " << dh[i].mUnknown2 << " " << dh[i].mUnknown3 << " " << dh[i].mUnknown4 << " " <<
+            dh[i].mUnknown6 << std::endl;
+        } 
     }
 }
 
@@ -27,10 +39,11 @@ int main(int argc, char** argv)
 
     options.add_options()
         ("s,size","Display file sizes.")
+        ("v,verbose","Display extensive info about each file.")
         ("h,help","Display help and exit.")
         ("d,decrypt","Decrypt whole input file with corresponding keys, mostly for debugging. See also -S.")
         ("S,shift-keys","Shift decrypting keys by given number of bytes. Has only effect with -d.",cxxopts::value<int>())
-        ("e,extract","Extract given file. NOT IMPLEMENTED YET",cxxopts::value<std::string>())
+        ("e,extract","Extract given file.",cxxopts::value<std::string>())
         ("i,input","Specify input file name.",cxxopts::value<std::string>());
 
     options.parse_positional({"i"});
@@ -45,6 +58,8 @@ int main(int argc, char** argv)
 
     bool displaySize = arguments.count("s") > 0;
     bool decryptMode = arguments.count("d") > 0;
+    bool extractMode = arguments.count("e") > 0;
+    bool verbose = arguments.count("v") > 0;
 
     if (arguments.count("i") < 1)
     {
@@ -114,7 +129,6 @@ int main(int argc, char** argv)
         MFLogger::ConsoleLogger::info("decrypting into " + outputFile);
 
         std::ofstream f2;
-
         f2.open(outputFile);
 
         if (!f2.is_open())
@@ -140,6 +154,46 @@ int main(int argc, char** argv)
 
     bool success = dta.load(f);
 
+    if (extractMode)
+    {
+        std::string extractFile = arguments["e"].as<std::string>();
+        std::string outputFile = "out";
+
+        MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".");
+
+        int fileIndex = dta.getFileIndex(extractFile);
+
+        if (fileIndex < 0)
+        {
+            MFLogger::ConsoleLogger::fatal("File " + extractFile + " not found.");
+            f.close();
+            return 1;
+        }
+
+        std::ofstream f2;
+        f2.open(outputFile);
+ 
+        if (!f2.is_open())
+        {
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".");
+            f.close();
+            return 1;
+        }
+
+        char *buffer;
+        unsigned int fileSize;        
+ 
+        dta.getFile(f,fileIndex,&buffer,fileSize);
+
+        f2.write(buffer,fileSize);
+
+        free(buffer);
+
+        f2.close();
+        f.close();
+        return 0;
+    }
+
     f.close();
 
     if (!success)
@@ -148,7 +202,7 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    dump(dta,displaySize);
+    dump(dta,displaySize,verbose);
 
     return 0;
 }

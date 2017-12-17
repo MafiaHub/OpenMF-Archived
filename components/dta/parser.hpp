@@ -17,6 +17,7 @@ public:
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
     std::string getFileName(unsigned int index);
     void getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length);   ///< Get the concrete file from within the DST file into a buffer.
+    int getFileIndex(std::string fileName);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -60,6 +61,9 @@ public:
         unsigned char mUnknown7[7];
         unsigned char mName[256];
     } DataHeader;
+
+    inline std::vector<ContentHeader> getContentHeaders() { return mContentHeaders; };
+    inline std::vector<DataHeader> getDataHeaders() { return mDataHeaders; };
 
 protected:
     FileHeader mFileHeader;
@@ -141,17 +145,27 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     return true;
 }
 
+int DataFormatDTA::getFileIndex(std::string fileName)
+{
+    for (int i = 0; i < mDataHeaders.size(); i++)
+        if (fileName.compare((char *) mDataHeaders[i].mName) == 0)
+            return i;
+
+    return -1;
+}
+
 void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length)
 {
     length = getFileSize(index);
     *dstBuffer = (char *) malloc(length);
 
-    unsigned int fileOffset = 0;   // TODO: where is the file?
+    unsigned int fileOffset = mContentHeaders[index].mDataEnd + 5;   // why + 5?
+    // TODO: some files are probably compressed
 
     srcFile.clear();
     srcFile.seekg(fileOffset);
     srcFile.read(*dstBuffer,length);
-    decrypt(*dstBuffer,length);
+    decrypt(*dstBuffer,length,1);
 }
 
 unsigned int DataFormatDTA::getFileSize(unsigned int index)
