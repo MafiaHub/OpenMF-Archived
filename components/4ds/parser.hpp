@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_4DS_H
 
 #include <base_parser.hpp>
+#include <cstring>
 
 namespace MFFormat
 {
@@ -308,7 +309,25 @@ public:
     } Model;
 
     virtual bool load(std::ifstream &srcFile) override;
-    Model* getModel();
+    
+    inline Model* getModel()
+    {
+        return mLoadedModel;
+    }
+
+    typedef enum
+    {
+        ERROR_SUCCESS,
+        ERROR_SIGNATURE,
+    } ErrorCodes;
+
+    std::string getErrorStr()
+    {
+        switch (mErrorCode)
+        {
+            case ERROR_SIGNATURE: return "Wrong 4ds signature";
+        }
+    }
 
 protected:
     void loadMaterial(Model *model, std::ifstream &file);
@@ -326,7 +345,7 @@ protected:
     SingleMorph loadSingleMorph(std::ifstream &file);
     void loadMesh(Model *model, std::ifstream &file);
     Model* loadModel(std::ifstream &file);
-    Model* mLodedModel;
+    Model* mLoadedModel;
 };
 
 void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
@@ -772,7 +791,12 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
     Model *model = reinterpret_cast<Model*>(malloc(sizeof(Model)));
     read(file, &model->mSignature, 4);
 
-    //TODO(DavoSK): Add check for proper format signature contains 4DS word in ASCII 
+    if (!strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3))
+    {
+        mErrorCode = DataFormat4DS::ERROR_SIGNATURE;
+        return nullptr;
+    }
+
     read(file, &model->mFormatVersion);
     read(file, &model->mTimestamp);
     
@@ -785,13 +809,8 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
 
 bool DataFormat4DS::load(std::ifstream &srcFile)
 {
-    mLodedModel = loadModel(srcFile);
-    return mLodedModel != nullptr;
-}
-
-DataFormat4DS::Model* DataFormat4DS::getModel() 
-{ 
-    return mLodedModel; 
+    mLoadedModel = loadModel(srcFile);
+    return mLoadedModel != nullptr;
 }
 
 }

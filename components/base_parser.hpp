@@ -89,8 +89,9 @@ public:
             return sstream.str();
         }
     } Mat4;
-
     #pragma pack(pop)
+
+    virtual std::string getErrorStr() { return "Unknown error"; };
 protected:
     template<typename T>
     void read(std::ifstream & stream, T* a, size_t size = sizeof(T))
@@ -99,6 +100,8 @@ protected:
     }
 
     std::streamsize fileLength(std::ifstream &f);
+
+    uint32_t mErrorCode = 0;
 };
 
 }

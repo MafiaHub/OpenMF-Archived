@@ -45,9 +45,10 @@ public:
     } Chunk;
 
     virtual bool load(std::ifstream &srcFile) override;
-    std::vector<Object> getObjects();
-    size_t              getNumObjects();
-    Object*             getObject(size_t index);
+
+    inline std::vector<Object> getObjects()     { return mObjects; }
+    inline size_t getNumObjects()               { return mObjects.size(); }
+    inline Object* getObject(size_t index)      { return &mObjects.at(index); }
 private:
     std::vector<Object> mObjects;
 };
@@ -102,21 +103,6 @@ bool DataFormatCacheBIN::load(std::ifstream &srcFile)
     }
 
     return true;
-}
-
-std::vector<DataFormatCacheBIN::Object> DataFormatCacheBIN::getObjects()
-{
-    return mObjects;
-}
- 
-size_t DataFormatCacheBIN::getNumObjects()
-{
-    return mObjects.size();
-}
- 
-DataFormatCacheBIN::Object* DataFormatCacheBIN::getObject(size_t index) 
-{
-    return &mObjects.at(index);
 }
 
 }
