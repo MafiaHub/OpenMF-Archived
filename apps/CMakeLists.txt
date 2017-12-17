@@ -1,6 +1,6 @@
 ADD_SUBDIRECTORY(game)
 ADD_SUBDIRECTORY(model_viewer)
-ADD_SUBDIRECTORY(format_tools)
+ADD_SUBDIRECTORY(format_utils)
 
 IF(WIN32)
     IF(MSVC)

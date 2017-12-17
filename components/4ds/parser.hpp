@@ -74,7 +74,7 @@ public:
         Vec3 mAmbient;
         Vec3 mDiffuse;
         Vec3 mEmission;
-        float mTransparency; // 0.0 - invisible; 1.0 - solid
+        float mTransparency; // 0.0 - invisible; 1.0 - opaque
 
         // environment map
         float mEnvRatio;
