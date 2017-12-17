@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <dta/parser.hpp>
 #include <utils.hpp>
-#include <logger_console.hpp>
+#include <loggers/console.hpp>
 
 #define ALIGN 50
 

@@ -8,7 +8,7 @@
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
-#include <logger_console.hpp>
+#include <loggers/console.hpp>
 
 void printHelp()
 {

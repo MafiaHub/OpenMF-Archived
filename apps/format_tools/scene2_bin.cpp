@@ -1,6 +1,6 @@
 #include <iostream>
 #include <scene2_bin/parser.hpp>
-#include <logger_console.hpp>
+#include <loggers/console.hpp>
 #include <utils.hpp>
 
 using namespace MFLogger;

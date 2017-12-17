@@ -4,7 +4,6 @@
 #include <cstring>
 
 #include <base_parser.hpp>
-#include <logger_console.hpp>
 
 namespace MFFormat
 {

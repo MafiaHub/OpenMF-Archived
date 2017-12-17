@@ -1,10 +1,23 @@
 #ifndef LOGGER_FILE_H
 #define LOGGER_FILE_H
 
-#include <loggers.hpp>
+#include <base_logger.hpp>
 
 namespace MFLogger
 {
+
+class FileLogger : Logger 
+{
+public:
+    FileLogger(std::string fileName);
+    virtual void print_raw(std::string str) override;
+    virtual void print_info(std::string str) override;
+    virtual void print_warn(std::string str) override;
+    virtual void print_fatal(std::string str) override;
+
+private:
+    std::ofstream mFile;
+};
 
 FileLogger::FileLogger(std::string fileName)
 {

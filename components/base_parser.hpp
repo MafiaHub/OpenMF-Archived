@@ -8,7 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include <logger_console.hpp>
+#include <loggers/console.hpp>
 
 namespace MFFormat
 {

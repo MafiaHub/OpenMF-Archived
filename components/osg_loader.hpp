@@ -6,7 +6,7 @@
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
-#include <logger_console.hpp>
+#include <loggers/console.hpp>
 #include <utils.hpp>
 
 namespace MFFormat
