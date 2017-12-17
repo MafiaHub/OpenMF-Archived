@@ -3,10 +3,24 @@
 
 #include <iostream>
 
-#include <loggers.hpp>
+#include <base_logger.hpp>
 
 namespace MFLogger
 {
+
+class ConsoleLogger : Logger 
+{
+public:
+    virtual void print_raw(std::string str) override;
+    virtual void print_info(std::string str) override;
+    virtual void print_warn(std::string str) override;
+    virtual void print_fatal(std::string str) override;
+
+    static void raw(std::string str);
+    static void info(std::string str);
+    static void warn(std::string str);
+    static void fatal(std::string str);
+};
 
 void ConsoleLogger::raw(std::string str)
 {

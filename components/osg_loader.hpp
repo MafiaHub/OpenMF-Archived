@@ -5,8 +5,8 @@
 #include <osg/Texture2D>
 #include <fstream>
 #include <algorithm>
-#include <format_parser_4ds.hpp>
-#include <logger_console.hpp>
+#include <4ds/parser.hpp>
+#include <loggers/console.hpp>
 #include <utils.hpp>
 
 namespace MFFormat
