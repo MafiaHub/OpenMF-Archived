@@ -143,7 +143,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
         {
             Vec3 new_scale = {};
             read(srcFile, &new_scale);
-            object->mPos2 = new_scale;
+            object->mScale = new_scale;
         } 
         break;
 
