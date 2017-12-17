@@ -5,7 +5,7 @@
 #include <osg/Texture2D>
 #include <fstream>
 #include <algorithm>
-#include <format_parser_4ds.hpp>
+#include <4ds/parser.hpp>
 #include <logger_console.hpp>
 #include <utils.hpp>
 

@@ -3,11 +3,114 @@
 
 #include <cstring>
 
-#include <format_parsers.hpp>
+#include <base_parser.hpp>
 #include <logger_console.hpp>
 
 namespace MFFormat
 {
+
+class DataFormatScene2BIN: public DataFormat
+{
+public:
+    typedef enum {
+        // top nodes
+        NODE_MISSION = 0x4c53,
+        NODE_META = 0x0001,
+        NODE_UNK_FILE = 0xAFFF,
+        NODE_UNK_FILE2 = 0x3200,
+        NODE_FOV = 0x3010,
+        NODE_VIEW_DISTANCE = 0x3011,
+        NODE_CLIPPING_PLANES = 0x3211,
+        NODE_WORLD = 0x4000,
+        NODE_ENTITIES = 0xAE20,
+        NODE_INIT = 0xAE50,
+        // WORLD subnode
+        NODE_OBJECT = 0x4010
+    } NodeType;
+
+    typedef enum {
+        OBJECT_TYPE = 0x4011,
+        OBJECT_POSITION = 0x0020,
+        OBJECT_ROTATION = 0x0022,
+        OBJECT_POSITION_2 = 0x002C,
+        OBJECT_SCALE = 0x002D,
+        OBJECT_PARENT = 0x4020,
+        OBJECT_NAME = 0x0010, 
+        OBJECT_MODEL = 0x2012,
+        OBJECT_LIGHT_TYPE = 0x4041,
+        OBJECT_LIGHT_COLOUR = 0x0026,
+        OBJECT_LIGHT_POWER = 0x4042,
+        OBJECT_LIGHT_UNK_1 = 0x4043,
+        OBJECT_LIGHT_RANGE = 0x4044,
+        OBJECT_LIGHT_FLAGS = 0x4045,
+        OBJECT_LIGHT_SECTOR= 0x4046
+    } ObjectProperty;
+
+    typedef enum {
+        OBJECT_TYPE_LIGHT = 0x02,
+        OBJECT_TYPE_CAMERA = 0x03,
+        OBJECT_TYPE_SOUND = 0x04,
+        OBJECT_TYPE_MODEL = 0x09,
+        OBJECT_TYPE_OCCLUDER = 0x0C,
+        OBJECT_TYPE_SECTOR = 0x99,
+        OBJECT_TYPE_SCRIPT = 0x9B
+    } ObjectType;
+
+    #pragma pack(push, 1)
+    typedef struct
+    {
+        uint16_t mType;
+        uint32_t mSize;
+    } Node;
+    #pragma pack(pop)
+
+    typedef struct _Object
+    {
+        uint32_t mType;
+        Vec3 mPos;
+        Quat mRot;
+        Vec3 mPos2; // NOTE(zaklaus): Final world transform position?
+        Vec3 mScale;
+        std::string mName;
+        std::string mModelName;
+        std::string mParentName;
+
+        // Light properties
+        float mLightType;
+        Vec3 mLightColour;
+        int32_t mLightFlags;
+        float mLightPower;
+        float mLightUnk0;
+        float mLightUnk1;
+        float mLightNear;
+        float mLightFar;
+        char mLightSectors[5000];
+    } Object;
+
+    virtual bool load(std::ifstream &srcFile);
+    
+    size_t  getNumObjects();
+    Object* getObject(size_t index);
+    Object* getObject(std::string name);
+    std::unordered_map<std::string, Object> getObjects();
+
+    float getFov();
+    void  setFov(float value);
+
+    float getViewDistance();
+    void  setViewDistance(float value);
+
+    Vec2  getClippingPlanes();
+    void  setClippingPlanes(Vec2 value);
+private:
+    void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
+    void readObject(std::ifstream &srcFile, Node* node, Object* object);
+    
+    std::unordered_map<std::string, Object> mObjects;
+    float mFov;
+    float mViewDistance;
+    Vec2  mClippingPlanes;
+};
 
 bool DataFormatScene2BIN::load(std::ifstream &srcFile)
 {
