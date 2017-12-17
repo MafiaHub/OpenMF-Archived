@@ -51,7 +51,7 @@ int main(int argc, char** argv)
         ("t,type","Specify object type.",cxxopts::value<int>());
 
     options.parse_positional({"i","t"});
-    options.positional_help("file");
+    options.positional_help("file [type]");
     auto arguments = options.parse(argc,argv);
 
     if (arguments.count("h") > 0)

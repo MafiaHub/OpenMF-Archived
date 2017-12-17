@@ -32,7 +32,7 @@ void dump(MFFormat::DataFormatCacheBIN cache_bin)
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("scene2_bin","CLI utility for Mafia scene2.bin format.");
+    cxxopts::Options options("cache_bin","CLI utility for Mafia cache.bin format.");
 
     options.add_options()
         ("h,help","Display help and exit.")

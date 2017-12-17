@@ -9,43 +9,56 @@
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
-
-void printHelp()
-{
-    std::cout << "4DS model viewer" << std::endl << std::endl;
-    std::cout << "usage: viewer 4dsfile [texturedir]" << std::endl;
-}
+#include <cxxopts.hpp>
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
+    cxxopts::Options options("viewer","3D viewer for Mafia 4DS files.");
+
+    options.add_options()
+        ("h,help","Display help and exit.")
+        ("i,input","Specify input file name.",cxxopts::value<std::string>())
+        ("t,texdir","Specify texture directory.",cxxopts::value<std::string>());
+
+    options.parse_positional({"i","t"});
+    options.positional_help("file [texdir]");
+    auto arguments = options.parse(argc,argv);
+
+    if (arguments.count("h") > 0)
     {
-        MFLogger::ConsoleLogger::fatal("Expected filename.");
-        printHelp();
+        std::cout << options.help() << std::endl;
+        return 0;
+    }
+
+    if (arguments.count("i") < 1)
+    {
+        MFLogger::ConsoleLogger::fatal("Expected file.");
+        std::cout << options.help() << std::endl;
         return 1;
     }
 
+    std::string inputFile = arguments["i"].as<std::string>();
+
     std::ifstream f;
-    f.open(argv[1]);
+    f.open(inputFile);
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + std::string(argv[1]) + ".");
-        printHelp();
+        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".");
         return 1;
     }
 
     MFFormat::Loader loader;
     osgViewer::Viewer viewer;
 
-    if (argc > 2)
-        loader.setTextureDir(argv[2]);
+    if (arguments.count("t") > 0)
+        loader.setTextureDir(arguments["t"].as<std::string>());
 
     osg::ref_ptr<osg::Node> n = loader.load4ds(f);
 
     f.close();
 
-    if (argc <= 2)    // apply test texture
+    if (arguments.count("t") < 1)    // apply test texture
     {
         osg::ref_ptr<osg::Texture2D> t = new osg::Texture2D();
         osg::ref_ptr<osg::Image> i = osgDB::readImageFile("../resources/test.tga");

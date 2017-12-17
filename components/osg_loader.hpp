@@ -213,8 +213,8 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
                 char alphaTextureName[255];
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
-    //            osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
-    // TODO: apply alpha texture
+                // osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
+                // TODO: apply alpha texture
             }
 
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
