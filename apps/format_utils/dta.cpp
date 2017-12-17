@@ -3,49 +3,67 @@
 #include <dta/parser.hpp>
 #include <utils.hpp>
 #include <loggers/console.hpp>
+#include <cxxopts.hpp>
 
 #define ALIGN 50
 
-void printHelp()
-{
-    std::cout << "DTA format tool" << std::endl << std::endl;
-
-    std::cout << "usage: dta file [options]" << std::endl;
-}
-
-void dump(MFFormat::DataFormatDTA &dta)
+void dump(MFFormat::DataFormatDTA &dta, bool displaySize)
 {
     std::cout << "number of files: " << dta.getNumFiles() << std::endl;
     std::cout << "file list:" << std::endl;
 
     for (int i = 0; i < dta.getNumFiles(); ++i)
     {
-        std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B" << std::endl;
+        if (displaySize)
+            std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B" << std::endl;
+        else
+            std::cout << dta.getFileName(i) << std::endl;
     }
 }
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
+    cxxopts::Options options("dta","CLI utility for Mafia DTA format.");
+
+    options.add_options()
+        ("s,size","Display file sizes.")
+        ("h,help","Display help and exit.")
+        ("e,extract","Extract given file. NOT IMPLEMENTED YET",cxxopts::value<std::string>())
+        ("i,input","Specify input file name.",cxxopts::value<std::string>());
+
+    options.parse_positional({"i"});
+    options.positional_help("file");
+    auto arguments = options.parse(argc,argv);
+
+    if (arguments.count("h") > 0)
+    {
+        std::cout << options.help() << std::endl;
+        return 0;
+    }
+
+    bool displaySize = arguments.count("s") > 0;
+
+    if (arguments.count("i") < 1)
     {
         MFLogger::ConsoleLogger::fatal("Expected file.");
-        printHelp();
+        std::cout << options.help() << std::endl;
         return 1;
     }
 
-    std::ifstream f;
+    std::string inputFile = arguments["i"].as<std::string>();
 
-    f.open(argv[1]);
+    std::ifstream f;
+    f.open(inputFile);
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + std::string(argv[1]) + ".");
+        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".");
         return 1;
     }
 
     MFFormat::DataFormatDTA dta;
 
-    std::vector<std::string> filePath = MFUtil::strSplit(argv[1],'/');  // FIXME: platform-independece needed 
+    std::vector<std::string> filePath = MFUtil::strSplit(inputFile,'/');  // FIXME: platform-independece needed 
     std::string fileName = MFUtil::strToLower(filePath.back());
 
     if (fileName.compare("a0.dta") == 0)
@@ -79,11 +97,11 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        MFLogger::ConsoleLogger::fatal("Could not parse file " + std::string(argv[1]) + ".");
+        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".");
         return 1;
     }
 
-    dump(dta);
+    dump(dta,displaySize);
 
     return 0;
 }

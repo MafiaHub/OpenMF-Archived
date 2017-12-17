@@ -791,7 +791,7 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
     Model *model = reinterpret_cast<Model*>(malloc(sizeof(Model)));
     read(file, &model->mSignature, 4);
 
-    if (!strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3))
+    if (strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3) != 0)
     {
         mErrorCode = DataFormat4DS::ERROR_SIGNATURE;
         return nullptr;

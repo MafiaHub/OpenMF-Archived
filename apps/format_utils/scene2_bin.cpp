@@ -2,14 +2,9 @@
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <cxxopts.hpp>
 
 using namespace MFLogger;
-
-void printHelp()
-{
-    std::cout << "Scene2.bin format tool" << std::endl << std::endl;
-    std::cout << "usage: scene2_bin file [object_type]" << std::endl;
-}
 
 void dump(MFFormat::DataFormatScene2BIN scene2_bin, uint32_t obj_type)
 {
@@ -48,21 +43,38 @@ void dump(MFFormat::DataFormatScene2BIN scene2_bin, uint32_t obj_type)
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
+    cxxopts::Options options("scene2_bin","CLI utility for Mafia scene2.bin format.");
+
+    options.add_options()
+        ("h,help","Display help and exit.")
+        ("i,input","Specify input file name.",cxxopts::value<std::string>())
+        ("t,type","Specify object type.",cxxopts::value<int>());
+
+    options.parse_positional({"i","t"});
+    options.positional_help("file [type]");
+    auto arguments = options.parse(argc,argv);
+
+    if (arguments.count("h") > 0)
     {
-        ConsoleLogger::fatal("Expecting file name.");
-        printHelp();
+        std::cout << options.help() << std::endl;
+        return 0;
+    }
+
+    if (arguments.count("i") < 1)
+    {
+        MFLogger::ConsoleLogger::fatal("Expected file.");
+        std::cout << options.help() << std::endl;
         return 1;
     }
 
-    std::string file_name = std::string(argv[1]);
+    std::string inputFile = arguments["i"].as<std::string>();
 
     std::ifstream f;
-    f.open(file_name);
+    f.open(inputFile);
 
     if (!f.is_open())
     {
-        ConsoleLogger::fatal("Could not open file " + file_name + ".");
+        ConsoleLogger::fatal("Could not open file " + inputFile + ".");
         return 1;
     }
 
@@ -72,18 +84,16 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        ConsoleLogger::fatal("Could not parse file " + file_name + ".");
+        ConsoleLogger::fatal("Could not parse file " + inputFile + ".");
         return 1;
     }
 
-    uint32_t obj_type = 0;
+    uint32_t objType = 0;
 
-    if (argc < 3)
-    {
-        obj_type = std::atoi(argv[2]);
-    }
+    if (arguments.count("t") >= 1)
+        objType = arguments["t"].as<int>();
 
-    dump(scene2_bin, obj_type);
+    dump(scene2_bin, objType);
 
     return 0;
 }
