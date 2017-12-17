@@ -2,6 +2,7 @@
 #include <cache_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <cxxopts.hpp>
 
 using namespace MFLogger;
 

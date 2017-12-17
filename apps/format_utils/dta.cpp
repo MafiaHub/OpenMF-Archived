@@ -32,9 +32,7 @@ int main(int argc, char** argv)
         ("i,input","Specify input file name.",cxxopts::value<std::string>());
 
     options.parse_positional({"i"});
-
     options.positional_help("file");
-
     auto arguments = options.parse(argc,argv);
 
     if (arguments.count("h") > 0)
