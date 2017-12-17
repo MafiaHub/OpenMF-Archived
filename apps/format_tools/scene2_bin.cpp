@@ -8,10 +8,10 @@ using namespace MFLogger;
 void printHelp()
 {
     std::cout << "Scene2.bin format tool" << std::endl << std::endl;
-    std::cout << "usage: scene2_bin file" << std::endl;
+    std::cout << "usage: scene2_bin file [object_type]" << std::endl;
 }
 
-void dump(MFFormat::DataFormatScene2BIN scene2_bin)
+void dump(MFFormat::DataFormatScene2BIN scene2_bin, uint32_t obj_type)
 {
     ConsoleLogger::raw("view distance: " + std::to_string(scene2_bin.getViewDistance()) + ",");
     ConsoleLogger::raw("field of view: " + std::to_string(scene2_bin.getFov()) + ",");
@@ -22,6 +22,9 @@ void dump(MFFormat::DataFormatScene2BIN scene2_bin)
     for (auto pair : scene2_bin.getObjects())
     {
         auto object = pair.second;
+
+        if (object.mType != obj_type && obj_type != 0) continue;
+
         ConsoleLogger::raw("\tobject name: " + object.mName + ",");
         ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",");
         ConsoleLogger::raw("\t\ttype: " + std::to_string(object.mType) + ",");
@@ -73,7 +76,14 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    dump(scene2_bin);
+    uint32_t obj_type = 0;
+
+    if (argc < 3)
+    {
+        obj_type = std::atoi(argv[2]);
+    }
+
+    dump(scene2_bin, obj_type);
 
     return 0;
 }
