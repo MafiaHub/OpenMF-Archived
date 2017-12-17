@@ -1,6 +1,9 @@
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+
+#include <osg/ShadeModel>
+
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <fstream>
@@ -90,6 +93,8 @@ osg::ref_ptr<osg::Node> Loader::make4dsFaceGroup(
     geom->setNormalArray(normals);
     geom->setTexCoordArray(0,uvs);
 
+    geom->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
+
     geom->addPrimitiveSet(indices.get());
     geode->addDrawable(geom.get());
 
@@ -138,8 +143,11 @@ osg::ref_ptr<osg::Node> Loader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, Mate
     {
         auto vertex = meshLOD->mVertices[i];
 
+        osg::Vec3 normal = osg::Vec3f(vertex.mNormal.x, vertex.mNormal.y, vertex.mNormal.z);
+        normal.normalize();
+
         vertices->push_back(osg::Vec3f(vertex.mPos.x, vertex.mPos.y, vertex.mPos.z));
-        normals->push_back(osg::Vec3f(vertex.mNormal.x, vertex.mNormal.y, vertex.mNormal.z));
+        normals->push_back(normal);
         uvs->push_back(osg::Vec2f(vertex.mUV.x, 1.0 - vertex.mUV.y));
     }
 
