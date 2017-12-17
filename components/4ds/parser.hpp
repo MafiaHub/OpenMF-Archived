@@ -308,7 +308,11 @@ public:
     } Model;
 
     virtual bool load(std::ifstream &srcFile) override;
-    Model* getModel();
+    
+    inline Model* getModel()
+    {
+        return mLoadedModel;
+    }
 
 protected:
     void loadMaterial(Model *model, std::ifstream &file);
@@ -326,7 +330,7 @@ protected:
     SingleMorph loadSingleMorph(std::ifstream &file);
     void loadMesh(Model *model, std::ifstream &file);
     Model* loadModel(std::ifstream &file);
-    Model* mLodedModel;
+    Model* mLoadedModel;
 };
 
 void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
@@ -785,13 +789,8 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
 
 bool DataFormat4DS::load(std::ifstream &srcFile)
 {
-    mLodedModel = loadModel(srcFile);
-    return mLodedModel != nullptr;
-}
-
-DataFormat4DS::Model* DataFormat4DS::getModel() 
-{ 
-    return mLodedModel; 
+    mLoadedModel = loadModel(srcFile);
+    return mLoadedModel != nullptr;
 }
 
 }

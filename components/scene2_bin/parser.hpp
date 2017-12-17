@@ -88,19 +88,16 @@ public:
 
     virtual bool load(std::ifstream &srcFile);
     
-    size_t  getNumObjects();
-    Object* getObject(size_t index);
-    Object* getObject(std::string name);
-    std::unordered_map<std::string, Object> getObjects();
+    inline size_t getNumObjects()                               { return mObjects.size(); }
+    inline Object* getObject(std::string name)                  { return &mObjects.at(name); }
+    inline std::unordered_map<std::string, Object> getObjects() { return mObjects; }
+    inline float getFov()                                       { return mFov; }
+    inline void setFov(float value)                             { mFov = value; }
+    inline float getViewDistance()                              { return mViewDistance; }
+    inline void setViewDistance(float value)                    { mViewDistance = value; }
+    inline Vec2  getClippingPlanes()                            { return mClippingPlanes; }
+    inline void  setClippingPlanes(Vec2 value)                  { mClippingPlanes = value; }
 
-    float getFov();
-    void  setFov(float value);
-
-    float getViewDistance();
-    void  setViewDistance(float value);
-
-    Vec2  getClippingPlanes();
-    void  setClippingPlanes(Vec2 value);
 private:
     void readHeader(std::ifstream &srcFile, Header* Header, uint32_t offset);
     void readObject(std::ifstream &srcFile, Header* Header, Object* object);
@@ -303,51 +300,6 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         }
         break;
     }
-}
-
-size_t  DataFormatScene2BIN::getNumObjects()
-{
-    return mObjects.size();
-}
-
-DataFormatScene2BIN::Object* DataFormatScene2BIN::getObject(std::string name)
-{
-    return &mObjects.at(name);
-}
-
-std::unordered_map<std::string, DataFormatScene2BIN::Object> DataFormatScene2BIN::getObjects()
-{
-    return mObjects;
-}
-
-float DataFormatScene2BIN::getFov()
-{
-    return mFov;
-}
-
-void DataFormatScene2BIN::setFov(float value)
-{
-    mFov = value;
-}
-
-float DataFormatScene2BIN::getViewDistance()
-{
-    return mViewDistance;
-}
-
-void DataFormatScene2BIN::setViewDistance(float value)
-{
-    mViewDistance = value;
-}
-
-DataFormat::Vec2 DataFormatScene2BIN::getClippingPlanes()
-{
-    return mClippingPlanes;
-}
-
-void DataFormatScene2BIN::setClippingPlanes(DataFormat::Vec2 value)
-{
-    mClippingPlanes = value;
 }
 
 }
