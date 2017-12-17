@@ -20,6 +20,7 @@ int main(int argc, char** argv)
         ("h,help","Display help and exit.")
         ("i,input","Specify input file name.",cxxopts::value<std::string>())
         ("s,scene","Specify scene2.bin file.",cxxopts::value<std::string>())
+        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("t,texdir","Specify texture directory.",cxxopts::value<std::string>());
 
     options.parse_positional({"i","t"});
@@ -38,6 +39,11 @@ int main(int argc, char** argv)
         std::cout << options.help() << std::endl;
         return 1;
     }
+
+    int fov = 95;
+
+    if (arguments.count("f") > 0)
+        fov = arguments["f"].as<int>();
 
     std::string inputFile = arguments["i"].as<std::string>();
 
@@ -92,6 +98,11 @@ int main(int argc, char** argv)
     }
 
     viewer.setSceneData(g);
+
+    double fovy, aspect, znear, zfar;
+
+    viewer.getCamera()->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
+    viewer.getCamera()->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
 
     return viewer.run();
 }
