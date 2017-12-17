@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_SCENE2_BIN_H
 
 #include <algorithm>
+#include <cstring>
 
 #include <format_parsers.hpp>
 #include <logger_console.hpp>
@@ -76,13 +77,7 @@ void DataFormatScene2BIN::readNode(std::ifstream &srcFile, Node* node, uint32_t 
                 position += next_node.mSize;
             }
 
-            // NOTE(zaklaus): Avoid inserting duplicate objects that
-            // were already inserted as a parent object of another object.
-            auto it = std::find(mObjects.begin(), mObjects.end(), new_object);
-            if (it == mObjects.end())
-            {
-                mObjects.push_back(new_object);
-            }
+            mObjects.insert(make_pair(new_object.mName, new_object));
         } 
         break;
     }
@@ -111,7 +106,9 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
         case OBJECT_MODEL:
         {
             char *model_name = reinterpret_cast<char*>(malloc(node->mSize + 1));
-            read(srcFile, model_name, node->mSize - 1);
+            read(srcFile, model_name, node->mSize);
+            model_name[strlen(model_name) - 4] = '\0';
+            sprintf(model_name, "%s.4ds", model_name);
             model_name[node->mSize] = '\0';
 
             object->mModelName = std::string(model_name);
@@ -201,17 +198,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
             Object parent_object = {};
             readObject(srcFile, &parent_node, &parent_object);
 
-            auto it = std::find(mObjects.begin(), mObjects.end(), parent_object);
-
-            if (it != mObjects.end())
-            {
-                object->parent = it - mObjects.end();
-            }
-            else
-            {
-                mObjects.push_back(parent_object);
-                object->parent = mObjects.size() - 1;
-            }
+            object->mParentName = parent_object.mName;
         }
         break;
     }
@@ -222,14 +209,14 @@ size_t  DataFormatScene2BIN::getNumObjects()
     return mObjects.size();
 }
 
-DataFormatScene2BIN::Object* DataFormatScene2BIN::getObject(size_t index)
+DataFormatScene2BIN::Object* DataFormatScene2BIN::getObject(std::string name)
 {
-    return &mObjects.at(index);
+    return &mObjects.at(name);
 }
 
-std::vector<DataFormatScene2BIN::Object>* DataFormatScene2BIN::getObjects()
+std::unordered_map<std::string, DataFormatScene2BIN::Object> DataFormatScene2BIN::getObjects()
 {
-    return &mObjects;
+    return mObjects;
 }
 
 float DataFormatScene2BIN::getFov()

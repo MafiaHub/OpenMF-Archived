@@ -13,7 +13,34 @@ void printHelp()
 
 void dump(MFFormat::DataFormatScene2BIN scene2_bin)
 {
-    // TODO(zaklaus): dump data
+    ConsoleLogger::raw("view distance: " + std::to_string(scene2_bin.getViewDistance()) + ",");
+    ConsoleLogger::raw("field of view: " + std::to_string(scene2_bin.getFov()) + ",");
+    ConsoleLogger::raw("clipping planes: [" + scene2_bin.getClippingPlanes().str() + "],");
+    ConsoleLogger::raw("number of objects: " + std::to_string(scene2_bin.getNumObjects()) + ",");
+    ConsoleLogger::raw("");
+
+    for (auto pair : scene2_bin.getObjects())
+    {
+        auto object = pair.second;
+        ConsoleLogger::raw("\tobject name: " + object.mName + ",");
+        ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",");
+        ConsoleLogger::raw("\t\ttype: " + std::to_string(object.mType) + ",");
+        ConsoleLogger::raw("\t\tposition: [" + object.mPos.str() + "],");
+        ConsoleLogger::raw("\t\tposition2: [" + object.mPos2.str() + "],");
+        ConsoleLogger::raw("\t\trotation: [" + object.mRot.str() + "],");
+        ConsoleLogger::raw("\t\tscale: [" + object.mScale.str() + "],");
+        ConsoleLogger::raw("\t\tparent name: " + object.mParentName + ",");
+        ConsoleLogger::raw("\t\tlight properties:");
+        {
+            ConsoleLogger::raw("\t\t\tlight type: " + std::to_string(object.mLightType) + ",");
+            ConsoleLogger::raw("\t\t\tlight colour: [" + object.mLightColour.str() + "],");
+            ConsoleLogger::raw("\t\t\tlight power: " + std::to_string(object.mLightPower));
+            ConsoleLogger::raw("\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ",");
+            ConsoleLogger::raw("\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ",");
+            ConsoleLogger::raw("\t\t\tlight near: " + std::to_string(object.mLightNear) + ",");
+            ConsoleLogger::raw("\t\t\tlight far: " + std::to_string(object.mLightFar) + ",");
+        }
+    }
 }
 
 int main(int argc, char** argv)

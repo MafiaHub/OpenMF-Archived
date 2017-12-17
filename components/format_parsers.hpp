@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstdint>
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <logger_console.hpp>
 
@@ -152,8 +153,7 @@ public:
         Vec3 mScale;
         std::string mName;
         std::string mModelName;
-        Node parent_node;
-        size_t parent;
+        std::string mParentName;
 
         // Light properties
         float mLightType;
@@ -165,18 +165,14 @@ public:
         float mLightNear;
         float mLightFar;
         char mLightSectors[5000];
-
-        bool operator==(const struct _Object &rhs)
-        {
-            return mName.compare(rhs.mName);
-        }
     } Object;
 
     virtual bool load(std::ifstream &srcFile);
     
     size_t  getNumObjects();
     Object* getObject(size_t index);
-    std::vector<Object>* getObjects();
+    Object* getObject(std::string name);
+    std::unordered_map<std::string, Object> getObjects();
 
     float getFov();
     void  setFov(float value);
@@ -190,7 +186,7 @@ private:
     void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
     void readObject(std::ifstream &srcFile, Node* node, Object* object);
     
-    std::vector<Object> mObjects;
+    std::unordered_map<std::string, Object> mObjects;
     float mFov;
     float mViewDistance;
     Vec2  mClippingPlanes;
