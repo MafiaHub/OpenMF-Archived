@@ -1,9 +1,6 @@
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
-
-#include <osg/ShadeModel>
-
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <fstream>
