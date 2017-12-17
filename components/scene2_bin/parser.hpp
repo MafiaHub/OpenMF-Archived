@@ -75,7 +75,7 @@ public:
         std::string mParentName;
 
         // Light properties
-        float mLightType;
+        uint32_t mLightType;
         Vec3 mLightColour;
         int32_t mLightFlags;
         float mLightPower;

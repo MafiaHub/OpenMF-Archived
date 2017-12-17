@@ -5,6 +5,7 @@
 #include <osgViewer/Viewer>
 #include <osg_loader.hpp>
 #include <4ds/parser.hpp>
+#include <scene2_bin/parser.hpp>
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
@@ -18,6 +19,8 @@ int main(int argc, char** argv)
     options.add_options()
         ("h,help","Display help and exit.")
         ("i,input","Specify input file name.",cxxopts::value<std::string>())
+        ("s,scene","Specify scene2.bin file.",cxxopts::value<std::string>())
+        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("t,texdir","Specify texture directory.",cxxopts::value<std::string>());
 
     options.parse_positional({"i","t"});
@@ -37,6 +40,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    int fov = 95;
+
+    if (arguments.count("f") > 0)
+        fov = arguments["f"].as<int>();
+
     std::string inputFile = arguments["i"].as<std::string>();
 
     std::ifstream f;
@@ -54,7 +62,10 @@ int main(int argc, char** argv)
     if (arguments.count("t") > 0)
         loader.setTextureDir(arguments["t"].as<std::string>());
 
+    osg::ref_ptr<osg::Group> g = new osg::Group();
     osg::ref_ptr<osg::Node> n = loader.load4ds(f);
+
+    g->addChild(n);
 
     f.close();
 
@@ -68,7 +79,30 @@ int main(int argc, char** argv)
         n->getOrCreateStateSet()->setTextureAttributeAndModes(0,t.get());
     }
     
-    viewer.setSceneData(n);
+    if (arguments.count("s") > 0)    // optional scene2.bin file
+    {
+        std::ifstream f2;
+        std::string scene2BinPath = arguments["s"].as<std::string>();
+        f2.open(scene2BinPath);
+
+        if (!f2.is_open())
+        {
+            MFLogger::ConsoleLogger::warn("Could not open file " + scene2BinPath + ".");
+        }
+        else
+        {
+            osg::ref_ptr<osg::Node> n2 = loader.loadScene2Bin(f2);
+            f2.close();
+            g->addChild(n2);
+        }  
+    }
+
+    viewer.setSceneData(g);
+
+    double fovy, aspect, znear, zfar;
+
+    viewer.getCamera()->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
+    viewer.getCamera()->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
 
     return viewer.run();
 }
