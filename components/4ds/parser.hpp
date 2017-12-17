@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_4DS_H
 
 #include <base_parser.hpp>
+#include <cstring>
 
 namespace MFFormat
 {
@@ -312,6 +313,20 @@ public:
     inline Model* getModel()
     {
         return mLoadedModel;
+    }
+
+    typedef enum
+    {
+        ERROR_SUCCESS,
+        ERROR_SIGNATURE,
+    } ErrorCodes;
+
+    std::string getErrorStr()
+    {
+        switch (mErrorCode)
+        {
+            case ERROR_SIGNATURE: return "Wrong 4ds signature";
+        }
     }
 
 protected:
@@ -776,7 +791,12 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
     Model *model = reinterpret_cast<Model*>(malloc(sizeof(Model)));
     read(file, &model->mSignature, 4);
 
-    //TODO(DavoSK): Add check for proper format signature contains 4DS word in ASCII 
+    if (!strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3))
+    {
+        mErrorCode = 1;
+        return nullptr;
+    }
+
     read(file, &model->mFormatVersion);
     read(file, &model->mTimestamp);
     
