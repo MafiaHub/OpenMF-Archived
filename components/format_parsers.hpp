@@ -88,6 +88,69 @@ protected:
     std::streamsize fileLength(std::ifstream &f);
 };
 
+class DataFormatScene2BIN: public DataFormat
+{
+public:
+    typedef enum {
+        // top nodes
+        NODE_MISSION = 0x4c53,
+        NODE_META = 0x0001,
+        NODE_UNK_FILE = 0xAFFF,
+        NODE_UNK_FILE2 = 0x3200,
+        NODE_FOV = 0x3010,
+        NODE_VIEW_DISTANCE = 0x3011,
+        NODE_CLIPPING_PLANES = 0x3211,
+        NODE_WORLD = 0x4000,
+        NODE_ENTITIES = 0xAE20,
+        NODE_INIT = 0xAE50,
+        // WORLD subnode
+        NODE_OBJECT = 0x4010
+    } NodeType;
+
+    typedef enum {
+        OBJECT_TYPE = 0x4011,
+        OBJECT_POSITION = 0x0020,
+        OBJECT_ROTATION = 0x0022,
+        OBJECT_POSITION_2 = 0x002C,
+        OBJECT_SCALE = 0x002D,
+        OBJECT_PARENT = 0x4020,
+        OBJECT_NAME = 0x0010, 
+        OBJECT_MODEL = 0x2012
+    } ObjectType;
+
+    #pragma pack(push, 1)
+    typedef struct
+    {
+        uint16_t mType;
+        uint32_t mSize; 
+    } Header;
+    
+    typedef struct
+    {
+        uint16_t mType;
+        uint32_t mSize;
+    } Node;
+    #pragma pack(pop)
+
+    typedef struct
+    {
+        uint32_t mType;
+        Vec3 mPos;
+        Vec3 mRot;
+        Vec3 mRot2;
+        Vec3 mScale;
+        char *mName;
+        char *mModelName;
+        Node *mNode;
+    } Object;
+
+    virtual bool load(std::ifstream &srcFile);    
+private:
+    void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
+    void readObject(std::ifstream &srcFile, Node* node, Object* object);
+    std::vector<Object> mObjects;
+};
+
 class DataFormatCacheBIN: public DataFormat
 {
 public:
