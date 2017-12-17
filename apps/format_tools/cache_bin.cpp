@@ -16,13 +16,13 @@ void dump(MFFormat::DataFormatCacheBIN cache_bin)
     ConsoleLogger::raw("number of objects: " + std::to_string(cache_bin.getNumObjects()) + ".");
     for (auto object : cache_bin.getObjects())
     {
-        ConsoleLogger::raw("object name: " + std::string(object.mObjectName) + ":");
+        ConsoleLogger::raw("object name: " + object.mObjectName + ":");
         ConsoleLogger::raw("\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",");
         ConsoleLogger::raw("\tnumber of instances: " + std::to_string(object.mInstances.size()) + ",");
 
         for (auto instance : object.mInstances)
         {
-            ConsoleLogger::raw("\t\tmodel name: " + std::string(instance.mModelName) + ",");
+            ConsoleLogger::raw("\t\tmodel name: " + instance.mModelName + ",");
             ConsoleLogger::raw("\t\tposition: [" + instance.mPos.str() + "],");
             ConsoleLogger::raw("\t\trotation: [" + instance.mRot.str() + "],");
             ConsoleLogger::raw("\t\tscale: [" + instance.mScale.str() + "],");
@@ -31,7 +31,7 @@ void dump(MFFormat::DataFormatCacheBIN cache_bin)
             ConsoleLogger::raw("");
         }
 
-        ConsoleLogger::raw("end of object: " + std::string(object.mObjectName));
+        ConsoleLogger::raw("end of object: " + object.mObjectName);
     }
 }
 
