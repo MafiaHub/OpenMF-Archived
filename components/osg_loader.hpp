@@ -220,6 +220,8 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 
+        std::vector<osg::ref_ptr<osg::MatrixTransform>> meshes;
+
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
@@ -239,7 +241,18 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
             transform->setMatrix(mat);
 
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
-            group->addChild(transform);
+
+            meshes.push_back(transform);
+        }
+
+        for (int i = 0; i < model->mMeshCount; ++i)     // parent meshes
+        {
+            unsigned int parentID = model->mMeshes[i].mParentID;
+
+            if (parentID == 0)
+                group->addChild(meshes[i]);
+            else
+                meshes[parentID - 1]->addChild(meshes[i]);
         }
     }
 
