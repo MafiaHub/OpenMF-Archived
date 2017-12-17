@@ -82,6 +82,8 @@ int main(int argc, char** argv)
         dta.setDecryptKeys(dta.A6_KEYS);
     else if (fileName.compare("a7.dta") == 0)
         dta.setDecryptKeys(dta.A7_KEYS);
+    else if (fileName.compare("a8.dta") == 0)
+        dta.setDecryptKeys(dta.A8_KEYS);
     else if (fileName.compare("a9.dta") == 0)
         dta.setDecryptKeys(dta.A9_KEYS);
     else if (fileName.compare("aa.dta") == 0)
