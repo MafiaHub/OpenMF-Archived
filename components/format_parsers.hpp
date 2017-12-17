@@ -115,7 +115,24 @@ public:
         OBJECT_SCALE = 0x002D,
         OBJECT_PARENT = 0x4020,
         OBJECT_NAME = 0x0010, 
-        OBJECT_MODEL = 0x2012
+        OBJECT_MODEL = 0x2012,
+        OBJECT_LIGHT_TYPE = 0x4041,
+        OBJECT_LIGHT_COLOUR = 0x0026,
+        OBJECT_LIGHT_POWER = 0x4042,
+        OBJECT_LIGHT_UNK_1 = 0x4043,
+        OBJECT_LIGHT_RANGE = 0x4044,
+        OBJECT_LIGHT_FLAGS = 0x4045,
+        OBJECT_LIGHT_SECTOR= 0x4046
+    } ObjectProperty;
+
+    typedef enum {
+        OBJECT_TYPE_LIGHT = 0x02,
+        OBJECT_TYPE_CAMERA = 0x03,
+        OBJECT_TYPE_SOUND = 0x04,
+        OBJECT_TYPE_MODEL = 0x09,
+        OBJECT_TYPE_OCCLUDER = 0x0C,
+        OBJECT_TYPE_SECTOR = 0x99,
+        OBJECT_TYPE_SCRIPT = 0x9B
     } ObjectType;
 
     #pragma pack(push, 1)
@@ -126,16 +143,33 @@ public:
     } Node;
     #pragma pack(pop)
 
-    typedef struct
+    typedef struct _Object
     {
         uint32_t mType;
         Vec3 mPos;
-        Vec3 mRot;
-        Vec3 mRot2;
+        Quat mRot;
+        Vec3 mPos2; // NOTE(zaklaus): Final world transform position?
         Vec3 mScale;
-        char *mName;
-        char *mModelName;
-        Node *mNode;
+        std::string mName;
+        std::string mModelName;
+        Node parent_node;
+        size_t parent;
+
+        // Light properties
+        float mLightType;
+        Vec3 mLightColour;
+        int32_t mLightFlags;
+        float mLightPower;
+        float mLightUnk0;
+        float mLightUnk1;
+        float mLightNear;
+        float mLightFar;
+        char mLightSectors[5000];
+
+        bool operator==(const struct _Object &rhs)
+        {
+            return mName.compare(rhs.mName);
+        }
     } Object;
 
     virtual bool load(std::ifstream &srcFile);
@@ -143,10 +177,23 @@ public:
     size_t  getNumObjects();
     Object* getObject(size_t index);
     std::vector<Object>* getObjects();
+
+    float getFov();
+    void  setFov(float value);
+
+    float getViewDistance();
+    void  setViewDistance(float value);
+
+    Vec2  getClippingPlanes();
+    void  setClippingPlanes(Vec2 value);
 private:
     void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
     void readObject(std::ifstream &srcFile, Node* node, Object* object);
+    
     std::vector<Object> mObjects;
+    float mFov;
+    float mViewDistance;
+    Vec2  mClippingPlanes;
 };
 
 class DataFormatCacheBIN: public DataFormat
@@ -163,8 +210,7 @@ public:
     typedef struct
     {
         Header mHeader;
-        uint32_t mModelNameLength;
-        char *mModelName;
+        std::string mModelName;
         Vec3 mPos;
         Quat mRot;
         Vec3 mScale;
@@ -178,8 +224,7 @@ public:
     typedef struct
     {
         Header mHeader;
-        uint32_t mObjectNameLength;
-        char *mObjectName;
+        std::string mObjectName;
         int8_t mBounds[0x4C];
         std::vector<Instance> mInstances;
     } Object;

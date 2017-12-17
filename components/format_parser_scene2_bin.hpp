@@ -1,7 +1,10 @@
 #ifndef FORMAT_PARSERS_SCENE2_BIN_H
 #define FORMAT_PARSERS_SCENE2_BIN_H
 
+#include <algorithm>
+
 #include <format_parsers.hpp>
+#include <logger_console.hpp>
 
 namespace MFFormat
 {
@@ -44,17 +47,19 @@ void DataFormatScene2BIN::readNode(std::ifstream &srcFile, Node* node, uint32_t 
 
         case NODE_VIEW_DISTANCE:
         {
-            uint32_t position = offset;
-            float viewdist = 0;
-            read(srcFile, &viewdist);
+            read(srcFile, &mViewDistance);
         } 
+        break;
+
+        case NODE_CLIPPING_PLANES:
+        {
+            read(srcFile, &mClippingPlanes);
+        }
         break;
 
         case NODE_FOV:
         {
-            uint32_t position = offset;
-            float fov = 0;
-            read(srcFile, &fov);
+            read(srcFile, &mFov);
         } 
         break;
 
@@ -70,13 +75,15 @@ void DataFormatScene2BIN::readNode(std::ifstream &srcFile, Node* node, uint32_t 
                 readObject(srcFile, &next_node, &new_object);
                 position += next_node.mSize;
             }
-            mObjects.push_back(new_object);
-        } 
-        break;
 
-        default:
-        {
-        }
+            // NOTE(zaklaus): Avoid inserting duplicate objects that
+            // were already inserted as a parent object of another object.
+            auto it = std::find(mObjects.begin(), mObjects.end(), new_object);
+            if (it == mObjects.end())
+            {
+                mObjects.push_back(new_object);
+            }
+        } 
         break;
     }
 }
@@ -93,26 +100,119 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
 
         case OBJECT_NAME:
         {
-            object->mName = reinterpret_cast<char*>(malloc(node->mSize + 1));
-            read(srcFile, object->mName, node->mSize - 1);
-            object->mName[node->mSize] = '\0';
+            char *name = reinterpret_cast<char*>(malloc(node->mSize + 1));
+            read(srcFile, name, node->mSize - 1);
+            name[node->mSize] = '\0';
+
+            object->mName = std::string(name);
         }
         break;
 
         case OBJECT_MODEL:
         {
-            object->mModelName = reinterpret_cast<char*>(malloc(node->mSize + 1));
-            read(srcFile, object->mModelName, node->mSize - 1);
-            object->mModelName[node->mSize] = '\0';
+            char *model_name = reinterpret_cast<char*>(malloc(node->mSize + 1));
+            read(srcFile, model_name, node->mSize - 1);
+            model_name[node->mSize] = '\0';
+
+            object->mModelName = std::string(model_name);
         }
+        break;
+
+        case OBJECT_POSITION:
+        {
+            Vec3 new_position = {};
+            read(srcFile, &new_position);
+            object->mPos = new_position;
+        } 
+        break;
+
+        case OBJECT_ROTATION:
+        {
+            Quat new_rotation = {};
+            read(srcFile, &new_rotation);
+            object->mRot = new_rotation;
+        } 
         break;
 
         case OBJECT_POSITION_2:
         {
             Vec3 new_position = {};
             read(srcFile, &new_position);
-            object->mPos = new_position;
+            object->mPos2 = new_position;
         } 
+        break;
+
+        case OBJECT_SCALE:
+        {
+            Vec3 new_scale = {};
+            read(srcFile, &new_scale);
+            object->mPos2 = new_scale;
+        } 
+        break;
+
+        case OBJECT_LIGHT_TYPE:
+        {
+            read(srcFile, &object->mLightType);
+        }
+        break;
+        
+        case OBJECT_LIGHT_COLOUR:
+        {
+            read(srcFile, &object->mLightColour);
+        }
+        break;
+        
+        case OBJECT_LIGHT_POWER:
+        {
+            read(srcFile, &object->mLightPower);
+        }
+        break;
+        
+        case OBJECT_LIGHT_RANGE:
+        {
+            read(srcFile, &object->mLightNear);
+            read(srcFile, &object->mLightFar);
+        }
+        break;
+        
+        case OBJECT_LIGHT_SECTOR:
+        {
+            read(srcFile, object->mLightSectors, node->mSize);
+        }
+        break;
+        
+        case OBJECT_LIGHT_FLAGS:
+        {
+            read(srcFile, &object->mLightFlags);
+        }
+        break;
+
+        case OBJECT_LIGHT_UNK_1:
+        {
+            read(srcFile, &object->mLightUnk0);
+            read(srcFile, &object->mLightUnk1);
+        }
+        break;
+
+        case OBJECT_PARENT:
+        {
+            Node parent_node = {};
+            read(srcFile, &parent_node);
+            Object parent_object = {};
+            readObject(srcFile, &parent_node, &parent_object);
+
+            auto it = std::find(mObjects.begin(), mObjects.end(), parent_object);
+
+            if (it != mObjects.end())
+            {
+                object->parent = it - mObjects.end();
+            }
+            else
+            {
+                mObjects.push_back(parent_object);
+                object->parent = mObjects.size() - 1;
+            }
+        }
         break;
     }
 }
@@ -130,6 +230,36 @@ DataFormatScene2BIN::Object* DataFormatScene2BIN::getObject(size_t index)
 std::vector<DataFormatScene2BIN::Object>* DataFormatScene2BIN::getObjects()
 {
     return &mObjects;
+}
+
+float DataFormatScene2BIN::getFov()
+{
+    return mFov;
+}
+
+void DataFormatScene2BIN::setFov(float value)
+{
+    mFov = value;
+}
+
+float DataFormatScene2BIN::getViewDistance()
+{
+    return mViewDistance;
+}
+
+void DataFormatScene2BIN::setViewDistance(float value)
+{
+    mViewDistance = value;
+}
+
+DataFormat::Vec2 DataFormatScene2BIN::getClippingPlanes()
+{
+    return mClippingPlanes;
+}
+
+void DataFormatScene2BIN::setClippingPlanes(DataFormat::Vec2 value)
+{
+    mClippingPlanes = value;
 }
 
 }
