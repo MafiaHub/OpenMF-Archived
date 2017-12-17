@@ -6,19 +6,19 @@
 
 using namespace MFLogger;
 
-void dump(MFFormat::DataFormatScene2BIN scene2_bin, uint32_t obj_type)
+void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
-    ConsoleLogger::raw("view distance: " + std::to_string(scene2_bin.getViewDistance()) + ",");
-    ConsoleLogger::raw("field of view: " + std::to_string(scene2_bin.getFov()) + ",");
-    ConsoleLogger::raw("clipping planes: [" + scene2_bin.getClippingPlanes().str() + "],");
-    ConsoleLogger::raw("number of objects: " + std::to_string(scene2_bin.getNumObjects()) + ",");
+    ConsoleLogger::raw("view distance: " + std::to_string(scene2Bin.getViewDistance()) + ",");
+    ConsoleLogger::raw("field of view: " + std::to_string(scene2Bin.getFov()) + ",");
+    ConsoleLogger::raw("clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],");
+    ConsoleLogger::raw("number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ",");
     ConsoleLogger::raw("");
 
-    for (auto pair : scene2_bin.getObjects())
+    for (auto pair : scene2Bin.getObjects())
     {
         auto object = pair.second;
 
-        if (object.mType != obj_type && obj_type != 0) continue;
+        if (object.mType != objType && objType != 0) continue;
 
         ConsoleLogger::raw("\tobject name: " + object.mName + ",");
         ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",");
@@ -78,9 +78,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    MFFormat::DataFormatScene2BIN scene2_bin;
+    MFFormat::DataFormatScene2BIN scene2Bin;
 
-    bool success = scene2_bin.load(f);
+    bool success = scene2Bin.load(f);
 
     if (!success)
     {
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
     if (arguments.count("t") >= 1)
         objType = arguments["t"].as<int>();
 
-    dump(scene2_bin, objType);
+    dump(scene2Bin, objType);
 
     return 0;
 }

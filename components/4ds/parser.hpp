@@ -394,17 +394,17 @@ void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
 
 DataFormat4DS::Lod DataFormat4DS::loadLod(std::ifstream &file)
 {
-    Lod new_lod = {};
-    read(file, &new_lod.mRelativeDistance);
-    read(file, &new_lod.mVertexCount);
+    Lod newLod = {};
+    read(file, &newLod.mRelativeDistance);
+    read(file, &newLod.mVertexCount);
 
-    new_lod.mVertices = reinterpret_cast<Vertex*>(malloc(sizeof(Vertex)* new_lod.mVertexCount));
-    read(file, new_lod.mVertices, sizeof(Vertex)*new_lod.mVertexCount);
-    read(file, &new_lod.mFaceGroupCount); 
+    newLod.mVertices = reinterpret_cast<Vertex*>(malloc(sizeof(Vertex)* newLod.mVertexCount));
+    read(file, newLod.mVertices, sizeof(Vertex)*newLod.mVertexCount);
+    read(file, &newLod.mFaceGroupCount); 
 
-    new_lod.mFaceGroups = reinterpret_cast<FaceGroup*>(malloc(sizeof(FaceGroup)*new_lod.mFaceGroupCount));
+    newLod.mFaceGroups = reinterpret_cast<FaceGroup*>(malloc(sizeof(FaceGroup)*newLod.mFaceGroupCount));
     
-    for(size_t i = 0; i < new_lod.mFaceGroupCount; ++i)
+    for(size_t i = 0; i < newLod.mFaceGroupCount; ++i)
     {
         FaceGroup new_face_group = {};
         read(file, &new_face_group.mFaceCount);
@@ -412,232 +412,232 @@ DataFormat4DS::Lod DataFormat4DS::loadLod(std::ifstream &file)
         read(file, new_face_group.mFaces, sizeof(Face)*new_face_group.mFaceCount);
         read(file, &new_face_group.mMaterialID);
 
-        new_lod.mFaceGroups[i] = new_face_group;
+        newLod.mFaceGroups[i] = new_face_group;
     }
 
-    return new_lod;
+    return newLod;
 }
 
 DataFormat4DS::Standard DataFormat4DS::loadStandard(std::ifstream &file)
 {
-    Standard new_standard = {};
-    read(file, &new_standard.mInstanced);
+    Standard newStandard = {};
+    read(file, &newStandard.mInstanced);
 
-    if(!new_standard.mInstanced)
+    if(!newStandard.mInstanced)
     {
-        read(file, &new_standard.mLODLevel);
-        new_standard.mLODs = reinterpret_cast<Lod*>(malloc(sizeof(Lod)*new_standard.mLODLevel));
+        read(file, &newStandard.mLODLevel);
+        newStandard.mLODs = reinterpret_cast<Lod*>(malloc(sizeof(Lod)*newStandard.mLODLevel));
 
-        for(size_t i = 0; i < new_standard.mLODLevel; ++i)
+        for(size_t i = 0; i < newStandard.mLODLevel; ++i)
         {
-            Lod new_lod = {};
-            new_lod = loadLod(file);
-            new_standard.mLODs[i] = new_lod;
+            Lod newLod = {};
+            newLod = loadLod(file);
+            newStandard.mLODs[i] = newLod;
         }
     }
 
-    return new_standard;
+    return newStandard;
 }
 
 DataFormat4DS::Mirror DataFormat4DS::loadMirror(std::ifstream &file)
 {
-    Mirror new_mirror = {};
-    read(file, &new_mirror.mMinBox);
-    read(file, &new_mirror.mMaxBox);
-    read(file, &new_mirror.mUnk, sizeof(float) * 4);
-    read(file, &new_mirror.mReflectionMatrix);
-    read(file, &new_mirror.mBackgroundColor);
-    read(file, &new_mirror.mViewDistance);
-    read(file, &new_mirror.mVertexCount);
-    read(file, &new_mirror.mFaceCount);
+    Mirror newMirror = {};
+    read(file, &newMirror.mMinBox);
+    read(file, &newMirror.mMaxBox);
+    read(file, &newMirror.mUnk, sizeof(float) * 4);
+    read(file, &newMirror.mReflectionMatrix);
+    read(file, &newMirror.mBackgroundColor);
+    read(file, &newMirror.mViewDistance);
+    read(file, &newMirror.mVertexCount);
+    read(file, &newMirror.mFaceCount);
 
-    new_mirror.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*new_mirror.mVertexCount));
-    new_mirror.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*new_mirror.mFaceCount));
+    newMirror.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*newMirror.mVertexCount));
+    newMirror.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*newMirror.mFaceCount));
     
-    read(file, new_mirror.mVertices, sizeof(Vec3)*new_mirror.mVertexCount);
-    read(file, new_mirror.mFaces, sizeof(Face)*new_mirror.mFaceCount);
+    read(file, newMirror.mVertices, sizeof(Vec3)*newMirror.mVertexCount);
+    read(file, newMirror.mFaces, sizeof(Face)*newMirror.mFaceCount);
     
-    return new_mirror;
+    return newMirror;
 }
 
 DataFormat4DS::Glow DataFormat4DS::loadGlow(std::ifstream &file)
 {
-    Glow new_glow = {};
-    read(file, &new_glow.mGlowCount);
-    new_glow.mGlowData = reinterpret_cast<GlowData*>(malloc(sizeof(GlowData)*new_glow.mGlowCount));
+    Glow newGlow = {};
+    read(file, &newGlow.mGlowCount);
+    newGlow.mGlowData = reinterpret_cast<GlowData*>(malloc(sizeof(GlowData)*newGlow.mGlowCount));
     
-    for(size_t i = 0; i < new_glow.mGlowCount; ++i)
+    for(size_t i = 0; i < newGlow.mGlowCount; ++i)
     {
-        GlowData new_glow_data = {};
-        read(file, &new_glow_data.mPosition);
-        read(file, &new_glow_data.mMaterialID);
+        GlowData newGlow_data = {};
+        read(file, &newGlow_data.mPosition);
+        read(file, &newGlow_data.mMaterialID);
         
-        new_glow.mGlowData[i] = new_glow_data;
+        newGlow.mGlowData[i] = newGlow_data;
     }
     
-    return new_glow;
+    return newGlow;
 }
 
 DataFormat4DS::Portal DataFormat4DS::loadPortal(std::ifstream &file)
 {
-    Portal new_portal = {};
-    read(file, &new_portal.mVertexCount);
-    read(file, &new_portal.mUnk0);
-    read(file, new_portal.mUnk1, sizeof(float) * 6);
-    new_portal.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*new_portal.mVertexCount));
-    read(file, new_portal.mVertices, sizeof(Vec3)*new_portal.mVertexCount); 
+    Portal newPortal = {};
+    read(file, &newPortal.mVertexCount);
+    read(file, &newPortal.mUnk0);
+    read(file, newPortal.mUnk1, sizeof(float) * 6);
+    newPortal.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*newPortal.mVertexCount));
+    read(file, newPortal.mVertices, sizeof(Vec3)*newPortal.mVertexCount); 
    
-    return new_portal;
+    return newPortal;
 }
 
 DataFormat4DS::Sector DataFormat4DS::loadSector(std::ifstream &file)
 {
-    Sector new_sector = {};
-    read(file, &new_sector.mUnk0);
-    read(file, &new_sector.mUnk1);
-    read(file, &new_sector.mVertexCount);
-    read(file, &new_sector.mFaceCount);
+    Sector newSector = {};
+    read(file, &newSector.mUnk0);
+    read(file, &newSector.mUnk1);
+    read(file, &newSector.mVertexCount);
+    read(file, &newSector.mFaceCount);
 
-    new_sector.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*new_sector.mVertexCount));
-    read(file, new_sector.mVertices, sizeof(Vec3)*new_sector.mVertexCount);
+    newSector.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newSector.mVertexCount));
+    read(file, newSector.mVertices, sizeof(Vec3)*newSector.mVertexCount);
 
-    new_sector.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*new_sector.mFaceCount));
-    read(file, new_sector.mFaces, sizeof(Face) *new_sector.mFaceCount);
+    newSector.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*newSector.mFaceCount));
+    read(file, newSector.mFaces, sizeof(Face) *newSector.mFaceCount);
 
-    read(file, &new_sector.mMinBox);
-    read(file, &new_sector.mMaxBox);
-    read(file, &new_sector.mPortalCount);
+    read(file, &newSector.mMinBox);
+    read(file, &newSector.mMaxBox);
+    read(file, &newSector.mPortalCount);
 
-    new_sector.mPortals = reinterpret_cast<Portal*>(malloc(sizeof(Portal)*new_sector.mPortalCount));
+    newSector.mPortals = reinterpret_cast<Portal*>(malloc(sizeof(Portal)*newSector.mPortalCount));
 
-    for(size_t i = 0; i < new_sector.mPortalCount; ++i) 
+    for(size_t i = 0; i < newSector.mPortalCount; ++i) 
     {
-        Portal new_portal = {};
-        new_portal = loadPortal(file);
-        new_sector.mPortals[i] = new_portal;
+        Portal newPortal = {};
+        newPortal = loadPortal(file);
+        newSector.mPortals[i] = newPortal;
     }
 
-    return new_sector;
+    return newSector;
 }
 
 DataFormat4DS::Target DataFormat4DS::loadTarget(std::ifstream &file)
 {
-    Target new_target = {};
-    read(file, &new_target.mUnk0);
-    read(file, &new_target.mTargetCount);
+    Target newTarget = {};
+    read(file, &newTarget.mUnk0);
+    read(file, &newTarget.mTargetCount);
     
-    new_target.mTargets = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*new_target.mTargetCount));
-    read(file, new_target.mTargets, sizeof(uint16_t)*new_target.mTargetCount);
+    newTarget.mTargets = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*newTarget.mTargetCount));
+    read(file, newTarget.mTargets, sizeof(uint16_t)*newTarget.mTargetCount);
     
-    return new_target;
+    return newTarget;
 }
 
 DataFormat4DS::Morph DataFormat4DS::loadMorph(std::ifstream &file, bool ignoreStandard)
 {
-    Morph new_morph = { };
+    Morph newMorph = { };
     // NOTE(zaklaus): Single Morph contains Standard Mesh in Single Mesh already.
     if(!ignoreStandard) 
     {
-        new_morph.mStandard = loadStandard(file);
+        newMorph.mStandard = loadStandard(file);
     } 
     // NOTE(zaklaus): ELSE ignore Standard Mesh, since Single Mesh has it.
     
-    read(file, &new_morph.mFrameCount);
+    read(file, &newMorph.mFrameCount);
     
-    if(new_morph.mFrameCount)
+    if(newMorph.mFrameCount)
     {
-        read(file, &new_morph.mLODLevel);
-        read(file, &new_morph.mUnk0);
+        read(file, &newMorph.mLODLevel);
+        read(file, &newMorph.mUnk0);
 
-        new_morph.mLODs = reinterpret_cast<MorphLod*>(malloc(sizeof(MorphLod)*new_morph.mLODLevel));
+        newMorph.mLODs = reinterpret_cast<MorphLod*>(malloc(sizeof(MorphLod)*newMorph.mLODLevel));
 
-        for(size_t i = 0; i < new_morph.mLODLevel; ++i) 
+        for(size_t i = 0; i < newMorph.mLODLevel; ++i) 
         {
-            MorphLod new_morph_lod = {};
-            read(file, &new_morph_lod.mVertexCount);
+            MorphLod newMorphLod = {};
+            read(file, &newMorphLod.mVertexCount);
 
-            new_morph_lod.mVertices = reinterpret_cast<MorphLodVertex*>(malloc(sizeof(MorphLodVertex)*new_morph_lod.mVertexCount * new_morph.mFrameCount));
-            read(file, new_morph_lod.mVertices, sizeof(MorphLodVertex)*new_morph_lod.mVertexCount * new_morph.mFrameCount);
+            newMorphLod.mVertices = reinterpret_cast<MorphLodVertex*>(malloc(sizeof(MorphLodVertex)*newMorphLod.mVertexCount * newMorph.mFrameCount));
+            read(file, newMorphLod.mVertices, sizeof(MorphLodVertex)*newMorphLod.mVertexCount * newMorph.mFrameCount);
 
-            if(new_morph_lod.mVertexCount * new_morph.mFrameCount) 
+            if(newMorphLod.mVertexCount * newMorph.mFrameCount) 
             {
-                read(file, &new_morph_lod.mUnk0);
+                read(file, &newMorphLod.mUnk0);
             }
 
-            new_morph_lod.mVertexLinks = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*new_morph_lod.mVertexCount));
-            read(file, new_morph_lod.mVertexLinks, sizeof(uint16_t)*new_morph_lod.mVertexCount);
+            newMorphLod.mVertexLinks = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*newMorphLod.mVertexCount));
+            read(file, newMorphLod.mVertexLinks, sizeof(uint16_t)*newMorphLod.mVertexCount);
 
-            new_morph.mLODs[i] = new_morph_lod;
+            newMorph.mLODs[i] = newMorphLod;
         }
         
-        read(file, &new_morph.mMinBox);
-        read(file, &new_morph.mMaxBox);
-        read(file, new_morph.mUnk1, sizeof(float) * 4);
+        read(file, &newMorph.mMinBox);
+        read(file, &newMorph.mMaxBox);
+        read(file, newMorph.mUnk1, sizeof(float) * 4);
 
     }
-    return new_morph;
+    return newMorph;
 }
 
 DataFormat4DS::SingleMeshLodJoint DataFormat4DS::loadSingleMeshLodJoint(std::ifstream &file)
 {
-    SingleMeshLodJoint new_joint = {};
-    read(file, &new_joint.mTransform);
-    read(file, &new_joint.mUnk0, sizeof(uint32_t));
-    read(file, &new_joint.mAdditionalValuesCount);
-    read(file, &new_joint.mBoneID);
-    read(file, &new_joint.mMinBox);
-    read(file, &new_joint.mMaxBox);
+    SingleMeshLodJoint newJoint = {};
+    read(file, &newJoint.mTransform);
+    read(file, &newJoint.mUnk0, sizeof(uint32_t));
+    read(file, &newJoint.mAdditionalValuesCount);
+    read(file, &newJoint.mBoneID);
+    read(file, &newJoint.mMinBox);
+    read(file, &newJoint.mMaxBox);
 
-    new_joint.mAdditionalValues = reinterpret_cast<float*>(malloc(sizeof(float)*new_joint.mAdditionalValuesCount));
-    read(file, new_joint.mAdditionalValues, sizeof(float)*new_joint.mAdditionalValuesCount);
+    newJoint.mAdditionalValues = reinterpret_cast<float*>(malloc(sizeof(float)*newJoint.mAdditionalValuesCount));
+    read(file, newJoint.mAdditionalValues, sizeof(float)*newJoint.mAdditionalValuesCount);
    
-    return new_joint;
+    return newJoint;
 }
 
 DataFormat4DS::SingleMeshLod DataFormat4DS::loadSingleMeshLod(std::ifstream &file)
 {
-    SingleMeshLod new_lod = {};
-    read(file, &new_lod.mJointCount);
-    read(file, &new_lod.mUnk0);
-    read(file, &new_lod.mMinBox);
-    read(file, &new_lod.mMaxBox);
+    SingleMeshLod newLod = {};
+    read(file, &newLod.mJointCount);
+    read(file, &newLod.mUnk0);
+    read(file, &newLod.mMinBox);
+    read(file, &newLod.mMaxBox);
 
-    new_lod.mJoints = reinterpret_cast<SingleMeshLodJoint*>(malloc(sizeof(SingleMeshLodJoint)*new_lod.mJointCount));
-    for(size_t i = 0; i < new_lod.mJointCount; ++i) 
+    newLod.mJoints = reinterpret_cast<SingleMeshLodJoint*>(malloc(sizeof(SingleMeshLodJoint)*newLod.mJointCount));
+    for(size_t i = 0; i < newLod.mJointCount; ++i) 
     {
-        SingleMeshLodJoint new_joint = {};
-        new_joint = loadSingleMeshLodJoint(file);
-        new_lod.mJoints[i] = new_joint;
+        SingleMeshLodJoint newJoint = {};
+        newJoint = loadSingleMeshLodJoint(file);
+        newLod.mJoints[i] = newJoint;
     }  
       
-    return new_lod;
+    return newLod;
 }
 
 DataFormat4DS::SingleMesh DataFormat4DS::loadSingleMesh(std::ifstream &file)
 {
-    SingleMesh new_mesh = {};
+    SingleMesh newMesh = {};
     
-    new_mesh.mStandard = loadStandard(file);
+    newMesh.mStandard = loadStandard(file);
     
-    new_mesh.mLODs = reinterpret_cast<SingleMeshLod*>(malloc(sizeof(SingleMeshLod)*new_mesh.mStandard.mLODLevel));
+    newMesh.mLODs = reinterpret_cast<SingleMeshLod*>(malloc(sizeof(SingleMeshLod)*newMesh.mStandard.mLODLevel));
     
-    for(size_t i = 0; i < new_mesh.mStandard.mLODLevel; ++i) 
+    for(size_t i = 0; i < newMesh.mStandard.mLODLevel; ++i) 
     {
-        SingleMeshLod new_lod = {};
-        new_lod = loadSingleMeshLod(file);
-        new_mesh.mLODs[i] = new_lod;
+        SingleMeshLod newLod = {};
+        newLod = loadSingleMeshLod(file);
+        newMesh.mLODs[i] = newLod;
     }
     
-    return new_mesh;
+    return newMesh;
 }
 
 DataFormat4DS::SingleMorph DataFormat4DS::loadSingleMorph(std::ifstream &file)
 {
-    SingleMorph new_morph = {};
-    new_morph.mSingleMesh = loadSingleMesh(file);
+    SingleMorph newMorph = {};
+    newMorph.mSingleMesh = loadSingleMesh(file);
 
-    new_morph.mMorph = loadMorph(file, 1);
-    return new_morph;
+    newMorph.mMorph = loadMorph(file, 1);
+    return newMorph;
 }
 
 void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
@@ -647,56 +647,56 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
 
     for(size_t i = 0; i < model->mMeshCount; ++i)
     {
-        Mesh new_mesh = {};
-        read(file, &new_mesh.mMeshType);
+        Mesh newMesh = {};
+        read(file, &newMesh.mMeshType);
 
-        if(new_mesh.mMeshType == MESHTYPE_STANDARD)
+        if(newMesh.mMeshType == MESHTYPE_STANDARD)
         {
-            read(file, &new_mesh.mVisualMeshType);
-            read(file, &new_mesh.mMeshRenderFlags);
+            read(file, &newMesh.mVisualMeshType);
+            read(file, &newMesh.mMeshRenderFlags);
         }
 
-        read(file, &new_mesh.mParentID);
-        read(file, &new_mesh.mPos);
-        read(file, &new_mesh.mScale);
+        read(file, &newMesh.mParentID);
+        read(file, &newMesh.mPos);
+        read(file, &newMesh.mScale);
 
         float r[4];
         read(file, r, sizeof(float) * 4);
-        new_mesh.mRot = {r[1], r[2], r[3], -r[0]};
+        newMesh.mRot = {r[1], r[2], r[3], -r[0]};
 
-        read(file, &new_mesh.mCullingFlags);
-        read(file, &new_mesh.mMeshNameLength);
-        read(file, new_mesh.mMeshName, new_mesh.mMeshNameLength);
-        read(file, &new_mesh.mMeshParamsLength);
-        read(file, new_mesh.mMeshParams, new_mesh.mMeshParamsLength);
+        read(file, &newMesh.mCullingFlags);
+        read(file, &newMesh.mMeshNameLength);
+        read(file, newMesh.mMeshName, newMesh.mMeshNameLength);
+        read(file, &newMesh.mMeshParamsLength);
+        read(file, newMesh.mMeshParams, newMesh.mMeshParamsLength);
 
-        switch(new_mesh.mMeshType)
+        switch(newMesh.mMeshType)
         {
             case MESHTYPE_STANDARD:
             {
-                switch(new_mesh.mVisualMeshType)
+                switch(newMesh.mVisualMeshType)
                 {
                     case VISUALMESHTYPE_STANDARD:
                     {
-                        Standard new_standard = {};
-                        new_standard = loadStandard(file);
-                        new_mesh.mStandard = new_standard;
+                        Standard newStandard = {};
+                        newStandard = loadStandard(file);
+                        newMesh.mStandard = newStandard;
                     } 
                     break;
 
                     case VISUALMESHTYPE_MIRROR:
                     {
-                        Mirror new_mirror = {};
-                        new_mirror = loadMirror(file);
-                        new_mesh.mMirror = new_mirror;
+                        Mirror newMirror = {};
+                        newMirror = loadMirror(file);
+                        newMesh.mMirror = newMirror;
                     } 
                     break;
 
                     case VISUALMESHTYPE_GLOW:
                     {
-                        Glow new_glow = {};
-                        new_glow = loadGlow(file);
-                        new_mesh.mGlow = new_glow;
+                        Glow newGlow = {};
+                        newGlow = loadGlow(file);
+                        newMesh.mGlow = newGlow;
                     } 
                     break;
 
@@ -706,15 +706,15 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                         new_billboard.mStandard = loadStandard(file);
                         read(file, &new_billboard.mRotationAxis);
                         read(file, &new_billboard.mIgnoreCamera);
-                        new_mesh.mBillboard = new_billboard;
+                        newMesh.mBillboard = new_billboard;
                     } 
                     break;
                     
                     case VISUALMESHTYPE_MORPH:
                     {
-                        Morph new_morph = {};
-                        new_morph = loadMorph(file, 0);
-                        new_mesh.mMorph = new_morph;
+                        Morph newMorph = {};
+                        newMorph = loadMorph(file, 0);
+                        newMesh.mMorph = newMorph;
                     }
                     break;
                                 
@@ -722,7 +722,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     {
                         SingleMesh new_single_mesh = {};
                         new_single_mesh = loadSingleMesh(file);
-                        new_mesh.mSingleMesh = new_single_mesh;
+                        newMesh.mSingleMesh = new_single_mesh;
                     }
                     break;
                     
@@ -730,7 +730,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
                     {
                         SingleMorph new_single_morph = {};
                         new_single_morph = loadSingleMorph(file);
-                        new_mesh.mSingleMorph = new_single_morph;
+                        newMesh.mSingleMorph = new_single_morph;
                     }
                     break;
 
@@ -744,35 +744,35 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
 
             case MESHTYPE_DUMMY:
             {
-                Dummy new_dummy = {};
-                read(file, &new_dummy.mMinBox);
-                read(file, &new_dummy.mMaxBox);
-                new_mesh.mDummy = new_dummy;
+                Dummy newDummy = {};
+                read(file, &newDummy.mMinBox);
+                read(file, &newDummy.mMaxBox);
+                newMesh.mDummy = newDummy;
             }
             break;
             
             case MESHTYPE_SECTOR:
             {
-                Sector new_sector = {};
-                new_sector = loadSector(file);
-                new_mesh.mSector = new_sector;
+                Sector newSector = {};
+                newSector = loadSector(file);
+                newMesh.mSector = newSector;
             }
             break;
             
             case MESHTYPE_TARGET:
             {
-                Target new_target = {};
-                new_target = loadTarget(file);
-                new_mesh.mTarget = new_target;
+                Target newTarget = {};
+                newTarget = loadTarget(file);
+                newMesh.mTarget = newTarget;
             }
             break;
             
             case MESHTYPE_BONE:
             {
-                Bone new_bone = {};
-                read(file, &new_bone.mTransform);
-                read(file, &new_bone.mBoneID);
-                new_mesh.mBone = new_bone;
+                Bone newBone = {};
+                read(file, &newBone.mTransform);
+                read(file, &newBone.mBoneID);
+                newMesh.mBone = newBone;
             }
             break;
 
@@ -782,7 +782,7 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             break;
         }
 
-        model->mMeshes[i] = new_mesh;
+        model->mMeshes[i] = newMesh;
     }
 }
 
