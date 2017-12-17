@@ -73,6 +73,25 @@ std::string arrayToString(T *array, size_t len, std::string delim)
     return sstream.str();
 }
 
+size_t peak_length(std::ifstream &file)
+{
+    size_t len = 0;
+    char currentChar;
+    auto stateBefore = file.tellg();
+
+    while(true) 
+    {
+        file.get(currentChar);
+        len++;
+        if(currentChar == '\0')
+        {
+            file.seekg(stateBefore, file.beg);
+            return len;
+        }    
+    }
+    return -1;
+}
+
 }
 
 #endif
