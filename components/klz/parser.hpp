@@ -171,7 +171,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         srcFile.seekg(mLinkNameOffsetTable[i], srcFile.beg);
         read(srcFile, &newLink.mFlags);
       
-        newLink.mNameLength = MFUtil::peakLength(srcFile);
+        newLink.mNameLength = MFUtil::peekLength(srcFile);
         newLink.mName = reinterpret_cast<char*>(malloc(newLink.mNameLength));
         read(srcFile, newLink.mName, newLink.mNameLength);
         mLinkTables.push_back(newLink);

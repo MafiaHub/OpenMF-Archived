@@ -73,7 +73,7 @@ std::string arrayToString(T *array, size_t len, std::string delim)
     return sstream.str();
 }
 
-size_t peakLength(std::ifstream &file)
+size_t peekLength(std::ifstream &file)
 {
     size_t len = 0;
     char currentChar;
