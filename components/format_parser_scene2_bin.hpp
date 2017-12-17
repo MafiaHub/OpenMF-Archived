@@ -1,7 +1,6 @@
 #ifndef FORMAT_PARSERS_SCENE2_BIN_H
 #define FORMAT_PARSERS_SCENE2_BIN_H
 
-#include <algorithm>
 #include <cstring>
 
 #include <format_parsers.hpp>
