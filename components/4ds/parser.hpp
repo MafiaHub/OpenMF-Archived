@@ -793,7 +793,7 @@ DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
 
     if (!strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3))
     {
-        mErrorCode = 1;
+        mErrorCode = DataFormat4DS::ERROR_SIGNATURE;
         return nullptr;
     }
 
