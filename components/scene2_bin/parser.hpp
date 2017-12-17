@@ -12,20 +12,20 @@ class DataFormatScene2BIN: public DataFormat
 {
 public:
     typedef enum {
-        // top nodes
-        NODE_MISSION = 0x4c53,
-        NODE_META = 0x0001,
-        NODE_UNK_FILE = 0xAFFF,
-        NODE_UNK_FILE2 = 0x3200,
-        NODE_FOV = 0x3010,
-        NODE_VIEW_DISTANCE = 0x3011,
-        NODE_CLIPPING_PLANES = 0x3211,
-        NODE_WORLD = 0x4000,
-        NODE_ENTITIES = 0xAE20,
-        NODE_INIT = 0xAE50,
-        // WORLD subnode
-        NODE_OBJECT = 0x4010
-    } NodeType;
+        // top Headers
+        Header_MISSION = 0x4c53,
+        Header_META = 0x0001,
+        Header_UNK_FILE = 0xAFFF,
+        Header_UNK_FILE2 = 0x3200,
+        Header_FOV = 0x3010,
+        Header_VIEW_DISTANCE = 0x3011,
+        Header_CLIPPING_PLANES = 0x3211,
+        Header_WORLD = 0x4000,
+        Header_ENTITIES = 0xAE20,
+        Header_INIT = 0xAE50,
+        // WORLD subHeader
+        Header_OBJECT = 0x4010
+    } HeaderType;
 
     typedef enum {
         OBJECT_TYPE = 0x4011,
@@ -60,7 +60,7 @@ public:
     {
         uint16_t mType;
         uint32_t mSize;
-    } Node;
+    } Header;
     #pragma pack(pop)
 
     typedef struct _Object
@@ -102,8 +102,8 @@ public:
     Vec2  getClippingPlanes();
     void  setClippingPlanes(Vec2 value);
 private:
-    void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
-    void readObject(std::ifstream &srcFile, Node* node, Object* object);
+    void readHeader(std::ifstream &srcFile, Header* Header, uint32_t offset);
+    void readObject(std::ifstream &srcFile, Header* Header, Object* object);
     
     std::unordered_map<std::string, Object> mObjects;
     float mFov;
@@ -113,69 +113,69 @@ private:
 
 bool DataFormatScene2BIN::load(std::ifstream &srcFile)
 {
-    Node new_node = {};
-    read(srcFile, &new_node);
+    Header new_header = {};
+    read(srcFile, &new_header);
     uint32_t position = 6;
 
-    while(position + 6 < new_node.mSize)
+    while(position + 6 < new_header.mSize)
     {
         srcFile.seekg(position, srcFile.beg);
-        Node current_node = {};
-        read(srcFile, &current_node);
-        readNode(srcFile, &current_node, position + 6);
-        position += current_node.mSize;
+        Header current_header = {};
+        read(srcFile, &current_header);
+        readHeader(srcFile, &current_header, position + 6);
+        position += current_header.mSize;
     }
 
     return true;
 }
 
-void DataFormatScene2BIN::readNode(std::ifstream &srcFile, Node* node, uint32_t offset)
+void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uint32_t offset)
 {
-    switch(node->mType)
+    switch(header->mType)
     {
-        case NODE_WORLD:
+        case Header_WORLD:
         {
             uint32_t position = offset;
-            while(position + 6 < offset + node->mSize)
+            while(position + 6 < offset + header->mSize)
             {
-                Node next_node = {};
+                Header next_header = {};
                 srcFile.seekg(position, srcFile.beg);
-                read(srcFile, &next_node);
-                readNode(srcFile, &next_node, position + 6);
-                position += next_node.mSize;
+                read(srcFile, &next_header);
+                readHeader(srcFile, &next_header, position + 6);
+                position += next_header.mSize;
             }
         }
         break;
 
-        case NODE_VIEW_DISTANCE:
+        case Header_VIEW_DISTANCE:
         {
             read(srcFile, &mViewDistance);
         } 
         break;
 
-        case NODE_CLIPPING_PLANES:
+        case Header_CLIPPING_PLANES:
         {
             read(srcFile, &mClippingPlanes);
         }
         break;
 
-        case NODE_FOV:
+        case Header_FOV:
         {
             read(srcFile, &mFov);
         } 
         break;
 
-        case NODE_OBJECT:
+        case Header_OBJECT:
         {
             uint32_t position = offset;
             Object new_object = {};
-            while(position + 6 < offset + node->mSize)
+            while(position + 6 < offset + header->mSize)
             {
-                Node next_node = {};
+                Header next_header = {};
                 srcFile.seekg(position, srcFile.beg);
-                read(srcFile, &next_node);
-                readObject(srcFile, &next_node, &new_object);
-                position += next_node.mSize;
+                read(srcFile, &next_header);
+                readObject(srcFile, &next_header, &new_object);
+                position += next_header.mSize;
             }
 
             mObjects.insert(make_pair(new_object.mName, new_object));
@@ -184,9 +184,9 @@ void DataFormatScene2BIN::readNode(std::ifstream &srcFile, Node* node, uint32_t 
     }
 }
 
-void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object* object)
+void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Object* object)
 {
-    switch(node->mType)
+    switch(header->mType)
     {
         case OBJECT_TYPE:
         {
@@ -196,9 +196,9 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
 
         case OBJECT_NAME:
         {
-            char *name = reinterpret_cast<char*>(malloc(node->mSize + 1));
-            read(srcFile, name, node->mSize - 1);
-            name[node->mSize] = '\0';
+            char *name = reinterpret_cast<char*>(malloc(header->mSize + 1));
+            read(srcFile, name, header->mSize - 1);
+            name[header->mSize] = '\0';
 
             object->mName = std::string(name);
         }
@@ -206,11 +206,11 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
 
         case OBJECT_MODEL:
         {
-            char *model_name = reinterpret_cast<char*>(malloc(node->mSize + 1));
-            read(srcFile, model_name, node->mSize);
+            char *model_name = reinterpret_cast<char*>(malloc(header->mSize + 1));
+            read(srcFile, model_name, header->mSize);
             model_name[strlen(model_name) - 4] = '\0';
             sprintf(model_name, "%s.4ds", model_name);
-            model_name[node->mSize] = '\0';
+            model_name[header->mSize] = '\0';
 
             object->mModelName = std::string(model_name);
         }
@@ -275,7 +275,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
         
         case OBJECT_LIGHT_SECTOR:
         {
-            read(srcFile, object->mLightSectors, node->mSize);
+            read(srcFile, object->mLightSectors, header->mSize);
         }
         break;
         
@@ -294,10 +294,10 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Node* node, Object*
 
         case OBJECT_PARENT:
         {
-            Node parent_node = {};
-            read(srcFile, &parent_node);
+            Header parent_header = {};
+            read(srcFile, &parent_header);
             Object parent_object = {};
-            readObject(srcFile, &parent_node, &parent_object);
+            readObject(srcFile, &parent_header, &parent_object);
 
             object->mParentName = parent_object.mName;
         }
