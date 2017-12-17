@@ -28,6 +28,8 @@ int main(int argc, char** argv)
     options.add_options()
         ("s,size","Display file sizes.")
         ("h,help","Display help and exit.")
+        ("d,decrypt","Decrypt whole input file with corresponding keys, mostly for debugging. See also -S.")
+        ("S,shift-keys","Shift decrypting keys by given number of bytes. Has only effect with -d.",cxxopts::value<int>())
         ("e,extract","Extract given file. NOT IMPLEMENTED YET",cxxopts::value<std::string>())
         ("i,input","Specify input file name.",cxxopts::value<std::string>());
 
@@ -42,6 +44,7 @@ int main(int argc, char** argv)
     }
 
     bool displaySize = arguments.count("s") > 0;
+    bool decryptMode = arguments.count("d") > 0;
 
     if (arguments.count("i") < 1)
     {
@@ -53,7 +56,11 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     std::ifstream f;
-    f.open(inputFile);
+
+    if (decryptMode)
+        f.open(inputFile, std::ios::ate);
+    else
+        f.open(inputFile);
 
     if (!f.is_open())
     {
@@ -93,6 +100,44 @@ int main(int argc, char** argv)
     else if (fileName.compare("ac.dta") == 0)
         dta.setDecryptKeys(dta.AC_KEYS);
 
+    if (decryptMode)   // decrypt whole file
+    {
+        std::streamsize fileSize = f.tellg();
+        f.seekg(0, std::ios::beg);
+
+        unsigned int relativeShift = 0;
+
+        if (arguments.count("S") > 0)
+            relativeShift = arguments["S"].as<int>();
+
+        std::string outputFile = inputFile + ".decrypt" + std::to_string(relativeShift);
+        MFLogger::ConsoleLogger::info("decrypting into " + outputFile);
+
+        std::ofstream f2;
+
+        f2.open(outputFile);
+
+        if (!f2.is_open())
+        {
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".");
+            f.close();
+            return 1;
+        }
+           
+        char *buffer = (char *) malloc(fileSize);
+        
+        f.read(buffer,fileSize);
+        f.close();
+
+        dta.decrypt(buffer,fileSize,relativeShift);
+
+        f2.write(buffer,fileSize);
+
+        free(buffer);
+        f2.close();
+        return 0;    
+    }
+
     bool success = dta.load(f);
 
     f.close();
@@ -102,7 +147,7 @@ int main(int argc, char** argv)
         MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".");
         return 1;
     }
-
+    
     dump(dta,displaySize);
 
     return 0;
