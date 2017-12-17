@@ -13,18 +13,18 @@ class DataFormatScene2BIN: public DataFormat
 public:
     typedef enum {
         // top Headers
-        Header_MISSION = 0x4c53,
-        Header_META = 0x0001,
-        Header_UNK_FILE = 0xAFFF,
-        Header_UNK_FILE2 = 0x3200,
-        Header_FOV = 0x3010,
-        Header_VIEW_DISTANCE = 0x3011,
-        Header_CLIPPING_PLANES = 0x3211,
-        Header_WORLD = 0x4000,
-        Header_ENTITIES = 0xAE20,
-        Header_INIT = 0xAE50,
+       HEADER_MISSION = 0x4c53,
+       HEADER_META = 0x0001,
+       HEADER_UNK_FILE = 0xAFFF,
+       HEADER_UNK_FILE2 = 0x3200,
+       HEADER_FOV = 0x3010,
+       HEADER_VIEW_DISTANCE = 0x3011,
+       HEADER_CLIPPING_PLANES = 0x3211,
+       HEADER_WORLD = 0x4000,
+       HEADER_ENTITIES = 0xAE20,
+       HEADER_INIT = 0xAE50,
         // WORLD subHeader
-        Header_OBJECT = 0x4010
+       HEADER_OBJECT = 0x4010
     } HeaderType;
 
     typedef enum {
@@ -133,7 +133,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
 {
     switch(header->mType)
     {
-        case Header_WORLD:
+        case HEADER_WORLD:
         {
             uint32_t position = offset;
             while(position + 6 < offset + header->mSize)
@@ -147,25 +147,25 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
         }
         break;
 
-        case Header_VIEW_DISTANCE:
+        case HEADER_VIEW_DISTANCE:
         {
             read(srcFile, &mViewDistance);
         } 
         break;
 
-        case Header_CLIPPING_PLANES:
+        case HEADER_CLIPPING_PLANES:
         {
             read(srcFile, &mClippingPlanes);
         }
         break;
 
-        case Header_FOV:
+        case HEADER_FOV:
         {
             read(srcFile, &mFov);
         } 
         break;
 
-        case Header_OBJECT:
+        case HEADER_OBJECT:
         {
             uint32_t position = offset;
             Object new_object = {};
