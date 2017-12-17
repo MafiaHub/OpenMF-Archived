@@ -6,12 +6,6 @@
 
 using namespace MFLogger;
 
-void printHelp()
-{
-    std::cout << "Scene2.bin format tool" << std::endl << std::endl;
-    std::cout << "usage: scene2_bin file [object_type]" << std::endl;
-}
-
 void dump(MFFormat::DataFormatScene2BIN scene2_bin, uint32_t obj_type)
 {
     ConsoleLogger::raw("view distance: " + std::to_string(scene2_bin.getViewDistance()) + ",");
@@ -63,7 +57,7 @@ int main(int argc, char** argv)
     if (arguments.count("h") > 0)
     {
         std::cout << options.help() << std::endl;
-        return 1;
+        return 0;
     }
 
     if (arguments.count("i") < 1)

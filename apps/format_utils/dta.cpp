@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     if (arguments.count("h") > 0)
     {
         std::cout << options.help() << std::endl;
-        return 1;
+        return 0;
     }
 
     bool displaySize = arguments.count("s") > 0;
