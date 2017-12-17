@@ -76,6 +76,18 @@ public:
         float b0, b1, b2, b3;
         float c0, c1, c2, c3;
         float d0, d1, d2, d3;
+
+        inline std::string str()
+        {
+            std::stringstream sstream;
+
+            sstream << a0 << " " << a1 << " " << a2 << " " << a3 << std::endl;
+            sstream << b0 << " " << b1 << " " << b2 << " " << b3 << std::endl;
+            sstream << c0 << " " << c1 << " " << c2 << " " << c3 << std::endl;
+            sstream << d0 << " " << d1 << " " << d2 << " " << d3 << std::endl;
+            
+            return sstream.str();
+        }
     } Mat4;
 
     #pragma pack(pop)
