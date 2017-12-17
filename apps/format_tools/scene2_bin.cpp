@@ -1,5 +1,5 @@
 #include <iostream>
-#include <format_parser_scene2_bin.hpp>
+#include <scene2_bin/parser.hpp>
 #include <logger_console.hpp>
 #include <utils.hpp>
 
