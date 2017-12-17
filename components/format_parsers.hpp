@@ -122,12 +122,6 @@ public:
     typedef struct
     {
         uint16_t mType;
-        uint32_t mSize; 
-    } Header;
-    
-    typedef struct
-    {
-        uint16_t mType;
         uint32_t mSize;
     } Node;
     #pragma pack(pop)
@@ -144,7 +138,11 @@ public:
         Node *mNode;
     } Object;
 
-    virtual bool load(std::ifstream &srcFile);    
+    virtual bool load(std::ifstream &srcFile);
+    
+    size_t  getNumObjects();
+    Object* getObject(size_t index);
+    std::vector<Object>* getObjects();
 private:
     void readNode(std::ifstream &srcFile, Node* node, uint32_t offset);
     void readObject(std::ifstream &srcFile, Node* node, Object* object);
