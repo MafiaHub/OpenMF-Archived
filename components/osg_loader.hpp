@@ -78,8 +78,20 @@ osg::ref_ptr<osg::Node> Loader::loadScene2Bin(std::ifstream &srcFile)
                     {
                         MFLogger::ConsoleLogger::info("object: light");
 
-                        osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
+                        #if 0
+                            // for debug
+                            osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                             new osg::Sphere(osg::Vec3f(0,0,0),0.1));
+                        #else
+                            osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
+
+                            MFFormat::DataFormat::Vec3 c = object.mLightColour;
+                            // osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
+                            osg::Vec3f lightColor = osg::Vec3f(1,1,1);
+
+                            lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
+                            lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.5,1));
+                        #endif
 
                         objectNode = lightNode;
                         break;
