@@ -83,7 +83,7 @@ int main(int argc, char** argv)
     {
         std::ifstream f2;
         std::string scene2BinPath = arguments["s"].as<std::string>();
-        f2.open(scene2BinPath);
+        f2.open(scene2BinPath, std::ios::binary);
 
         if (!f2.is_open())
         {
