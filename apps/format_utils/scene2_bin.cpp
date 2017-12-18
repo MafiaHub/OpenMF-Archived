@@ -6,6 +6,34 @@
 
 using namespace MFLogger;
 
+typedef struct
+{
+    uint32_t mType;
+    const char *mName;
+} ObjectTypeName;
+
+ObjectTypeName const gObjectTypeNames[] = {
+    {0x02, "OBJECT_TYPE_LIGHT"},
+    {0x03, "OBJECT_TYPE_CAMERA"},
+    {0x04, "OBJECT_TYPE_SOUND"},
+    {0x09, "OBJECT_TYPE_MODEL"},
+    {0x0C, "OBJECT_TYPE_OCCLUDER"},
+    {0x99, "OBJECT_TYPE_SECTOR"},
+    {0x9B, "OBJECT_TYPE_SCRIPT"},
+};
+
+char const *getObjectTypeName(uint32_t objType)
+{
+    size_t count = (sizeof(gObjectTypeNames) / sizeof(gObjectTypeNames[0]));
+    for (size_t i = 0; i < count; i++)
+    {
+        if (gObjectTypeNames[i].mType == objType)
+            return gObjectTypeNames[i].mName;
+    }
+
+    return "OBJECT_TYPE_UNKNOWN";
+}
+
 void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
     ConsoleLogger::raw("view distance: " + std::to_string(scene2Bin.getViewDistance()) + ",");
@@ -22,7 +50,8 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 
         ConsoleLogger::raw("\tobject name: " + object.mName + ",");
         ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",");
-        ConsoleLogger::raw("\t\ttype: " + std::to_string(object.mType) + ",");
+        ConsoleLogger::raw("\t\ttype: " + 
+            std::string(getObjectTypeName(object.mType)) + "(" + std::to_string(object.mType) + "),");
         ConsoleLogger::raw("\t\tposition: [" + object.mPos.str() + "],");
         ConsoleLogger::raw("\t\tposition2: [" + object.mPos2.str() + "],");
         ConsoleLogger::raw("\t\trotation: [" + object.mRot.str() + "],");
