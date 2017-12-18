@@ -1,3 +1,6 @@
+#ifndef OSG_LOADER_H
+#define OSG_LOADER_H
+
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
@@ -359,3 +362,5 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 }
 
 }
+
+#endif
