@@ -62,6 +62,7 @@ ENDIF(WIN32)
 
 
 FIND_PACKAGE(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
+FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics LinearMath)
 INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 SET(USED_OSG_PLUGINS
