@@ -11,6 +11,7 @@
 #include <osg/LightModel>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
+#include <renderer/renderer_osg.hpp>
 
 int main(int argc, char** argv)
 {
@@ -18,13 +19,11 @@ int main(int argc, char** argv)
 
     options.add_options()
         ("h,help","Display help and exit.")
-        ("i,input","Specify input file name.",cxxopts::value<std::string>())
+        ("i,input","Specify input, mission name by default.",cxxopts::value<std::string>())
         ("s,scene","Specify scene2.bin file.",cxxopts::value<std::string>())
-        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
-        ("t,texdir","Specify texture directory.",cxxopts::value<std::string>());
+        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>());
 
-    options.parse_positional({"i","t"});
-    options.positional_help("file [texdir]");
+    options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
     if (arguments.count("h") > 0)
@@ -47,62 +46,13 @@ int main(int argc, char** argv)
 
     std::string inputFile = arguments["i"].as<std::string>();
 
-    std::ifstream f;
-    f.open(inputFile, std::ios::binary);
+    MFRender::OSGRenderer renderer;
+    renderer.loadMission(inputFile);
 
-    if (!f.is_open())
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".");
-        return 1;
-    }
+    renderer.setCameraParameters(true,fov,0);
 
-    MFFormat::Loader loader;
-    osgViewer::Viewer viewer;
+    while (!renderer.done())
+        renderer.frame();
 
-    if (arguments.count("t") > 0)
-        loader.setTextureDir(arguments["t"].as<std::string>());
-
-    osg::ref_ptr<osg::Group> g = new osg::Group();
-    osg::ref_ptr<osg::Node> n = loader.load4ds(f);
-
-    g->addChild(n);
-
-    f.close();
-
-    if (arguments.count("t") < 1)    // apply test texture
-    {
-        osg::ref_ptr<osg::Texture2D> t = new osg::Texture2D();
-        osg::ref_ptr<osg::Image> i = osgDB::readImageFile("../resources/test.tga");
-        t->setImage(i);
-        t->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
-        t->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
-        n->getOrCreateStateSet()->setTextureAttributeAndModes(0,t.get());
-    }
-    
-    if (arguments.count("s") > 0)    // optional scene2.bin file
-    {
-        std::ifstream f2;
-        std::string scene2BinPath = arguments["s"].as<std::string>();
-        f2.open(scene2BinPath, std::ios::binary);
-
-        if (!f2.is_open())
-        {
-            MFLogger::ConsoleLogger::warn("Could not open file " + scene2BinPath + ".");
-        }
-        else
-        {
-            osg::ref_ptr<osg::Node> n2 = loader.loadScene2Bin(f2);
-            f2.close();
-            g->addChild(n2);
-        }  
-    }
-
-    viewer.setSceneData(g);
-
-    double fovy, aspect, znear, zfar;
-
-    viewer.getCamera()->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
-    viewer.getCamera()->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
-
-    return viewer.run();
+    return 0;
 }
