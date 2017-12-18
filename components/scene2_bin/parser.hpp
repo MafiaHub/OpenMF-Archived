@@ -36,6 +36,7 @@ public:
         OBJECT_PARENT = 0x4020,
         OBJECT_NAME = 0x0010, 
         OBJECT_MODEL = 0x2012,
+        OBJECT_LIGHT_MAIN = 0x4040,
         OBJECT_LIGHT_TYPE = 0x4041,
         OBJECT_LIGHT_COLOUR = 0x0026,
         OBJECT_LIGHT_POWER = 0x4042,
@@ -99,8 +100,9 @@ public:
     inline void  setClippingPlanes(Vec2 value)                  { mClippingPlanes = value; }
 
 private:
-    void readHeader(std::ifstream &srcFile, Header* Header, uint32_t offset);
-    void readObject(std::ifstream &srcFile, Header* Header, Object* object);
+    void readHeader(std::ifstream &srcFile, Header* header, uint32_t offset);
+    void readObject(std::ifstream &srcFile, Header* header, Object* object, uint32_t offset);
+    void readLight (std::ifstream &srcFile, Header* header, Object* object);
     
     std::unordered_map<std::string, Object> mObjects;
     float mFov;
@@ -166,12 +168,12 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
         {
             uint32_t position = offset;
             Object newObject = {};
-            while(position + 6 < offset + header->mSize)
+            while(position < offset + header->mSize)
             {
                 Header nextHeader = {};
                 srcFile.seekg(position, srcFile.beg);
                 read(srcFile, &nextHeader);
-                readObject(srcFile, &nextHeader, &newObject);
+                readObject(srcFile, &nextHeader, &newObject, position + 6);
                 position += nextHeader.mSize;
             }
 
@@ -181,7 +183,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
     }
 }
 
-void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Object* object)
+void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Object* object, uint32_t offset)
 {
     switch(header->mType)
     {
@@ -247,6 +249,36 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         } 
         break;
 
+        case OBJECT_LIGHT_MAIN:
+        {
+            uint32_t position = offset;
+            while (position + 6 < offset + header->mSize)
+            {
+                Header lightHeader = {};
+                read(srcFile, &lightHeader);
+                readLight(srcFile, &lightHeader, object);
+                position += lightHeader.mSize;
+            }
+        }
+        break;
+
+        case OBJECT_PARENT:
+        {
+            Header parentHeader = {};
+            read(srcFile, &parentHeader);
+            Object parentObject = {};
+            readObject(srcFile, &parentHeader, &parentObject, offset + 6);
+
+            object->mParentName = parentObject.mName;
+        }
+        break;
+    }
+}
+
+void DataFormatScene2BIN::readLight(std::ifstream &srcFile, Header* header, Object* object)
+{
+    switch(header->mType)
+    {
         case OBJECT_LIGHT_TYPE:
         {
             read(srcFile, &object->mLightType);
@@ -256,6 +288,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         case OBJECT_LIGHT_COLOUR:
         {
             read(srcFile, &object->mLightColour);
+            printf("ok?\n");
         }
         break;
         
@@ -274,7 +307,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         
         case OBJECT_LIGHT_SECTOR:
         {
-            read(srcFile, object->mLightSectors, header->mSize);
+            //read(srcFile, object->mLightSectors, header->mSize);
         }
         break;
         
@@ -288,17 +321,6 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         {
             read(srcFile, &object->mLightUnk0);
             read(srcFile, &object->mLightUnk1);
-        }
-        break;
-
-        case OBJECT_PARENT:
-        {
-            Header parent_header = {};
-            read(srcFile, &parent_header);
-            Object parent_object = {};
-            readObject(srcFile, &parent_header, &parent_object);
-
-            object->mParentName = parent_object.mName;
         }
         break;
     }
