@@ -73,9 +73,9 @@ int main(int argc, char** argv)
     std::ifstream f;
 
     if (decryptMode)
-        f.open(inputFile, std::ios::ate);
+        f.open(inputFile, std::ios::ate | std::ios::binary);
     else
-        f.open(inputFile);
+        f.open(inputFile, std::ios::binary);
 
     if (!f.is_open())
     {
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
         MFLogger::ConsoleLogger::info("decrypting into " + outputFile);
 
         std::ofstream f2;
-        f2.open(outputFile);
+        f2.open(outputFile, std::ios::binary);
 
         if (!f2.is_open())
         {

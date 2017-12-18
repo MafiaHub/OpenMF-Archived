@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     std::ifstream f;
-    f.open(inputFile);
+    f.open(inputFile, std::ios::binary);
 
     if (!f.is_open())
     {
