@@ -56,6 +56,15 @@ public:
         OBJECT_TYPE_SCRIPT = 0x9B
     } ObjectType;
 
+    typedef enum {
+        LIGHT_TYPE_POINT = 0x01,
+        LIGHT_TYPE_DIRECTIONAL = 0x03,
+        LIGHT_TYPE_AMBIENT = 0x04,
+        LIGHT_TYPE_FOG = 0x05,
+        LIGHT_TYPE_POINT_AMBIENT = 0x06,
+        LIGHT_TYPE_LAYERED_FOG = 0x08,
+    } LightType;
+
     #pragma pack(push, 1)
     typedef struct
     {
