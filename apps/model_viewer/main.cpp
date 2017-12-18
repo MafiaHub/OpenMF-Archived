@@ -1,14 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include <osg/Node>
-#include <osgDB/ReadFile>
-#include <osgViewer/Viewer>
-#include <osg_loader.hpp>
 #include <4ds/parser.hpp>
 #include <scene2_bin/parser.hpp>
-#include <osgDB/ReadFile>
-#include <osg/Texture2D>
-#include <osg/LightModel>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <renderer/renderer_osg.hpp>
