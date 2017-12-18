@@ -25,6 +25,7 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission) override;
     virtual void frame() override;
+    virtual void setCameraParameters(bool perspective, float fov, float orthoSize) override;
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
@@ -41,9 +42,24 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     if (!mViewer->isRealized())
         mViewer->realize();
 
-if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
-    mViewer->setCameraManipulator(new osgGA::TrackballManipulator());
+    if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
+        mViewer->setCameraManipulator(new osgGA::TrackballManipulator());
+}
 
+void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize)
+{
+    osg::Camera *camera = mViewer->getCamera();
+
+    if (perspective)
+    {
+        double fovy, aspect, znear, zfar;
+        camera->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
+        camera->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
+    }
+    else
+    {
+        // TODO: implement this
+    }
 }
 
 bool OSGRenderer::loadMission(std::string mission)

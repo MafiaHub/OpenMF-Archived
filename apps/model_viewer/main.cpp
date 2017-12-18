@@ -49,6 +49,8 @@ int main(int argc, char** argv)
     MFRender::OSGRenderer renderer;
     renderer.loadMission(inputFile);
 
+    renderer.setCameraParameters(true,fov,0);
+
     while (!renderer.done())
         renderer.frame();
 
