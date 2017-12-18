@@ -19,13 +19,11 @@ int main(int argc, char** argv)
 
     options.add_options()
         ("h,help","Display help and exit.")
-        ("i,input","Specify input file name.",cxxopts::value<std::string>())
+        ("i,input","Specify input, mission name by default.",cxxopts::value<std::string>())
         ("s,scene","Specify scene2.bin file.",cxxopts::value<std::string>())
-        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
-        ("t,texdir","Specify texture directory.",cxxopts::value<std::string>());
+        ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>());
 
-    options.parse_positional({"i","t"});
-    options.positional_help("file [texdir]");
+    options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
     if (arguments.count("h") > 0)
@@ -48,22 +46,11 @@ int main(int argc, char** argv)
 
     std::string inputFile = arguments["i"].as<std::string>();
 
-    std::ifstream f;
-    f.open(inputFile, std::ios::binary);
-
-    if (!f.is_open())
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".");
-        return 1;
-    }
-
     MFRender::OSGRenderer renderer;
-    renderer.loadMission("00MENU");
+    renderer.loadMission(inputFile);
 
     while (!renderer.done())
-    {
         renderer.frame();
-    }
 
     return 0;
 }

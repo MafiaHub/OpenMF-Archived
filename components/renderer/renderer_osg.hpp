@@ -48,7 +48,7 @@ if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "../mafia/MISSIONS/" + mission;
+    std::string missionDir = "../mafia/MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
     std::string textureDir = "../mafia/MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
 
@@ -91,6 +91,8 @@ void OSGRenderer::frame()
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
     }
+}
+
 }
 
 #endif
