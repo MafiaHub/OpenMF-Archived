@@ -452,7 +452,7 @@ DataFormat4DS::Mirror DataFormat4DS::loadMirror(std::ifstream &file)
     read(file, &newMirror.mVertexCount);
     read(file, &newMirror.mFaceCount);
 
-    newMirror.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*newMirror.mVertexCount));
+    newMirror.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newMirror.mVertexCount));
     newMirror.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*newMirror.mFaceCount));
     
     read(file, newMirror.mVertices, sizeof(Vec3)*newMirror.mVertexCount);
@@ -485,7 +485,7 @@ DataFormat4DS::Portal DataFormat4DS::loadPortal(std::ifstream &file)
     read(file, &newPortal.mVertexCount);
     read(file, &newPortal.mUnk0);
     read(file, newPortal.mUnk1, sizeof(float) * 6);
-    newPortal.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(osg::Vec3f)*newPortal.mVertexCount));
+    newPortal.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newPortal.mVertexCount));
     read(file, newPortal.mVertices, sizeof(Vec3)*newPortal.mVertexCount); 
    
     return newPortal;
