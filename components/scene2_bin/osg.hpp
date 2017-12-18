@@ -19,13 +19,13 @@
 namespace MFFormat
 {
 
-class OSGScene2Loader : public OSGLoader
+class OSGScene2BinLoader : public OSGLoader
 {
 public:
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile);
 };
 
-osg::ref_ptr<osg::Node> OSGScene2Loader::load(std::ifstream &srcFile)
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 

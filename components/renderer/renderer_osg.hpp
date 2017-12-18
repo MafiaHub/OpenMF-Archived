@@ -71,7 +71,7 @@ bool OSGRenderer::loadMission(std::string mission)
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
     MFFormat::OSG4DSLoader l4ds;
-    MFFormat::OSGScene2Loader lScene2;
+    MFFormat::OSGScene2BinLoader lScene2;
 
     osg::ref_ptr<osg::Group> g = new osg::Group();
 
