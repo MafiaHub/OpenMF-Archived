@@ -89,7 +89,7 @@ osg::ref_ptr<osg::Node> Loader::loadScene2Bin(std::ifstream &srcFile)
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
-                        // osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
+                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
                         osg::Vec3f lightColor = osg::Vec3f(1,1,1);
 
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
@@ -321,6 +321,12 @@ osg::ref_ptr<osg::Node> Loader::load4ds(std::ifstream &srcFile)
 
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
+
+            // TODO(zaklaus): Improve this, either distinguish collision faces
+            // in the world or skip them entirely.
+            //if (model->mMeshes[i].mMeshType == MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
+            //    continue;
+            
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
             osg::Matrixd mat;
 
