@@ -25,9 +25,11 @@ osg::Matrixd OSGLoader::makeTransformMatrix(
     MFFormat::DataFormat::Quat r)
 {
     osg::Matrixd mat;
+
     mat.preMultTranslate(osg::Vec3f(p.x,p.y,p.z));
     mat.preMultScale(osg::Vec3f(s.x,s.y,s.z));
     mat.preMultRotate(osg::Quat(r.x,r.y,r.z,r.w)); 
+
     return mat;
 }
 

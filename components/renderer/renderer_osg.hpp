@@ -8,6 +8,7 @@
 #include <4ds/osg.hpp>
 #include <4ds/parser.hpp>
 #include <scene2_bin/parser.hpp>
+#include <scene2_bin/osg.hpp>
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
@@ -67,27 +68,39 @@ bool OSGRenderer::loadMission(std::string mission)
     std::string missionDir = "../mafia/MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
     std::string textureDir = "../mafia/MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
+    std::string scene2BinPath = missionDir + "/scene2.bin";
 
-    MFFormat::OSG4DSLoader meshLoader;
+    MFFormat::OSG4DSLoader l4ds;
+    MFFormat::OSGScene2BinLoader lScene2;
 
     osg::ref_ptr<osg::Group> g = new osg::Group();
 
-    std::ifstream f;
+    std::ifstream f, f2;
     f.open(scene4dsPath, std::ios::binary);
 
-    if (!f.is_open())
+    if (!f.is_open())    // TODO: make a special methof somewhere to load by file names
     {
         MFLogger::ConsoleLogger::fatal("Could not open file " + scene4dsPath + ".");
         return false;
     }
 
-    meshLoader.setTextureDir(textureDir);
-    osg::ref_ptr<osg::Node> n = meshLoader.load(f);
-    g->addChild(n);
+    f2.open(scene2BinPath, std::ios::binary);
+
+    if (!f2.is_open())
+    {
+        MFLogger::ConsoleLogger::fatal("Could not open file " + scene2BinPath + ".");
+        f.close();
+        return false;
+    }
+
+    l4ds.setTextureDir(textureDir);
+    g->addChild( l4ds.load(f) );
+    g->addChild( lScene2.load(f2) );
 
     mRootNode = g;
 
     f.close();
+    f2.close();
 
     mViewer->setSceneData(mRootNode);
 

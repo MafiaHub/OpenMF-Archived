@@ -181,7 +181,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
     osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
 
-    group->setMatrix( osg::Matrixd::scale(osg::Vec3f(1.0,1.0,-1.0)) );
+    //  this transforms the scene to the correct coord system, but other things (scene.bin etc.) have to follow
+    //  group->setMatrix( osg::Matrixd::scale(osg::Vec3f(1.0,1.0,-1.0)) );
 
     if (format.load(srcFile))
     {
