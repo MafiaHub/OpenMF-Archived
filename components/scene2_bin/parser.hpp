@@ -177,7 +177,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
         {
             uint32_t position = offset;
             Object newObject = {};
-            while(position < offset + header->mSize)
+            while(position + 6 < offset + header->mSize)
             {
                 Header nextHeader = {};
                 srcFile.seekg(position, srcFile.beg);
@@ -297,7 +297,6 @@ void DataFormatScene2BIN::readLight(std::ifstream &srcFile, Header* header, Obje
         case OBJECT_LIGHT_COLOUR:
         {
             read(srcFile, &object->mLightColour);
-            printf("ok?\n");
         }
         break;
         
