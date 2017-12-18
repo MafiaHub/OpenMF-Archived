@@ -5,7 +5,7 @@
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
-#include <osg_loader.hpp>
+#include <4ds/osg.hpp>
 #include <4ds/parser.hpp>
 #include <scene2_bin/parser.hpp>
 #include <osgDB/ReadFile>
@@ -68,7 +68,7 @@ bool OSGRenderer::loadMission(std::string mission)
     std::string textureDir = "../mafia/MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
 
-    MFFormat::Loader loader;
+    MFFormat::OSG4DSLoader meshLoader;
 
     osg::ref_ptr<osg::Group> g = new osg::Group();
 
@@ -81,8 +81,8 @@ bool OSGRenderer::loadMission(std::string mission)
         return false;
     }
 
-    loader.setTextureDir(textureDir);
-    osg::ref_ptr<osg::Node> n = loader.load4ds(f);
+    meshLoader.setTextureDir(textureDir);
+    osg::ref_ptr<osg::Node> n = meshLoader.load(f);
     g->addChild(n);
 
     mRootNode = g;
