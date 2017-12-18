@@ -5,9 +5,10 @@
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
-#include <osg_loader.hpp>
+#include <4ds/osg.hpp>
 #include <4ds/parser.hpp>
 #include <scene2_bin/parser.hpp>
+#include <scene2_bin/osg.hpp>
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
@@ -69,7 +70,8 @@ bool OSGRenderer::loadMission(std::string mission)
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
-    MFFormat::Loader loader;
+    MFFormat::OSG4DSLoader l4ds;
+    MFFormat::OSGScene2Loader lScene2;
 
     osg::ref_ptr<osg::Group> g = new osg::Group();
 
@@ -91,9 +93,9 @@ bool OSGRenderer::loadMission(std::string mission)
         return false;
     }
 
-    loader.setTextureDir(textureDir);
-    g->addChild( loader.load4ds(f) );
-    g->addChild( loader.loadScene2Bin(f2) );
+    l4ds.setTextureDir(textureDir);
+    g->addChild( l4ds.load(f) );
+    g->addChild( lScene2.load(f2) );
 
     mRootNode = g;
 
