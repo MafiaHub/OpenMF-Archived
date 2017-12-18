@@ -786,7 +786,8 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
 
         // NOTE(zaklaus): Check whether this is a collision mesh.
         // happens AFTER we load the required content to skip it.
-        if (std::string(newMesh.mMeshName).find("wcol"))
+        std::string meshName = std::string(newMesh.mMeshName);
+        if (meshName.find("wcol") != meshName.npos)
         {
             newMesh.mMeshType = MESHTYPE_COLLISION;
         }
