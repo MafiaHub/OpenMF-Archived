@@ -34,6 +34,7 @@ public:
     typedef enum
     {
         MESHTYPE_STANDARD = 0x01,
+        MESHTYPE_COLLISION = 0x02, // NOTE(zaklaus): Imaginary type based on mesh name "wcol*"
         MESHTYPE_SECTOR = 0x05,
         MESHTYPE_DUMMY = 0x06,
         MESHTYPE_TARGET = 0x07,
@@ -780,6 +781,14 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             {
             }
             break;
+        }
+
+
+        // NOTE(zaklaus): Check whether this is a collision mesh.
+        // happens AFTER we load the required content to skip it.
+        if (std::string(newMesh.mMeshName).find("wcol"))
+        {
+            newMesh.mMeshType = MESHTYPE_COLLISION;
         }
 
         model->mMeshes[i] = newMesh;
