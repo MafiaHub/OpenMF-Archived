@@ -1,6 +1,7 @@
 #include <iostream>
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
+#include <vfs/vfs.hpp>
 #include <utils.hpp>
 #include <cxxopts.hpp>
 
@@ -110,9 +111,10 @@ int main(int argc, char** argv)
     }
 
     std::string inputFile = arguments["i"].as<std::string>();
+    MFFiles::Filesystem fs;
 
     std::ifstream f;
-    f.open(inputFile, std::ios::binary);
+    fs.open(f, inputFile, std::ios::binary);
 
     if (!f.is_open())
     {
