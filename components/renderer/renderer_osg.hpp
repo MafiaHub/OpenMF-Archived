@@ -26,7 +26,7 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission) override;
     virtual void frame() override;
-    virtual void setCameraParameters(bool perspective, float fov, float orthoSize) override;
+    virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
@@ -37,6 +37,10 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer");
     mViewer = new osgViewer::Viewer();
+                
+    //mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );  // not working?
+    mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES );
+    mViewer->getCamera()->setNearFarRatio(0.0001);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
@@ -51,15 +55,15 @@ OSGRenderer::OSGRenderer(): MFRenderer()
         mViewer->setCameraManipulator(new osgGA::TrackballManipulator());
 }
 
-void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize)
+void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
     osg::Camera *camera = mViewer->getCamera();
 
     if (perspective)
     {
-        double fovy, aspect, znear, zfar;
-        camera->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
-        camera->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
+        double fovY, aspect, zNear, zFar;
+        camera->getProjectionMatrixAsPerspective(fovY,aspect,zNear,zFar);
+        camera->setProjectionMatrixAsPerspective(fov,aspect,nearDist,farDist);
     }
     else
     {
