@@ -36,6 +36,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
     MFFormat::DataFormatScene2BIN parser;
 
+    MFFormat::OSG4DSLoader loader4DS;
+
     bool success = parser.load(srcFile);
 
     if (success)
@@ -76,13 +78,11 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                     objectNode = lightNode;
                     break;
                 }
-/*
+
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
                 {
-                    objectNode = 
-                    break;
                 }
-*/
+
                 default:
                 {
                     logStr += "unknown";

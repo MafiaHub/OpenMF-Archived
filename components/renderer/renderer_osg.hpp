@@ -77,30 +77,9 @@ bool OSGRenderer::loadMission(std::string mission)
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-    std::ifstream f, f2;
-    f.open(scene4dsPath, std::ios::binary);
-
-    if (!f.is_open())    // TODO: make a special methof somewhere to load by file names
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + scene4dsPath + ".");
-        return false;
-    }
-
-    f2.open(scene2BinPath, std::ios::binary);
-
-    if (!f2.is_open())
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + scene2BinPath + ".");
-        f.close();
-        return false;
-    }
-
     l4ds.setTextureDir(textureDir);
-    mRootNode->addChild( l4ds.load(f) );
-    mRootNode->addChild( lScene2.load(f2) );
-
-    f.close();
-    f2.close();
+    mRootNode->addChild( l4ds.loadFile(scene4dsPath) );
+    mRootNode->addChild( lScene2.loadFile(scene2BinPath) );
 
     return true;
 }
