@@ -84,6 +84,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
                         lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
                         lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
+                        lightNode->getLight()->setPosition(osg::Vec4(1,1,1,0));  // fourth component decides type - 0 = point, 1 = directional 
                         lightNode->getLight()->setLightNum(lightNumber);  // each light must have a unique number
                         lightNumber++;
                     #endif
