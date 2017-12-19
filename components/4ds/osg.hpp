@@ -7,6 +7,7 @@
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
+#include <vfs/encoding.hpp>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
@@ -45,6 +46,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
     std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
+    texturePath = MFFiles::convertPathToCanonical(texturePath);
 
     osg::ref_ptr<osg::Image> img = osgDB::readImageFile(texturePath);
 

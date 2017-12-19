@@ -7,6 +7,8 @@
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
+#include <osg/Light>
+#include <osg/LightSource>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
@@ -20,7 +22,7 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
-namespace MFFormat
+    namespace MFFormat
 {
 
 class OSGScene2BinLoader : public OSGLoader
@@ -69,7 +71,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 {
                     logStr += "light";
 
-                    #if 1
+                    #if 0
                         // for debug
                         osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                         new osg::Sphere(osg::Vec3f(0,0,0),0.1));
@@ -78,7 +80,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
                         osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
-                        osg::Vec3f lightColor = osg::Vec3f(1,1,1);
+                        //osg::Vec3f lightColor = osg::Vec3f(1,1,1);
 
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
                         lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.5,1));

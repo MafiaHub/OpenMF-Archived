@@ -7,6 +7,7 @@
 
 #include <osdefines.hpp>
 #include <dta/parser.hpp>
+#include <vfs/encoding.hpp>
 
 #ifdef OMF_SYSTEM_LINUX
 #include <unistd.h>
@@ -23,6 +24,14 @@ public:
     Filesystem();
     ~Filesystem() {}
 
+    static Filesystem *get()
+    {
+        if (mInstance == nullptr)
+            mInstance = new Filesystem();
+
+        return mInstance;
+    }
+
     void initDTA();
 
     bool open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode = std::ios::binary);
@@ -33,7 +42,11 @@ public:
 
 private:
     std::vector<std::string> mSearchPaths;
+
+    static Filesystem *mInstance;
 };
+
+Filesystem *Filesystem::mInstance;
 
 Filesystem::Filesystem()
 {
@@ -56,6 +69,8 @@ void Filesystem::initDTA()
 
 bool Filesystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
+    fileName = convertPathToCanonical(fileName);
+
     for (auto path : mSearchPaths)
     {
         file.open(path + "/" + fileName, mode);
