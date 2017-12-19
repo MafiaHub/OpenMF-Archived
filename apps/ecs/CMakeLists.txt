@@ -1,0 +1,2 @@
+ADD_EXECUTABLE(ecs_sphere ecs_sphere.cpp)
+TARGET_LINK_LIBRARIES(ecs_sphere ${OPENSCENEGRAPH_LIBRARIES})

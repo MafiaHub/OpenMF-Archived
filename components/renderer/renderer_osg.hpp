@@ -27,6 +27,12 @@ public:
     virtual bool loadMission(std::string mission) override;
     virtual void frame() override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize) override;
+    
+    // TODO(zaklaus): Provide a better way of describing scene graph group.
+    inline void setSceneData(osg::Node *node)
+    {
+        mViewer->setSceneData(node);
+    }
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
