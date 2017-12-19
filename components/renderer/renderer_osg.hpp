@@ -30,7 +30,7 @@ public:
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
-    osg::ref_ptr<osg::Node> mRootNode;            ///< root node of the whole scene being rendered
+    osg::ref_ptr<osg::MatrixTransform> mRootNode;            ///< root node of the whole scene being rendered
 };
 
 OSGRenderer::OSGRenderer(): MFRenderer()
@@ -39,6 +39,10 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mViewer = new osgViewer::Viewer();
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
+
+    mRootNode = new osg::MatrixTransform();
+    mRootNode->setMatrix( osg::Matrixd::scale(osg::Vec3f(1,1,-1)) );
+    mViewer->setSceneData(mRootNode);
 
     if (!mViewer->isRealized())
         mViewer->realize();
@@ -73,8 +77,6 @@ bool OSGRenderer::loadMission(std::string mission)
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-    osg::ref_ptr<osg::Group> g = new osg::Group();
-
     std::ifstream f, f2;
     f.open(scene4dsPath, std::ios::binary);
 
@@ -94,15 +96,11 @@ bool OSGRenderer::loadMission(std::string mission)
     }
 
     l4ds.setTextureDir(textureDir);
-    g->addChild( l4ds.load(f) );
-    g->addChild( lScene2.load(f2) );
-
-    mRootNode = g;
+    mRootNode->addChild( l4ds.load(f) );
+    mRootNode->addChild( lScene2.load(f2) );
 
     f.close();
     f2.close();
-
-    mViewer->setSceneData(mRootNode);
 
     return true;
 }

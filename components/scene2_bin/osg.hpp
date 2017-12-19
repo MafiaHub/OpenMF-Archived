@@ -76,8 +76,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                     objectNode = lightNode;
                     break;
                 }
-
-
+/*
+                case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
+                {
+                    objectNode = 
+                    break;
+                }
+*/
                 default:
                 {
                     logStr += "unknown";
@@ -93,10 +98,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
 
                 if (hasTransform)
-                    objectTransform->setMatrix(makeTransformMatrix(
-                        object.mPos,
-                        object.mScale,
-                        object.mRot));
+                    objectTransform->setMatrix(makeTransformMatrix(object.mPos,object.mScale,object.mRot));
 
                 objectTransform->addChild(objectNode);
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
