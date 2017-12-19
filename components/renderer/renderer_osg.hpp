@@ -69,15 +69,17 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "../mafia/MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
-    std::string textureDir = "../mafia/MAPS/";
+    std::string missionDir = "MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
+    std::string textureDir = "MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-    l4ds.setTextureDir(textureDir);
+l4ds.setBaseDir("../mafia/");  // tmp
+lScene2.setBaseDir("../mafia/");
+
     mRootNode->addChild( l4ds.loadFile(scene4dsPath) );
     mRootNode->addChild( lScene2.loadFile(scene2BinPath) );
 

@@ -81,6 +81,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
                 {
+                    logStr += "model: " + object.mModelName;
+    //                objectNode = loader4DS.loadFile(   );
+                    break;
                 }
 
                 default:
