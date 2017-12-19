@@ -51,7 +51,25 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
 
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
-        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector
+        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
+
+        // disable lights for backdrop sector:
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT1,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT2,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT3,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT4,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT5,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT6,osg::StateAttribute::OFF);
+        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT7,osg::StateAttribute::OFF);
+        // and add ambient only:
+        osg::ref_ptr<osg::Light> backdropLight = new osg::Light;
+
+        backdropLight->setAmbient(osg::Vec4f(1,1,1,1));
+        backdropLight->setDiffuse(osg::Vec4f(0,0,0,0));
+        backdropLight->setSpecular(osg::Vec4f(0,0,0,0));
+
+        cameraRel->getOrCreateStateSet()->setAttributeAndModes(backdropLight);
 
         group->addChild(cameraRel);
 
@@ -64,6 +82,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
             std::string logStr = object.mName + ": ";
 
             bool hasTransform = true;
+
+            unsigned int lightNumber = 0;
 
             switch (object.mType)
             {
@@ -79,11 +99,14 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
-                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
-                        //osg::Vec3f lightColor = osg::Vec3f(1,1,1);
+                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z) * object.mLightPower;
 
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
-                        lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.5,1));
+                        lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
+                        lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
+                        lightNode->getLight()->setPosition(osg::Vec4(1,1,1,0));  // fourth component decides type - 0 = point, 1 = directional 
+                        lightNode->getLight()->setLightNum(lightNumber);  // each light must have a unique number
+                        lightNumber++;
                     #endif
 
                     objectNode = lightNode;
