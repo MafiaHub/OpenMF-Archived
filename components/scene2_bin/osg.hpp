@@ -46,6 +46,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
+std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
+
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector
 
@@ -89,7 +91,19 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
                 {
                     logStr += "model: " + object.mModelName;
-                    objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );
+
+                    if ( modelMap.find(object.mModelName) != modelMap.end() )   // model alreay loaded?
+                    {
+                        MFLogger::ConsoleLogger::info("already loaded, instancing");
+                        objectNode = modelMap[object.mModelName];
+                    }
+                    else
+                    {
+                        objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );   
+                        modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
+                            (object.mModelName,objectNode));
+                    }
+
                     break;
                 }
 
