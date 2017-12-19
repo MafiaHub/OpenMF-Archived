@@ -9,8 +9,9 @@ class Entity;
 class Shard
 {
 public:
-    Shard() {}
-    virtual ~Shard();
+    Shard() :   mOwner(nullptr), 
+                mUserData(nullptr) {}
+    virtual ~Shard() {}
     
     // TODO(zaklaus): Decide on what the pipeline should pass to the entity.
     virtual void onInit()=0;

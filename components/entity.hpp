@@ -2,7 +2,12 @@
 #define ENTITY_H
 
 #include <vector>
+#include <algorithm>
 #include <base_shard.hpp>
+#include <osg/Node>
+#include <osg/Group>
+#include <osg/ref_ptr>
+#include <osg/ValueObject>
 
 namespace MFEntity
 {
@@ -10,8 +15,13 @@ namespace MFEntity
 class Entity
 {
 public:
-    Entity() {}
-    Entity(Entity *parent) : mParent(parent) {}
+    Entity() 
+    {
+        mGroup  = new osg::Group();
+        mTransform = new osg::Node();
+        mGroup->addChild(mTransform);
+    }
+    
     ~Entity() {}
 
     // TODO(zaklaus): Decide on what the pipeline should pass to the entity.
@@ -21,13 +31,21 @@ public:
     void onRender();
     void onDebugDraw();
 
-    void addChild(Entity *child);
+    void addChild(Entity *entity);
+    void removeChild(Entity *entity);
     void assign(Shard *shard);
+    void dispose(Shard *shard);
+
+    osg::ref_ptr<osg::Node> getTransform() { return mTransform; }
+    osg::ref_ptr<osg::Group> getGroup() { return mGroup; }
+    void                    setTransform(osg::ref_ptr<osg::Node> transform);
 
 private:
-    std::vector<Entity*> mChildren;
+    osg::ref_ptr<osg::Group> mGroup;
     std::vector<Shard*> mShards;
+    std::vector<Entity*> mChildren;
     Entity *mParent;
+    osg::ref_ptr<osg::Node> mTransform;
 };
 
 void Entity::onInit()
@@ -75,15 +93,44 @@ void Entity::onDebugDraw()
         child->onDebugDraw();
 }
 
-void Entity::addChild(Entity *child)
+void Entity::addChild(Entity *entity)
 {
-    mChildren.push_back(child);
+    mGroup->addChild(entity->getGroup());
+    mChildren.push_back(entity);
+}
+
+void Entity::removeChild(Entity *entity)
+{
+    mGroup->removeChild(entity->getGroup());
+    mChildren.erase(std::remove(mChildren.begin(), mChildren.end(), entity), mChildren.end());
 }
 
 void Entity::assign(Shard *shard)
 {
     shard->setOwner(this);
     mShards.push_back(shard);
+}
+
+void Entity::dispose(Shard *shard)
+{
+    mShards.erase(std::remove(mShards.begin(), mShards.end(), shard), mShards.end());
+    delete shard;
+}
+
+void Entity::setTransform(osg::ref_ptr<osg::Node> transform)
+{
+    for (auto parent : mTransform->getParents())
+    {
+        parent->addChild(transform);
+    }
+
+    for (auto parent : mTransform->getParents())
+    {
+        parent->removeChild(mTransform);
+    }
+
+    // TODO(zaklaus): Is this all we need to do to get rid of the previous osg::Node?
+    mTransform = transform;
 }
 
 }
