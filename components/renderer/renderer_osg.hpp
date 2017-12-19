@@ -45,7 +45,6 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     mRootNode = new osg::MatrixTransform();
-
     osg::Matrixd m;
 
     m.makeScale(osg::Vec3f(1,1,-1));
@@ -55,7 +54,7 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
     mViewer->setSceneData(mRootNode);
 
-    mViewer->setUpViewInWindow(0,0,800,600); 
+    mViewer->setUpViewInWindow(0,0,1024,768); 
 
     if (!mViewer->isRealized())
         mViewer->realize();

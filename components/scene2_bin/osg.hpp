@@ -63,13 +63,15 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
             bool hasTransform = true;
 
+            unsigned int lightNumber = 0;
+
             switch (object.mType)
             {
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
                 {
                     logStr += "light";
 
-                    #if 1
+                    #if 0
                         // for debug
                         osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                         new osg::Sphere(osg::Vec3f(0,0,0),0.1));
@@ -77,11 +79,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
-                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z);
-                        osg::Vec3f lightColor = osg::Vec3f(1,1,1);
+                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z) * object.mLightPower;
 
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
-                        lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.5,1));
+                        lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
+                        lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
+                        lightNode->getLight()->setLightNum(lightNumber);  // each light must have a unique number
+                        lightNumber++;
                     #endif
 
                     objectNode = lightNode;
