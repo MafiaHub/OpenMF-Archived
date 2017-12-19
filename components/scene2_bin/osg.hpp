@@ -14,6 +14,7 @@
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osgText/Text3D>
 #include <osgText/Font3D>
@@ -36,11 +37,21 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
     MFFormat::DataFormatScene2BIN parser;
 
+    MFFormat::OSG4DSLoader loader4DS;
+    loader4DS.setBaseDir(mBaseDir);
+
     bool success = parser.load(srcFile);
 
     if (success)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
+
+std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
+
+        osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
+        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector
+
+        group->addChild(cameraRel);
 
         for (auto pair : parser.getObjects())
         {
@@ -77,6 +88,24 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                     break;
                 }
 
+                case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
+                {
+                    logStr += "model: " + object.mModelName;
+
+                    if ( modelMap.find(object.mModelName) != modelMap.end() )   // model alreay loaded?
+                    {
+                        MFLogger::ConsoleLogger::info("already loaded, instancing");
+                        objectNode = modelMap[object.mModelName];
+                    }
+                    else
+                    {
+                        objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );   
+                        modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
+                            (object.mModelName,objectNode));
+                    }
+
+                    break;
+                }
 
                 default:
                 {
@@ -93,10 +122,11 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
 
                 if (hasTransform)
-                    objectTransform->setMatrix(makeTransformMatrix(
-                        object.mPos,
-                        object.mScale,
-                        object.mRot));
+                {
+                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
+                    m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
+                    objectTransform->setMatrix(m);
+                }
 
                 objectTransform->addChild(objectNode);
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
@@ -108,7 +138,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         {
             std::string parentName = pair.second->getName();
 
-            if ( nodeMap.find(parentName) != nodeMap.end() )
+            if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
+                cameraRel->addChild(pair.second);
+            else if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
                 group->addChild(pair.second);

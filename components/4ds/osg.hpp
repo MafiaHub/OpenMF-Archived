@@ -21,7 +21,6 @@ class OSG4DSLoader : public OSGLoader
 {
 public:
     virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile) override;
-    void setTextureDir(std::string textureDir);
 
 protected:
     typedef std::vector<osg::ref_ptr<osg::StateSet>> MaterialList;
@@ -34,13 +33,7 @@ protected:
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup);
     osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName);
-    std::string mTextureDir;
 };
-
-void OSG4DSLoader::setTextureDir(std::string textureDir)
-{
-    mTextureDir = textureDir;
-}
 
 osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
 {
@@ -51,7 +44,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
-    std::string texturePath = mTextureDir + "/" + fileName;    // FIXME: platform independent path concat
+    std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
 
     osg::ref_ptr<osg::Image> img = osgDB::readImageFile(texturePath);
 
@@ -59,7 +52,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     {
         // try again with lowercase filename
         fileName = MFUtil::strToLower(fileName);
-        texturePath = mTextureDir + "/" + fileName;
+        texturePath = getTextureDir() + fileName;
         img = osgDB::readImageFile( texturePath );
     }
 

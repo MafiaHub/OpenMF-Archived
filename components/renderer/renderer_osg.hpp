@@ -26,19 +26,27 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission) override;
     virtual void frame() override;
-    virtual void setCameraParameters(bool perspective, float fov, float orthoSize) override;
+    virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
-    osg::ref_ptr<osg::Node> mRootNode;            ///< root node of the whole scene being rendered
+    osg::ref_ptr<osg::MatrixTransform> mRootNode;            ///< root node of the whole scene being rendered
 };
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer");
     mViewer = new osgViewer::Viewer();
+                
+    //mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );  // not working?
+    mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES );
+    mViewer->getCamera()->setNearFarRatio(0.0001);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
+
+    mRootNode = new osg::MatrixTransform();
+    mRootNode->setMatrix( osg::Matrixd::scale(osg::Vec3f(1,1,-1)) );
+    mViewer->setSceneData(mRootNode);
 
     if (!mViewer->isRealized())
         mViewer->realize();
@@ -47,15 +55,15 @@ OSGRenderer::OSGRenderer(): MFRenderer()
         mViewer->setCameraManipulator(new osgGA::TrackballManipulator());
 }
 
-void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize)
+void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
     osg::Camera *camera = mViewer->getCamera();
 
     if (perspective)
     {
-        double fovy, aspect, znear, zfar;
-        camera->getProjectionMatrixAsPerspective(fovy,aspect,znear,zfar);
-        camera->setProjectionMatrixAsPerspective(fov,aspect,znear,zfar);
+        double fovY, aspect, zNear, zFar;
+        camera->getProjectionMatrixAsPerspective(fovY,aspect,zNear,zFar);
+        camera->setProjectionMatrixAsPerspective(fov,aspect,nearDist,farDist);
     }
     else
     {
@@ -65,44 +73,19 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "../mafia/MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
-    std::string textureDir = "../mafia/MAPS/";
+    std::string missionDir = "MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
+    std::string textureDir = "MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-    osg::ref_ptr<osg::Group> g = new osg::Group();
+l4ds.setBaseDir("../mafia/");  // tmp
+lScene2.setBaseDir("../mafia/");
 
-    std::ifstream f, f2;
-    f.open(scene4dsPath, std::ios::binary);
-
-    if (!f.is_open())    // TODO: make a special methof somewhere to load by file names
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + scene4dsPath + ".");
-        return false;
-    }
-
-    f2.open(scene2BinPath, std::ios::binary);
-
-    if (!f2.is_open())
-    {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + scene2BinPath + ".");
-        f.close();
-        return false;
-    }
-
-    l4ds.setTextureDir(textureDir);
-    g->addChild( l4ds.load(f) );
-    g->addChild( lScene2.load(f2) );
-
-    mRootNode = g;
-
-    f.close();
-    f2.close();
-
-    mViewer->setSceneData(mRootNode);
+    mRootNode->addChild( l4ds.loadFile(scene4dsPath) );
+    mRootNode->addChild( lScene2.loadFile(scene2BinPath) );
 
     return true;
 }
