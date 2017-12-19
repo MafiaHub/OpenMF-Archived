@@ -47,6 +47,8 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mRootNode = new osg::MatrixTransform();
     osg::Matrixd m;
 
+
+
     m.makeScale(osg::Vec3f(1,1,-1));
     m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
 
