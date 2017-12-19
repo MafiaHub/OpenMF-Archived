@@ -14,6 +14,7 @@
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osgText/Text3D>
 #include <osgText/Font3D>
@@ -44,6 +45,11 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     if (success)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
+
+        osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
+        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector
+
+        group->addChild(cameraRel);
 
         for (auto pair : parser.getObjects())
         {
@@ -118,6 +124,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         {
             std::string parentName = pair.second->getName();
 
+            if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
+                cameraRel->addChild(pair.second);
             if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
