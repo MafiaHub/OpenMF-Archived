@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cache_bin/parser.hpp>
 #include <loggers/console.hpp>
+#include <vfs/vfs.hpp>
 #include <utils.hpp>
 #include <cxxopts.hpp>
 
@@ -57,8 +58,10 @@ int main(int argc, char** argv)
 
     std::string inputFile = arguments["i"].as<std::string>();
 
+    MFFiles::Filesystem fs;
+
     std::ifstream f;
-    f.open(inputFile, std::ios::binary);
+    fs.open(f, inputFile);
 
     if (!f.is_open())
     {
