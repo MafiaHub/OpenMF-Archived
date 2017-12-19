@@ -70,7 +70,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
     std::ifstream f;
 
     fileName = mBaseDir + fileName;
-    f.open(mBaseDir + fileName);
+    f.open(fileName);
 
     if (f.is_open())
     {

@@ -37,6 +37,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     MFFormat::DataFormatScene2BIN parser;
 
     MFFormat::OSG4DSLoader loader4DS;
+    loader4DS.setBaseDir(mBaseDir);
 
     bool success = parser.load(srcFile);
 
@@ -82,7 +83,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
                 {
                     logStr += "model: " + object.mModelName;
-    //                objectNode = loader4DS.loadFile(   );
+                    objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );
                     break;
                 }
 
@@ -101,7 +102,11 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
 
                 if (hasTransform)
-                    objectTransform->setMatrix(makeTransformMatrix(object.mPos,object.mScale,object.mRot));
+                {
+                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
+                    m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
+                    objectTransform->setMatrix(m);
+                }
 
                 objectTransform->addChild(objectNode);
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
