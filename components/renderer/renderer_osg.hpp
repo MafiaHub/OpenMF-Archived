@@ -45,14 +45,27 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     mRootNode = new osg::MatrixTransform();
-    mRootNode->setMatrix( osg::Matrixd::scale(osg::Vec3f(1,1,-1)) );
+
+    osg::Matrixd m;
+
+    m.makeScale(osg::Vec3f(1,1,-1));
+    m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
+
+    mRootNode->setMatrix(m);   // transform the whole scene to OSG space
+
     mViewer->setSceneData(mRootNode);
+
+    mViewer->setUpViewInWindow(0,0,800,600); 
 
     if (!mViewer->isRealized())
         mViewer->realize();
 
+    osg::ref_ptr<MFUtil::WalkManipulator> cameraManipulator = new MFUtil::WalkManipulator();
+
+    cameraManipulator->setMaxVelocity(5);
+
     if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
-        mViewer->setCameraManipulator(new osgGA::TrackballManipulator());
+        mViewer->setCameraManipulator(cameraManipulator);
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)

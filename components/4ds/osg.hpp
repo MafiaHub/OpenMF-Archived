@@ -17,7 +17,7 @@
 namespace MFFormat
 {
 
-class OSG4DSLoader : public OSGLoader
+class OSG4DSLoader: public OSGLoader
 {
 public:
     virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile) override;
