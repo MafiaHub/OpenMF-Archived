@@ -46,7 +46,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
-std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
+        std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
 
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector
