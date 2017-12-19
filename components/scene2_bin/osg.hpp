@@ -126,7 +126,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
 
             if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
                 cameraRel->addChild(pair.second);
-            if ( nodeMap.find(parentName) != nodeMap.end() )
+            else if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
                 group->addChild(pair.second);
