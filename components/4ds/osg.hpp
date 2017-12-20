@@ -142,10 +142,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
     {
         auto vertex = meshLOD->mVertices[i];
 
-        osg::Vec3 normal = osg::Vec3f(vertex.mNormal.x, vertex.mNormal.y, vertex.mNormal.z);
+        osg::Vec3 normal = toOSG( vertex.mNormal );
         normal.normalize();
 
-        vertices->push_back(osg::Vec3f(vertex.mPos.x, vertex.mPos.y, vertex.mPos.z));
+        vertices->push_back( toOSG(vertex.mPos) );
         normals->push_back(normal);
         uvs->push_back(osg::Vec2f(vertex.mUV.x, 1.0 - vertex.mUV.y));
     }

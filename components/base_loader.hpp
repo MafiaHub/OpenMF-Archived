@@ -18,6 +18,9 @@ public:
     osg::ref_ptr<osg::Node> loadFile(std::string fileName);          // overloading load() didn't work somehow - why?
     void setBaseDir(std::string baseDir);
 
+    osg::Vec3f toOSG(MFFormat::DataFormat::Vec3 v);
+    osg::Quat toOSG(MFFormat::DataFormat::Quat q);
+
 protected:
     osg::Matrixd makeTransformMatrix(
         MFFormat::DataFormat::Vec3 p,
@@ -30,12 +33,35 @@ protected:
     std::string mBaseDir;
 
     MFFile::FileSystem *mFileSystem;
+
+    osg::Matrixd mMafiaToOSGMatrix;
+    osg::Matrixd mMafiaToOSGMatrixInvert;
 };
+
+osg::Vec3f OSGLoader::toOSG(MFFormat::DataFormat::Vec3 v)
+{
+    return mMafiaToOSGMatrix.preMult(osg::Vec3(v.x,v.y,v.z));
+}
+
+osg::Quat OSGLoader::toOSG(MFFormat::DataFormat::Quat q)
+{
+    osg::Matrixd transform;
+    transform.preMult(mMafiaToOSGMatrix);
+    transform.preMult(osg::Matrixd::rotate(osg::Quat(q.x,q.y,q.z,q.w)));
+    transform.preMult(mMafiaToOSGMatrixInvert);
+    return transform.getRotate();
+}
 
 OSGLoader::OSGLoader()
 {
     mBaseDir = "";
     mFileSystem = MFFile::FileSystem::getInstance();
+
+    mMafiaToOSGMatrix.makeScale(osg::Vec3f(1,1,-1));
+    mMafiaToOSGMatrix.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
+
+    mMafiaToOSGMatrixInvert = mMafiaToOSGMatrix;
+    mMafiaToOSGMatrixInvert.invert(mMafiaToOSGMatrixInvert);
 }
 
 void OSGLoader::setBaseDir(std::string baseDir)
@@ -60,9 +86,9 @@ osg::Matrixd OSGLoader::makeTransformMatrix(
 {
     osg::Matrixd mat;
 
-    mat.preMultTranslate(osg::Vec3f(p.x,p.y,p.z));
-    mat.preMultScale(osg::Vec3f(s.x,s.y,s.z));
-    mat.preMultRotate(osg::Quat(r.x,r.y,r.z,r.w)); 
+    mat.preMultTranslate(toOSG(p));
+    mat.preMultScale(toOSG(s));
+    mat.preMultRotate(toOSG(r)); 
 
     return mat;
 }
