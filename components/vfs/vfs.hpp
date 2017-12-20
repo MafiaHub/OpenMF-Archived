@@ -9,13 +9,15 @@
 #include <dta/parser.hpp>
 #include <vfs/encoding.hpp>
 
+#include <loggers/console.hpp>
+
 #ifdef OMF_SYSTEM_LINUX
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
 #endif
 
-namespace MFFiles
+namespace MFFile
 {
 
 /**
@@ -23,14 +25,14 @@ namespace MFFiles
     FS details and whether a file is inside DTA or on actual HDD.
 */
 
-class Filesystem
+class FileSystem
 {
 public:
-    ~Filesystem() {}
+    ~FileSystem() {}
 
-    static Filesystem *getInstance()
+    static FileSystem *getInstance()
     {
-        static Filesystem sFileSystem;
+        static FileSystem sFileSystem;
         return &sFileSystem;
     }
 
@@ -38,19 +40,19 @@ public:
 
     bool open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode = std::ios::binary);
 
-    void                     addPath(std::string path) { mSearchPaths.push_back(path); }
+    void                     addPath(std::string path);
     size_t                   getNumPaths()             { return mSearchPaths.size(); }
     std::vector<std::string> getPaths()          const { return mSearchPaths; }
 
 private:
-    Filesystem();                             // hide the constructor
-    Filesystem(Filesystem const&);            // hide the copy constructor
-    Filesystem& operator=(Filesystem const&); // hide the assign operator
+    FileSystem();                             // hide the constructor
+    FileSystem(FileSystem const&);            // hide the copy constructor
+    FileSystem& operator=(FileSystem const&); // hide the assign operator
 
     std::vector<std::string> mSearchPaths;
 };
     
-Filesystem::Filesystem()
+FileSystem::FileSystem()
 {
     mSearchPaths.push_back("resources");
     mSearchPaths.push_back("mafia");
@@ -59,28 +61,41 @@ Filesystem::Filesystem()
     struct passwd *pw = getpwuid(getuid());
     const char *dir = pw->pw_dir;
     std::string dirpath = std::string(dir) + "/";
-    mSearchPaths.push_back(dirpath + ".openmf");
-    mSearchPaths.push_back(dirpath + ".openmf/mafia");
+    addPath(dirpath + ".openmf");
+    addPath(dirpath + ".openmf/mafia");
 #endif
 };
 
-void Filesystem::initDTA()
+void FileSystem::addPath(std::string path)
+{
+    if (path[path.length() - 1] == '/')
+        path.erase(path.length() - 1,1);            
+
+    mSearchPaths.push_back(path);
+}
+
+void FileSystem::initDTA()
 {
 
 }
 
-bool Filesystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
+bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
-    fileName = convertPathToCanonical(fileName);
+    // fileName = convertPathToCanonical(fileName);
 
     for (auto path : mSearchPaths)
     {
-        file.open(path + "/" + fileName, mode);
-        if (file.is_open()) return true;
+        std::string realPath = path + "/" + fileName;
+        MFLogger::ConsoleLogger::info("VFS: Trying to open " + realPath + ".");
+        file.open(realPath, mode);
+
+        if (file.is_open())
+            return true;
     }
 
     // TODO(zaklaus): Otherwise, search inside DTA archives...
 
+    MFLogger::ConsoleLogger::warn("VFS: Could not open requested file " + fileName + ".");
     return false;
 }
 
