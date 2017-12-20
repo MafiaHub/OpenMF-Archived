@@ -101,9 +101,7 @@ std::string FileSystem::getFileLocation(std::string fileName)
 
 bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
-    // fileName = convertPathToCanonical(fileName);
-    /* NOTE(drummy): For now that the files are loaded from HDD converting to lowercase
-       breaks loading on Linux, later re-enable this. */
+    fileName = convertPathToCanonical(fileName);
 
     std::string fileLocation = getFileLocation(fileName);    
 

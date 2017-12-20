@@ -48,14 +48,11 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
     std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
-    //texturePath = MFFile::convertPathToCanonical(texturePath);
+    texturePath = MFFile::convertPathToCanonical(texturePath);
 
-    std::string fileLocation = mFileSystem->getFileLocation(fileName);
+    std::string fileLocation = mFileSystem->getFileLocation(texturePath);
 
     osg::ref_ptr<osg::Image> img;
-
-    if (fileLocation.length() == 0) // tmp fix for Linux 
-        fileLocation = mFileSystem->getFileLocation(getTextureDir() + MFUtil::strToLower(fileName));
 
     if (fileLocation.length() == 0)
     {
