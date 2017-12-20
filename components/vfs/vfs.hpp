@@ -18,18 +18,20 @@
 namespace MFFiles
 {
 
+/**
+    Meyers Singleton class that encapsulating working with files. Hides platform-dependant
+    FS details and whether a file is inside DTA or on actual HDD.
+*/
+
 class Filesystem
 {
 public:
-    Filesystem();
     ~Filesystem() {}
 
-    static Filesystem *get()
+    static Filesystem *getInstance()
     {
-        if (mInstance == nullptr)
-            mInstance = new Filesystem();
-
-        return mInstance;
+        static Filesystem sFileSystem;
+        return &sFileSystem;
     }
 
     void initDTA();
@@ -41,13 +43,13 @@ public:
     std::vector<std::string> getPaths()          const { return mSearchPaths; }
 
 private:
+    Filesystem();                             // hide the constructor
+    Filesystem(Filesystem const&);            // hide the copy constructor
+    Filesystem& operator=(Filesystem const&); // hide the assign operator
+
     std::vector<std::string> mSearchPaths;
-
-    static Filesystem *mInstance;
 };
-
-Filesystem *Filesystem::mInstance;
-
+    
 Filesystem::Filesystem()
 {
     mSearchPaths.push_back("resources");
@@ -60,7 +62,7 @@ Filesystem::Filesystem()
     mSearchPaths.push_back(dirpath + ".openmf");
     mSearchPaths.push_back(dirpath + ".openmf/mafia");
 #endif
-}
+};
 
 void Filesystem::initDTA()
 {

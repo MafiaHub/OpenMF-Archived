@@ -22,7 +22,7 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
-    namespace MFFormat
+namespace MFFormat
 {
 
 class OSGScene2BinLoader : public OSGLoader

@@ -15,6 +15,7 @@
 #include <loggers/console.hpp>
 #include <renderer/renderer_osg.hpp>
 #include <osgGA/TrackballManipulator>
+#include <vfs/vfs.hpp>
 
 namespace MFRender
 
@@ -46,8 +47,6 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
     mRootNode = new osg::MatrixTransform();
     osg::Matrixd m;
-
-
 
     m.makeScale(osg::Vec3f(1,1,-1));
     m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
@@ -87,16 +86,16 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "missions/" + mission;  // temporarily hard-coded, solve this with VFS?
-    std::string textureDir = "maps/";
+    std::string missionDir = "MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
+//    std::string textureDir = "MAPS/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-l4ds.setBaseDir("../mafia/");  // tmp
-lScene2.setBaseDir("../mafia/");
+//l4ds.setBaseDir("../mafia/");  // tmp
+//lScene2.setBaseDir("../mafia/");
 
     mRootNode->addChild( l4ds.loadFile(scene4dsPath) );
     mRootNode->addChild( lScene2.loadFile(scene2BinPath) );

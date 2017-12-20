@@ -5,7 +5,6 @@
 #include <base_parser.hpp>
 #include <fstream>
 #include <loggers/console.hpp>
-#include <vfs/vfs.hpp>
 
 namespace MFFormat
 {
@@ -69,10 +68,9 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
     osg::ref_ptr<osg::Node> n;
 
     std::ifstream f;
-    auto fs = MFFiles::Filesystem::get();
 
     fileName = mBaseDir + fileName;
-    fs->open(f, fileName);
+    f.open(fileName);
 
     if (f.is_open())
     {
