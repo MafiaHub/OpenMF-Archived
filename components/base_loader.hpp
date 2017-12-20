@@ -28,11 +28,14 @@ protected:
     std::string getModelDir();
 
     std::string mBaseDir;
+
+    MFFile::FileSystem *mFileSystem;
 };
 
 OSGLoader::OSGLoader()
 {
-    mBaseDir = ".";
+    mBaseDir = "";
+    mFileSystem = MFFile::FileSystem::getInstance();
 }
 
 void OSGLoader::setBaseDir(std::string baseDir)
@@ -42,12 +45,12 @@ void OSGLoader::setBaseDir(std::string baseDir)
 
 std::string OSGLoader::getTextureDir()
 {
-    return mBaseDir + "/MAPS/";
+    return mBaseDir + "MAPS/";
 }
 
 std::string OSGLoader::getModelDir()
 {
-    return mBaseDir + "/MODELS/";
+    return mBaseDir + "MODELS/";
 }
 
 osg::Matrixd OSGLoader::makeTransformMatrix(
@@ -69,10 +72,9 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
     osg::ref_ptr<osg::Node> n;
 
     std::ifstream f;
-    auto fs = MFFiles::Filesystem::get();
 
     fileName = mBaseDir + fileName;
-    fs->open(f, fileName);
+    f.open(fileName);
 
     if (f.is_open())
     {

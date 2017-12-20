@@ -15,6 +15,7 @@
 #include <loggers/console.hpp>
 #include <renderer/renderer_osg.hpp>
 #include <osgGA/TrackballManipulator>
+#include <vfs/vfs.hpp>
 
 namespace MFRender
 
@@ -31,6 +32,7 @@ public:
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::MatrixTransform> mRootNode;            ///< root node of the whole scene being rendered
+    MFFile::FileSystem *mFileSystem;
 };
 
 OSGRenderer::OSGRenderer(): MFRenderer()
@@ -38,6 +40,10 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     MFLogger::ConsoleLogger::info("initiating OSG renderer");
     mViewer = new osgViewer::Viewer();
                 
+    mFileSystem = MFFile::FileSystem::getInstance();
+
+mFileSystem->addPath("../mafia/");
+
     //mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );  // not working?
     mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES );
     mViewer->getCamera()->setNearFarRatio(0.0001);
@@ -47,12 +53,11 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mRootNode = new osg::MatrixTransform();
     osg::Matrixd m;
 
-
-
     m.makeScale(osg::Vec3f(1,1,-1));
     m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
 
     mRootNode->setMatrix(m);   // transform the whole scene to OSG space
+                               // TODO: Maybe rather transforming the model when creating the geometry than here would be better.
 
     mViewer->setSceneData(mRootNode);
 
@@ -87,19 +92,27 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "missions/" + mission;  // temporarily hard-coded, solve this with VFS?
-    std::string textureDir = "maps/";
+    std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
-l4ds.setBaseDir("../mafia/");  // tmp
-lScene2.setBaseDir("../mafia/");
+    std::ifstream file4DS;
+    std::ifstream fileScene2Bin;
 
-    mRootNode->addChild( l4ds.loadFile(scene4dsPath) );
-    mRootNode->addChild( lScene2.loadFile(scene2BinPath) );
+    if (!mFileSystem->open(file4DS,scene4dsPath))
+        MFLogger::ConsoleLogger::warn("Couldn not open 4ds file: " + scene4dsPath + ".");
+
+    if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
+        MFLogger::ConsoleLogger::warn("Couldn not open scene2.bin file: " + scene2BinPath + ".");
+
+    mRootNode->addChild( l4ds.load(file4DS) );
+    mRootNode->addChild( lScene2.load(fileScene2Bin) );
+
+    file4DS.close();
+    fileScene2Bin.close();
 
     return true;
 }

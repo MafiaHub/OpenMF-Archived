@@ -15,6 +15,7 @@
 #include <4ds/osg.hpp>
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
+#include <osg/Material>
 #include <utils.hpp>
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
@@ -22,7 +23,7 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
-    namespace MFFormat
+namespace MFFormat
 {
 
 class OSGScene2BinLoader : public OSGLoader
@@ -54,22 +55,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
         // disable lights for backdrop sector:
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT1,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT2,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT3,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT4,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT5,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT6,osg::StateAttribute::OFF);
-        cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT7,osg::StateAttribute::OFF);
-        // and add ambient only:
-        /* osg::ref_ptr<osg::Light> backdropLight = new osg::Light;
+        osg::ref_ptr<osg::Material> mat = new osg::Material;
 
-        backdropLight->setAmbient(osg::Vec4f(1,1,1,1));
-        backdropLight->setDiffuse(osg::Vec4f(0,0,0,0));
-        backdropLight->setSpecular(osg::Vec4f(0,0,0,0));
-
-        cameraRel->getOrCreateStateSet()->setAttributeAndModes(backdropLight); */
+        mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
+        mat->setColorMode(osg::Material::OFF);
+        cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
+        osg::StateAttribute::ON |
+        osg::StateAttribute::OVERRIDE);
 
         group->addChild(cameraRel);
 
@@ -107,8 +99,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
                         lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
                         lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
-                        lightNode->getLight()->setPosition(osg::Vec4(1,1,1,0));  // fourth component decides type - 0 = point, 1 = directional 
-                        lightNode->getLight()->setLightNum(lightNumber);  // each light must have a unique number
+                        lightNode->getLight()->setPosition(osg::Vec4(1,1,1,0));  // TODO: fourth component decides type - 0 = point, 1 = directional 
+                        lightNode->getLight()->setLightNum(lightNumber);         // each light must have a unique number
                         lightNumber++;
                     #endif
 
@@ -127,9 +119,19 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                     }
                     else
                     {
-                        objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );   
-                        modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
-                            (object.mModelName,objectNode));
+                        std::ifstream f;
+                        
+                        if (!mFileSystem->open(f,"MODELS/" + object.mModelName))
+                        {
+                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".");
+                        }
+                        else
+                        {
+                            objectNode = loader4DS.load(f);   
+                            modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
+                                (object.mModelName,objectNode));
+                            f.close();
+                        }
                     }
 
                     break;

@@ -58,10 +58,9 @@ int main(int argc, char** argv)
 
     std::string inputFile = arguments["i"].as<std::string>();
 
-    MFFiles::Filesystem fs;
-
     std::ifstream f;
-    fs.open(f, inputFile);
+
+    f.open(inputFile);
 
     if (!f.is_open())
     {

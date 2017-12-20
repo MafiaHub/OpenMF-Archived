@@ -3,7 +3,7 @@
 
 #include <utils.hpp>
 
-namespace MFFiles
+namespace MFFile
 {
     std::string convertPathToCanonical(std::string path)
     {
