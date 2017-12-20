@@ -1,6 +1,7 @@
 #ifndef OSG_UTILS_H
 #define OSG_UTILS_H
 
+#include <fstream>
 #include <osg/Transform>
 #include <osgGA/FirstPersonManipulator>
 

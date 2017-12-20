@@ -39,6 +39,7 @@ public:
     void initDTA();
 
     bool open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode = std::ios::binary);
+    std::string getFileLocation(std::string fileName);
 
     void                     addPath(std::string path);
     size_t                   getNumPaths()             { return mSearchPaths.size(); }
@@ -79,24 +80,40 @@ void FileSystem::initDTA()
 
 }
 
+std::string FileSystem::getFileLocation(std::string fileName)
+{
+    for (auto path : mSearchPaths)     // TODO: what's the fastest way to check a file existence?
+    {
+        std::string realPath = path + "/" + fileName;
+
+        std::ifstream f;
+        f.open(realPath);
+
+        if (f.good())
+        {
+            f.close();
+            return realPath;
+        }
+    }
+
+    return "";
+}
+
 bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
     // fileName = convertPathToCanonical(fileName);
+    /* NOTE(drummy): For now that the files are loaded from HDD converting to lowercase
+       breaks loading on Linux, later re-enable this. */
 
-    for (auto path : mSearchPaths)
-    {
-        std::string realPath = path + "/" + fileName;
-        MFLogger::ConsoleLogger::info("VFS: Trying to open " + realPath + ".");
-        file.open(realPath, mode);
+    std::string fileLocation = getFileLocation(fileName);    
 
-        if (file.is_open())
-            return true;
-    }
+    if (fileLocation.length() == 0)
+        return false;
+
+    file.open(fileLocation);
+    return file.good();
 
     // TODO(zaklaus): Otherwise, search inside DTA archives...
-
-    MFLogger::ConsoleLogger::warn("VFS: Could not open requested file " + fileName + ".");
-    return false;
 }
 
 }

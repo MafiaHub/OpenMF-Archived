@@ -8,12 +8,13 @@
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
-#include <vfs/encoding.hpp>
+#include <vfs/vfs.hpp>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_utils.hpp>
 #include <base_loader.hpp>
 
 namespace MFFormat
@@ -49,17 +50,22 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
     //texturePath = MFFile::convertPathToCanonical(texturePath);
 
-    osg::ref_ptr<osg::Image> img = osgDB::readImageFile(texturePath);
+    std::string fileLocation = mFileSystem->getFileLocation(fileName);
 
-    if (!img)         // FIXME: better non-case-sensitive filename solution
+    osg::ref_ptr<osg::Image> img;
+
+    if (fileLocation.length() == 0) // tmp fix for Linux 
+        fileLocation = mFileSystem->getFileLocation(getTextureDir() + MFUtil::strToLower(fileName));
+
+    if (fileLocation.length() == 0)
     {
-        // try again with lowercase filename
-        fileName = MFUtil::strToLower(fileName);
-        texturePath = getTextureDir() + fileName;
-        img = osgDB::readImageFile( texturePath );
+        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName + ".");
     }
-
-    tex->setImage(img);
+    else
+    {
+        img = osgDB::readImageFile(fileLocation);
+        tex->setImage(img);
+    }
 
     return tex;
 }

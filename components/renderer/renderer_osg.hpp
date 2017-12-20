@@ -57,6 +57,7 @@ mFileSystem->addPath("../mafia/");
     m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
 
     mRootNode->setMatrix(m);   // transform the whole scene to OSG space
+                               // TODO: Maybe rather transforming the model when creating the geometry than here would be better.
 
     mViewer->setSceneData(mRootNode);
 
@@ -91,7 +92,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
+    std::string missionDir = "MISSIONS/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 

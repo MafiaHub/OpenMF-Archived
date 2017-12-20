@@ -127,9 +127,19 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                     }
                     else
                     {
-                        objectNode = loader4DS.loadFile( "MODELS/" + object.mModelName );   
-                        modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
-                            (object.mModelName,objectNode));
+                        std::ifstream f;
+                        
+                        if (!mFileSystem->open(f,"MODELS/" + object.mModelName))
+                        {
+                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".");
+                        }
+                        else
+                        {
+                            objectNode = loader4DS.load(f);   
+                            modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
+                                (object.mModelName,objectNode));
+                            f.close();
+                        }
                     }
 
                     break;

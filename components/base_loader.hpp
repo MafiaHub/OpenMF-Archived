@@ -5,6 +5,7 @@
 #include <base_parser.hpp>
 #include <fstream>
 #include <loggers/console.hpp>
+#include <vfs/vfs.hpp>
 
 namespace MFFormat
 {
@@ -27,11 +28,14 @@ protected:
     std::string getModelDir();
 
     std::string mBaseDir;
+
+    MFFile::FileSystem *mFileSystem;
 };
 
 OSGLoader::OSGLoader()
 {
-    mBaseDir = ".";
+    mBaseDir = "";
+    mFileSystem = MFFile::FileSystem::getInstance();
 }
 
 void OSGLoader::setBaseDir(std::string baseDir)
@@ -41,12 +45,12 @@ void OSGLoader::setBaseDir(std::string baseDir)
 
 std::string OSGLoader::getTextureDir()
 {
-    return mBaseDir + "/MAPS/";
+    return mBaseDir + "MAPS/";
 }
 
 std::string OSGLoader::getModelDir()
 {
-    return mBaseDir + "/MODELS/";
+    return mBaseDir + "MODELS/";
 }
 
 osg::Matrixd OSGLoader::makeTransformMatrix(
