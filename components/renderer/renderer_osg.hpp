@@ -31,7 +31,7 @@ public:
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
-    osg::ref_ptr<osg::MatrixTransform> mRootNode;            ///< root node of the whole scene being rendered
+    osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
 };
 
@@ -50,15 +50,7 @@ mFileSystem->addPath("../mafia/");
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    mRootNode = new osg::MatrixTransform();
-    osg::Matrixd m;
-
-    m.makeScale(osg::Vec3f(1,1,-1));
-    m.postMult( osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(1,0,0)) );
-
-    mRootNode->setMatrix(m);   // transform the whole scene to OSG space
-                               // TODO: Maybe rather transforming the model when creating the geometry than here would be better.
-
+    mRootNode = new osg::Group();
     mViewer->setSceneData(mRootNode);
 
     mViewer->setUpViewInWindow(0,0,1024,768); 
