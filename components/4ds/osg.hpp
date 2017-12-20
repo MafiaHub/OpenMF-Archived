@@ -4,9 +4,11 @@
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+#include <osg/Material>
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
+#include <vfs/encoding.hpp>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
@@ -45,6 +47,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
     std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
+    texturePath = MFFiles::convertPathToCanonical(texturePath);
 
     osg::ref_ptr<osg::Image> img = osgDB::readImageFile(texturePath);
 
@@ -193,6 +196,9 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
             materials.push_back(new osg::StateSet());
 
             osg::StateSet *stateSet = materials[i].get();
+            auto mat = new osg::Material();
+            stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+            mat->setTransparency(osg::Material::FRONT, 1. - model->mMaterials[i].mTransparency);
 
             char diffuseTextureName[255];
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
@@ -205,10 +211,12 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
                 char alphaTextureName[255];
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
-                // osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
-                // TODO: apply alpha texture
+                osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
+                stateSet->setTextureAttributeAndModes(1, alphaTex.get(), osg::StateAttribute::ON || osg::StateAttribute::OVERRIDE);
             }
 
+            stateSet->setAttribute(mat);
+            stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 

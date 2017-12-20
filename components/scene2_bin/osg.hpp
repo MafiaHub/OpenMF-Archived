@@ -7,6 +7,8 @@
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
+#include <osg/Light>
+#include <osg/LightSource>
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
@@ -20,7 +22,7 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
-namespace MFFormat
+    namespace MFFormat
 {
 
 class OSGScene2BinLoader : public OSGLoader
@@ -61,13 +63,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT6,osg::StateAttribute::OFF);
         cameraRel->getOrCreateStateSet()->setMode(GL_LIGHT7,osg::StateAttribute::OFF);
         // and add ambient only:
-        osg::ref_ptr<osg::Light> backdropLight = new osg::Light;
+        /* osg::ref_ptr<osg::Light> backdropLight = new osg::Light;
 
         backdropLight->setAmbient(osg::Vec4f(1,1,1,1));
         backdropLight->setDiffuse(osg::Vec4f(0,0,0,0));
         backdropLight->setSpecular(osg::Vec4f(0,0,0,0));
 
-        cameraRel->getOrCreateStateSet()->setAttributeAndModes(backdropLight);
+        cameraRel->getOrCreateStateSet()->setAttributeAndModes(backdropLight); */
 
         group->addChild(cameraRel);
 
@@ -87,6 +89,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
             {
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
                 {
+                    if (object.mLightType != MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT)
+                        break;
+
                     logStr += "light";
 
                     #if 0

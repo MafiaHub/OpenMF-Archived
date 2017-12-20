@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    int fov = 95;
+    int fov = 75;
 
     if (arguments.count("f") > 0)
         fov = arguments["f"].as<int>();
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     MFRender::OSGRenderer renderer;
     renderer.loadMission(inputFile);
 
-    renderer.setCameraParameters(true,fov,0,1,1000);
+    renderer.setCameraParameters(true,fov,0,0.01,1000);
 
     while (!renderer.done())
         renderer.frame();

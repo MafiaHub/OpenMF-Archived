@@ -87,8 +87,8 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "MISSIONS/" + mission;  // temporarily hard-coded, solve this with VFS?
-    std::string textureDir = "MAPS/";
+    std::string missionDir = "missions/" + mission;  // temporarily hard-coded, solve this with VFS?
+    std::string textureDir = "maps/";
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
 
