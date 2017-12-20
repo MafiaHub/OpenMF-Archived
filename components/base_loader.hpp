@@ -45,19 +45,11 @@ osg::Vec3f OSGLoader::toOSG(MFFormat::DataFormat::Vec3 v)
 
 osg::Quat OSGLoader::toOSG(MFFormat::DataFormat::Quat q)
 {
-osg::Matrixd transform;
-
-
-
-
-transform.preMult(mMafiaToOSGMatrix);
-
-transform.preMult(    osg::Matrixd::rotate( osg::Quat(q.x,q.y,q.z,q.w)));
-
-transform.preMult(mMafiaToOSGMatrixInvert);
-
-return transform.getRotate();
-
+    osg::Matrixd transform;
+    transform.preMult(mMafiaToOSGMatrix);
+    transform.preMult(osg::Matrixd::rotate(osg::Quat(q.x,q.y,q.z,q.w)));
+    transform.preMult(mMafiaToOSGMatrixInvert);
+    return transform.getRotate();
 }
 
 OSGLoader::OSGLoader()
