@@ -48,7 +48,6 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
 
     if (success)
     {
-        std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
         std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
         
         for (auto object : parser.getObjects())
@@ -94,32 +93,16 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
 
                     if (hasTransform)
                     {
-                        
                         osg::Matrixd m = makeTransformMatrix(instance.mPos, instance.mScale, instance.mRot);
                         m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
                         objectTransform->setMatrix(m);
                     }
 
                     objectTransform->addChild(objectNode);
-                    nodeMap.insert(nodeMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mObjectName,objectTransform));
+                    group->addChild(objectTransform);
                 }
-            }
-        }   // for
-
-        for (auto pair : nodeMap)   // set parents
-        {
-            /*std::string parentName = pair.second->getName();
-
-            if ( nodeMap.find(parentName) != nodeMap.end() )
-                nodeMap[parentName]->addChild(pair.second);
-            else
-                group->addChild(pair.second);
-
-            pair.second->setName("");*/
-
-            group->addChild(pair.second);
-        }
-      
+            } // for
+        }   // for      
     }
 
     return group;
