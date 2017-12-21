@@ -17,6 +17,8 @@
 #include <base_loader.hpp>
 #include <osg/FrontFace>
 
+#include <osg/BlendFunc>
+
 namespace MFFormat
 {
 
@@ -87,11 +89,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
             else
             {
                 osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
-
-tex->setImage(imgAlpha);
-return tex;
-
-                // TODO: copy image to alpha channel of img
+                img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
             }
         }
 
@@ -241,17 +239,29 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             char alphaTextureName[255];
 
+//mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,0,0,0.5));
+
+
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
+
+                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
             }
             else
+            {
                 alphaTextureName[0] = 0;
+                stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+            }
 
             osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName);
 
-            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE) );
+            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
 
             if (!(model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
                 stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);

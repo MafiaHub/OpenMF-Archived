@@ -146,6 +146,23 @@ bool WalkManipulator::handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIAc
     mLastFrameTime = timeNow;
 }
 
+osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg)
+{
+    osg::ref_ptr<osg::Image> dstImg = new osg::Image;
+
+    dstImg->allocateImage(img->s(),img->t(),1,GL_RGBA,GL_FLOAT);
+
+    for (int y = 0; y < dstImg->t(); ++y)
+        for (int x = 0; x < dstImg->s(); ++x)
+        {
+            osg::Vec4f alphaPixel = alphaImg->getColor(x,y);
+            osg::Vec4f srcPixel = img->getColor(x,y);
+            dstImg->setColor(osg::Vec4f(srcPixel.x(),srcPixel.y(),srcPixel.z(),alphaPixel.x()),x,y);
+        }
+
+    return dstImg;
+}
+
 }
 
 #endif
