@@ -51,8 +51,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
-        // TODO: disable culling for backdrop sector - skybox sometimes disappears
-        // TODO: also make skybox NOT cut off the scene, i.e. either scale it or use stencil buffer or something
+        cameraRel->setCullingActive(false);
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;
@@ -63,10 +62,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         osg::StateAttribute::ON |
         osg::StateAttribute::OVERRIDE);
 
-        group->addChild(cameraRel);
-        
-        unsigned int lightNumber = 0;
+        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform();
+        trans->setMatrix(osg::Matrixd::scale(osg::Vec3f(10,10,10)));   // so that the skybox doesn't cut the scene off
+        trans->addChild(cameraRel);
 
+        group->addChild(trans);
+ 
+        unsigned int lightNumber = 0;
      
         // TMP: add default light until game lights are correctly handled
         osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
