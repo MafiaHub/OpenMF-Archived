@@ -16,8 +16,9 @@
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
-
 #include <osg/BlendFunc>
+#include <osg/AlphaFunc>
+#include <bmp_analyser.hpp>
 
 namespace MFFormat
 {
@@ -37,10 +38,10 @@ protected:
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup);
-    osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha = "");
+    osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha="", bool colorKey=false);
 };
 
-osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha)
+osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
 {
     std::string logStr = "loading texture " + fileName;
 
@@ -79,6 +80,23 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     else
     {
         img = osgDB::readImageFile(fileLocation);
+
+        if (colorKey)
+        {
+            MFFormat::BMPInfo bmp;
+
+            std::ifstream bmpFile;
+            bmpFile.open(fileLocation);
+            bmp.load(bmpFile);
+            bmpFile.close();
+
+            osg::Vec3f transparentColor = osg::Vec3f(     
+                bmp.mTransparentColor.r / 255.0,
+                bmp.mTransparentColor.g / 255.0,
+                bmp.mTransparentColor.b / 255.0);
+
+            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.1 );
+        }
 
         if (alphaTexture)
         {
@@ -233,6 +251,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
             osg::StateSet *stateSet = materials[i].get();
             auto mat = new osg::Material();
 
+            bool colorKey = model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
+
             char diffuseTextureName[255];
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
             diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
@@ -254,9 +274,17 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
             {
                 alphaTextureName[0] = 0;
                 stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+
+                if (colorKey)
+                {
+                    osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
+                    alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
+                    stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
+                    stateSet->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                }
             }
 
-            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName);
+            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
 
             stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
 

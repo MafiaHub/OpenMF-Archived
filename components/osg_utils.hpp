@@ -163,6 +163,28 @@ osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg
     return dstImg;
 }
 
+osg::ref_ptr<osg::Image> applyColorKey(osg::Image *img, osg::Vec3f color, float err=0.01)
+{
+    osg::ref_ptr<osg::Image> dstImg = new osg::Image;
+
+    dstImg->allocateImage(img->s(),img->t(),1,GL_RGBA,GL_FLOAT);
+
+    for (int y = 0; y < dstImg->t(); ++y)
+        for (int x = 0; x < dstImg->s(); ++x)
+        {
+            osg::Vec4f p = img->getColor(x,y);
+
+            float alpha =
+                (std::abs(p.x() - color.x()) <= err && 
+                 std::abs(p.y() - color.y()) <= err &&
+                 std::abs(p.z() - color.z()) <= err) ? 0.0 : 1.0;
+
+            dstImg->setColor(osg::Vec4f(p.x(),p.y(),p.z(),alpha),x,y);
+        }
+
+    return dstImg;
+}
+
 }
 
 #endif
