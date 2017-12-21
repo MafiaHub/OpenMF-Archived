@@ -17,6 +17,8 @@
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 
+#include <osg/FrontFace>
+
 namespace MFFormat
 {
 
@@ -200,8 +202,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             osg::StateSet *stateSet = materials[i].get();
             auto mat = new osg::Material();
-            stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-            mat->setTransparency(osg::Material::FRONT, 1. - model->mMaterials[i].mTransparency);
 
             char diffuseTextureName[255];
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
@@ -209,17 +209,25 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName);
 
+            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE) );
+
+            if (!(model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
+                stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
                 char alphaTextureName[255];
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
-                osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
-                stateSet->setTextureAttributeAndModes(1, alphaTex.get(), osg::StateAttribute::ON || osg::StateAttribute::OVERRIDE);
+
+                /* TODO: load the texture as image and copy it to the alpha channel of the main
+                   texture, then set transparency on stateset and renderbin to transparent */
+
+                //osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
+                //stateSet->setTextureAttributeAndModes(1, alphaTex.get(), osg::StateAttribute::ON || osg::StateAttribute::OVERRIDE);
             }
 
             stateSet->setAttribute(mat);
-            stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 
