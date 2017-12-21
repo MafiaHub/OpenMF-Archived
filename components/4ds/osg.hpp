@@ -7,7 +7,6 @@
 #include <osg/Material>
 #include <osg/Geode>
 #include <osg/Texture2D>
-#include <osg/ShapeDrawable>
 #include <vfs/vfs.hpp>
 #include <fstream>
 #include <algorithm>
@@ -16,7 +15,6 @@
 #include <utils.hpp>
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
-
 #include <osg/FrontFace>
 
 namespace MFFormat

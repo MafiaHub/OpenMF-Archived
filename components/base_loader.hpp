@@ -2,7 +2,6 @@
 #define OSG_LOADER_H
 
 #include <osg/MatrixTransform>
-#include <base_parser.hpp>
 #include <fstream>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>

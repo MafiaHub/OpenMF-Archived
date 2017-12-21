@@ -1,21 +1,16 @@
 #ifndef RENDERER_OSG_H
 #define RENDERER_OSG_H
 
-#include <renderer/renderer_base.hpp>
+#include <renderer/base_renderer.hpp>
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 #include <4ds/osg.hpp>
-#include <4ds/parser.hpp>
-#include <scene2_bin/parser.hpp>
 #include <scene2_bin/osg.hpp>
-#include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
-#include <renderer/renderer_osg.hpp>
 #include <osgGA/TrackballManipulator>
-#include <vfs/vfs.hpp>
 
 namespace MFRender
 
@@ -26,16 +21,21 @@ class OSGRenderer: public MFRenderer
 public:
     OSGRenderer();
     virtual bool loadMission(std::string mission) override;
+    virtual bool loadSingleModel(std::string model) override;
+
     virtual void frame() override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
 
     virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
 
+    virtual void setFreeCameraSpeed(double newSpeed) override;
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
+    MFUtil::WalkManipulator *mCameraManipulator;
 };
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
@@ -61,14 +61,9 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
     osg::Matrixd viewMatrix;
 
     viewMatrix.setTrans(osg::Vec3(x,y,z));
-//    viewMatrix.invert(viewMatrix);
 
     viewMatrix.setRotate( MFUtil::eulerToQuat(yaw,pitch,roll) );
-
-
-mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
-
-//    mViewer->getCamera()->setViewMatrix(viewMatrix);
+    mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
 }
 
 OSGRenderer::OSGRenderer(): MFRenderer()
@@ -96,10 +91,15 @@ mFileSystem->addPath("../mafia/");
 
     osg::ref_ptr<MFUtil::WalkManipulator> cameraManipulator = new MFUtil::WalkManipulator();
 
-    cameraManipulator->setMaxVelocity(5);
+    mCameraManipulator = cameraManipulator.get();
 
     if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
         mViewer->setCameraManipulator(cameraManipulator);
+}
+
+void OSGRenderer::setFreeCameraSpeed(double newSpeed)
+{
+    mCameraManipulator->setMaxVelocity(newSpeed);
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
@@ -141,6 +141,24 @@ bool OSGRenderer::loadMission(std::string mission)
 
     file4DS.close();
     fileScene2Bin.close();
+
+    return true;
+}
+
+bool OSGRenderer::loadSingleModel(std::string model)
+{
+    std::ifstream file4DS;
+    MFFormat::OSG4DSLoader l4ds;
+
+    if (!mFileSystem->open(file4DS,"models/" + model))
+    {
+        MFLogger::ConsoleLogger::warn("Couldn not open 4ds file: " + model + ".");
+        return false;
+    }
+     
+    mRootNode->addChild( l4ds.load(file4DS) );
+
+    file4DS.close();
 
     return true;
 }
