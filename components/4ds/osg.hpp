@@ -239,9 +239,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             char alphaTextureName[255];
 
-//mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,0,0,0.5));
-
-
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
