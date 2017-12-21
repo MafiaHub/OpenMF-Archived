@@ -164,7 +164,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
             static_cast<int>(materials.size() - 1),
             meshLOD->mFaceGroups[i].mMaterialID - 1));
 
-        faceGroup->setStateSet(materials[materialID]);
+// TODO: set default material when materialID = 0
+// or no materials are defined in .4ds file
+		if(materials.size() > 0)
+				faceGroup->setStateSet(materials[materialID]);
 
         group->addChild(faceGroup);
     }
