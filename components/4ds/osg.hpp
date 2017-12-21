@@ -253,6 +253,18 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             bool colorKey = model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
 
+            if (model->mMaterials[i].mTransparency < 1)
+            {
+                osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),model->mMaterials[i].mTransparency));
+
+                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);       
+                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
+            }
+
             char diffuseTextureName[255];
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
             diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
@@ -264,7 +276,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
 
-                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
                 osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
                 blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
