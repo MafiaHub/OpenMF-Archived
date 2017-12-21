@@ -238,7 +238,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             // TODO(zaklaus): Improve this, either distinguish collision faces
             // in the world or skip them entirely.
-            //if (model->mMeshes[i].mMeshType == MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
+            // if (model->mMeshes[i].mMeshType == MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
             //    continue;
             
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();

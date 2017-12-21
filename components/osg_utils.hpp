@@ -4,9 +4,48 @@
 #include <fstream>
 #include <osg/Transform>
 #include <osgGA/FirstPersonManipulator>
+#include <math.h>
 
 namespace MFUtil
 {
+
+/** Convert quaternion rotation to yaw, pitch, roll (Euler angles), in radians. */
+
+void quatToEuler(osg::Quat q, double &yaw, double &pitch, double &roll)
+{
+    double qx = q.x(); 
+    double qy = q.y(); 
+    double qz = q.z(); 
+    double qw = q.w(); 
+
+    double sqx = qx * qx; 
+    double sqy = qy * qy; 
+    double sqz = qz * qz; 
+    double sqw = qw * qw; 
+
+    double term1 = 2 * (qx*qy+qw*qz); 
+    double term2 = sqw + sqx - sqy - sqz; 
+    double term3 = -2 * (qx * qz - qw * qy); 
+    double term4 = 2 * (qw * qx + qy * qz); 
+    double term5 = sqw - sqx - sqy + sqz; 
+
+    yaw = atan2(term1, term2); 
+    pitch = atan2(term4, term5); 
+    roll = asin(term3); 
+}
+
+/** Convert Euler rotation (yaw, pitch, roll) to quaternion, in radians. */
+
+osg::Quat eulerToQuat(double yaw, double pitch, double roll)
+{
+    osg::Matrixd mat;
+
+    mat.preMultRotate( osg::Quat(yaw,osg::Vec3f(0,0,1)) );
+    mat.preMultRotate( osg::Quat(pitch,osg::Vec3f(1,0,0)) );
+    mat.preMultRotate( osg::Quat(roll,osg::Vec3f(0,1,0)) );
+
+    return mat.getRotate(); 
+}
 
 class MoveEarthSkyWithEyePointTransform: public osg::Transform
 { 
