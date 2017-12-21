@@ -29,11 +29,47 @@ public:
     virtual void frame() override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
 
+    virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
+    virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
 };
+
+void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
+{
+    osg::Matrixd viewMatrix = mViewer->getCamera()->getViewMatrix();
+
+    viewMatrix.invert(viewMatrix);
+
+    osg::Vec3f translation,scale;
+    osg::Quat rotation, scaleOrient;
+
+    viewMatrix.decompose(translation,rotation,scale,scaleOrient);
+
+    x = translation.x();
+    y = translation.y();
+    z = translation.z();
+
+    MFUtil::quatToEuler(rotation,yaw,pitch,roll);
+}
+
+void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll)
+{
+    osg::Matrixd viewMatrix;
+
+    viewMatrix.setTrans(osg::Vec3(x,y,z));
+//    viewMatrix.invert(viewMatrix);
+
+    viewMatrix.setRotate( MFUtil::eulerToQuat(yaw,pitch,roll) );
+
+
+mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
+
+//    mViewer->getCamera()->setViewMatrix(viewMatrix);
+}
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
