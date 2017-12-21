@@ -7,6 +7,7 @@
 #include <osgViewer/Viewer>
 #include <4ds/osg.hpp>
 #include <scene2_bin/osg.hpp>
+#include <cache_bin/osg.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
@@ -120,15 +121,18 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-    std::string missionDir = "missions/" + mission;
+     std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
+    std::string cacheBinPath = missionDir + "/cache.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
+    MFFormat::OSGCacheBinLoader lCache;
 
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
+    std::ifstream fileCacheBin;
 
     if (!mFileSystem->open(file4DS,scene4dsPath))
         MFLogger::ConsoleLogger::warn("Couldn not open 4ds file: " + scene4dsPath + ".");
@@ -138,6 +142,12 @@ bool OSGRenderer::loadMission(std::string mission)
 
     mRootNode->addChild( l4ds.load(file4DS) );
     mRootNode->addChild( lScene2.load(fileScene2Bin) );
+
+    if(mFileSystem->open(fileCacheBin,cacheBinPath)) 
+    {
+        mRootNode->addChild(lCache.load(fileCacheBin));
+        fileCacheBin.close();
+    }
 
     file4DS.close();
     fileScene2Bin.close();
