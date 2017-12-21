@@ -235,12 +235,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
-
-            // TODO(zaklaus): Improve this, either distinguish collision faces
-            // in the world or skip them entirely.
-            // if (model->mMeshes[i].mMeshType == MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
-            //    continue;
-            
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
             osg::Matrixd mat;
 
@@ -253,7 +247,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             transform->setMatrix(makeTransformMatrix(p,s,r));
 
-            transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
+            // TODO(zaklaus): Improve this, either distinguish collision faces
+            // in the world or skip them entirely.
+            if (model->mMeshes[i].mMeshType != MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
+                transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
         }
