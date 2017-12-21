@@ -64,6 +64,17 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         osg::StateAttribute::OVERRIDE);
 
         group->addChild(cameraRel);
+        
+        unsigned int lightNumber = 0;
+
+     
+        // TMP: add default light until game lights are correctly handled
+        osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
+        defaultLightNode->getLight()->setPosition( osg::Vec4f(1,1,1,0) );
+        defaultLightNode->getLight()->setLightNum( lightNumber++ );
+        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.5,0.5,0.5,1.0) );
+        group->addChild( defaultLightNode );
+
 
         for (auto pair : parser.getObjects())
         {
@@ -74,8 +85,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
             std::string logStr = object.mName + ": ";
 
             bool hasTransform = true;
-
-            unsigned int lightNumber = 0;
 
             switch (object.mType)
             {
@@ -91,6 +100,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                         new osg::Sphere(osg::Vec3f(0,0,0),0.1));
                     #else
+                        if (lightNumber > 6)      // fixed pipeline only supports 7 lights
+                            break;
+
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
@@ -99,7 +111,18 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                         lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
                         lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
                         lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
-                        lightNode->getLight()->setPosition(osg::Vec4(1,1,1,0));  // TODO: fourth component decides type - 0 = point, 1 = directional 
+
+                        bool isPositional =
+                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
+                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT;
+
+                        osg::Vec3f lightPos = isPositional ?
+                            osg::Vec3f(0,0,0) :             // position will be set via transform node
+                            toOSG(object.mPos);             // for directional lights position usually defines direction - is this the right field though?
+
+                        lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
+                            isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
+ 
                         lightNode->getLight()->setLightNum(lightNumber);         // each light must have a unique number
                         lightNumber++;
                     #endif
