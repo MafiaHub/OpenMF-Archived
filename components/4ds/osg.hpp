@@ -16,6 +16,9 @@
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
+#include <osg/BlendFunc>
+#include <osg/AlphaFunc>
+#include <bmp_analyser.hpp>
 
 namespace MFFormat
 {
@@ -35,32 +38,79 @@ protected:
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup);
-    osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName);
+    osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha="", bool colorKey=false);
 };
 
-osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName)
+osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
 {
-    MFLogger::ConsoleLogger::info("loading texture " + fileName);
+    std::string logStr = "loading texture " + fileName;
+
+    bool alphaTexture = fileNameAlpha.length() > 0;
+
+    if (alphaTexture)
+        logStr += " (alpha texture: " + fileNameAlpha + ")";
+
+    logStr += ".";
+
+    MFLogger::ConsoleLogger::info(logStr);
 
     osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
      
     tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
-    std::string texturePath = getTextureDir() + fileName;    // FIXME: platform independent path concat
-    texturePath = MFFile::convertPathToCanonical(texturePath);
+    std::string filePath = MFFile::convertPathToCanonical(getTextureDir() + fileName);  // FIXME: platform independent path concat
+    std::string fileLocation = mFileSystem->getFileLocation(filePath);
 
-    std::string fileLocation = mFileSystem->getFileLocation(texturePath);
+    std::string filePathAlpha;
+    std::string fileLocationAlpha;
+
+    if (alphaTexture)
+    {
+        filePathAlpha = MFFile::convertPathToCanonical(getTextureDir() + fileNameAlpha);
+        fileLocationAlpha = mFileSystem->getFileLocation(filePathAlpha);
+    } 
 
     osg::ref_ptr<osg::Image> img;
 
     if (fileLocation.length() == 0)
     {
-        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName + ".");
+        MFLogger::ConsoleLogger::warn("Could not load texture.");
     }
     else
     {
         img = osgDB::readImageFile(fileLocation);
+
+        if (colorKey)
+        {
+            MFFormat::BMPInfo bmp;
+
+            std::ifstream bmpFile;
+            bmpFile.open(fileLocation);
+            bmp.load(bmpFile);
+            bmpFile.close();
+
+            osg::Vec3f transparentColor = osg::Vec3f(     
+                bmp.mTransparentColor.r / 255.0,
+                bmp.mTransparentColor.g / 255.0,
+                bmp.mTransparentColor.b / 255.0);
+
+            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.1 );
+        }
+
+        if (alphaTexture)
+        {
+            if (fileLocationAlpha.length() == 0)
+            {
+                MFLogger::ConsoleLogger::warn("Could not load alpha texture.");
+            }
+            else
+            {
+                osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
+                img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
+            }
+        }
+
         tex->setImage(img);
     }
 
@@ -204,29 +254,57 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
             osg::StateSet *stateSet = materials[i].get();
             auto mat = new osg::Material();
 
+            bool colorKey = model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
+
+            if (model->mMaterials[i].mTransparency < 1)
+            {
+                osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),model->mMaterials[i].mTransparency));
+
+                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);       
+                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
+            }
+
             char diffuseTextureName[255];
             memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
             diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
 
-            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName);
-
-            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE) );
-
-            if (!(model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
-                stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+            char alphaTextureName[255];
 
             if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
             {
-                char alphaTextureName[255];
                 memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
                 alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
 
-                /* TODO: load the texture as image and copy it to the alpha channel of the main
-                   texture, then set transparency on stateset and renderbin to transparent */
-
-                //osg::ref_ptr<osg::Texture2D> alphaTex = loadTexture(alphaTextureName);
-                //stateSet->setTextureAttributeAndModes(1, alphaTex.get(), osg::StateAttribute::ON || osg::StateAttribute::OVERRIDE);
+                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
             }
+            else
+            {
+                alphaTextureName[0] = 0;
+                stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+
+                if (colorKey)
+                {
+                    osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
+                    alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
+                    stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
+                    stateSet->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                }
+            }
+
+            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
+
+            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
+
+            if (!(model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
+                stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
 
             stateSet->setAttribute(mat);
             stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
@@ -250,8 +328,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             // TODO(zaklaus): Improve this, either distinguish collision faces
             // in the world or skip them entirely.
-            if (model->mMeshes[i].mMeshType != MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
-                transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
+
+            transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
         }
