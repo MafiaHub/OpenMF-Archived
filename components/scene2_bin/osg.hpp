@@ -4,15 +4,12 @@
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
-#include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
 #include <osg/Light>
 #include <osg/LightSource>
 #include <fstream>
 #include <algorithm>
-#include <4ds/parser.hpp>
-#include <4ds/osg.hpp>
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <osg/Material>
@@ -55,6 +52,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
         // TODO: disable culling for backdrop sector - skybox sometimes disappears
+        // TODO: also make skybox NOT cut off the scene, i.e. either scale it or use stencil buffer or something
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;

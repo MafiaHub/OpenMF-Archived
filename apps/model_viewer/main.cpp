@@ -1,10 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <4ds/parser.hpp>
-#include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
-#include <renderer/renderer_osg.hpp>
+#include <renderer/osg_renderer.hpp>
 #include <string.h>
 #include <stdlib.h>
 

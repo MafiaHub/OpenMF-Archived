@@ -1,21 +1,16 @@
 #ifndef RENDERER_OSG_H
 #define RENDERER_OSG_H
 
-#include <renderer/renderer_base.hpp>
+#include <renderer/base_renderer.hpp>
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 #include <4ds/osg.hpp>
-#include <4ds/parser.hpp>
-#include <scene2_bin/parser.hpp>
 #include <scene2_bin/osg.hpp>
-#include <osgDB/ReadFile>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
-#include <renderer/renderer_osg.hpp>
 #include <osgGA/TrackballManipulator>
-#include <vfs/vfs.hpp>
 
 namespace MFRender
 
