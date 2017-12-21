@@ -54,6 +54,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
+        // TODO: disable culling for backdrop sector - skybox sometimes disappears
+
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;
 

@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define DEFAULT_CAMERA_SPEED 7.0
+
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
     double cam[6];
@@ -54,8 +56,9 @@ int main(int argc, char** argv)
     options.add_options()
         ("h,help","Display help and exit.")
         ("i,input","Specify input, mission name by default.",cxxopts::value<std::string>())
-        ("s,scene","Specify scene2.bin file.",cxxopts::value<std::string>())
+        ("4,4ds","Load single 4ds model instead of mission.")
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
+        ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>());
 
@@ -64,6 +67,12 @@ int main(int argc, char** argv)
 
     bool cameraInfo = arguments.count("c") > 0;
     bool cameraPlace = arguments.count("p") > 0;
+    bool model = arguments.count("4") > 0;
+
+    double cameraSpeed = DEFAULT_CAMERA_SPEED;
+
+    if (arguments.count("s") > 0)
+        cameraSpeed = arguments["s"].as<double>();
 
     if (arguments.count("h") > 0)
     {
@@ -86,9 +95,14 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
-    renderer.loadMission(inputFile);
+
+    if (model)
+        renderer.loadSingleModel(inputFile);
+    else
+        renderer.loadMission(inputFile);
 
     renderer.setCameraParameters(true,fov,0,0.01,1000);
+    renderer.setFreeCameraSpeed(cameraSpeed);
 
     if (cameraPlace)
     {
