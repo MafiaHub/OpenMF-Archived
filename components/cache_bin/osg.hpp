@@ -30,10 +30,10 @@ namespace MFFormat
 class OSGCacheBinLoader : public OSGLoader
 {
 public:
-    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile);
+    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName = "");
 };
 
-osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
+osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -46,10 +46,10 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
 
     bool success = parser.load(srcFile);
 
+	std::map<std::string, osg::ref_ptr<osg::Group>> nodeMap;
+
     if (success)
     {
-        std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
-        
         for (auto object : parser.getObjects())
         {
             osg::ref_ptr<osg::Node> objectNode;
@@ -61,15 +61,11 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
         
             for(auto instance : object.mInstances)
             {
-                logStr += "model: " + instance.mModelName + " " + std::to_string(instance.mPos.x) + " " + std::to_string(instance.mPos.y) + " " + std::to_string(instance.mPos.z) + "\n";
+				objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
 
-                if ( modelMap.find(instance.mModelName) != modelMap.end() )   // model alreay loaded?
+                if (!objectNode)
                 {
-                    MFLogger::ConsoleLogger::info("already loaded, instancing\n");
-                    objectNode = modelMap[instance.mModelName];
-                }
-                else
-                {
+					logStr += "model: " + instance.mModelName + " " + std::to_string(instance.mPos.x) + " " + std::to_string(instance.mPos.y) + " " + std::to_string(instance.mPos.z) + "\n";
                     std::ifstream f;
                     
                     if (!mFileSystem->open(f,"MODELS/" + instance.mModelName))
@@ -78,10 +74,9 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
                     }
                     else
                     {
-                        objectNode = loader4DS.load(f);   
-                        modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
-                            (instance.mModelName,objectNode));
-                        f.close();
+						objectNode = loader4DS.load(f, instance.mModelName);
+						storeToCache(instance.mModelName, objectNode);
+						f.close();
                     }
                 }
                 
@@ -100,6 +95,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile)
 
                     objectTransform->addChild(objectNode);
                     group->addChild(objectTransform);
+					nodeMap.insert(nodeMap.begin(), std::pair<std::string, osg::ref_ptr<osg::Group>>(object.mObjectName, objectTransform));
                 }
             } // for
         }   // for      
