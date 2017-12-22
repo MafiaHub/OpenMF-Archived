@@ -10,7 +10,7 @@ namespace MFFormat    // TODO: MFFormat or MFRender?
 {
 
 /**
-  Serves to only load resources (models, textures) at most once.
+  \brief Serves to only load resources (models, textures) at most once.
 */
 
 class OSGLoaderCache

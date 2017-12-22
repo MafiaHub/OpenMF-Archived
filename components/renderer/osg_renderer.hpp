@@ -13,8 +13,8 @@
 #include <osgGA/TrackballManipulator>
 #include <loader_cache.hpp>
 #include <osgViewer/ViewerEventHandlers>
-
 #include <osgUtil/Optimizer>
+#include <osg/Fog>
 
 namespace MFRender
 
@@ -83,9 +83,7 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
 mFileSystem->addPath("../mafia/");
 
-    //mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );  // not working?
-    mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES );
-    mViewer->getCamera()->setNearFarRatio(0.0001);
+    mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
@@ -158,6 +156,15 @@ bool OSGRenderer::loadMission(std::string mission)
 
     file4DS.close();
     fileScene2Bin.close();
+
+    osg::ref_ptr<osg::Fog> fog = new osg::Fog;
+
+    fog->setMode(osg::Fog::LINEAR);
+    fog->setStart(300);
+    fog->setEnd(1500);
+    fog->setColor(osg::Vec4f(0.4,0.4,0.4,1));
+
+    mRootNode->getOrCreateStateSet()->setAttributeAndModes(fog,osg::StateAttribute::ON);
 
     optimize();
 

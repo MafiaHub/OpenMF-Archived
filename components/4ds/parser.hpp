@@ -33,7 +33,7 @@ public:
 
     typedef enum
     {
-        MESHTYPE_STANDARD = 0x01,
+        MESHTYPE_STANDARD = 0x01,  // visual mesh
         MESHTYPE_COLLISION = 0x02, // NOTE(zaklaus): Imaginary type based on mesh name "wcol*"
         MESHTYPE_SECTOR = 0x05,
         MESHTYPE_DUMMY = 0x06,
@@ -43,14 +43,14 @@ public:
 
     typedef enum
     {
-        VISUALMESHTYPE_STANDARD = 0x0,
-        VISUALMESHTYPE_SINGLEMESH = 0x02,
-        VISUALMESHTYPE_SINGLEMORPH = 0x03,
-        VISUALMESHTYPE_BILLBOARD = 0x04,
-        VISUALMESHTYPE_MORPH = 0x05,
+        VISUALMESHTYPE_STANDARD = 0x0,      // normal mesh
+        VISUALMESHTYPE_SINGLEMESH = 0x02,   // mesh with bones
+        VISUALMESHTYPE_SINGLEMORPH = 0x03,  // combination of morph and skeletal animation?
+        VISUALMESHTYPE_BILLBOARD = 0x04,    // billboarding mesh (rotates towards camera
+        VISUALMESHTYPE_MORPH = 0x05,        // mesh with morphing (non-skeletal) animation
         VISUALMESHTYPE_GLOW = 0x06,
         VISUALMESHTYPE_MIRROR = 0x08
-    } VisualMeshType;
+    } VisualMeshType;                       // subtype of mesh, when MeshType == MESHTYPE_STANDARD
 
     typedef enum
     {

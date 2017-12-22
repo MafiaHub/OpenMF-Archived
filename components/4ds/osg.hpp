@@ -66,7 +66,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     tex->setWrap(osg::Texture::WRAP_S,osg::Texture::REPEAT);
     tex->setWrap(osg::Texture::WRAP_T,osg::Texture::REPEAT);
 
-    std::string filePath = MFFile::convertPathToCanonical(getTextureDir() + fileName);  // FIXME: platform independent path concat
+    std::string filePath = MFFile::convertPathToCanonical(getTextureDir() + fileName);
     std::string fileLocation = mFileSystem->getFileLocation(filePath);
 
     std::string filePathAlpha;
