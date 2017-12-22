@@ -105,6 +105,8 @@ bool WalkManipulator::handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIAc
     moveUp(mUp * dist);
 
     mLastFrameTime = timeNow;
+
+	return true;
 }
 
 }
