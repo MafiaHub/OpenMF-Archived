@@ -144,6 +144,7 @@ bool OSGRenderer::loadMission(std::string mission)
 
     l4ds.setLoaderCache(&mLoaderCache);
     lScene2.setLoaderCache(&mLoaderCache);
+	lCache.setLoaderCache(&mLoaderCache);
 
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
@@ -176,7 +177,7 @@ bool OSGRenderer::loadMission(std::string mission)
 
     mRootNode->getOrCreateStateSet()->setAttributeAndModes(fog,osg::StateAttribute::ON);
 
-    optimize();
+    //optimize();
 
     return true;
 }
