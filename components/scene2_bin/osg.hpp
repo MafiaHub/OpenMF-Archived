@@ -26,10 +26,10 @@ namespace MFFormat
 class OSGScene2BinLoader : public OSGLoader
 {
 public:
-    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile);
+    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
 };
 
-osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -45,8 +45,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     if (success)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
-
-        std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
 
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
         MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
@@ -76,7 +74,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         defaultLightNode->getLight()->setLightNum( lightNumber++ );
         defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.5,0.5,0.5,1.0) );
         group->addChild( defaultLightNode );
-
 
         for (auto pair : parser.getObjects())
         {
@@ -137,24 +134,20 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 {
                     logStr += "model: " + object.mModelName;
 
-                    if ( modelMap.find(object.mModelName) != modelMap.end() )   // model alreay loaded?
-                    {
-                        MFLogger::ConsoleLogger::info("already loaded, instancing");
-                        objectNode = modelMap[object.mModelName];
-                    }
-                    else
+                    objectNode = (osg::Node *) getFromCache(object.mModelName).get();
+
+                    if (!objectNode)
                     {
                         std::ifstream f;
                         
-                        if (!mFileSystem->open(f,"MODELS/" + object.mModelName))
+                        if (!mFileSystem->open(f,"models/" + object.mModelName))
                         {
                             MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".");
                         }
                         else
                         {
-                            objectNode = loader4DS.load(f);   
-                            modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
-                                (object.mModelName,objectNode));
+                            objectNode = loader4DS.load(f,object.mModelName);   
+                            storeToCache(object.mModelName,objectNode);
                             f.close();
                         }
                     }

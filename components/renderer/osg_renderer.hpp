@@ -11,6 +11,7 @@
 #include <osg/LightModel>
 #include <loggers/console.hpp>
 #include <osgGA/TrackballManipulator>
+#include <loader_cache.hpp>
 
 namespace MFRender
 
@@ -36,6 +37,7 @@ protected:
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
     MFUtil::WalkManipulator *mCameraManipulator;
+    MFFormat::OSGLoaderCache mLoaderCache;
 };
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
@@ -104,6 +106,8 @@ void OSGRenderer::setFreeCameraSpeed(double newSpeed)
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
+    // FIXME: looks like near/far setting doesn't work - OSG automatically computes them from viewport - turn it off
+
     osg::Camera *camera = mViewer->getCamera();
 
     if (perspective)
@@ -127,6 +131,9 @@ bool OSGRenderer::loadMission(std::string mission)
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
+    l4ds.setLoaderCache(&mLoaderCache);
+    lScene2.setLoaderCache(&mLoaderCache);
+
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
 
@@ -149,6 +156,8 @@ bool OSGRenderer::loadSingleModel(std::string model)
 {
     std::ifstream file4DS;
     MFFormat::OSG4DSLoader l4ds;
+
+    l4ds.setLoaderCache(&mLoaderCache);
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
