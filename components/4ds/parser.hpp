@@ -328,6 +328,8 @@ public:
         {
             case ERROR_SIGNATURE: return "Wrong 4ds signature";
         }
+
+		return "Unknown error";
     }
 
 protected:

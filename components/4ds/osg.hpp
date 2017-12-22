@@ -119,6 +119,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
         }
 
         tex->setImage(img);
+		tex->setMaxAnisotropy(16.0f);
     }
 
     storeToCache(textureIdentifier,tex);
