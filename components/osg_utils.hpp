@@ -144,6 +144,8 @@ bool WalkManipulator::handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIAc
     moveUp(mUp * dist);
 
     mLastFrameTime = timeNow;
+
+	return true;
 }
 
 osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg)
