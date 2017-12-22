@@ -1,28 +1,7 @@
 #ifndef OSG_CACHE_BIN_LOADER_H
 #define OSG_CACHE_BIN_LOADER_H
 
-#include <osg/Node>
-#include <osg/Geometry>
-#include <osg/MatrixTransform>
-#include <osg/Geode>
-#include <osg/Texture2D>
-#include <osg/ShapeDrawable>
-#include <osg/Light>
-#include <osg/LightSource>
-#include <fstream>
-#include <algorithm>
-#include <4ds/parser.hpp>
-#include <4ds/osg.hpp>
 #include <cache_bin/parser.hpp>
-#include <loggers/console.hpp>
-#include <osg/Material>
-#include <utils.hpp>
-#include <osg_utils.hpp>
-#include <base_loader.hpp>
-#include <osgText/Text3D>
-#include <osgText/Font3D>
-#include <osg/Billboard>
-
 
 namespace MFFormat
 {
