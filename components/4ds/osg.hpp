@@ -166,6 +166,12 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", instanced: " + std::to_string(mesh->mStandard.mInstanced));
 
+    if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
+    {
+        osg::ref_ptr<osg::Node> emptyNode;
+        return emptyNode;
+    }
+
     const float maxDistance = 10000000.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
 
@@ -266,6 +272,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
+            // FIXME: this is big now, move to a separate function
             materials.push_back(new osg::StateSet());
 
             osg::StateSet *stateSet = materials[i].get();
@@ -345,7 +352,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
             // TODO(zaklaus): Improve this, either distinguish collision faces
             // in the world or skip them entirely.
-
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
