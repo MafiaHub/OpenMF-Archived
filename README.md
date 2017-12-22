@@ -7,3 +7,5 @@ We respect copyrights and intelectual property and you need to own the original 
 The project is in very early stage and cannot offer much at the moment. If you want to help, feel free to join us.
 
 ![](https://github.com/OpenMafia/openmf/blob/master/resources/screen.jpg?raw=true)
+
+![](https://github.com/OpenMafia/openmf/blob/master/resources/screen2.jpg?raw=true)

@@ -108,7 +108,7 @@ bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::
     if (fileLocation.length() == 0)
         return false;
 
-    file.open(fileLocation);
+    file.open(fileLocation, std::ios::binary);
     return file.good();
 
     // TODO(zaklaus): Otherwise, search inside DTA archives...

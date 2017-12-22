@@ -20,16 +20,18 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
+#include <osg/Fog>
+
 namespace MFFormat
 {
 
 class OSGScene2BinLoader : public OSGLoader
 {
 public:
-    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile);
+    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
 };
 
-osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -46,13 +48,10 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
-        std::map<std::string,osg::ref_ptr<osg::Node>> modelMap;  // for instancing already loaded models
-
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
-        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
+            MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
-        // TODO: disable culling for backdrop sector - skybox sometimes disappears
-        // TODO: also make skybox NOT cut off the scene, i.e. either scale it or use stencil buffer or something
+        cameraRel->setCullingActive(false);
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;
@@ -60,13 +59,20 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
         mat->setColorMode(osg::Material::OFF);
         cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
-        osg::StateAttribute::ON |
-        osg::StateAttribute::OVERRIDE);
+            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        group->addChild(cameraRel);
-        
+        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform();
+
+        // FIXME: better use stencil buffer so that skybox doesn't z-fight with the sun
+        trans->setMatrix(osg::Matrixd::scale(osg::Vec3f(10,10,10)));   // so that the skybox doesn't cut the scene off
+
+        trans->addChild(cameraRel);
+
+        cameraRel->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
+
+        group->addChild(trans);
+ 
         unsigned int lightNumber = 0;
-
      
         // TMP: add default light until game lights are correctly handled
         osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
@@ -74,7 +80,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
         defaultLightNode->getLight()->setLightNum( lightNumber++ );
         defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.5,0.5,0.5,1.0) );
         group->addChild( defaultLightNode );
-
 
         for (auto pair : parser.getObjects())
         {
@@ -135,24 +140,20 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile)
                 {
                     logStr += "model: " + object.mModelName;
 
-                    if ( modelMap.find(object.mModelName) != modelMap.end() )   // model alreay loaded?
-                    {
-                        MFLogger::ConsoleLogger::info("already loaded, instancing");
-                        objectNode = modelMap[object.mModelName];
-                    }
-                    else
+                    objectNode = (osg::Node *) getFromCache(object.mModelName).get();
+
+                    if (!objectNode)
                     {
                         std::ifstream f;
                         
-                        if (!mFileSystem->open(f,"MODELS/" + object.mModelName))
+                        if (!mFileSystem->open(f,"models/" + object.mModelName))
                         {
                             MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".");
                         }
                         else
                         {
-                            objectNode = loader4DS.load(f);   
-                            modelMap.insert(modelMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Node>>
-                                (object.mModelName,objectNode));
+                            objectNode = loader4DS.load(f,object.mModelName);   
+                            storeToCache(object.mModelName,objectNode);
                             f.close();
                         }
                     }
