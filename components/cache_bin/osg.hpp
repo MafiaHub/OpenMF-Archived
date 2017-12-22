@@ -42,7 +42,6 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
     MFFormat::DataFormatCacheBIN parser;
 
     MFFormat::OSG4DSLoader loader4DS;
-    loader4DS.setBaseDir(mBaseDir);
 
     bool success = parser.load(srcFile);
 
