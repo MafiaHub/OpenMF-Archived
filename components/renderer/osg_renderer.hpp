@@ -95,7 +95,7 @@ mFileSystem->addPath("../mafia/");
     mRootNode = new osg::Group();
     mViewer->setSceneData(mRootNode);
 
-    mViewer->setUpViewInWindow(0,0,1024,768); 
+    mViewer->setUpViewInWindow(40,40,1024,768); 
 
     if (!mViewer->isRealized())
         mViewer->realize();
