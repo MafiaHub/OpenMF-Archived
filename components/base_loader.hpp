@@ -5,6 +5,7 @@
 #include <fstream>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
+#include <loader_cache.hpp>
 
 namespace MFFormat
 {
@@ -13,9 +14,19 @@ class OSGLoader
 {
 public:
     OSGLoader();
-    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile)=0;
-    osg::ref_ptr<osg::Node> loadFile(std::string fileName);          // overloading load() didn't work somehow - why?
+
+    /**
+        Load given object into OSG node.
+
+        @param srcFile    file stream to load the object from
+        @param fileName   optional file name that serves to reuse already loaded objects from cache
+    */
+    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile,std::string fileName="")=0;
+
+    osg::ref_ptr<osg::Node> loadFile(std::string fileName);                                   // overloading load() didn't work somehow - why?
     void setBaseDir(std::string baseDir);
+
+    void setLoaderCache(OSGLoaderCache *cache) { mLoaderCache = cache; };
 
     osg::Vec3f toOSG(MFFormat::DataFormat::Vec3 v);
     osg::Quat toOSG(MFFormat::DataFormat::Quat q);
@@ -35,7 +46,28 @@ protected:
 
     osg::Matrixd mMafiaToOSGMatrix;
     osg::Matrixd mMafiaToOSGMatrixInvert;
+
+    OSGLoaderCache *mLoaderCache;   ///< Derived classes should make use of the cache with getFromChache/storeToCache.
+
+    osg::ref_ptr<osg::Referenced> getFromCache(std::string identifier);
+    void storeToCache(std::string identifier,osg::ref_ptr<osg::Referenced> obj);
 };
+
+osg::ref_ptr<osg::Referenced> OSGLoader::getFromCache(std::string identifier)
+{
+    if (mLoaderCache)
+        return mLoaderCache->getObject(identifier);
+
+    osg::ref_ptr<osg::Referenced> result;
+
+    return result;
+}
+
+void OSGLoader::storeToCache(std::string identifier,osg::ref_ptr<osg::Referenced> obj)
+{
+    if (mLoaderCache)
+        mLoaderCache->storeObject(identifier,obj);
+}
 
 osg::Vec3f OSGLoader::toOSG(MFFormat::DataFormat::Vec3 v)
 {
@@ -54,6 +86,7 @@ osg::Quat OSGLoader::toOSG(MFFormat::DataFormat::Quat q)
 OSGLoader::OSGLoader()
 {
     mBaseDir = "";
+    mLoaderCache = 0;
     mFileSystem = MFFile::FileSystem::getInstance();
 
     mMafiaToOSGMatrix.makeScale(osg::Vec3f(1,1,-1));
@@ -103,7 +136,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
 
     if (f.is_open())
     {
-        n = load(f);
+        n = load(f,fileName);
         f.close();
     }
     else

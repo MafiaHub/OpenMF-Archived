@@ -11,6 +11,10 @@
 #include <osg/LightModel>
 #include <loggers/console.hpp>
 #include <osgGA/TrackballManipulator>
+#include <loader_cache.hpp>
+#include <osgViewer/ViewerEventHandlers>
+
+#include <osgUtil/Optimizer>
 
 namespace MFRender
 
@@ -36,6 +40,10 @@ protected:
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
     MFUtil::WalkManipulator *mCameraManipulator;
+    MFFormat::OSGLoaderCache mLoaderCache;
+
+void optimize();
+
 };
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
@@ -81,6 +89,10 @@ mFileSystem->addPath("../mafia/");
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
+    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
+    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
+    mViewer->addEventHandler(statshandler);
+
     mRootNode = new osg::Group();
     mViewer->setSceneData(mRootNode);
 
@@ -104,6 +116,8 @@ void OSGRenderer::setFreeCameraSpeed(double newSpeed)
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
+    // FIXME: looks like near/far setting doesn't work - OSG automatically computes them from viewport - turn it off
+
     osg::Camera *camera = mViewer->getCamera();
 
     if (perspective)
@@ -127,6 +141,9 @@ bool OSGRenderer::loadMission(std::string mission)
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
 
+    l4ds.setLoaderCache(&mLoaderCache);
+    lScene2.setLoaderCache(&mLoaderCache);
+
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
 
@@ -142,13 +159,51 @@ bool OSGRenderer::loadMission(std::string mission)
     file4DS.close();
     fileScene2Bin.close();
 
+    optimize();
+
     return true;
+}
+
+void OSGRenderer::optimize()
+{
+    // TODO(drummy): I went crazy with optimization, but this will probably
+    // need to be changed once we want to have dynamic objects etc.
+
+    MFLogger::ConsoleLogger::info("optimizing");
+
+    osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
+    osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
+    osgUtil::Optimizer::CombineStaticTransformsVisitor transformCombiner;
+    osgUtil::Optimizer::RemoveRedundantNodesVisitor redundantRemover;
+    osgUtil::Optimizer::RemoveEmptyNodesVisitor emptyRemover;
+    osgUtil::Optimizer::StateVisitor stateOptimizer(true,true,true);
+    osgUtil::Optimizer::StaticObjectDetectionVisitor staticDetector;
+    osgUtil::Optimizer::CopySharedSubgraphsVisitor subgraphCopier;
+    osgUtil::Optimizer::MergeGeometryVisitor geometryMerger;
+    osgUtil::Optimizer::MergeGeodesVisitor geodesMerger;
+    osgUtil::Optimizer::TessellateVisitor tesselator;
+    osgUtil::Optimizer::MakeFastGeometryVisitor geometryOptimizer;
+
+    mRootNode->accept(staticDetector);
+    mRootNode->accept(redundantRemover);
+    mRootNode->accept(emptyRemover);
+//    mRootNode->accept(subgraphCopier);
+    mRootNode->accept(flattener);
+//    mRootNode->accept(transformCombiner);
+    mRootNode->accept(geometryOptimizer);
+//    mRootNode->accept(tesselator);
+//    mRootNode->accept(geometryMerger);
+    mRootNode->accept(geodesMerger);
+//    mRootNode->accept(stateOptimizer);
+    mRootNode->accept(sceneBalancer);
 }
 
 bool OSGRenderer::loadSingleModel(std::string model)
 {
     std::ifstream file4DS;
     MFFormat::OSG4DSLoader l4ds;
+
+    l4ds.setLoaderCache(&mLoaderCache);
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
@@ -159,6 +214,8 @@ bool OSGRenderer::loadSingleModel(std::string model)
     mRootNode->addChild( l4ds.load(file4DS) );
 
     file4DS.close();
+
+    optimize();
 
     return true;
 }

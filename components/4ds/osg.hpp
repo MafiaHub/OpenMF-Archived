@@ -26,7 +26,7 @@ namespace MFFormat
 class OSG4DSLoader: public OSGLoader
 {
 public:
-    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile) override;
+    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="") override;
 
 protected:
     typedef std::vector<osg::ref_ptr<osg::StateSet>> MaterialList;
@@ -43,6 +43,13 @@ protected:
 
 osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
 {
+    std::string textureIdentifier = fileName + ";" + fileNameAlpha + ";" + (colorKey ? "1" : "0");
+
+    osg::ref_ptr<osg::Texture2D> cached = (osg::Texture2D *) getFromCache(textureIdentifier).get();   
+    
+    if (cached)
+        return cached;
+
     std::string logStr = "loading texture " + fileName;
 
     bool alphaTexture = fileNameAlpha.length() > 0;
@@ -114,6 +121,8 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
         tex->setImage(img);
     }
 
+    storeToCache(textureIdentifier,tex);
+
     return tex;
 }
 
@@ -156,6 +165,12 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         "  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", instanced: " + std::to_string(mesh->mStandard.mInstanced));
+
+    if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
+    {
+        osg::ref_ptr<osg::Node> emptyNode;
+        return emptyNode;
+    }
 
     const float maxDistance = 10000000.0;
     const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
@@ -214,10 +229,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
             static_cast<int>(materials.size() - 1),
             meshLOD->mFaceGroups[i].mMaterialID - 1));
 
-// TODO: set default material when materialID = 0
-// or no materials are defined in .4ds file
-		if(materials.size() > 0)
-				faceGroup->setStateSet(materials[materialID]);
+        // TODO: set default material when materialID = 0
+        // or no materials are defined in .4ds file
+        if(materials.size() > 0)
+            faceGroup->setStateSet(materials[materialID]);
 
         group->addChild(faceGroup);
     }
@@ -225,8 +240,16 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
     return group;
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
+osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string fileName)
 {
+    if (fileName.length() > 0)
+    {
+        osg::ref_ptr<osg::Node> cached = (osg::Node *) getFromCache(fileName).get();   
+
+        if (cached)
+            return cached;
+    }
+
     std::string logStr = "loading model";
 
     MFFormat::DataFormat4DS format;
@@ -249,6 +272,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
+            // FIXME: this is big now, move to a separate function
             materials.push_back(new osg::StateSet());
 
             osg::StateSet *stateSet = materials[i].get();
@@ -328,7 +352,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
 
             // TODO(zaklaus): Improve this, either distinguish collision faces
             // in the world or skip them entirely.
-
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
@@ -344,6 +367,9 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile)
                 meshes[parentID - 1]->addChild(meshes[i]);
         }
     }
+
+    if (fileName.length() > 0)
+        storeToCache(fileName,group);
 
     return group;
 }
