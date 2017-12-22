@@ -58,6 +58,7 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
+		("b,base-dir", "Specify base game directory.", cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>());
 
     options.parse_positional({"i"});
@@ -89,6 +90,9 @@ int main(int argc, char** argv)
 
     if (arguments.count("f") > 0)
         fov = arguments["f"].as<int>();
+
+	if (arguments.count("b") > 0)
+		MFFile::FileSystem::getInstance()->addPath(arguments["b"].as<std::string>());
 
     std::string inputFile = arguments["i"].as<std::string>();
 
