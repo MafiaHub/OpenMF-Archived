@@ -12,6 +12,7 @@
 #include <loggers/console.hpp>
 #include <osgGA/TrackballManipulator>
 #include <loader_cache.hpp>
+#include <osgViewer/ViewerEventHandlers>
 
 namespace MFRender
 
@@ -82,6 +83,10 @@ mFileSystem->addPath("../mafia/");
     mViewer->getCamera()->setNearFarRatio(0.0001);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
+
+    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
+    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
+    mViewer->addEventHandler(statshandler);
 
     mRootNode = new osg::Group();
     mViewer->setSceneData(mRootNode);
