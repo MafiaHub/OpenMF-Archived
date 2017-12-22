@@ -83,9 +83,7 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
 mFileSystem->addPath("../mafia/");
 
-    //mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR );  // not working?
-    mViewer->getCamera()->setComputeNearFarMode( osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES );
-    mViewer->getCamera()->setNearFarRatio(0.0001);
+    mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
