@@ -177,7 +177,7 @@ bool OSGRenderer::loadMission(std::string mission)
 
     mRootNode->getOrCreateStateSet()->setAttributeAndModes(fog,osg::StateAttribute::ON);
 
-    //optimize();
+    optimize();
 
     return true;
 }
