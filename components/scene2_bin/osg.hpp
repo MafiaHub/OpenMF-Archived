@@ -20,6 +20,8 @@
 #include <osgText/Font3D>
 #include <osg/Billboard>
 
+#include <osg/Fog>
+
 namespace MFFormat
 {
 
@@ -47,7 +49,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
         osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
-        MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
+            MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
         cameraRel->setCullingActive(false);
 
@@ -57,12 +59,16 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
         mat->setColorMode(osg::Material::OFF);
         cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
-        osg::StateAttribute::ON |
-        osg::StateAttribute::OVERRIDE);
+            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform();
+
+        // FIXME: better use stencil buffer so that skybox doesn't z-fight with the sun
         trans->setMatrix(osg::Matrixd::scale(osg::Vec3f(10,10,10)));   // so that the skybox doesn't cut the scene off
+
         trans->addChild(cameraRel);
+
+        cameraRel->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
         group->addChild(trans);
  
