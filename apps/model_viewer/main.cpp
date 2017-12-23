@@ -58,7 +58,7 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
-		("v,verbosity","Sets log verbosity output.", cxxopts::value<uint8_t>())
+		("v,verbosity","Sets log verbosity output.")
 		("b,base-dir", "Specify base game directory.", cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>());
 
