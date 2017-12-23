@@ -12,8 +12,8 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
     std::cout << "number of files: " << dta.getNumFiles() << std::endl;
     std::cout << "file list:" << std::endl;
 
-    std::vector<MFFormat::DataFormatDTA::ContentHeader> ch = dta.getContentHeaders();
-    std::vector<MFFormat::DataFormatDTA::DataHeader> dh = dta.getDataHeaders();
+    std::vector<MFFormat::DataFormatDTA::FileTableRecord> ftr = dta.getFileTableRecords();
+    std::vector<MFFormat::DataFormatDTA::DataFileHeader> dfh = dta.getDataFileHeaders();
 
     for (int i = 0; i < dta.getNumFiles(); ++i)
     {
@@ -26,9 +26,8 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 
         if (verbose)
         {
-            std::cout << "  " << ch[i].mUnknown << " " << ch[i].mDataOffset << " " << ch[i].mDataEnd << " " <<
-            dh[i].mUnknown << " " << dh[i].mUnknown2 << " " << dh[i].mUnknown3 << " " << dh[i].mUnknown4 << " " <<
-            dh[i].mUnknown6 << std::endl;
+            std::cout << "  " << ftr[i].mFileNameChecksum << " " << ftr[i].mFileNameLength << " " << ftr[i].mDataOffset <<
+            " " << ftr[i].mDataEnd << " " << dfh[i].mUnknown << " " << dfh[i].mUnknown2 << " " << dfh[i].mTimeStamp << " " << std::endl;
         } 
     }
 }

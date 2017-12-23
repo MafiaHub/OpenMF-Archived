@@ -54,12 +54,11 @@ public:
     {
         uint32_t mUnknown;
         uint32_t mUnknown2;
-        uint32_t mUnknown3;
-        uint32_t mUnknown4;
+        uint64_t mTimeStamp;
         uint32_t mSize;
-        uint32_t mUnknown6;
+        uint32_t mCompressedBlockCount;
         unsigned char mNameLength;
-        unsigned char mUnknown7[7];
+        unsigned char mFlags[7];
         unsigned char mName[256];
     } DataFileHeader;
 
