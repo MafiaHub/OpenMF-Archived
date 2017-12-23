@@ -42,6 +42,7 @@ public:
     std::string getFileLocation(std::string fileName);
 
     void                     addPath(std::string path);
+	void                     prependPath(std::string path);
     size_t                   getNumPaths()             { return mSearchPaths.size(); }
     std::vector<std::string> getPaths()          const { return mSearchPaths; }
 
@@ -49,6 +50,8 @@ private:
     FileSystem();                             // hide the constructor
     FileSystem(FileSystem const&);            // hide the copy constructor
     FileSystem& operator=(FileSystem const&); // hide the assign operator
+
+	void addPath(std::string path, size_t index);
 
     std::vector<std::string> mSearchPaths;
 };
@@ -67,12 +70,22 @@ FileSystem::FileSystem()
 #endif
 };
 
+void FileSystem::prependPath(std::string path)
+{
+	addPath(path, 0);
+}
+
 void FileSystem::addPath(std::string path)
+{
+	addPath(path, mSearchPaths.size());
+}
+
+void FileSystem::addPath(std::string path, size_t index)
 {
     if (path[path.length() - 1] == '/')
         path.erase(path.length() - 1,1);            
 
-    mSearchPaths.push_back(path);
+	mSearchPaths.insert(mSearchPaths.begin() + index, path);
 }
 
 void FileSystem::initDTA()
@@ -101,6 +114,7 @@ std::string FileSystem::getFileLocation(std::string fileName)
 
 bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
+	mode;
     fileName = convertPathToCanonical(fileName);
 
     std::string fileLocation = getFileLocation(fileName);    

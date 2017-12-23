@@ -77,7 +77,7 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
-    MFLogger::ConsoleLogger::info("initiating OSG renderer");
+    MFLogger::ConsoleLogger::info("renderer", "initiating OSG renderer");
     mViewer = new osgViewer::Viewer();
                 
     mFileSystem = MFFile::FileSystem::getInstance();
@@ -115,6 +115,7 @@ void OSGRenderer::setFreeCameraSpeed(double newSpeed)
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
+	orthoSize;
     // FIXME: looks like near/far setting doesn't work - OSG automatically computes them from viewport - turn it off
 
     osg::Camera *camera = mViewer->getCamera();
@@ -151,10 +152,10 @@ bool OSGRenderer::loadMission(std::string mission)
     std::ifstream fileCacheBin;
 
     if (!mFileSystem->open(file4DS,scene4dsPath))
-        MFLogger::ConsoleLogger::warn("Couldn not open 4ds file: " + scene4dsPath + ".");
+        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open 4ds file: " + scene4dsPath + ".");
 
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
-        MFLogger::ConsoleLogger::warn("Couldn not open scene2.bin file: " + scene2BinPath + ".");
+        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open scene2.bin file: " + scene2BinPath + ".");
 
     mRootNode->addChild( l4ds.load(file4DS) );
     mRootNode->addChild( lScene2.load(fileScene2Bin) );
@@ -187,7 +188,7 @@ void OSGRenderer::optimize()
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
 
-    MFLogger::ConsoleLogger::info("optimizing");
+    MFLogger::ConsoleLogger::info("renderer", "optimizing");
 
     osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
     osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
@@ -225,7 +226,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
-        MFLogger::ConsoleLogger::warn("Couldn not open 4ds file: " + model + ".");
+        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open 4ds file: " + model + ".");
         return false;
     }
      

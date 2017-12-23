@@ -35,7 +35,7 @@ osg::ref_ptr<osg::Referenced> OSGLoaderCache::getObject(std::string identifier)
     osg::ref_ptr<osg::Referenced> result = mObjects[identifier];
 
     if (result)
-        MFLogger::ConsoleLogger::info("loading cached: " + identifier);
+        MFLogger::ConsoleLogger::info("asset", "loading cached: " + identifier);
 
     return result;
 }

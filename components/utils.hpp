@@ -89,7 +89,7 @@ size_t peekLength(std::ifstream &file)
             return len;
         }    
     }
-    return -1;
+    return 0;
 }
 
 }

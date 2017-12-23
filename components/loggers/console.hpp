@@ -8,58 +8,67 @@
 namespace MFLogger
 {
 
-class ConsoleLogger : Logger 
+class ConsoleLogger : public Logger 
 {
 public:
-    virtual void print_raw(std::string str) override;
-    virtual void print_info(std::string str) override;
-    virtual void print_warn(std::string str) override;
-    virtual void print_fatal(std::string str) override;
+    virtual void print_raw  (std::string id, std::string str) override;
+    virtual void print_info (std::string id, std::string str) override;
+    virtual void print_warn (std::string id, std::string str) override;
+    virtual void print_fatal(std::string id, std::string str) override;
 
-    static void raw(std::string str);
-    static void info(std::string str);
-    static void warn(std::string str);
-    static void fatal(std::string str);
+	static ConsoleLogger *getInstance()
+	{
+		static ConsoleLogger logger;
+		return &logger;
+	}
+
+    static void raw(std::string id, std::string str);
+    static void info(std::string id, std::string str);
+    static void warn(std::string id, std::string str);
+    static void fatal(std::string id, std::string str);
 };
 
-void ConsoleLogger::raw(std::string str)
+void ConsoleLogger::raw(std::string id, std::string str)
 {
-    std::cout << str << std::endl;
+	getInstance()->print_raw(id, str);
 }
 
-void ConsoleLogger::info(std::string str)
+void ConsoleLogger::info(std::string id, std::string str)
 {
-    std::cout << "[INFO] " << str << std::endl;
+	getInstance()->print_info(id, str);
 }
 
-void ConsoleLogger::warn(std::string str)
+void ConsoleLogger::warn(std::string id, std::string str)
 {
-    std::cout << "[WARN] " << str << std::endl;
+	getInstance()->print_warn(id, str);
 }
 
-void ConsoleLogger::fatal(std::string str)
+void ConsoleLogger::fatal(std::string id, std::string str)
 {
-    std::cout << "[FATAL] " << str << std::endl;
+	getInstance()->print_fatal(id, str);
 }
 
-void ConsoleLogger::print_raw(std::string str)
+void ConsoleLogger::print_raw(std::string id, std::string str)
 {
-    ConsoleLogger::raw(str);
+	std::cout << str << std::endl;
 }
 
-void ConsoleLogger::print_info(std::string str)
+void ConsoleLogger::print_info(std::string id, std::string str)
 {
-    ConsoleLogger::info(str);
+	if (canPrint(id, LOG_VERBOSITY_INFO))
+		std::cout << "[INFO] " << str << std::endl;
 }
 
-void ConsoleLogger::print_warn(std::string str)
+void ConsoleLogger::print_warn(std::string id, std::string str)
 {
-    ConsoleLogger::warn(str);
+	if (canPrint(id, LOG_VERBOSITY_WARN))
+		std::cout << "[WARN] " << str << std::endl;
 }
 
-void ConsoleLogger::print_fatal(std::string str)
+void ConsoleLogger::print_fatal(std::string id, std::string str)
 {
-    ConsoleLogger::fatal(str);
+	if (canPrint(id, LOG_VERBOSITY_FATAL))
+		std::cout << "[FATAL] " << str << std::endl;
 }
 
 }

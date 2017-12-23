@@ -61,7 +61,7 @@ bool DataFormatCacheBIN::load(std::ifstream &srcFile)
     Chunk newChunk = {};
     read(srcFile, &newChunk.mVersion);
 
-    while(srcFile.tellg() < newHeader.mSize - sizeof(uint32_t)) 
+    while((uint32_t)srcFile.tellg() < newHeader.mSize - sizeof(uint32_t)) 
     {
         Object newObject = {};
         uint32_t objectNameLength, modelNameLength;
@@ -78,7 +78,7 @@ bool DataFormatCacheBIN::load(std::ifstream &srcFile)
 
         size_t current_pos = srcFile.tellg();
         size_t header_size = sizeof(Header) + sizeof(uint32_t) + objectNameLength + 0x4C;
-        while(srcFile.tellg() < current_pos + newObject.mHeader.mSize - header_size)
+        while((uint32_t)srcFile.tellg() < current_pos + newObject.mHeader.mSize - header_size)
         {
             Instance newInstance = {};
 
