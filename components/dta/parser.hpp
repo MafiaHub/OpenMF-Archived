@@ -43,11 +43,11 @@ public:
 
     typedef struct
     {
-        uint16_t mFileNameChecksum;     
-        uint16_t mFileNameLength; 
-        uint32_t mDataOffset;
-        uint32_t mDataEnd;
-        char mNameHint[16];
+        uint16_t mFileNameChecksum;        // checksum of upper file name 
+        uint16_t mFileNameLength;
+        uint32_t mHeaderOffset;            // where DataFileHeader starts
+        uint32_t mDataOffset;              // where the data start
+        char mNameHint[16];                // file name, often incomplete
     } FileTableRecord;
 
     typedef struct
@@ -61,6 +61,25 @@ public:
         unsigned char mFlags[7];
         unsigned char mName[256];
     } DataFileHeader;
+
+    typedef struct
+    {
+        uint32_t mChunkId;
+        uint32_t mChunkSize;
+        uint32_t mType;
+
+        uint32_t mChunkId2;
+        uint32_t mChunkSize2;
+        uint16_t mTags;
+        uint16_t mChannels;
+        uint32_t mSamplesPerSecond;
+        uint32_t mBytesPerSecond;
+        uint16_t mBlockAlign;
+        uint16_t mSampleBits;
+
+        uint32_t mChunkId3;
+        uint32_t mChunkSize3;
+    } WavHeader;
 
     inline std::vector<FileTableRecord> getFileTableRecords() { return mFileTableRecords; };
     inline std::vector<DataFileHeader> getDataFileHeaders() { return mDataFileHeaders; };
@@ -131,7 +150,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     for (int i = 0; i < mFileTableRecords.size(); ++i)
     {
         DataFileHeader h;
-        srcFile.seekg(mFileTableRecords[i].mDataOffset);
+        srcFile.seekg(mFileTableRecords[i].mHeaderOffset);
         srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataFileHeader));
 
         if (!srcFile.good())
@@ -159,7 +178,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
     length = getFileSize(index);
     *dstBuffer = (char *) malloc(length);
 
-    unsigned int fileOffset = mFileTableRecords[index].mDataEnd + 5;   // why + 5?
+    unsigned int fileOffset = mFileTableRecords[index].mDataOffset + 5;   // why + 5?
     // TODO: some files are probably compressed
 
     srcFile.clear();
