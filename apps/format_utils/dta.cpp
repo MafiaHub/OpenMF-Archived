@@ -26,8 +26,9 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 
         if (verbose)
         {
-            std::cout << "  " << ftr[i].mFileNameChecksum << " " << ftr[i].mFileNameLength << " " << ftr[i].mDataOffset <<
-            " " << ftr[i].mDataEnd << " " << dfh[i].mUnknown << " " << dfh[i].mUnknown2 << " " << dfh[i].mTimeStamp << " " << std::endl;
+            std::cout << "  " << ftr[i].mFileNameChecksum << " " << ftr[i].mFileNameLength << " " << ftr[i].mHeaderOffset <<
+            " " << ftr[i].mDataOffset << " " << dfh[i].mUnknown << " " << dfh[i].mUnknown2 << " " << dfh[i].mTimeStamp << " "
+            << " " << dfh[i].mCompressedBlockCount << std::endl;
         } 
     }
 }

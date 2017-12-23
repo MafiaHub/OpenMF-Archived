@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_DTA_H
 
 #include <base_parser.hpp>
+#include <string.h>
 
 namespace MFFormat
 {
@@ -82,7 +83,7 @@ public:
     } WavHeader;
 
     inline std::vector<FileTableRecord> getFileTableRecords() { return mFileTableRecords; };
-    inline std::vector<DataFileHeader> getDataFileHeaders() { return mDataFileHeaders; };
+    inline std::vector<DataFileHeader>  getDataFileHeaders()  { return mDataFileHeaders;  };
 
 protected:
     FileHeader mFileHeader;
@@ -93,7 +94,7 @@ protected:
 }; 
 
 uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
-uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e};
+uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e };
 uint32_t DataFormatDTA::A2_KEYS[2] = {0x1417d340, 0xb6399e19};
 uint32_t DataFormatDTA::A3_KEYS[2] = {0xa94b8d3c, 0x771f3888};
 uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
@@ -178,13 +179,32 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
     length = getFileSize(index);
     *dstBuffer = (char *) malloc(length);
 
-    unsigned int fileOffset = mFileTableRecords[index].mDataOffset + 5;   // why + 5?
-    // TODO: some files are probably compressed
+    unsigned int fileOffset = mFileTableRecords[index].mDataOffset;
 
     srcFile.clear();
     srcFile.seekg(fileOffset);
-    srcFile.read(*dstBuffer,length);
-    decrypt(*dstBuffer,length,1);
+
+    unsigned int bufferPos = 0;
+
+    for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
+    {
+        uint16_t blockSize[2];
+        srcFile.read((char *) blockSize,4);
+
+        char *block = (char *) malloc(blockSize[0]);
+
+        srcFile.read(block,blockSize[0]);
+
+        decrypt(block,blockSize[0]);
+
+        // 1 is for 1 metadata byte
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize[0] - 1);
+        bufferPos += blockSize[0] - 1;
+
+        // TODO: decompress
+
+        free(block);
+    }
 }
 
 unsigned int DataFormatDTA::getFileSize(unsigned int index)
