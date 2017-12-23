@@ -42,7 +42,7 @@ public:
     std::string getFileLocation(std::string fileName);
 
     void                     addPath(std::string path);
-	void                     addBasePath(std::string path);
+	void                     prependPath(std::string path);
     size_t                   getNumPaths()             { return mSearchPaths.size(); }
     std::vector<std::string> getPaths()          const { return mSearchPaths; }
 
@@ -70,7 +70,7 @@ FileSystem::FileSystem()
 #endif
 };
 
-void FileSystem::addBasePath(std::string path)
+void FileSystem::prependPath(std::string path)
 {
 	addPath(path, 0);
 }

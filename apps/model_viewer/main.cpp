@@ -102,7 +102,7 @@ int main(int argc, char** argv)
         fov = arguments["f"].as<int>();
 
 	if (arguments.count("b") > 0)
-		MFFile::FileSystem::getInstance()->addBasePath(arguments["b"].as<std::string>());
+		MFFile::FileSystem::getInstance()->prependPath(arguments["b"].as<std::string>());
 
     std::string inputFile = arguments["i"].as<std::string>();
 
