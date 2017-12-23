@@ -58,6 +58,7 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
+		("v,verbosity","Sets log verbosity output.", cxxopts::value<uint8_t>())
 		("b,base-dir", "Specify base game directory.", cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>());
 
@@ -79,9 +80,18 @@ int main(int argc, char** argv)
         return 0;
     }
 
+	if (arguments.count("v") > 0)
+	{
+		MFLogger::ConsoleLogger::getInstance()->setVerbosity(MFLogger::LOG_VERBOSITY_INFO);
+	}
+	else
+	{
+		MFLogger::ConsoleLogger::getInstance()->setVerbosity(MFLogger::LOG_VERBOSITY_WARN);
+	}
+
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.");
+        MFLogger::ConsoleLogger::fatal("viewer", "Expected file.");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -92,7 +102,7 @@ int main(int argc, char** argv)
         fov = arguments["f"].as<int>();
 
 	if (arguments.count("b") > 0)
-		MFFile::FileSystem::getInstance()->addPath(arguments["b"].as<std::string>());
+		MFFile::FileSystem::getInstance()->addBasePath(arguments["b"].as<std::string>());
 
     std::string inputFile = arguments["i"].as<std::string>();
 
@@ -121,7 +131,7 @@ int main(int argc, char** argv)
         {
             if (infoCounter <= 0)
             {
-                MFLogger::ConsoleLogger::info("camera: " + getCameraString(&renderer));
+                MFLogger::ConsoleLogger::info("viewer", "camera: " + getCameraString(&renderer));
                 infoCounter = 30;
             }
             infoCounter--;

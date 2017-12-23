@@ -45,11 +45,11 @@ char const *getTypeName(size_t count, TypeName const *typeNames, uint32_t objTyp
 
 void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
-    ConsoleLogger::raw("view distance: " + std::to_string(scene2Bin.getViewDistance()) + ",");
-    ConsoleLogger::raw("field of view: " + std::to_string(scene2Bin.getFov()) + ",");
-    ConsoleLogger::raw("clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],");
-    ConsoleLogger::raw("number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ",");
-    ConsoleLogger::raw("");
+    ConsoleLogger::raw("dump", "view distance: " + std::to_string(scene2Bin.getViewDistance()) + ",");
+    ConsoleLogger::raw("dump", "field of view: " + std::to_string(scene2Bin.getFov()) + ",");
+    ConsoleLogger::raw("dump", "clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],");
+    ConsoleLogger::raw("dump", "number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ",");
+    ConsoleLogger::raw("dump", "");
 
     for (auto pair : scene2Bin.getObjects())
     {
@@ -57,30 +57,30 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 
         if (object.mType != objType && objType != 0) continue;
 
-        ConsoleLogger::raw("\tobject name: " + object.mName + " {");
-        ConsoleLogger::raw("\t\ttype: " + std::string(getTypeName(7, gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),");
-        ConsoleLogger::raw("\t\tposition: [" + object.mPos.str() + "],");
-        ConsoleLogger::raw("\t\tposition2: [" + object.mPos2.str() + "],");
-        ConsoleLogger::raw("\t\trotation: [" + object.mRot.str() + "],");
-        ConsoleLogger::raw("\t\tscale: [" + object.mScale.str() + "],");
-        ConsoleLogger::raw("\t\tparent name: " + object.mParentName + ",");
+        ConsoleLogger::raw("dump", "\tobject name: " + object.mName + " {");
+        ConsoleLogger::raw("dump", "\t\ttype: " + std::string(getTypeName(7, gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),");
+        ConsoleLogger::raw("dump", "\t\tposition: [" + object.mPos.str() + "],");
+        ConsoleLogger::raw("dump", "\t\tposition2: [" + object.mPos2.str() + "],");
+        ConsoleLogger::raw("dump", "\t\trotation: [" + object.mRot.str() + "],");
+        ConsoleLogger::raw("dump", "\t\tscale: [" + object.mScale.str() + "],");
+        ConsoleLogger::raw("dump", "\t\tparent name: " + object.mParentName + ",");
 
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL)
-            ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",");
+            ConsoleLogger::raw("dump", "\t\tmodel name: " + object.mModelName + ",");
         
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT)
         {
-            ConsoleLogger::raw("\t\tlight properties {");
-            ConsoleLogger::raw("\t\t\tlight type: " + std::string(getTypeName(5, gLightTypeNames, object.mLightType)) + "(" + std::to_string(object.mLightType) + "),");
-            ConsoleLogger::raw("\t\t\tlight colour: [" + object.mLightColour.str() + "],");
-            ConsoleLogger::raw("\t\t\tlight power: " + std::to_string(object.mLightPower));
-            ConsoleLogger::raw("\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ",");
-            ConsoleLogger::raw("\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ",");
-            ConsoleLogger::raw("\t\t\tlight near: " + std::to_string(object.mLightNear) + ",");
-            ConsoleLogger::raw("\t\t\tlight far: " + std::to_string(object.mLightFar) + ",");
-            ConsoleLogger::raw("\t\t}");
+            ConsoleLogger::raw("dump", "\t\tlight properties {");
+            ConsoleLogger::raw("dump", "\t\t\tlight type: " + std::string(getTypeName(5, gLightTypeNames, object.mLightType)) + "(" + std::to_string(object.mLightType) + "),");
+            ConsoleLogger::raw("dump", "\t\t\tlight colour: [" + object.mLightColour.str() + "],");
+            ConsoleLogger::raw("dump", "\t\t\tlight power: " + std::to_string(object.mLightPower));
+            ConsoleLogger::raw("dump", "\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ",");
+            ConsoleLogger::raw("dump", "\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ",");
+            ConsoleLogger::raw("dump", "\t\t\tlight near: " + std::to_string(object.mLightNear) + ",");
+            ConsoleLogger::raw("dump", "\t\t\tlight far: " + std::to_string(object.mLightFar) + ",");
+            ConsoleLogger::raw("dump", "\t\t}");
         }
-        ConsoleLogger::raw("\t}");
+        ConsoleLogger::raw("dump", "\t}");
     }
 }
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.");
+        MFLogger::ConsoleLogger::fatal("dump", "Expected file.");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        ConsoleLogger::fatal("Could not open file " + inputFile + ".");
+        ConsoleLogger::fatal("dump", "Could not open file " + inputFile + ".");
         return 1;
     }
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        ConsoleLogger::fatal("Could not parse file " + inputFile + ".");
+        ConsoleLogger::fatal("dump", "Could not parse file " + inputFile + ".");
         return 1;
     }
 

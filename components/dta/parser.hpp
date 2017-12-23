@@ -119,7 +119,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
     decrypt((char *) headerArray,headerArraySize);
 
-    for (int i = 0; i < mFileHeader.mFileCount; ++i)
+    for (size_t i = 0; i < mFileHeader.mFileCount; ++i)
         mContentHeaders.push_back(headerArray[i]);
 
     free(headerArray);
