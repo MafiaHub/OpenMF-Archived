@@ -59,7 +59,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     logStr += ".";
 
-    MFLogger::ConsoleLogger::info("renderer", logStr);
+    MFLogger::ConsoleLogger::info(logStr, "renderer");
 
     osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
      
@@ -82,7 +82,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     if (fileLocation.length() == 0 && fileName.length() != 0)
     {
-        MFLogger::ConsoleLogger::warn("renderer", "Could not load texture: " + fileName);
+        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, "renderer");
     }
     else if (fileName.length() != 0)
     {
@@ -109,7 +109,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
         {
             if (fileLocationAlpha.length() == 0)
             {
-                MFLogger::ConsoleLogger::warn("renderer", "Could not load alpha texture: " + fileNameAlpha);
+                MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, "renderer");
             }
             else
             {
@@ -133,7 +133,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::Vec2Array *uvs,
         MFFormat::DataFormat4DS::FaceGroup *faceGroup)
 {
-    MFLogger::ConsoleLogger::info("renderer", "      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".");
+    MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", "renderer");
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -162,10 +162,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
 
 osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
-    MFLogger::ConsoleLogger::info("renderer", 
-        "  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
+    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
-        ", instanced: " + std::to_string(mesh->mStandard.mInstanced));
+        ", instanced: " + std::to_string(mesh->mStandard.mInstanced),
+ 
+        "renderer");
 
     if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
     {
@@ -194,9 +195,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
 
 osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, MaterialList &materials)
 {
-    MFLogger::ConsoleLogger::info("renderer", 
-        "    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
-        ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount));
+    MFLogger::ConsoleLogger::info("    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
+        ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount),
+ 
+        "renderer");
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -267,7 +269,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         logStr += ", meshes: " + std::to_string(model->mMeshCount);
         logStr += ", materials: " + std::to_string(model->mMaterialCount);
 
-        MFLogger::ConsoleLogger::info("renderer", logStr);
+        MFLogger::ConsoleLogger::info(logStr, "renderer");
 
         MaterialList materials;
 

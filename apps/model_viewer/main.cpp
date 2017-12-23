@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("viewer", "Expected file.");
+        MFLogger::ConsoleLogger::fatal("Expected file.", "viewer");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
         {
             if (infoCounter <= 0)
             {
-                MFLogger::ConsoleLogger::info("viewer", "camera: " + getCameraString(&renderer));
+                MFLogger::ConsoleLogger::info("camera: " + getCameraString(&renderer), "viewer");
                 infoCounter = 30;
             }
             infoCounter--;

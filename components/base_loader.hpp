@@ -140,7 +140,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
         f.close();
     }
     else
-        MFLogger::ConsoleLogger::warn("asset", "Could not open file " + fileName + ".");
+        MFLogger::ConsoleLogger::warn("Could not open file " + fileName + ".", "asset");
 
     return n;
 }

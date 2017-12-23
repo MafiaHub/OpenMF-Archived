@@ -77,7 +77,7 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
-    MFLogger::ConsoleLogger::info("renderer", "initiating OSG renderer");
+    MFLogger::ConsoleLogger::info("initiating OSG renderer", "renderer");
     mViewer = new osgViewer::Viewer();
                 
     mFileSystem = MFFile::FileSystem::getInstance();
@@ -152,10 +152,10 @@ bool OSGRenderer::loadMission(std::string mission)
     std::ifstream fileCacheBin;
 
     if (!mFileSystem->open(file4DS,scene4dsPath))
-        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open 4ds file: " + scene4dsPath + ".");
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", "renderer");
 
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
-        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open scene2.bin file: " + scene2BinPath + ".");
+        MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", "renderer");
 
     mRootNode->addChild( l4ds.load(file4DS) );
     mRootNode->addChild( lScene2.load(fileScene2Bin) );
@@ -188,7 +188,7 @@ void OSGRenderer::optimize()
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
 
-    MFLogger::ConsoleLogger::info("renderer", "optimizing");
+    MFLogger::ConsoleLogger::info("optimizing", "renderer");
 
     osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
     osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
@@ -226,7 +226,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
-        MFLogger::ConsoleLogger::warn("renderer", "Couldn't not open 4ds file: " + model + ".");
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", "renderer");
         return false;
     }
      

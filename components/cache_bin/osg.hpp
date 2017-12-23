@@ -16,7 +16,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
-    MFLogger::ConsoleLogger::info("renderer", "loading cache.bin");
+    MFLogger::ConsoleLogger::info("loading cache.bin", "renderer");
 
     MFFormat::DataFormatCacheBIN parser;
 
@@ -48,7 +48,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                     
                     if (!mFileSystem->open(f,"MODELS/" + instance.mModelName))
                     {
-                        MFLogger::ConsoleLogger::warn("renderer", "Could not load model " + instance.mModelName + ".");
+                        MFLogger::ConsoleLogger::warn("Could not load model " + instance.mModelName + ".", "renderer");
                     }
                     else
                     {
@@ -58,7 +58,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                     }
                 }
                 
-                MFLogger::ConsoleLogger::info("renderer", logStr);
+                MFLogger::ConsoleLogger::info(logStr, "renderer");
 
                 if (objectNode.get())
                 {

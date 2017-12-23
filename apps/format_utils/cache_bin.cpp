@@ -9,25 +9,25 @@ using namespace MFLogger;
 
 void dump(MFFormat::DataFormatCacheBIN cacheBin)
 {
-    ConsoleLogger::raw("dump", "number of objects: " + std::to_string(cacheBin.getNumObjects()) + ".");
+    ConsoleLogger::raw("number of objects: " + std::to_string(cacheBin.getNumObjects()) + ".", "dump");
     for (auto object : cacheBin.getObjects())
     {
-        ConsoleLogger::raw("dump", "object name: " + object.mObjectName + ":");
-        ConsoleLogger::raw("dump", "\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",");
-        ConsoleLogger::raw("dump", "\tnumber of instances: " + std::to_string(object.mInstances.size()) + ",");
+        ConsoleLogger::raw("object name: " + object.mObjectName + ":", "dump");
+        ConsoleLogger::raw("\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",", "dump");
+        ConsoleLogger::raw("\tnumber of instances: " + std::to_string(object.mInstances.size()) + ",", "dump");
 
         for (auto instance : object.mInstances)
         {
-            ConsoleLogger::raw("dump", "\t\tmodel name: " + instance.mModelName + ",");
-            ConsoleLogger::raw("dump", "\t\tposition: [" + instance.mPos.str() + "],");
-            ConsoleLogger::raw("dump", "\t\trotation: [" + instance.mRot.str() + "],");
-            ConsoleLogger::raw("dump", "\t\tscale: [" + instance.mScale.str() + "],");
-            ConsoleLogger::raw("dump", "\t\tscale2: [" + instance.mScale2.str() + "],");
-            ConsoleLogger::raw("dump", "\t\tunk0: " + std::to_string(instance.mUnk0) + ",");
-            ConsoleLogger::raw("dump", "");
+            ConsoleLogger::raw("\t\tmodel name: " + instance.mModelName + ",", "dump");
+            ConsoleLogger::raw("\t\tposition: [" + instance.mPos.str() + "],", "dump");
+            ConsoleLogger::raw("\t\trotation: [" + instance.mRot.str() + "],", "dump");
+            ConsoleLogger::raw("\t\tscale: [" + instance.mScale.str() + "],", "dump");
+            ConsoleLogger::raw("\t\tscale2: [" + instance.mScale2.str() + "],", "dump");
+            ConsoleLogger::raw("\t\tunk0: " + std::to_string(instance.mUnk0) + ",", "dump");
+            ConsoleLogger::raw("", "dump");
         }
 
-        ConsoleLogger::raw("dump", "end of object: " + object.mObjectName);
+        ConsoleLogger::raw("end of object: " + object.mObjectName, "dump");
     }
 }
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("dump", "Expected file.");
+        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        ConsoleLogger::fatal("dump", "Could not open file " + inputFile + ".");
+        ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;
     }
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        ConsoleLogger::fatal("dump", "Could not parse file " + inputFile + ".");
+        ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
         return 1;
     }
 

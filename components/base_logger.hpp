@@ -19,10 +19,10 @@ typedef enum
 class Logger 
 {
 public:
-    virtual void print_raw  (std::string id, std::string str) = 0;
-    virtual void print_info (std::string id, std::string str) = 0;
-    virtual void print_warn (std::string id, std::string str) = 0;
-    virtual void print_fatal(std::string id, std::string str) = 0;
+    virtual void print_raw  (std::string str, std::string id = "") = 0;
+    virtual void print_info (std::string str, std::string id = "") = 0;
+    virtual void print_warn (std::string str, std::string id = "") = 0;
+    virtual void print_fatal(std::string str, std::string id = "") = 0;
 
 	void setVerbosity(uint8_t level)
 	{

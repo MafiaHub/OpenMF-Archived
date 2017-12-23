@@ -11,10 +11,10 @@ namespace MFLogger
 class ConsoleLogger : public Logger 
 {
 public:
-    virtual void print_raw  (std::string id, std::string str) override;
-    virtual void print_info (std::string id, std::string str) override;
-    virtual void print_warn (std::string id, std::string str) override;
-    virtual void print_fatal(std::string id, std::string str) override;
+    virtual void print_raw  (std::string str, std::string id) override;
+    virtual void print_info (std::string str, std::string id) override;
+    virtual void print_warn (std::string str, std::string id) override;
+    virtual void print_fatal(std::string str, std::string id) override;
 
 	static ConsoleLogger *getInstance()
 	{
@@ -22,50 +22,50 @@ public:
 		return &logger;
 	}
 
-    static void raw(std::string id, std::string str);
-    static void info(std::string id, std::string str);
-    static void warn(std::string id, std::string str);
-    static void fatal(std::string id, std::string str);
+    static void raw(std::string str, std::string id = "");
+    static void info(std::string str, std::string id = "");
+    static void warn(std::string str, std::string id = "");
+    static void fatal(std::string str, std::string id = "");
 };
 
-void ConsoleLogger::raw(std::string id, std::string str)
+void ConsoleLogger::raw(std::string str, std::string id)
 {
-	getInstance()->print_raw(id, str);
+	getInstance()->print_raw(str, id);
 }
 
-void ConsoleLogger::info(std::string id, std::string str)
+void ConsoleLogger::info(std::string str, std::string id)
 {
-	getInstance()->print_info(id, str);
+	getInstance()->print_info(str, id);
 }
 
-void ConsoleLogger::warn(std::string id, std::string str)
+void ConsoleLogger::warn(std::string str, std::string id)
 {
-	getInstance()->print_warn(id, str);
+	getInstance()->print_warn(str, id);
 }
 
-void ConsoleLogger::fatal(std::string id, std::string str)
+void ConsoleLogger::fatal(std::string str, std::string id)
 {
-	getInstance()->print_fatal(id, str);
+	getInstance()->print_fatal(str, id);
 }
 
-void ConsoleLogger::print_raw(std::string id, std::string str)
+void ConsoleLogger::print_raw(std::string str, std::string id)
 {
 	std::cout << str << std::endl;
 }
 
-void ConsoleLogger::print_info(std::string id, std::string str)
+void ConsoleLogger::print_info(std::string str, std::string id)
 {
 	if (canPrint(id, LOG_VERBOSITY_INFO))
 		std::cout << "[INFO] " << str << std::endl;
 }
 
-void ConsoleLogger::print_warn(std::string id, std::string str)
+void ConsoleLogger::print_warn(std::string str, std::string id)
 {
 	if (canPrint(id, LOG_VERBOSITY_WARN))
 		std::cout << "[WARN] " << str << std::endl;
 }
 
-void ConsoleLogger::print_fatal(std::string id, std::string str)
+void ConsoleLogger::print_fatal(std::string str, std::string id)
 {
 	if (canPrint(id, LOG_VERBOSITY_FATAL))
 		std::cout << "[FATAL] " << str << std::endl;

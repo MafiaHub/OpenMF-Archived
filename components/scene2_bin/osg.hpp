@@ -35,7 +35,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
-    MFLogger::ConsoleLogger::info("renderer", "loading scene2.bin");
+    MFLogger::ConsoleLogger::info("loading scene2.bin", "renderer");
 
     MFFormat::DataFormatScene2BIN parser;
 
@@ -148,7 +148,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         
                         if (!mFileSystem->open(f,"models/" + object.mModelName))
                         {
-                            MFLogger::ConsoleLogger::warn("renderer", "Could not load model " + object.mModelName + ".");
+                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".", "renderer");
                         }
                         else
                         {
@@ -169,7 +169,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 }
             }
             
-            MFLogger::ConsoleLogger::info("renderer", logStr);
+            MFLogger::ConsoleLogger::info(logStr, "renderer");
 
             if (objectNode.get())
             {

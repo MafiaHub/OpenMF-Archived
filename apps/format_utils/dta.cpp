@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("dta", "Expected file.");
+        MFLogger::ConsoleLogger::fatal("Expected file.", "dta");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("dta", "Could not open file " + inputFile + ".");
+        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dta");
         return 1;
     }
 
@@ -126,14 +126,14 @@ int main(int argc, char** argv)
             relativeShift = arguments["S"].as<int>();
 
         std::string outputFile = inputFile + ".decrypt" + std::to_string(relativeShift);
-        MFLogger::ConsoleLogger::info("dta", "decrypting into " + outputFile);
+        MFLogger::ConsoleLogger::info("decrypting into " + outputFile, "dta");
 
         std::ofstream f2;
         f2.open(outputFile, std::ios::binary);
 
         if (!f2.is_open())
         {
-            MFLogger::ConsoleLogger::fatal("dta", "Could not open file " + outputFile + ".");
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", "dta");
             f.close();
             return 1;
         }
@@ -159,13 +159,13 @@ int main(int argc, char** argv)
         std::string extractFile = arguments["e"].as<std::string>();
         std::string outputFile = "out";
 
-        MFLogger::ConsoleLogger::info("dta", "Extracting " + extractFile + " to " + outputFile + ".");
+        MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".", "dta");
 
         int fileIndex = dta.getFileIndex(extractFile);
 
         if (fileIndex < 0)
         {
-            MFLogger::ConsoleLogger::fatal("dta", "File " + extractFile + " not found.");
+            MFLogger::ConsoleLogger::fatal("File " + extractFile + " not found.", "dta");
             f.close();
             return 1;
         }
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
  
         if (!f2.is_open())
         {
-            MFLogger::ConsoleLogger::fatal("dta", "Could not open file " + outputFile + ".");
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", "dta");
             f.close();
             return 1;
         }
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        MFLogger::ConsoleLogger::fatal("dta", "Could not parse file " + inputFile + ".");
+        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dta");
         return 1;
     }
     
