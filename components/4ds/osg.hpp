@@ -80,11 +80,11 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     osg::ref_ptr<osg::Image> img;
 
-    if (fileLocation.length() == 0)
+    if (fileLocation.length() == 0 && fileName.length() != 0)
     {
-        MFLogger::ConsoleLogger::warn("renderer", "Could not load texture.");
+        MFLogger::ConsoleLogger::warn("renderer", "Could not load texture: " + fileName);
     }
-    else
+    else if (fileName.length() != 0)
     {
         img = osgDB::readImageFile(fileLocation);
 
@@ -102,14 +102,14 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
                 bmp.mTransparentColor.g / 255.0,
                 bmp.mTransparentColor.b / 255.0);
 
-            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.1 );
+            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.04f );
         }
 
         if (alphaTexture)
         {
             if (fileLocationAlpha.length() == 0)
             {
-                MFLogger::ConsoleLogger::warn("renderer", "Could not load alpha texture.");
+                MFLogger::ConsoleLogger::warn("renderer", "Could not load alpha texture: " + fileNameAlpha);
             }
             else
             {
