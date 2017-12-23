@@ -36,18 +36,19 @@ public:
     typedef struct
     {
         uint32_t mFileCount;
-        uint32_t mContentOffset;
-        uint32_t mContentSize;
+        uint32_t mFileTableOffset;
+        uint32_t mFileTableSize;
         uint32_t mUnknown;
     } FileHeader;
 
     typedef struct
     {
-        uint32_t mUnknown;         // ID or seq number?
+        uint16_t mFileNameChecksum;     
+        uint16_t mFileNameLength; 
         uint32_t mDataOffset;
         uint32_t mDataEnd;
-        char mName[16];
-    } ContentHeader;
+        char mNameHint[16];
+    } FileTableRecord;
 
     typedef struct
     {
@@ -60,15 +61,15 @@ public:
         unsigned char mNameLength;
         unsigned char mUnknown7[7];
         unsigned char mName[256];
-    } DataHeader;
+    } DataFileHeader;
 
-    inline std::vector<ContentHeader> getContentHeaders() { return mContentHeaders; };
-    inline std::vector<DataHeader> getDataHeaders() { return mDataHeaders; };
+    inline std::vector<FileTableRecord> getFileTableRecords() { return mFileTableRecords; };
+    inline std::vector<DataFileHeader> getDataFileHeaders() { return mDataFileHeaders; };
 
 protected:
     FileHeader mFileHeader;
-    std::vector<ContentHeader> mContentHeaders;
-    std::vector<DataHeader> mDataHeaders;
+    std::vector<FileTableRecord> mFileTableRecords;
+    std::vector<DataFileHeader> mDataFileHeaders;
     uint32_t mKey1;
     uint32_t mKey2;
 }; 
@@ -103,15 +104,15 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
     // read the content headers:
         
-    srcFile.seekg(mFileHeader.mContentOffset);
+    srcFile.seekg(mFileHeader.mFileTableOffset);
 
     if (!srcFile.good())
         return false;
 
-    mContentHeaders.clear();
+    mFileTableRecords.clear();
 
-    unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(ContentHeader);
-    ContentHeader *headerArray = (ContentHeader *) malloc(headerArraySize);
+    unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(FileTableRecord);
+    FileTableRecord *headerArray = (FileTableRecord *) malloc(headerArraySize);
     srcFile.read((char *) headerArray,headerArraySize);
 
     if (!srcFile.good())
@@ -120,26 +121,26 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     decrypt((char *) headerArray,headerArraySize);
 
     for (size_t i = 0; i < mFileHeader.mFileCount; ++i)
-        mContentHeaders.push_back(headerArray[i]);
+        mFileTableRecords.push_back(headerArray[i]);
 
     free(headerArray);
 
     // read the data headers:
 
-    mDataHeaders.clear();
+    mDataFileHeaders.clear();
 
-    for (int i = 0; i < mContentHeaders.size(); ++i)
+    for (int i = 0; i < mFileTableRecords.size(); ++i)
     {
-        DataHeader h;
-        srcFile.seekg(mContentHeaders[i].mDataOffset);
-        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        DataFileHeader h;
+        srcFile.seekg(mFileTableRecords[i].mDataOffset);
+        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataFileHeader));
 
         if (!srcFile.good())
             return false;
 
-        decrypt(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        decrypt(reinterpret_cast<char *>(&h),sizeof(DataFileHeader));
         h.mName[h.mNameLength] = 0;    // terminate the string
-        mDataHeaders.push_back(h);
+        mDataFileHeaders.push_back(h);
     }
 
     return true;
@@ -147,8 +148,8 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
 int DataFormatDTA::getFileIndex(std::string fileName)
 {
-    for (int i = 0; i < mDataHeaders.size(); i++)
-        if (fileName.compare((char *) mDataHeaders[i].mName) == 0)
+    for (int i = 0; i < mDataFileHeaders.size(); i++)
+        if (fileName.compare((char *) mDataFileHeaders[i].mName) == 0)
             return i;
 
     return -1;
@@ -159,7 +160,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
     length = getFileSize(index);
     *dstBuffer = (char *) malloc(length);
 
-    unsigned int fileOffset = mContentHeaders[index].mDataEnd + 5;   // why + 5?
+    unsigned int fileOffset = mFileTableRecords[index].mDataEnd + 5;   // why + 5?
     // TODO: some files are probably compressed
 
     srcFile.clear();
@@ -170,7 +171,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
 unsigned int DataFormatDTA::getFileSize(unsigned int index)
 {
-    return mDataHeaders[index].mSize;
+    return mDataFileHeaders[index].mSize;
 }
 
 void DataFormatDTA::setDecryptKeys(uint32_t key1, uint32_t key2)
@@ -192,7 +193,7 @@ unsigned int DataFormatDTA::getNumFiles()
 
 std::string DataFormatDTA::getFileName(unsigned int index)
 {
-    return std::string(reinterpret_cast<char *>(mDataHeaders[index].mName));
+    return std::string(reinterpret_cast<char *>(mDataFileHeaders[index].mName));
 }
     
 void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift)
