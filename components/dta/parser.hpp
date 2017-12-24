@@ -2,6 +2,8 @@
 #define FORMAT_PARSERS_DTA_H
 
 #include <base_parser.hpp>
+#include <string.h>
+#include <vector>
 
 namespace MFFormat
 {
@@ -14,10 +16,12 @@ public:
     void setDecryptKeys(uint32_t keys[2]);
     unsigned int getNumFiles();                         ///< Get the number of files inside the DTA.
     unsigned int getFileSize(unsigned int index);
-    void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
     std::string getFileName(unsigned int index);
     void getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length);   ///< Get the concrete file from within the DST file into a buffer.
     int getFileIndex(std::string fileName);
+
+    void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
+    void decompressLZSSRLE(char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -36,45 +40,77 @@ public:
     typedef struct
     {
         uint32_t mFileCount;
-        uint32_t mContentOffset;
-        uint32_t mContentSize;
+        uint32_t mFileTableOffset;
+        uint32_t mFileTableSize;
         uint32_t mUnknown;
     } FileHeader;
 
     typedef struct
     {
-        uint32_t mUnknown;         // ID or seq number?
-        uint32_t mDataOffset;
-        uint32_t mDataEnd;
-        char mName[16];
-    } ContentHeader;
+        uint16_t mFileNameChecksum;        // checksum of upper file name 
+        uint16_t mFileNameLength;
+        uint32_t mHeaderOffset;            // where DataFileHeader starts
+        uint32_t mDataOffset;              // where the data start
+        char mNameHint[16];                // file name, often incomplete
+    } FileTableRecord;
 
     typedef struct
     {
         uint32_t mUnknown;
         uint32_t mUnknown2;
-        uint32_t mUnknown3;
-        uint32_t mUnknown4;
+        uint64_t mTimeStamp;
         uint32_t mSize;
-        uint32_t mUnknown6;
+        uint32_t mCompressedBlockCount;
         unsigned char mNameLength;
-        unsigned char mUnknown7[7];
+        unsigned char mFlags[7];
         unsigned char mName[256];
-    } DataHeader;
+    } DataFileHeader;
 
-    inline std::vector<ContentHeader> getContentHeaders() { return mContentHeaders; };
-    inline std::vector<DataHeader> getDataHeaders() { return mDataHeaders; };
+    typedef enum
+    {
+        BLOCK_UNCOMPRESSED = 0,
+        BLOCK_LZSS_RLE     = 1,
+        BLOCK_DPCM0        = 8,
+        BLOCK_DPCM1        = 12,
+        BLOCK_DPCM2        = 16,
+        BLOCK_DPCM3        = 20,
+        BLOCK_DPCM4        = 24,
+        BLOCK_DPCM5        = 28,
+        BLOCK_DPCM6        = 32
+    } BlockType;
+
+    typedef struct
+    {
+        uint32_t mChunkId;
+        uint32_t mChunkSize;
+        uint32_t mType;
+
+        uint32_t mChunkId2;
+        uint32_t mChunkSize2;
+        uint16_t mTags;
+        uint16_t mChannels;
+        uint32_t mSamplesPerSecond;
+        uint32_t mBytesPerSecond;
+        uint16_t mBlockAlign;
+        uint16_t mSampleBits;
+
+        uint32_t mChunkId3;
+        uint32_t mChunkSize3;
+    } WavHeader;
+
+    inline std::vector<FileTableRecord> getFileTableRecords() { return mFileTableRecords; };
+    inline std::vector<DataFileHeader>  getDataFileHeaders()  { return mDataFileHeaders;  };
 
 protected:
     FileHeader mFileHeader;
-    std::vector<ContentHeader> mContentHeaders;
-    std::vector<DataHeader> mDataHeaders;
+    std::vector<FileTableRecord> mFileTableRecords;
+    std::vector<DataFileHeader> mDataFileHeaders;
     uint32_t mKey1;
     uint32_t mKey2;
 }; 
 
 uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
-uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e};
+uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e };
 uint32_t DataFormatDTA::A2_KEYS[2] = {0x1417d340, 0xb6399e19};
 uint32_t DataFormatDTA::A3_KEYS[2] = {0xa94b8d3c, 0x771f3888};
 uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
@@ -103,15 +139,15 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
     // read the content headers:
         
-    srcFile.seekg(mFileHeader.mContentOffset);
+    srcFile.seekg(mFileHeader.mFileTableOffset);
 
     if (!srcFile.good())
         return false;
 
-    mContentHeaders.clear();
+    mFileTableRecords.clear();
 
-    unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(ContentHeader);
-    ContentHeader *headerArray = (ContentHeader *) malloc(headerArraySize);
+    unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(FileTableRecord);
+    FileTableRecord *headerArray = (FileTableRecord *) malloc(headerArraySize);
     srcFile.read((char *) headerArray,headerArraySize);
 
     if (!srcFile.good())
@@ -120,26 +156,26 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     decrypt((char *) headerArray,headerArraySize);
 
     for (size_t i = 0; i < mFileHeader.mFileCount; ++i)
-        mContentHeaders.push_back(headerArray[i]);
+        mFileTableRecords.push_back(headerArray[i]);
 
     free(headerArray);
 
     // read the data headers:
 
-    mDataHeaders.clear();
+    mDataFileHeaders.clear();
 
-    for (int i = 0; i < mContentHeaders.size(); ++i)
+    for (int i = 0; i < mFileTableRecords.size(); ++i)
     {
-        DataHeader h;
-        srcFile.seekg(mContentHeaders[i].mDataOffset);
-        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        DataFileHeader h;
+        srcFile.seekg(mFileTableRecords[i].mHeaderOffset);
+        srcFile.read(reinterpret_cast<char *>(&h),sizeof(DataFileHeader));
 
         if (!srcFile.good())
             return false;
 
-        decrypt(reinterpret_cast<char *>(&h),sizeof(DataHeader));
+        decrypt(reinterpret_cast<char *>(&h),sizeof(DataFileHeader));
         h.mName[h.mNameLength] = 0;    // terminate the string
-        mDataHeaders.push_back(h);
+        mDataFileHeaders.push_back(h);
     }
 
     return true;
@@ -147,8 +183,8 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
 int DataFormatDTA::getFileIndex(std::string fileName)
 {
-    for (int i = 0; i < mDataHeaders.size(); i++)
-        if (fileName.compare((char *) mDataHeaders[i].mName) == 0)
+    for (int i = 0; i < mDataFileHeaders.size(); i++)
+        if (fileName.compare((char *) mDataFileHeaders[i].mName) == 0)
             return i;
 
     return -1;
@@ -159,18 +195,53 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
     length = getFileSize(index);
     *dstBuffer = (char *) malloc(length);
 
-    unsigned int fileOffset = mContentHeaders[index].mDataEnd + 5;   // why + 5?
-    // TODO: some files are probably compressed
+    unsigned int fileOffset = mFileTableRecords[index].mDataOffset;
 
     srcFile.clear();
     srcFile.seekg(fileOffset);
-    srcFile.read(*dstBuffer,length);
-    decrypt(*dstBuffer,length,1);
+
+    unsigned int bufferPos = 0;
+
+    for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
+    {
+        uint16_t blockSize[2];
+        srcFile.read((char *) blockSize,4);
+
+        char *block = (char *) malloc(blockSize[0]);
+
+        srcFile.read(block,blockSize[0]);
+
+        decrypt(block,blockSize[0]);
+
+        unsigned char blockType = block[0];
+
+        // 1 is for the block type byte byte
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize[0] - 1);
+
+        switch (blockType)
+        {
+            case BLOCK_UNCOMPRESSED: break;
+            // TODO
+            case BLOCK_LZSS_RLE: decompressLZSSRLE(*dstBuffer + bufferPos,blockSize[0] - 1); break;
+            case BLOCK_DPCM0: break;
+            case BLOCK_DPCM1: break;
+            case BLOCK_DPCM2: break;
+            case BLOCK_DPCM3: break;
+            case BLOCK_DPCM4: break;
+            case BLOCK_DPCM5: break;
+            case BLOCK_DPCM6: break;
+            default: break;
+        }
+
+        bufferPos += blockSize[0] - 1;
+
+        free(block);
+    }
 }
 
 unsigned int DataFormatDTA::getFileSize(unsigned int index)
 {
-    return mDataHeaders[index].mSize;
+    return mDataFileHeaders[index].mSize;
 }
 
 void DataFormatDTA::setDecryptKeys(uint32_t key1, uint32_t key2)
@@ -192,7 +263,7 @@ unsigned int DataFormatDTA::getNumFiles()
 
 std::string DataFormatDTA::getFileName(unsigned int index)
 {
-    return std::string(reinterpret_cast<char *>(mDataHeaders[index].mName));
+    return std::string(reinterpret_cast<char *>(mDataFileHeaders[index].mName));
 }
     
 void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift)
@@ -213,6 +284,86 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
 
         buffer[i] = (char) ( ~((~dataByte) ^ keyByte) );
     }
+}
+
+void prbf(std::vector<char> v, std::string s)
+{
+std::cout << s << ": |";
+
+for (int i = 0; i < std::min((int) v.size(),(int) 50); i++)
+    std::cout << +((unsigned char) v[i]) << " ";
+
+std::cout << "|";
+
+std::cout << std::endl;
+}
+
+void DataFormatDTA::decompressLZSSRLE(char *buffer, unsigned int bufferLen)
+{
+return;  // TODO: fix this method, it's not working for some reason
+
+    // rewritten version of hdmaster's source
+    unsigned int position = 0;
+    std::vector<char> decompressed;
+
+    while (position < bufferLen)
+    {
+        auto value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
+        position += 2;
+
+        if (value == 0)
+        {
+            // copy the next at most 16 bytes
+            auto n = std::min(bufferLen - position,(unsigned int) 16);
+
+            for (int j = 0; j < n; ++j)
+                decompressed.push_back(buffer[position + j]);
+
+            position += n;
+        }
+        else
+        {
+            // go bit by bit from the left
+            for (unsigned int i = 0; i < 16 && position < bufferLen; ++i, value <<= 1)
+            {
+                if (value & 0x8000)    // leftmost bit set?
+                {
+                    unsigned char offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
+                    unsigned char n = buffer[position + 1] & 0x0f;
+
+                    if (offset == 0)
+                    {
+                        n = ((n << 8) | (buffer[position + 2])) + 16;   
+                        decompressed.insert(decompressed.end(),n,buffer[position + 3]);
+                        position += 4;
+                    }
+                    else
+                    {
+                        n += 3;
+
+                        if (n > offset)
+                        {
+                            for (int j = 0; j < n; ++j)
+                                decompressed.emplace_back(*(decompressed.end() - offset));
+                        }
+                        else
+                        {
+                            decompressed.insert(decompressed.end(),decompressed.end() - offset,decompressed.end() - offset + n);
+                        }
+
+                        position += 2;
+                    }
+                }
+                else
+                {
+                    decompressed.push_back(buffer[position]);
+                    position++;
+                }
+            }
+        }
+    }
+
+    memcpy(buffer,&(decompressed[0]),bufferLen);
 }
 
 }
