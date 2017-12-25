@@ -17,7 +17,7 @@
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
 
-#include <osg/ClearNode>
+#define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
 
@@ -79,7 +79,7 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
-    MFLogger::ConsoleLogger::info("initiating OSG renderer", "renderer");
+    MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();
                 
     mFileSystem = MFFile::FileSystem::getInstance();
@@ -154,13 +154,13 @@ bool OSGRenderer::loadMission(std::string mission)
     std::ifstream fileCacheBin;
 
     if (!mFileSystem->open(file4DS,scene4dsPath))
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", "renderer");
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
-        MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", "renderer");
+        MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
 
     if(!mFileSystem->open(fileCacheBin,cacheBinPath)) 
-        MFLogger::ConsoleLogger::warn("Couldn't not open cache.bin file: " + scene2BinPath + ".", "renderer");
+        MFLogger::ConsoleLogger::warn("Couldn't not open cache.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
 
     mRootNode->addChild( l4ds.load(file4DS) );
     mRootNode->addChild( lScene2.load(fileScene2Bin) );
@@ -189,7 +189,7 @@ void OSGRenderer::optimize()
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
 
-    MFLogger::ConsoleLogger::info("optimizing", "renderer");
+    MFLogger::ConsoleLogger::info("optimizing", OSGRENDERER_MODULE_STR);
 
     osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
     osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
@@ -227,7 +227,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", "renderer");
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
         return false;
     }
      
