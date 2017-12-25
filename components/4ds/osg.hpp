@@ -35,12 +35,18 @@ protected:
 
     osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh, MaterialList &materials);
     osg::ref_ptr<osg::StateSet> make4dsMaterial(MFFormat::DataFormat4DS::Material *material);
-    osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD, MaterialList &materials);
+    osg::ref_ptr<osg::Node> make4dsMeshLOD(
+        MFFormat::DataFormat4DS::Lod *meshLOD,
+        MaterialList &materials,
+        bool isBillboard=false,
+        osg::Vec3f billboardAxis=osg::Vec3f(0,0,1));
     osg::ref_ptr<osg::Node> make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
-        MFFormat::DataFormat4DS::FaceGroup *faceGroup);
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup,
+        bool isBillboard=false,
+        osg::Vec3f billboardAxis=osg::Vec3f(0,0,1));
     osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha="", bool colorKey=false);
 };
 
@@ -134,11 +140,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
-        MFFormat::DataFormat4DS::FaceGroup *faceGroup)
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup,
+        bool isBillboard,
+        osg::Vec3f billboardAxis)
 {
     MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", OSG4DS_MODULE_STR);
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
@@ -158,37 +164,55 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
     geom->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
     geom->addPrimitiveSet(indices.get());
-    geode->addDrawable(geom.get());
 
+    if (isBillboard)
+    {
+        osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard;
+        billboard->addDrawable(geom);
+        billboard->setAxis(billboardAxis);
+        return billboard;
+    }
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable(geom.get());
     return geode;
 }
 
 osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
-    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
-        ", type: " + std::to_string((int) mesh->mMeshType) +
-        ", instanced: " + std::to_string(mesh->mStandard.mInstanced),
- 
-        OSG4DS_MODULE_STR);
-
     if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
     {
         osg::ref_ptr<osg::Node> emptyNode;
         return emptyNode;
     }
 
+    MFFormat::DataFormat4DS::Standard standard;
+
+    bool isBillboard = mesh->mVisualMeshType == MFFormat::DataFormat4DS::VISUALMESHTYPE_BILLBOARD;
+
+    if (isBillboard)
+        standard = mesh->mBillboard.mStandard;
+    else
+        standard = mesh->mStandard;
+
+    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) standard.mLODLevel) +
+        ", type: " + std::to_string((int) mesh->mMeshType) +
+        ", instanced: " + std::to_string(standard.mInstanced),
+ 
+        OSG4DS_MODULE_STR);
+
     const float maxDistance = 10000000.0;
-    const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
+    const float stepLOD = maxDistance / standard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
     float previousDist = 0.0;
 
-    for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
+    for (int i = 0; i < standard.mLODLevel; ++i)
     {
-        float distLOD = mesh->mStandard.mLODLevel == 1 ? maxDistance : mesh->mStandard.mLODs[i].mRelativeDistance;
+        float distLOD = standard.mLODLevel == 1 ? maxDistance : standard.mLODs[i].mRelativeDistance;
 
-        nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i]),materials));
+        nodeLOD->addChild(make4dsMeshLOD(&(standard.mLODs[i]),materials,isBillboard));  // TODO: add rotation axis
         nodeLOD->setRange(i,previousDist,distLOD);
         previousDist = distLOD;
     }
@@ -196,7 +220,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
     return nodeLOD; 
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, MaterialList &materials)
+osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
+    DataFormat4DS::Lod *meshLOD,
+    MaterialList &materials,
+    bool isBillboard,
+    osg::Vec3 billboardAxis)
 {
     MFLogger::ConsoleLogger::info("    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
         ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount),
@@ -229,7 +257,9 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
             vertices.get(),
             normals.get(),
             uvs.get(),
-            &(meshLOD->mFaceGroups[i]));
+            &(meshLOD->mFaceGroups[i]),
+            isBillboard,
+            billboardAxis);
 
         const int materialID = std::max(0,std::min(
             static_cast<int>(materials.size() - 1),
