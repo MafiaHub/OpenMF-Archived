@@ -29,6 +29,8 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
         {
             MFLogger::ConsoleLogger::info("Loading object " + object.mObjectName + ".", OSGCACHEBIN_MOSULE_STR);
         
+            osg::ref_ptr<osg::Group> objectGroup = new osg::Group();
+
             for(auto instance : object.mInstances)
             {
                 osg::ref_ptr<osg::Node> objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
@@ -59,11 +61,13 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                     objectTransform->setMatrix(m);
 
                     objectTransform->addChild(objectNode);
-                    group->addChild(objectTransform);
+                    objectGroup->addChild(objectTransform);
                     nodeMap.insert(nodeMap.begin(), std::pair<std::string, osg::ref_ptr<osg::Group>>(object.mObjectName, objectTransform));
                 }
-            }   // for
-        }       // for      
+            }   // for instances
+
+            group->addChild(objectGroup);
+        }       // for objects
     }
 
     return group;
