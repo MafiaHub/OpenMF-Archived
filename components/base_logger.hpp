@@ -11,12 +11,12 @@ namespace MFLogger
 
 typedef enum
 {
-	LOG_VERBOSITY_FATAL,
-	LOG_VERBOSITY_WARN,
-	LOG_VERBOSITY_INFO,
+    LOG_VERBOSITY_INFO = 1,
+    LOG_VERBOSITY_WARN = 2,
+    LOG_VERBOSITY_FATAL = 4,
 } LogVerbosity;
 
-class Logger 
+class Logger
 {
 public:
     virtual void print_raw  (std::string str, std::string id = "") = 0;
@@ -24,31 +24,32 @@ public:
     virtual void print_warn (std::string str, std::string id = "") = 0;
     virtual void print_fatal(std::string str, std::string id = "") = 0;
 
-	void setVerbosity(uint8_t level)
-	{
-		mVerbosityLevel = level;
-	}
+    void setVerbosityFlags(uint32_t flags)
+    {
+        mVerbosityFlags = flags;
+    }
 
-	bool canPrint(std::string id, uint8_t level)
-	{
-		bool result = (mVerbosityLevel >= level);
-		result = result && (std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end());
-		return result;
-	}
+    bool canPrint(std::string id, uint32_t flags)
+    {
+        if (!(flags & mVerbosityFlags))
+            return false;
 
-	void addFilter(std::string id)
-	{
-		mFilteredIDs.push_back(id);
-	}
+        return std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end();
+    }
 
-	void removeFilter(std::string id)
-	{
-		mFilteredIDs.erase(std::remove(mFilteredIDs.begin(), mFilteredIDs.end(), id), mFilteredIDs.end());
-	}
+    void addFilter(std::string id)
+    {
+        mFilteredIDs.push_back(id);
+    }
+
+    void removeFilter(std::string id)
+    {
+        mFilteredIDs.erase(std::remove(mFilteredIDs.begin(), mFilteredIDs.end(), id), mFilteredIDs.end());
+    }
 
 protected:
-	uint8_t mVerbosityLevel;
-	std::vector<std::string> mFilteredIDs;
+    uint32_t mVerbosityFlags;
+    std::vector<std::string> mFilteredIDs;
 };
 
 }
