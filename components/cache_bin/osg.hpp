@@ -2,6 +2,7 @@
 #define OSG_CACHE_BIN_LOADER_H
 
 #include <cache_bin/parser.hpp>
+#define OSGCACHEBIN_MOSULE_STR "loader cache.bin"
 
 namespace MFFormat
 {
@@ -15,50 +16,43 @@ public:
 osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
-
-    MFLogger::ConsoleLogger::info("loading cache.bin", "renderer");
-
+    MFLogger::ConsoleLogger::info("loading cache.bin", OSGCACHEBIN_MOSULE_STR);
     MFFormat::DataFormatCacheBIN parser;
-
     MFFormat::OSG4DSLoader loader4DS;
-
     bool success = parser.load(srcFile);
 
-	std::map<std::string, osg::ref_ptr<osg::Group>> nodeMap;
+    std::map<std::string, osg::ref_ptr<osg::Group>> nodeMap;
 
     if (success)
     {
         for (auto object : parser.getObjects())
         {
             osg::ref_ptr<osg::Node> objectNode;
-
             std::string logStr = object.mObjectName + ": ";
-
             bool hasTransform = true;
-
         
             for(auto instance : object.mInstances)
             {
-				objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
+                objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
 
                 if (!objectNode)
                 {
-					logStr += "model: " + instance.mModelName + " " + std::to_string(instance.mPos.x) + " " + std::to_string(instance.mPos.y) + " " + std::to_string(instance.mPos.z) + "\n";
+                    logStr += "model: " + instance.mModelName + " " + std::to_string(instance.mPos.x) + " " + std::to_string(instance.mPos.y) + " " + std::to_string(instance.mPos.z) + "\n";
                     std::ifstream f;
                     
                     if (!mFileSystem->open(f,"MODELS/" + instance.mModelName))
                     {
-                        MFLogger::ConsoleLogger::warn("Could not load model " + instance.mModelName + ".", "renderer");
+                        MFLogger::ConsoleLogger::warn("Could not load model " + instance.mModelName + ".", OSGCACHEBIN_MOSULE_STR);
                     }
                     else
                     {
-						objectNode = loader4DS.load(f, instance.mModelName);
-						storeToCache(instance.mModelName, objectNode);
-						f.close();
+                        objectNode = loader4DS.load(f, instance.mModelName);
+                        storeToCache(instance.mModelName, objectNode);
+                        f.close();
                     }
                 }
                 
-                MFLogger::ConsoleLogger::info(logStr, "renderer");
+                MFLogger::ConsoleLogger::info(logStr, OSGCACHEBIN_MOSULE_STR);
 
                 if (objectNode.get())
                 {
@@ -73,10 +67,10 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
 
                     objectTransform->addChild(objectNode);
                     group->addChild(objectTransform);
-					nodeMap.insert(nodeMap.begin(), std::pair<std::string, osg::ref_ptr<osg::Group>>(object.mObjectName, objectTransform));
+                    nodeMap.insert(nodeMap.begin(), std::pair<std::string, osg::ref_ptr<osg::Group>>(object.mObjectName, objectTransform));
                 }
-            } // for
-        }   // for      
+            }   // for
+        }       // for      
     }
 
     return group;
