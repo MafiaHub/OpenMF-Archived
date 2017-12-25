@@ -25,6 +25,36 @@
 namespace MFFormat
 {
 
+class TextureSwitchCallback: public osg::StateSet::Callback
+{
+public:
+    virtual void operator()(osg::StateSet *s, osg::NodeVisitor *n)
+    {
+        if (mTmpCoundown <= 0)   // TODO: do this based on time. not frames
+            mTmpCoundown = 60;
+        else
+        {
+            mTmpCoundown--;
+            return;
+        }
+
+        mCurrentTexture = (mCurrentTexture + 1) % mTextures.size();
+
+        s->setTextureAttributeAndModes(0,mTextures[mCurrentTexture].get(),
+            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    }
+
+    void addTexture(osg::Texture2D *texture)
+    {
+        mTextures.push_back(texture);
+    }
+
+protected:
+    std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
+    unsigned int mCurrentTexture;
+    unsigned int mTmpCoundown;
+};
+
 class OSG4DSLoader: public OSGLoader
 {
 public:
@@ -48,7 +78,35 @@ protected:
         bool isBillboard=false,
         osg::Vec3f billboardAxis=osg::Vec3f(0,0,1));
     osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha="", bool colorKey=false);
+
+    std::vector<std::string> makeAnimationNames(std::string baseFileName, unsigned int frames);
 };
+
+std::vector<std::string> OSG4DSLoader::makeAnimationNames(std::string baseFileName, unsigned int frames)
+{
+    // FIXME: make this nicer
+
+    std::vector<std::string> result;
+
+    size_t dotPos = baseFileName.find('.');
+
+    std::string preStr, postStr;
+
+    postStr = baseFileName.substr(dotPos);
+    preStr = baseFileName.substr(0,dotPos - 2);
+
+    for (unsigned int i = 0; i < frames; ++i)
+    {
+        std::string numStr = std::to_string(i);
+
+        if (numStr.length() == 1)
+            numStr = "0" + numStr;
+
+        result.push_back(preStr + numStr + postStr);
+    }
+
+    return result;
+}
 
 osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
 {
@@ -314,9 +372,19 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     bool colorKey = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
 
+    MFFormat::DataFormat::Vec3 dif = material->mDiffuse;
+    MFFormat::DataFormat::Vec3 amb = material->mAmbient;
+    MFFormat::DataFormat::Vec3 emi = material->mEmission;
+
+    // TODO:
+    //mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
+    //mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
+    //mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
+
     if (material->mTransparency < 1)
     {
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
 
         stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
@@ -355,6 +423,19 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
             stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
             stateSet->setAttributeAndModes(alphaFunc,osg::StateAttribute::ON);
         }
+    }
+
+    if (material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE)
+    {
+        osg::ref_ptr<TextureSwitchCallback> cb = new TextureSwitchCallback;
+        std::vector<std::string> animationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
+
+        // TODO: also animate alpha texture
+
+        for (int i = 0; i < animationNames.size(); ++i)
+            cb->addTexture(loadTexture(animationNames[i]));
+
+        stateSet->setUpdateCallback(cb);
     }
 
     osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
