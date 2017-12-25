@@ -28,20 +28,23 @@ namespace MFFormat
 class TextureSwitchCallback: public osg::StateSet::Callback
 {
 public:
+    TextureSwitchCallback(unsigned framePeriod)
+    {
+        mCurrentTexture = 0;
+        mFramePeriod = framePeriod;
+    }
+
     virtual void operator()(osg::StateSet *s, osg::NodeVisitor *n)
     {
-        if (mTmpCoundown <= 0)   // TODO: do this based on time, not frames
-            mTmpCoundown = 60;
-        else
+        unsigned int newTexture = ((unsigned int) (n->getFrameStamp()->getReferenceTime() * 1000.0 / mFramePeriod)) % mTextures.size();
+
+        if (newTexture != mCurrentTexture)
         {
-            mTmpCoundown--;
-            return;
+            mCurrentTexture = newTexture;
+
+            s->setTextureAttributeAndModes(0,mTextures[mCurrentTexture].get(),
+                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
-
-        mCurrentTexture = (mCurrentTexture + 1) % mTextures.size();
-
-        s->setTextureAttributeAndModes(0,mTextures[mCurrentTexture].get(),
-            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     }
 
     void addTexture(osg::Texture2D *texture)
@@ -52,7 +55,7 @@ public:
 protected:
     std::vector<osg::ref_ptr<osg::Texture2D>> mTextures;
     unsigned int mCurrentTexture;
-    unsigned int mTmpCoundown;
+    unsigned int mFramePeriod;
 };
 
 class OSG4DSLoader: public OSGLoader
@@ -435,7 +438,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE)
     {
-        osg::ref_ptr<TextureSwitchCallback> cb = new TextureSwitchCallback;
+        osg::ref_ptr<TextureSwitchCallback> cb = new TextureSwitchCallback(material->mFramePeriod);
         std::vector<std::string> diffuseAnimationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
         std::vector<std::string> alphaAnimationNames = makeAnimationNames(alphaTextureName,material->mAnimSequenceLength);
 
