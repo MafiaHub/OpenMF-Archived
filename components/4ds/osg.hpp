@@ -30,7 +30,7 @@ class TextureSwitchCallback: public osg::StateSet::Callback
 public:
     virtual void operator()(osg::StateSet *s, osg::NodeVisitor *n)
     {
-        if (mTmpCoundown <= 0)   // TODO: do this based on time. not frames
+        if (mTmpCoundown <= 0)   // TODO: do this based on time, not frames
             mTmpCoundown = 60;
         else
         {
