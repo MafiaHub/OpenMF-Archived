@@ -439,8 +439,6 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         std::vector<std::string> diffuseAnimationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
         std::vector<std::string> alphaAnimationNames = makeAnimationNames(alphaTextureName,material->mAnimSequenceLength);
 
-        // TODO: also animate alpha texture
-
         for (int i = 0; i < diffuseAnimationNames.size(); ++i)
             cb->addTexture(loadTexture(diffuseAnimationNames[i],alphaAnimationNames[i],colorKey));
 
