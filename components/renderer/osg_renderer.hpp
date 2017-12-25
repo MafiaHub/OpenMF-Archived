@@ -17,6 +17,8 @@
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
 
+#include <osg/ClearNode>
+
 namespace MFRender
 
 {
@@ -157,8 +159,8 @@ bool OSGRenderer::loadMission(std::string mission)
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
         MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", "renderer");
 
-    mRootNode->addChild( l4ds.load(file4DS) );
     mRootNode->addChild( lScene2.load(fileScene2Bin) );
+    mRootNode->addChild( l4ds.load(file4DS) );
 
     if(mFileSystem->open(fileCacheBin,cacheBinPath)) 
     {

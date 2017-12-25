@@ -61,16 +61,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
             osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform();
+        cameraRel->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
 
-        // FIXME: better use stencil buffer so that skybox doesn't z-fight with the sun
-        trans->setMatrix(osg::Matrixd::scale(osg::Vec3f(10,10,10)));   // so that the skybox doesn't cut the scene off
+        cameraRel->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
+        cameraRel->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
+        // FIXME: disabling depth writing this way also disables depth test => bad (osg::ClearNode?)
 
-        trans->addChild(cameraRel);
-
-        cameraRel->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
-
-        group->addChild(trans);
+        group->addChild(cameraRel);
  
         unsigned int lightNumber = 0;
      
@@ -78,7 +75,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
         defaultLightNode->getLight()->setPosition( osg::Vec4f(1,1,1,0) );
         defaultLightNode->getLight()->setLightNum( lightNumber++ );
-        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.5,0.5,0.5,1.0) );
+        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.7,0.7,0.7,1.0) );
         group->addChild( defaultLightNode );
 
         for (auto pair : parser.getObjects())
