@@ -84,9 +84,17 @@ protected:
 
 std::vector<std::string> OSG4DSLoader::makeAnimationNames(std::string baseFileName, unsigned int frames)
 {
-    // FIXME: make this nicer
+    // FIXME: make this nicer 
 
     std::vector<std::string> result;
+
+    if (baseFileName.length() == 0)
+    {
+        for (unsigned int i = 0; i < frames; ++i)
+            result.push_back("");
+
+        return result;
+    }
 
     size_t dotPos = baseFileName.find('.');
 
@@ -428,12 +436,13 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     if (material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE)
     {
         osg::ref_ptr<TextureSwitchCallback> cb = new TextureSwitchCallback;
-        std::vector<std::string> animationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
+        std::vector<std::string> diffuseAnimationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
+        std::vector<std::string> alphaAnimationNames = makeAnimationNames(alphaTextureName,material->mAnimSequenceLength);
 
         // TODO: also animate alpha texture
 
-        for (int i = 0; i < animationNames.size(); ++i)
-            cb->addTexture(loadTexture(animationNames[i]));
+        for (int i = 0; i < diffuseAnimationNames.size(); ++i)
+            cb->addTexture(loadTexture(diffuseAnimationNames[i],alphaAnimationNames[i],colorKey));
 
         stateSet->setUpdateCallback(cb);
     }
