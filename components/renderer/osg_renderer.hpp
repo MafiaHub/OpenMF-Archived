@@ -147,33 +147,47 @@ bool OSGRenderer::loadMission(std::string mission)
 
     l4ds.setLoaderCache(&mLoaderCache);
     lScene2.setLoaderCache(&mLoaderCache);
-	lCache.setLoaderCache(&mLoaderCache);
+    lCache.setLoaderCache(&mLoaderCache);
 
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
 
-    if (!mFileSystem->open(file4DS,scene4dsPath))
+    if (!mFileSystem->open(file4DS,scene4dsPath))   // each mission must have 4ds file, therefore not opening means warning
         MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
     else
     {
-        mRootNode->addChild( l4ds.load(file4DS) );
+        osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
         file4DS.close();
     }
 
-    if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
-        MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
-    else
+    if (mFileSystem->open(fileScene2Bin,scene2BinPath))
     {
-        mRootNode->addChild( lScene2.load(fileScene2Bin) );
+        osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
         fileScene2Bin.close();
     }
 
-    if(!mFileSystem->open(fileCacheBin,cacheBinPath)) 
-        MFLogger::ConsoleLogger::warn("Couldn't not open cache.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
-    else
+    if (mFileSystem->open(fileCacheBin,cacheBinPath)) 
     {
-        mRootNode->addChild( lCache.load(fileCacheBin) );
+        osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
         fileCacheBin.close();
     }
 
