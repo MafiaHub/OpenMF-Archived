@@ -21,8 +21,6 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
     MFFormat::OSG4DSLoader loader4DS;
     bool success = parser.load(srcFile);
 
-    std::map<std::string, osg::ref_ptr<osg::Group>> nodeMap;
-
     if (success)
     {
         for (auto object : parser.getObjects())
@@ -62,7 +60,6 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
 
                     objectTransform->addChild(objectNode);
                     objectGroup->addChild(objectTransform);
-                    nodeMap.insert(nodeMap.begin(), std::pair<std::string, osg::ref_ptr<osg::Group>>(object.mObjectName, objectTransform));
                 }
             }   // for instances
 
