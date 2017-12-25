@@ -174,7 +174,7 @@ public:
     typedef struct
     {
         Standard mStandard;
-        uint32_t mRotationAxis;
+        uint32_t mRotationAxis;  // TODO: find out what the values mean
         uint8_t mIgnoreCamera;
     } Billboard;
 

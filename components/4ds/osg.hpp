@@ -20,6 +20,8 @@
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
 
+#define OSG4DS_MODULE_STR "loader 4ds"
+
 namespace MFFormat
 {
 
@@ -32,12 +34,19 @@ protected:
     typedef std::vector<osg::ref_ptr<osg::StateSet>> MaterialList;
 
     osg::ref_ptr<osg::Node> make4dsMesh(MFFormat::DataFormat4DS::Mesh *mesh, MaterialList &materials);
-    osg::ref_ptr<osg::Node> make4dsMeshLOD(MFFormat::DataFormat4DS::Lod *meshLOD, MaterialList &materials);
+    osg::ref_ptr<osg::StateSet> make4dsMaterial(MFFormat::DataFormat4DS::Material *material);
+    osg::ref_ptr<osg::Node> make4dsMeshLOD(
+        MFFormat::DataFormat4DS::Lod *meshLOD,
+        MaterialList &materials,
+        bool isBillboard=false,
+        osg::Vec3f billboardAxis=osg::Vec3f(0,0,1));
     osg::ref_ptr<osg::Node> make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
-        MFFormat::DataFormat4DS::FaceGroup *faceGroup);
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup,
+        bool isBillboard=false,
+        osg::Vec3f billboardAxis=osg::Vec3f(0,0,1));
     osg::ref_ptr<osg::Texture2D> loadTexture(std::string fileName, std::string fileNameAlpha="", bool colorKey=false);
 };
 
@@ -59,7 +68,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     logStr += ".";
 
-    MFLogger::ConsoleLogger::info(logStr, "renderer");
+    MFLogger::ConsoleLogger::info(logStr, OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
      
@@ -82,7 +91,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     if (fileLocation.length() == 0 && fileName.length() != 0)
     {
-        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, "renderer");
+        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
     }
     else if (fileName.length() != 0)
     {
@@ -109,7 +118,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
         {
             if (fileLocationAlpha.length() == 0)
             {
-                MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, "renderer");
+                MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
             }
             else
             {
@@ -131,11 +140,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
-        MFFormat::DataFormat4DS::FaceGroup *faceGroup)
+        MFFormat::DataFormat4DS::FaceGroup *faceGroup,
+        bool isBillboard,
+        osg::Vec3f billboardAxis)
 {
-    MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", "renderer");
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
@@ -155,37 +164,55 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
     geom->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
     geom->addPrimitiveSet(indices.get());
-    geode->addDrawable(geom.get());
 
+    if (isBillboard)
+    {
+        osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard;
+        billboard->addDrawable(geom);
+        billboard->setAxis(billboardAxis);
+        return billboard;
+    }
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable(geom.get());
     return geode;
 }
 
 osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
-    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) mesh->mStandard.mLODLevel) +
-        ", type: " + std::to_string((int) mesh->mMeshType) +
-        ", instanced: " + std::to_string(mesh->mStandard.mInstanced),
- 
-        "renderer");
-
     if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
     {
         osg::ref_ptr<osg::Node> emptyNode;
         return emptyNode;
     }
 
+    MFFormat::DataFormat4DS::Standard standard;
+
+    bool isBillboard = mesh->mVisualMeshType == MFFormat::DataFormat4DS::VISUALMESHTYPE_BILLBOARD;
+
+    if (isBillboard)
+        standard = mesh->mBillboard.mStandard;
+    else
+        standard = mesh->mStandard;
+
+    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) standard.mLODLevel) +
+        ", type: " + std::to_string((int) mesh->mMeshType) +
+        ", instanced: " + std::to_string(standard.mInstanced),
+ 
+        OSG4DS_MODULE_STR);
+
     const float maxDistance = 10000000.0;
-    const float stepLOD = maxDistance / mesh->mStandard.mLODLevel;
+    const float stepLOD = maxDistance / standard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
     float previousDist = 0.0;
 
-    for (int i = 0; i < mesh->mStandard.mLODLevel; ++i)
+    for (int i = 0; i < standard.mLODLevel; ++i)
     {
-        float distLOD = mesh->mStandard.mLODLevel == 1 ? maxDistance : mesh->mStandard.mLODs[i].mRelativeDistance;
+        float distLOD = standard.mLODLevel == 1 ? maxDistance : standard.mLODs[i].mRelativeDistance;
 
-        nodeLOD->addChild(make4dsMeshLOD(&(mesh->mStandard.mLODs[i]),materials));
+        nodeLOD->addChild(make4dsMeshLOD(&(standard.mLODs[i]),materials,isBillboard));  // TODO: add rotation axis
         nodeLOD->setRange(i,previousDist,distLOD);
         previousDist = distLOD;
     }
@@ -193,12 +220,16 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
     return nodeLOD; 
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD, MaterialList &materials)
+osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
+    DataFormat4DS::Lod *meshLOD,
+    MaterialList &materials,
+    bool isBillboard,
+    osg::Vec3 billboardAxis)
 {
     MFLogger::ConsoleLogger::info("    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
         ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount),
  
-        "renderer");
+        OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
@@ -226,7 +257,9 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
             vertices.get(),
             normals.get(),
             uvs.get(),
-            &(meshLOD->mFaceGroups[i]));
+            &(meshLOD->mFaceGroups[i]),
+            isBillboard,
+            billboardAxis);
 
         const int materialID = std::max(0,std::min(
             static_cast<int>(materials.size() - 1),
@@ -241,6 +274,70 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(DataFormat4DS::Lod *meshLOD
     }
 
     return group;
+}
+
+osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4DS::Material *material)
+{
+    osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
+
+    auto mat = new osg::Material();
+
+    bool colorKey = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
+
+    if (material->mTransparency < 1)
+    {
+        osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
+
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
+    }
+
+    char diffuseTextureName[255];
+    memcpy(diffuseTextureName,material->mDiffuseMapName,255);
+    diffuseTextureName[material->mDiffuseMapNameLength] = 0;  // terminate the string
+
+    char alphaTextureName[255];
+
+    if (material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
+    {
+        memcpy(alphaTextureName,material->mAlphaMapName,255);
+        alphaTextureName[material->mAlphaMapNameLength] = 0;  // terminate the string
+
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
+    }
+    else
+    {
+        alphaTextureName[0] = 0;
+        stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+
+        if (colorKey)
+        {
+            osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
+            alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
+            stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
+            stateSet->setAttributeAndModes(alphaFunc,osg::StateAttribute::ON);
+        }
+    }
+
+    osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
+
+    stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
+
+    if (!(material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
+        stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+
+    stateSet->setAttribute(mat);
+    stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+    return stateSet;
 }
 
 osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string fileName)
@@ -269,72 +366,14 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         logStr += ", meshes: " + std::to_string(model->mMeshCount);
         logStr += ", materials: " + std::to_string(model->mMaterialCount);
 
-        MFLogger::ConsoleLogger::info(logStr, "renderer");
+        MFLogger::ConsoleLogger::info(logStr,OSG4DS_MODULE_STR);
 
         MaterialList materials;
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
-            // FIXME: this is big now, move to a separate function
-            materials.push_back(new osg::StateSet());
-
-            osg::StateSet *stateSet = materials[i].get();
-            auto mat = new osg::Material();
-
-            bool colorKey = model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
-
-            if (model->mMaterials[i].mTransparency < 1)
-            {
-                osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),model->mMaterials[i].mTransparency));
-
-                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);       
-                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
-            }
-
-            char diffuseTextureName[255];
-            memcpy(diffuseTextureName,model->mMaterials[i].mDiffuseMapName,255);
-            diffuseTextureName[model->mMaterials[i].mDiffuseMapNameLength] = 0;  // terminate the string
-
-            char alphaTextureName[255];
-
-            if (model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
-            {
-                memcpy(alphaTextureName,model->mMaterials[i].mAlphaMapName,255);
-                alphaTextureName[model->mMaterials[i].mAlphaMapNameLength] = 0;  // terminate the string
-
-                stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
-                osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-                blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-                stateSet->setAttributeAndModes(blendFunc.get(), osg::StateAttribute::ON);
-            }
-            else
-            {
-                alphaTextureName[0] = 0;
-                stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-
-                if (colorKey)
-                {
-                    osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
-                    alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
-                    stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
-                    stateSet->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
-                }
-            }
-
-            osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
-
-            stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
-
-            if (!(model->mMaterials[i].mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
-                stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
-
-            stateSet->setAttribute(mat);
-            stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            MFLogger::ConsoleLogger::info("Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
+            materials.push_back(make4dsMaterial(&(model->mMaterials[i])));
         }
 
         std::vector<osg::ref_ptr<osg::MatrixTransform>> meshes;
