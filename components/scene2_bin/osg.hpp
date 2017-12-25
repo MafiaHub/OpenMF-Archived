@@ -177,7 +177,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                 if (hasTransform)
                 {
-                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
+                    osg::Matrixd m = makeTransformMatrix(object.mPos2,object.mScale,object.mRot);
                     m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
                     objectTransform->setMatrix(m);
                 }
