@@ -136,7 +136,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-     std::string missionDir = "missions/" + mission;
+    std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
     std::string cacheBinPath = missionDir + "/cache.bin";
@@ -159,17 +159,16 @@ bool OSGRenderer::loadMission(std::string mission)
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
         MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", "renderer");
 
-    mRootNode->addChild( lScene2.load(fileScene2Bin) );
-    mRootNode->addChild( l4ds.load(file4DS) );
+    if(!mFileSystem->open(fileCacheBin,cacheBinPath)) 
+        MFLogger::ConsoleLogger::warn("Couldn't not open cache.bin file: " + scene2BinPath + ".", "renderer");
 
-    if(mFileSystem->open(fileCacheBin,cacheBinPath)) 
-    {
-        mRootNode->addChild(lCache.load(fileCacheBin));
-        fileCacheBin.close();
-    }
+    mRootNode->addChild( l4ds.load(file4DS) );
+    mRootNode->addChild( lScene2.load(fileScene2Bin) );
+    mRootNode->addChild( lCache.load(fileCacheBin) );
 
     file4DS.close();
     fileScene2Bin.close();
+    fileCacheBin.close();
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
 
