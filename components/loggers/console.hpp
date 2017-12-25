@@ -69,19 +69,19 @@ void ConsoleLogger::print_raw(std::string str, std::string id)
 void ConsoleLogger::print_info(std::string str, std::string id)
 {
     if (canPrint(id, LOG_VERBOSITY_INFO))
-        std::cout << "[INFO] " << str << std::endl;
+        std::cout << "[INFO] [" << id << "] " << str << std::endl;
 }
 
 void ConsoleLogger::print_warn(std::string str, std::string id)
 {
     if (canPrint(id, LOG_VERBOSITY_WARN))
-        std::cout << "[WARN] " << str << std::endl;
+        std::cout << "[WARN] [" << id << "] " << str << std::endl;
 }
 
 void ConsoleLogger::print_fatal(std::string str, std::string id)
 {
     if (canPrint(id, LOG_VERBOSITY_FATAL))
-        std::cout << "[FATAL] " << str << std::endl;
+        std::cout << "[FATAL] [" << id << "] " << str << std::endl;
 }
 
 }

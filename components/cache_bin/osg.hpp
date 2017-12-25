@@ -27,17 +27,15 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
     {
         for (auto object : parser.getObjects())
         {
-            osg::ref_ptr<osg::Node> objectNode;
-            std::string logStr = object.mObjectName + ": ";
-            bool hasTransform = true;
+            MFLogger::ConsoleLogger::info("Loading object " + object.mObjectName + ".", OSGCACHEBIN_MOSULE_STR);
         
             for(auto instance : object.mInstances)
             {
-                objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
+                osg::ref_ptr<osg::Node> objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
 
                 if (!objectNode)
                 {
-                    logStr += "model: " + instance.mModelName + " " + std::to_string(instance.mPos.x) + " " + std::to_string(instance.mPos.y) + " " + std::to_string(instance.mPos.z) + "\n";
+                    MFLogger::ConsoleLogger::info("Loading model " + instance.mModelName + ". (" + instance.mPos.str() + ")",OSGCACHEBIN_MOSULE_STR);
                     std::ifstream f;
                     
                     if (!mFileSystem->open(f,"MODELS/" + instance.mModelName))
@@ -52,18 +50,13 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                     }
                 }
                 
-                MFLogger::ConsoleLogger::info(logStr, OSGCACHEBIN_MOSULE_STR);
-
                 if (objectNode.get())
                 {
                     osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
 
-                    if (hasTransform)
-                    {
-                        osg::Matrixd m = makeTransformMatrix(instance.mPos, instance.mScale, instance.mRot);
-                        m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
-                        objectTransform->setMatrix(m);
-                    }
+                    osg::Matrixd m = makeTransformMatrix(instance.mPos, instance.mScale, instance.mRot);
+                    m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
+                    objectTransform->setMatrix(m);
 
                     objectTransform->addChild(objectNode);
                     group->addChild(objectTransform);
