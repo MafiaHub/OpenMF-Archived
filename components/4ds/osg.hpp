@@ -188,12 +188,42 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
 
     MFFormat::DataFormat4DS::Standard standard;
 
-    bool isBillboard = mesh->mVisualMeshType == MFFormat::DataFormat4DS::VISUALMESHTYPE_BILLBOARD;
+    bool isBillboard = false;
+    bool unknown = false;
 
-    if (isBillboard)
-        standard = mesh->mBillboard.mStandard;
-    else
-        standard = mesh->mStandard;
+    switch (mesh->mVisualMeshType)
+    {
+        case MFFormat::DataFormat4DS::VISUALMESHTYPE_STANDARD:
+            standard = mesh->mStandard;
+            break;
+
+        case MFFormat::DataFormat4DS::VISUALMESHTYPE_BILLBOARD:
+            isBillboard = true;
+            standard = mesh->mBillboard.mStandard;
+            break;
+
+        case MFFormat::DataFormat4DS::VISUALMESHTYPE_SINGLEMESH:
+            standard = mesh->mSingleMesh.mStandard;
+            break;
+
+        case MFFormat::DataFormat4DS::VISUALMESHTYPE_SINGLEMORPH:
+            standard = mesh->mSingleMorph.mSingleMesh.mStandard;
+            break;
+
+        case MFFormat::DataFormat4DS::VISUALMESHTYPE_MORPH:
+            standard = mesh->mMorph.mStandard;
+            break;
+
+        default:
+            unknown = true;
+            break;
+    }
+
+    if (unknown)
+    {
+        osg::ref_ptr<osg::Node> emptyNode;
+        return emptyNode;
+    }
 
     MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
