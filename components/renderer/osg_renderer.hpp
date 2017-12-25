@@ -155,20 +155,27 @@ bool OSGRenderer::loadMission(std::string mission)
 
     if (!mFileSystem->open(file4DS,scene4dsPath))
         MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+    else
+    {
+        mRootNode->addChild( l4ds.load(file4DS) );
+        file4DS.close();
+    }
 
     if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
         MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+    else
+    {
+        mRootNode->addChild( lScene2.load(fileScene2Bin) );
+        fileScene2Bin.close();
+    }
 
     if(!mFileSystem->open(fileCacheBin,cacheBinPath)) 
         MFLogger::ConsoleLogger::warn("Couldn't not open cache.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
-
-    mRootNode->addChild( l4ds.load(file4DS) );
-    mRootNode->addChild( lScene2.load(fileScene2Bin) );
-    mRootNode->addChild( lCache.load(fileCacheBin) );
-
-    file4DS.close();
-    fileScene2Bin.close();
-    fileCacheBin.close();
+    else
+    {
+        mRootNode->addChild( lCache.load(fileCacheBin) );
+        fileCacheBin.close();
+    }
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
 
