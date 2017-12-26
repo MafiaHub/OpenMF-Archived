@@ -131,7 +131,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     if (cached)
         return cached;
 
-    std::string logStr = "loading texture " + fileName;
+    std::string logStr = "  Loading texture " + fileName;
 
     bool alphaTexture = fileNameAlpha.length() > 0;
 
@@ -537,7 +537,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
-            MFLogger::ConsoleLogger::info("Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
+            MFLogger::ConsoleLogger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
             materials.push_back(make4dsMaterial(&(model->mMaterials[i])));
         }
 
