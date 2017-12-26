@@ -32,11 +32,11 @@ protected:
     ConsoleLogger(uint32_t verbosityFlags);
 };
 
-ConsoleLogger::ConsoleLogger()
+ConsoleLogger::ConsoleLogger(): Logger()
 {
 }
 
-ConsoleLogger::ConsoleLogger(uint32_t verbosityFlags)
+ConsoleLogger::ConsoleLogger(uint32_t verbosityFlags): Logger()
 {
     mVerbosityFlags = verbosityFlags;
 }

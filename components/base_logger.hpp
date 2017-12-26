@@ -19,6 +19,7 @@ typedef enum
 class Logger
 {
 public:
+    Logger() { mFilterExclusive = true; };
     virtual void print_raw  (std::string str, std::string id = "") = 0;
     virtual void print_info (std::string str, std::string id = "") = 0;
     virtual void print_warn (std::string str, std::string id = "") = 0;
@@ -34,7 +35,7 @@ public:
         if (!(flags & mVerbosityFlags))
             return false;
 
-        return std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end();
+        return std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end() == mFilterExclusive;
     }
 
     void addFilter(std::string id)
@@ -47,9 +48,22 @@ public:
         mFilteredIDs.erase(std::remove(mFilteredIDs.begin(), mFilteredIDs.end(), id), mFilteredIDs.end());
     }
 
+    /**
+    Sets how the logger filter behaves.
+
+    @param excludeByID If true, callers set with addFilter will be excluded from the log. False value will
+                       revert the behavior, i.e. only callers added to the filter will be included.
+    */
+
+    void setFilterMode(bool excludeByID)
+    {
+        mFilterExclusive = excludeByID;
+    }
+
 protected:
     uint32_t mVerbosityFlags;
     std::vector<std::string> mFilteredIDs;
+    bool mFilterExclusive;   ///< says whether filter is exclusive of inclusive
 };
 
 }
