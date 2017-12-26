@@ -45,7 +45,8 @@ protected:
     MFUtil::WalkManipulator *mCameraManipulator;
     MFFormat::OSGLoaderCache mLoaderCache;
 
-void optimize();
+    void optimize();
+    void logCacheStats();
 
 };
 
@@ -202,6 +203,8 @@ bool OSGRenderer::loadMission(std::string mission)
 
     optimize();
 
+    logCacheStats();
+
     return true;
 }
 
@@ -258,6 +261,8 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     optimize();
 
+    logCacheStats();
+
     return true;
 }
 
@@ -274,6 +279,12 @@ void OSGRenderer::frame()
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
     }
+}
+
+void OSGRenderer::logCacheStats()
+{
+    MFLogger::ConsoleLogger::info("cache hits: " + std::to_string(mLoaderCache.getCacheHits()),OSGRENDERER_MODULE_STR);
+    MFLogger::ConsoleLogger::info("cache objects total: " + std::to_string(mLoaderCache.getNumObjects()),OSGRENDERER_MODULE_STR);
 }
 
 }
