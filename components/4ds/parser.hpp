@@ -116,7 +116,7 @@ public:
     {
         uint16_t mFaceCount;
         Face *mFaces;
-        uint16_t mMaterialID;
+        uint16_t mMaterialID;      // 1-based, 0 = default material
     } FaceGroup;
 
     typedef struct

@@ -19,8 +19,9 @@
 #include <osgText/Text3D>
 #include <osgText/Font3D>
 #include <osg/Billboard>
-
 #include <osg/Fog>
+
+#define OSGSCENE2BIN_MODULE_STR "loader scene2.bin"
 
 namespace MFFormat
 {
@@ -35,7 +36,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
 
-    MFLogger::ConsoleLogger::info("loading scene2.bin", "renderer");
+    MFLogger::ConsoleLogger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
 
     MFFormat::DataFormatScene2BIN parser;
 
@@ -61,16 +62,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
             osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform();
+        cameraRel->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
 
-        // FIXME: better use stencil buffer so that skybox doesn't z-fight with the sun
-        trans->setMatrix(osg::Matrixd::scale(osg::Vec3f(10,10,10)));   // so that the skybox doesn't cut the scene off
+        cameraRel->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
+        cameraRel->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
+        // FIXME: disabling depth writing this way also disables depth test => bad (osg::ClearNode?)
 
-        trans->addChild(cameraRel);
-
-        cameraRel->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
-
-        group->addChild(trans);
+        group->addChild(cameraRel);
  
         unsigned int lightNumber = 0;
      
@@ -78,7 +76,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
         defaultLightNode->getLight()->setPosition( osg::Vec4f(1,1,1,0) );
         defaultLightNode->getLight()->setLightNum( lightNumber++ );
-        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.5,0.5,0.5,1.0) );
+        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.7,0.7,0.7,1.0) );
         group->addChild( defaultLightNode );
 
         for (auto pair : parser.getObjects())
@@ -148,7 +146,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         
                         if (!mFileSystem->open(f,"models/" + object.mModelName))
                         {
-                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".", "renderer");
+                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
                         }
                         else
                         {
@@ -169,7 +167,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 }
             }
             
-            MFLogger::ConsoleLogger::info(logStr, "renderer");
+            MFLogger::ConsoleLogger::info(logStr, OSGSCENE2BIN_MODULE_STR);
 
             if (objectNode.get())
             {

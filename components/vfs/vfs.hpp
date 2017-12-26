@@ -17,6 +17,8 @@
 #include <pwd.h>
 #endif
 
+#define VFS_MODULE_STR "VFS"
+
 namespace MFFile
 {
 
@@ -114,13 +116,15 @@ std::string FileSystem::getFileLocation(std::string fileName)
 
 bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
 {
-	mode;
     fileName = convertPathToCanonical(fileName);
 
     std::string fileLocation = getFileLocation(fileName);    
 
     if (fileLocation.length() == 0)
+    {
+        MFLogger::ConsoleLogger::warn("Could not open file: " + fileName + ".",VFS_MODULE_STR);
         return false;
+    }
 
     file.open(fileLocation, std::ios::binary);
     return file.good();

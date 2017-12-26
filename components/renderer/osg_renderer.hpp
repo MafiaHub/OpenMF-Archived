@@ -17,6 +17,8 @@
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
 
+#define OSGRENDERER_MODULE_STR "renderer"
+
 namespace MFRender
 
 {
@@ -77,7 +79,7 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
 
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
-    MFLogger::ConsoleLogger::info("initiating OSG renderer", "renderer");
+    MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();
                 
     mFileSystem = MFFile::FileSystem::getInstance();
@@ -134,7 +136,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
 
 bool OSGRenderer::loadMission(std::string mission)
 {
-     std::string missionDir = "missions/" + mission;
+    std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
     std::string cacheBinPath = missionDir + "/cache.bin";
@@ -145,29 +147,49 @@ bool OSGRenderer::loadMission(std::string mission)
 
     l4ds.setLoaderCache(&mLoaderCache);
     lScene2.setLoaderCache(&mLoaderCache);
-	lCache.setLoaderCache(&mLoaderCache);
+    lCache.setLoaderCache(&mLoaderCache);
 
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
 
-    if (!mFileSystem->open(file4DS,scene4dsPath))
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", "renderer");
-
-    if (!mFileSystem->open(fileScene2Bin,scene2BinPath))
-        MFLogger::ConsoleLogger::warn("Couldn't not open scene2.bin file: " + scene2BinPath + ".", "renderer");
-
-    mRootNode->addChild( l4ds.load(file4DS) );
-    mRootNode->addChild( lScene2.load(fileScene2Bin) );
-
-    if(mFileSystem->open(fileCacheBin,cacheBinPath)) 
+    if (!mFileSystem->open(file4DS,scene4dsPath))   // each mission must have 4ds file, therefore not opening means warning
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+    else
     {
-        mRootNode->addChild(lCache.load(fileCacheBin));
-        fileCacheBin.close();
+        osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
+        file4DS.close();
     }
 
-    file4DS.close();
-    fileScene2Bin.close();
+    if (mFileSystem->open(fileScene2Bin,scene2BinPath))
+    {
+        osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
+        fileScene2Bin.close();
+    }
+
+    if (mFileSystem->open(fileCacheBin,cacheBinPath)) 
+    {
+        osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
+
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
+        fileCacheBin.close();
+    }
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
 
@@ -188,7 +210,7 @@ void OSGRenderer::optimize()
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
 
-    MFLogger::ConsoleLogger::info("optimizing", "renderer");
+    MFLogger::ConsoleLogger::info("optimizing", OSGRENDERER_MODULE_STR);
 
     osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
     osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
@@ -226,7 +248,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", "renderer");
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
         return false;
     }
      

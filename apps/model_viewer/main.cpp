@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     else
         renderer.loadMission(inputFile);
 
-    renderer.setCameraParameters(true,fov,0,0.01,100000);
+    renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
 
     if (cameraPlace)
