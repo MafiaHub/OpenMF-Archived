@@ -21,6 +21,8 @@
 #include <bmp_analyser.hpp>
 #include <osg/TexGen>
 
+#include <osg/TexEnv>
+
 #define OSG4DS_MODULE_STR "loader 4ds"
 
 namespace MFFormat
@@ -387,6 +389,10 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool diffuseMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_TEXTUREDIFFUSE;
     bool alphaMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE;
 
+    bool mixNormal = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_NORMALTEXTUREBLEND;
+    bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
+    bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
+
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
 
@@ -421,6 +427,17 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (envMap)
     {
+        osg::ref_ptr<osg::TexEnv> texEnv = new osg::TexEnv;
+
+        if (mixAdd)
+            texEnv->setMode(osg::TexEnv::ADD);
+        else if (mixMultiply)
+            texEnv->setMode(osg::TexEnv::MODULATE);
+//      else if (mixNormal)
+//          texEnv->setMode(osg::TexEnv::BLEND);   // FIXME: this doesn't look good for some reason, maybe texture format, see TexEnv docs
+            
+        stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
+
         memcpy(envTextureName,material->mEnvMapName,255);
         envTextureName[material->mEnvMapNameLength] = 0;  // terminate the string
 
