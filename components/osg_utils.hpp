@@ -80,6 +80,7 @@ public:
 class WalkManipulator: public osgGA::FirstPersonManipulator
 {
 public:
+    WalkManipulator();
     virtual bool handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
     virtual bool handleKeyUp(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
     virtual bool handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
@@ -92,6 +93,11 @@ protected:
     int mUp;
     bool mShift;
 };
+
+WalkManipulator::WalkManipulator(): osgGA::FirstPersonManipulator()
+{
+    setAllowThrow(false);
+}
 
 bool WalkManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
