@@ -297,7 +297,12 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         return emptyNode;
     }
 
-    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) standard.mLODLevel) +
+    char meshName[255];
+
+    memcpy(meshName,mesh->mMeshName,255);
+    meshName[mesh->mMeshNameLength] = 0;
+
+    MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", instanced: " + std::to_string(standard.mInstanced),
  
