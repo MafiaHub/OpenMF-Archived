@@ -400,6 +400,8 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
 
+    bool isTransparent = false;
+
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
 
@@ -414,15 +416,9 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (material->mTransparency < 1)
     {
+        isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
-
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }
 
     char diffuseTextureName[255];
@@ -455,22 +451,17 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (alphaMap)
     {
+        isTransparent = true;
         memcpy(alphaTextureName,material->mAlphaMapName,255);
         alphaTextureName[material->mAlphaMapNameLength] = 0;  // terminate the string
-
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
-        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }
     else
     {
         alphaTextureName[0] = 0;
-        stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
 
         if (colorKey)
         {
+            isTransparent = true;
             osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
             alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
             stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
@@ -488,6 +479,19 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
             cb->addTexture(loadTexture(diffuseAnimationNames[i],alphaAnimationNames[i],colorKey));
 
         stateSet->setUpdateCallback(cb);
+    }
+
+    if (isTransparent)
+    {
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
+    }
+    else   // opaque
+    {
+        stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     }
 
     if (diffuseMap)
