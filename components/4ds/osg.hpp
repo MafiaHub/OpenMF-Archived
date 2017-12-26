@@ -19,6 +19,9 @@
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
+#include <osg/TexGen>
+
+#include <osg/TexEnv>
 
 #define OSG4DS_MODULE_STR "loader 4ds"
 
@@ -382,6 +385,16 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     auto mat = new osg::Material();
 
     bool colorKey = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORKEY;
+    bool envMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ENVIRONMENTMAP;
+    bool diffuseMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_TEXTUREDIFFUSE;
+    bool alphaMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE;
+
+    bool mixNormal = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_NORMALTEXTUREBLEND;
+    bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
+    bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
+
+    unsigned int diffuseUnit = 0;
+    unsigned int envUnit = diffuseMap ? 1 : 0;
 
     MFFormat::DataFormat::Vec3 dif = material->mDiffuse;
     MFFormat::DataFormat::Vec3 amb = material->mAmbient;
@@ -410,8 +423,30 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     diffuseTextureName[material->mDiffuseMapNameLength] = 0;  // terminate the string
 
     char alphaTextureName[255];
+    char envTextureName[255]; 
 
-    if (material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE)
+    if (envMap)
+    {
+        osg::ref_ptr<osg::TexEnv> texEnv = new osg::TexEnv;
+
+        if (mixAdd)
+            texEnv->setMode(osg::TexEnv::ADD);
+        else if (mixMultiply)
+            texEnv->setMode(osg::TexEnv::MODULATE);
+//      else if (mixNormal)
+//          texEnv->setMode(osg::TexEnv::BLEND);   // FIXME: this doesn't look good for some reason, maybe texture format, see TexEnv docs
+            
+        stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
+
+        memcpy(envTextureName,material->mEnvMapName,255);
+        envTextureName[material->mEnvMapNameLength] = 0;  // terminate the string
+
+        osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen();
+        texGen->setMode(osg::TexGen::SPHERE_MAP);
+        stateSet->setTextureAttributeAndModes(envUnit,texGen);
+    }
+
+    if (alphaMap)
     {
         memcpy(alphaTextureName,material->mAlphaMapName,255);
         alphaTextureName[material->mAlphaMapNameLength] = 0;  // terminate the string
@@ -448,7 +483,17 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setUpdateCallback(cb);
     }
 
-    osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
+    if (diffuseMap)
+    {
+        osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
+        stateSet->setTextureAttributeAndModes(diffuseUnit,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    }
+
+    if (envMap)
+    {
+        osg::ref_ptr<osg::Texture2D> tex = loadTexture(envTextureName,"",false);
+        stateSet->setTextureAttributeAndModes(envUnit,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    }
 
     stateSet->setAttributeAndModes(new osg::FrontFace(osg::FrontFace::CLOCKWISE));
 
@@ -456,7 +501,6 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
 
     stateSet->setAttribute(mat);
-    stateSet->setTextureAttributeAndModes(0,tex.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
     return stateSet;
 }

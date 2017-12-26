@@ -7,6 +7,8 @@
 #include <vfs/vfs.hpp>
 #include <loader_cache.hpp>
 
+#define OSGLOADER_MODULE_STR "OSG loader"
+
 namespace MFFormat
 {
 
@@ -140,7 +142,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
         f.close();
     }
     else
-        MFLogger::ConsoleLogger::warn("Could not open file " + fileName + ".", "asset");
+        MFLogger::ConsoleLogger::warn("Could not open file " + fileName + ".", OSGLOADER_MODULE_STR);
 
     return n;
 }

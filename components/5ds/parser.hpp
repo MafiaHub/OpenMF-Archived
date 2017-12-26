@@ -95,7 +95,7 @@ void DataFormat5DS::AnimationSequence::setType(uint16_t type)
 
 void DataFormat5DS::AnimationSequence::setName(const std::string& str)
 {
-	mObjectName = str;
+    mObjectName = str;
 }
 
 void DataFormat5DS::AnimationSequence::addTimestamp(uint32_t time)
