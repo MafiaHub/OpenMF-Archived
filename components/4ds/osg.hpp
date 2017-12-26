@@ -539,9 +539,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
     osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
 
-    //  this transforms the scene to the correct coord system, but other things (scene.bin etc.) have to follow
-    //  group->setMatrix( osg::Matrixd::scale(osg::Vec3f(1.0,1.0,-1.0)) );
-
     if (format.load(srcFile))
     {
         auto model = format.getModel();
@@ -574,9 +571,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
             r = model->mMeshes[i].mRot;
 
             transform->setMatrix(makeTransformMatrix(p,s,r));
-
-            // TODO(zaklaus): Improve this, either distinguish collision faces
-            // in the world or skip them entirely.
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
