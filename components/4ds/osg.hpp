@@ -20,8 +20,8 @@
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
 #include <osg/TexGen>
-
 #include <osg/TexEnv>
+#include <osg/CullFace>
 
 #define OSG4DS_MODULE_STR "loader 4ds"
 
@@ -398,6 +398,8 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
+    bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
+
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
 
@@ -504,6 +506,14 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (!(material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
         stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+
+    if (hide)
+    {
+        osg::ref_ptr<osg::CullFace> cullFace = new osg::CullFace;
+        cullFace->setMode(osg::CullFace::FRONT_AND_BACK);
+        stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(cullFace,osg::StateAttribute::ON);
+    }
 
     stateSet->setAttribute(mat);
 
