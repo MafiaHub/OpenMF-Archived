@@ -85,7 +85,7 @@ OSGRenderer::OSGRenderer(): MFRenderer()
                 
     mFileSystem = MFFile::FileSystem::getInstance();
 
-mFileSystem->addPath("../mafia/");
+mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
 
     mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
@@ -93,6 +93,7 @@ mFileSystem->addPath("../mafia/");
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
+    statshandler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F4);
     mViewer->addEventHandler(statshandler);
 
     mRootNode = new osg::Group();
