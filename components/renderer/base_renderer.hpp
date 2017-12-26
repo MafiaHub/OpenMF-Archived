@@ -8,7 +8,7 @@ class MFRenderer
 {
 public:
     MFRenderer();
-    virtual bool loadMission(std::string mission)=0;
+    virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true)=0;
     virtual bool loadSingleModel(std::string model)=0;
 
     virtual void frame()=0;

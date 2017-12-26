@@ -27,7 +27,7 @@ class OSGRenderer: public MFRenderer
 {
 public:
     OSGRenderer();
-    virtual bool loadMission(std::string mission) override;
+    virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
     virtual bool loadSingleModel(std::string model) override;
 
     virtual void frame() override;
@@ -135,7 +135,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     }
 }
 
-bool OSGRenderer::loadMission(std::string mission)
+bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
 {
     std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
@@ -154,9 +154,7 @@ bool OSGRenderer::loadMission(std::string mission)
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
 
-    if (!mFileSystem->open(file4DS,scene4dsPath))   // each mission must have 4ds file, therefore not opening means warning
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
-    else
+    if (load4ds && mFileSystem->open(file4DS,scene4dsPath))
     {
         osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
 
@@ -167,8 +165,10 @@ bool OSGRenderer::loadMission(std::string mission)
 
         file4DS.close();
     }
+    else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
+        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
-    if (mFileSystem->open(fileScene2Bin,scene2BinPath))
+    if (loadScene2Bin && mFileSystem->open(fileScene2Bin,scene2BinPath))
     {
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
 
@@ -180,7 +180,7 @@ bool OSGRenderer::loadMission(std::string mission)
         fileScene2Bin.close();
     }
 
-    if (mFileSystem->open(fileCacheBin,cacheBinPath)) 
+    if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath)) 
     {
         osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
 

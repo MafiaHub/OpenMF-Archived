@@ -24,6 +24,11 @@ std::string strToUpper(std::string str)
     return str;
 }
 
+bool strStartsWith(std::string str, std::string prefix)
+{
+    return str.compare(0,prefix.size(),prefix) == 0;
+}
+
 template<typename Out>
 void _split(const std::string &s, char delim, Out result)
 {

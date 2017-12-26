@@ -20,8 +20,8 @@
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
 #include <osg/TexGen>
-
 #include <osg/TexEnv>
+#include <osg/CullFace>
 
 #define OSG4DS_MODULE_STR "loader 4ds"
 
@@ -131,7 +131,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     if (cached)
         return cached;
 
-    std::string logStr = "loading texture " + fileName;
+    std::string logStr = "  Loading texture " + fileName;
 
     bool alphaTexture = fileNameAlpha.length() > 0;
 
@@ -297,7 +297,12 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         return emptyNode;
     }
 
-    MFLogger::ConsoleLogger::info("  loading mesh, LOD level: " + std::to_string((int) standard.mLODLevel) +
+    char meshName[255];
+
+    memcpy(meshName,mesh->mMeshName,255);
+    meshName[mesh->mMeshNameLength] = 0;
+
+    MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", instanced: " + std::to_string(standard.mInstanced),
  
@@ -393,6 +398,10 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
+    bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
+
+    bool isTransparent = false;
+
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
 
@@ -407,15 +416,9 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (material->mTransparency < 1)
     {
+        isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
-
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }
 
     char diffuseTextureName[255];
@@ -448,19 +451,13 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (alphaMap)
     {
+        isTransparent = true;
         memcpy(alphaTextureName,material->mAlphaMapName,255);
         alphaTextureName[material->mAlphaMapNameLength] = 0;  // terminate the string
-
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
-        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }
     else
     {
         alphaTextureName[0] = 0;
-        stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
 
         if (colorKey)
         {
@@ -483,6 +480,19 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setUpdateCallback(cb);
     }
 
+    if (isTransparent)
+    {
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+        osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
+        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
+    }
+    else   // opaque
+    {
+        stateSet->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+    }
+
     if (diffuseMap)
     {
         osg::ref_ptr<osg::Texture2D> tex = loadTexture(diffuseTextureName,alphaTextureName,colorKey);
@@ -499,6 +509,14 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     if (!(material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_DOUBLESIDEDMATERIAL))
         stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+
+    if (hide)
+    {
+        osg::ref_ptr<osg::CullFace> cullFace = new osg::CullFace;
+        cullFace->setMode(osg::CullFace::FRONT_AND_BACK);
+        stateSet->setMode(GL_CULL_FACE,osg::StateAttribute::ON);
+        stateSet->setAttributeAndModes(cullFace,osg::StateAttribute::ON);
+    }
 
     stateSet->setAttribute(mat);
 
@@ -521,9 +539,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
     osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
 
-    //  this transforms the scene to the correct coord system, but other things (scene.bin etc.) have to follow
-    //  group->setMatrix( osg::Matrixd::scale(osg::Vec3f(1.0,1.0,-1.0)) );
-
     if (format.load(srcFile))
     {
         auto model = format.getModel();
@@ -537,7 +552,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
         for (int i = 0; i < model->mMaterialCount; ++i)  // load materials
         {
-            MFLogger::ConsoleLogger::info("Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
+            MFLogger::ConsoleLogger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
             materials.push_back(make4dsMaterial(&(model->mMaterials[i])));
         }
 
@@ -556,9 +571,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
             r = model->mMeshes[i].mRot;
 
             transform->setMatrix(makeTransformMatrix(p,s,r));
-
-            // TODO(zaklaus): Improve this, either distinguish collision faces
-            // in the world or skip them entirely.
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
 
             meshes.push_back(transform);
