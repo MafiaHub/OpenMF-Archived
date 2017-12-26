@@ -72,13 +72,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
  
         unsigned int lightNumber = 0;
      
-        // TMP: add default light until game lights are correctly handled
-        osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
-        defaultLightNode->getLight()->setPosition( osg::Vec4f(1,1,1,0) );
-        defaultLightNode->getLight()->setLightNum( lightNumber++ );
-        defaultLightNode->getLight()->setAmbient( osg::Vec4f(0.7,0.7,0.7,1.0) );
-        group->addChild( defaultLightNode );
-
         for (auto pair : parser.getObjects())
         {
             auto object = pair.second;
@@ -130,7 +123,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         lightNumber++;
                     #endif
 
-                    objectNode = lightNode;
+                    // TODO: for now, block adding lights, as they don't work
+                    // objectNode = lightNode;
                     break;
                 }
 

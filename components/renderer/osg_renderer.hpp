@@ -47,7 +47,7 @@ protected:
 
     void optimize();
     void logCacheStats();
-
+    void addDefaultLight();
 };
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
@@ -119,7 +119,6 @@ void OSGRenderer::setFreeCameraSpeed(double newSpeed)
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
-	orthoSize;
     // FIXME: looks like near/far setting doesn't work - OSG automatically computes them from viewport - turn it off
 
     osg::Camera *camera = mViewer->getCamera();
@@ -204,6 +203,7 @@ bool OSGRenderer::loadMission(std::string mission)
 
     optimize();
 
+    addDefaultLight();
     logCacheStats();
 
     return true;
@@ -261,7 +261,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     file4DS.close();
 
     optimize();
-
+    addDefaultLight();
     logCacheStats();
 
     return true;
@@ -286,6 +286,16 @@ void OSGRenderer::logCacheStats()
 {
     MFLogger::ConsoleLogger::info("cache hits: " + std::to_string(mLoaderCache.getCacheHits()),OSGRENDERER_MODULE_STR);
     MFLogger::ConsoleLogger::info("cache objects total: " + std::to_string(mLoaderCache.getNumObjects()),OSGRENDERER_MODULE_STR);
+}
+
+void OSGRenderer::addDefaultLight()
+{
+    osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
+    defaultLightNode->getLight()->setPosition(osg::Vec4f(1,1,1,0));  // w = 0 => directional
+    defaultLightNode->getLight()->setLightNum(0);
+    defaultLightNode->getLight()->setAmbient(osg::Vec4f(0.7,0.7,0.7,1.0));
+    mRootNode->addChild( defaultLightNode );
+    mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::ON);
 }
 
 }
