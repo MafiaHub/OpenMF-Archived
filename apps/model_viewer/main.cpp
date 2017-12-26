@@ -8,6 +8,8 @@
 
 #define DEFAULT_CAMERA_SPEED 7.0
 
+#define VIEWER_MODULE_STR "viewer"
+
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
     double cam[6];
@@ -49,7 +51,7 @@ void parseCameraString(std::string str, double params[6])
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("viewer","3D viewer for Mafia 4DS files.");
+    cxxopts::Options options(VIEWER_MODULE_STR,"3D viewer for Mafia 4DS files.");
 
     options.add_options()
         ("h,help","Display help and exit.")
@@ -85,7 +87,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "viewer");
+        MFLogger::ConsoleLogger::fatal("Expected file.", VIEWER_MODULE_STR);
         std::cout << options.help() << std::endl;
         return 1;
     }

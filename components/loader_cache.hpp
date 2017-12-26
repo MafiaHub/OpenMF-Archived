@@ -6,7 +6,9 @@
 #include <string>
 #include <loggers/console.hpp>
 
-namespace MFFormat    // TODO: MFFormat or MFRender?
+#define LOADERCACHE_MODULE_STR "loader cache"
+
+namespace MFFormat // TODO: MFFormat or MFRender?
 {
 
 /**
@@ -35,7 +37,7 @@ osg::ref_ptr<osg::Referenced> OSGLoaderCache::getObject(std::string identifier)
     osg::ref_ptr<osg::Referenced> result = mObjects[identifier];
 
     if (result)
-        MFLogger::ConsoleLogger::info("loading cached: " + identifier, "asset");
+        MFLogger::ConsoleLogger::info("loading cached: " + identifier, LOADERCACHE_MODULE_STR);
 
     return result;
 }

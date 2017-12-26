@@ -2,6 +2,7 @@
 #define OSG_CACHE_BIN_LOADER_H
 
 #include <cache_bin/parser.hpp>
+
 #define OSGCACHEBIN_MOSULE_STR "loader cache.bin"
 
 namespace MFFormat

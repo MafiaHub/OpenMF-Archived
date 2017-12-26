@@ -7,6 +7,8 @@
 
 #define ALIGN 50
 
+#define DTA_MODULE_STR "loader DTA"
+
 void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 {
     std::cout << "number of files: " << dta.getNumFiles() << std::endl;
@@ -35,7 +37,7 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("dta","CLI utility for Mafia DTA format.");
+    cxxopts::Options options(DTA_MODULE_STR,"CLI utility for Mafia DTA format.");
 
     options.add_options()
         ("s,size","Display file sizes.")
@@ -63,7 +65,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dta");
+        MFLogger::ConsoleLogger::fatal("Expected file.", DTA_MODULE_STR);
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -79,7 +81,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dta");
+        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", DTA_MODULE_STR);
         return 1;
     }
 
@@ -126,14 +128,14 @@ int main(int argc, char** argv)
             relativeShift = arguments["S"].as<int>();
 
         std::string outputFile = inputFile + ".decrypt" + std::to_string(relativeShift);
-        MFLogger::ConsoleLogger::info("decrypting into " + outputFile, "dta");
+        MFLogger::ConsoleLogger::info("decrypting into " + outputFile, DTA_MODULE_STR);
 
         std::ofstream f2;
         f2.open(outputFile, std::ios::binary);
 
         if (!f2.is_open())
         {
-            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", "dta");
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", DTA_MODULE_STR);
             f.close();
             return 1;
         }
@@ -159,13 +161,13 @@ int main(int argc, char** argv)
         std::string extractFile = arguments["e"].as<std::string>();
         std::string outputFile = "out";
 
-        MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".", "dta");
+        MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".", DTA_MODULE_STR);
 
         int fileIndex = dta.getFileIndex(extractFile);
 
         if (fileIndex < 0)
         {
-            MFLogger::ConsoleLogger::fatal("File " + extractFile + " not found.", "dta");
+            MFLogger::ConsoleLogger::fatal("File " + extractFile + " not found.", DTA_MODULE_STR);
             f.close();
             return 1;
         }
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
  
         if (!f2.is_open())
         {
-            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", "dta");
+            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", DTA_MODULE_STR);
             f.close();
             return 1;
         }
@@ -198,7 +200,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dta");
+        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", DTA_MODULE_STR);
         return 1;
     }
     
