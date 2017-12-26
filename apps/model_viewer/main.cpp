@@ -63,7 +63,10 @@ int main(int argc, char** argv)
         ("v,verbosity","Print verbose output.")
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
-        ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>());
+        ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
+        ("no-4ds","Do not load scene.4ds for the mission.")
+        ("no-scene2bin","Do not load scene2.bin for the mission.")
+        ("no-cachebin","Do not load cache.bin for the mission.");
 
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
@@ -71,6 +74,10 @@ int main(int argc, char** argv)
     bool cameraInfo = arguments.count("c") > 0;
     bool cameraPlace = arguments.count("p") > 0;
     bool model = arguments.count("4") > 0;
+
+    bool load4ds = arguments.count("no-4ds") < 1;
+    bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
+    bool loadCacheBin = arguments.count("no-cachebin") < 1;
 
     double cameraSpeed = DEFAULT_CAMERA_SPEED;
 
@@ -114,7 +121,7 @@ int main(int argc, char** argv)
     if (model)
         renderer.loadSingleModel(inputFile);
     else
-        renderer.loadMission(inputFile);
+        renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
