@@ -461,7 +461,6 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
         if (colorKey)
         {
-            isTransparent = true;
             osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
             alphaFunc->setFunction(osg::AlphaFunc::GREATER,0.5);
             stateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::ON);
