@@ -4,6 +4,7 @@
 #include <utils.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
+#include <algorithm>
 
 #define ALIGN 50
 
@@ -159,7 +160,11 @@ int main(int argc, char** argv)
     if (extractMode)
     {
         std::string extractFile = arguments["e"].as<std::string>();
-        std::string outputFile = "out";
+        std::string outputFile = "./" + MFUtil::strToLower(extractFile);
+        std::replace(outputFile.begin(),outputFile.end(),'\\','/');
+
+        // TODO: add Windows version here
+        system(std::string("mkdir -p \"$(dirname \"" + outputFile + "\")\" && touch \"" + outputFile + "\"").c_str());
 
         MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".", DTA_MODULE_STR);
 
