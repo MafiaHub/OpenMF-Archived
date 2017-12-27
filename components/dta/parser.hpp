@@ -21,7 +21,7 @@ public:
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
-    void decompressLZSSRLE(char *buffer, unsigned int bufferLen);
+    std::vector<unsigned char> decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -204,25 +204,35 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
-        uint16_t blockSize[2];
-        srcFile.read((char *) blockSize,4);
+        // FIXME: make this function nicer
+        uint32_t blockSize;     // compressed size
 
-        char *block = (char *) malloc(blockSize[0]);
+        srcFile.read((char *) &blockSize,4);
+        blockSize = blockSize & 0xffff;
+        char *block = (char *) malloc(blockSize);
 
-        srcFile.read(block,blockSize[0]);
+        srcFile.read(block,blockSize);
 
-        decrypt(block,blockSize[0]);
+        decrypt(block,blockSize);
 
         unsigned char blockType = block[0];
 
-        // 1 is for the block type byte byte
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize[0] - 1);
+        // 1 is for the block type byte
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);
+
+        std::vector<unsigned char> decompressed;
 
         switch (blockType)
         {
-            case BLOCK_UNCOMPRESSED: break;
-            // TODO
-            case BLOCK_LZSS_RLE: decompressLZSSRLE(*dstBuffer + bufferPos,blockSize[0] - 1); break;
+            case BLOCK_UNCOMPRESSED:
+                break;
+
+            case BLOCK_LZSS_RLE:
+                decompressed = decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
+                memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
+                blockSize = decompressed.size() + 1;
+                break;
+
             case BLOCK_DPCM0: break;
             case BLOCK_DPCM1: break;
             case BLOCK_DPCM2: break;
@@ -233,7 +243,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
             default: break;
         }
 
-        bufferPos += blockSize[0] - 1;
+        bufferPos += blockSize - 1;
 
         free(block);
     }
@@ -286,37 +296,23 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
     }
 }
 
-void prbf(std::vector<char> v, std::string s)
+std::vector<unsigned char> DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
 {
-std::cout << s << ": |";
-
-for (int i = 0; i < std::min((int) v.size(),(int) 50); i++)
-    std::cout << +((unsigned char) v[i]) << " ";
-
-std::cout << "|";
-
-std::cout << std::endl;
-}
-
-void DataFormatDTA::decompressLZSSRLE(char *buffer, unsigned int bufferLen)
-{
-return;  // TODO: fix this method, it's not working for some reason
-
     // rewritten version of hdmaster's source
     unsigned int position = 0;
-    std::vector<char> decompressed;
+    std::vector<unsigned char> decompressed;
 
     while (position < bufferLen)
     {
-        auto value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
+        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
         position += 2;
 
         if (value == 0)
         {
             // copy the next at most 16 bytes
-            auto n = std::min(bufferLen - position,(unsigned int) 16);
+            unsigned int n = std::min(bufferLen - position,(unsigned int) 16);
 
-            for (int j = 0; j < n; ++j)
+            for (unsigned int j = 0; j < n; ++j)
                 decompressed.push_back(buffer[position + j]);
 
             position += n;
@@ -328,8 +324,8 @@ return;  // TODO: fix this method, it's not working for some reason
             {
                 if (value & 0x8000)    // leftmost bit set?
                 {
-                    unsigned char offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
-                    unsigned char n = buffer[position + 1] & 0x0f;
+                    uint32_t offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
+                    uint32_t n = buffer[position + 1] & 0x0f;
 
                     if (offset == 0)
                     {
@@ -340,10 +336,9 @@ return;  // TODO: fix this method, it's not working for some reason
                     else
                     {
                         n += 3;
-
                         if (n > offset)
                         {
-                            for (int j = 0; j < n; ++j)
+                            for (unsigned int j = 0; j < n; ++j)
                                 decompressed.emplace_back(*(decompressed.end() - offset));
                         }
                         else
@@ -363,7 +358,7 @@ return;  // TODO: fix this method, it's not working for some reason
         }
     }
 
-    memcpy(buffer,&(decompressed[0]),bufferLen);
+    return decompressed;
 }
 
 }
