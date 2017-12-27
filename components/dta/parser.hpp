@@ -286,18 +286,6 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
     }
 }
 
-void prbf(std::vector<unsigned char> v, std::string s)
-{
-std::cout << s << ": |";
-
-for (int i = 0; i < std::min((int) v.size(),(int) 50); i++)
-    std::cout << +((unsigned char) v[i]) << " ";
-
-std::cout << "|";
-
-std::cout << std::endl;
-}
-
 void DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
 {
     // rewritten version of hdmaster's source
@@ -306,14 +294,8 @@ void DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int buffer
 
     while (position < bufferLen)
     {
-std::cout << "pos: " << position << std::endl;
-std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
         uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
-
-std::cout << "val: " << value << std::endl;
-
         position += 2;
-
 
         if (value == 0)
         {
@@ -322,7 +304,7 @@ std::cout << "val: " << value << std::endl;
 
             for (unsigned int j = 0; j < n; ++j)
                 decompressed.push_back(buffer[position + j]);
-prbf(decompressed,"a");
+
             position += n;
         }
         else
@@ -330,36 +312,28 @@ prbf(decompressed,"a");
             // go bit by bit from the left
             for (unsigned int i = 0; i < 16 && position < bufferLen; ++i, value <<= 1)
             {
-std::cout << "bit: " << i << std::endl;
                 if (value & 0x8000)    // leftmost bit set?
                 {
-std::cout << "pos: " << position << std::endl;
-std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
-                    uint16_t offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
-                    unsigned char n = buffer[position + 1] & 0x0f;
-std::cout << "off: " << +offset << " len: " << +n << std::endl;
+                    uint32_t offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
+                    uint32_t n = buffer[position + 1] & 0x0f;
+
                     if (offset == 0)
                     {
                         n = ((n << 8) | (buffer[position + 2])) + 16;   
-std::cout << "len: " << +n << std::endl;
                         decompressed.insert(decompressed.end(),n,buffer[position + 3]);
                         position += 4;
-prbf(decompressed,"b");
                     }
                     else
                     {
                         n += 3;
-std::cout << "len: " << +n << std::endl;
                         if (n > offset)
                         {
                             for (unsigned int j = 0; j < n; ++j)
                                 decompressed.emplace_back(*(decompressed.end() - offset));
-prbf(decompressed,"c");
                         }
                         else
                         {
                             decompressed.insert(decompressed.end(),decompressed.end() - offset,decompressed.end() - offset + n);
-prbf(decompressed,"d");
                         }
 
                         position += 2;
@@ -368,8 +342,6 @@ prbf(decompressed,"d");
                 else
                 {
                     decompressed.push_back(buffer[position]);
-prbf(decompressed,"e");
-std::cout << "pos: " << position << std::endl;
                     position++;
                 }
             }
