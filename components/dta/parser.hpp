@@ -208,9 +208,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         uint32_t blockSize;     // compressed size
 
         srcFile.read((char *) &blockSize,4);
-        char *block = (char *) malloc(blockSize);
-
         blockSize = blockSize & 0xffff;
+        char *block = (char *) malloc(blockSize);
 
         srcFile.read(block,blockSize);
 
