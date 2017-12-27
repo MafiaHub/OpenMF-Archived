@@ -318,9 +318,9 @@ std::cout << "val: " << value << std::endl;
         if (value == 0)
         {
             // copy the next at most 16 bytes
-            auto n = std::min(bufferLen - position,(unsigned int) 16);
+            unsigned int n = std::min(bufferLen - position,(unsigned int) 16);
 
-            for (int j = 0; j < n; ++j)
+            for (unsigned int j = 0; j < n; ++j)
                 decompressed.push_back(buffer[position + j]);
 prbf(decompressed,"a");
             position += n;
@@ -335,7 +335,7 @@ std::cout << "bit: " << i << std::endl;
                 {
 std::cout << "pos: " << position << std::endl;
 std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
-                    unsigned char offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
+                    uint16_t offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
                     unsigned char n = buffer[position + 1] & 0x0f;
 std::cout << "off: " << +offset << " len: " << +n << std::endl;
                     if (offset == 0)
@@ -352,7 +352,7 @@ prbf(decompressed,"b");
 std::cout << "len: " << +n << std::endl;
                         if (n > offset)
                         {
-                            for (int j = 0; j < n; ++j)
+                            for (unsigned int j = 0; j < n; ++j)
                                 decompressed.emplace_back(*(decompressed.end() - offset));
 prbf(decompressed,"c");
                         }
