@@ -204,25 +204,26 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
-        uint16_t blockSize[2];
-        srcFile.read((char *) blockSize,4);
+        uint32_t blockSize;
 
-        char *block = (char *) malloc(blockSize[0]);
+        srcFile.read((char *) &blockSize,4);
 
-        srcFile.read(block,blockSize[0]);
+        char *block = (char *) malloc(blockSize);
 
-        decrypt(block,blockSize[0]);
+        srcFile.read(block,blockSize);
+
+        decrypt(block,blockSize);
 
         unsigned char blockType = block[0];
 
-        // 1 is for the block type byte byte
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize[0] - 1);
+        // 1 is for the block type byte
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);
 
         switch (blockType)
         {
             case BLOCK_UNCOMPRESSED: break;
             // TODO
-            case BLOCK_LZSS_RLE: decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize[0] - 1); break;
+            case BLOCK_LZSS_RLE: decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
             case BLOCK_DPCM0: break;
             case BLOCK_DPCM1: break;
             case BLOCK_DPCM2: break;
@@ -233,7 +234,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
             default: break;
         }
 
-        bufferPos += blockSize[0] - 1;
+        bufferPos += blockSize - 1;
 
         free(block);
     }
