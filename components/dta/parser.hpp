@@ -21,7 +21,7 @@ public:
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
-    void decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen);
+    std::vector<unsigned char> decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -204,11 +204,13 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
-        uint32_t blockSize;
+        // FIXME: make this function nicer
+        uint32_t blockSize;     // compressed size
 
         srcFile.read((char *) &blockSize,4);
-
         char *block = (char *) malloc(blockSize);
+
+        blockSize = blockSize & 0xffff;
 
         srcFile.read(block,blockSize);
 
@@ -219,11 +221,19 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         // 1 is for the block type byte
         memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);
 
+        std::vector<unsigned char> decompressed;
+
         switch (blockType)
         {
-            case BLOCK_UNCOMPRESSED: break;
-            // TODO
-            case BLOCK_LZSS_RLE: decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_UNCOMPRESSED:
+                break;
+
+            case BLOCK_LZSS_RLE:
+                decompressed = decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
+                memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
+                blockSize = decompressed.size() + 1;
+                break;
+
             case BLOCK_DPCM0: break;
             case BLOCK_DPCM1: break;
             case BLOCK_DPCM2: break;
@@ -287,7 +297,7 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
     }
 }
 
-void DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
+std::vector<unsigned char> DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
 {
     // rewritten version of hdmaster's source
     unsigned int position = 0;
@@ -349,7 +359,7 @@ void DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int buffer
         }
     }
 
-    memcpy(buffer,&(decompressed[0]),bufferLen);
+    return decompressed;
 }
 
 }
