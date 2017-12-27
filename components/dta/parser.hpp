@@ -300,16 +300,23 @@ std::cout << std::endl;
 
 void DataFormatDTA::decompressLZSSRLE(char *buffer, unsigned int bufferLen)
 {
-return;  // TODO: fix this method, it's not working for some reason
-
     // rewritten version of hdmaster's source
     unsigned int position = 0;
     std::vector<char> decompressed;
 
     while (position < bufferLen)
     {
-        auto value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
+std::cout << "pos: " << position << std::endl;
+std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
+//        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
+//uint16_t value =    *((uint16_t *) (&buffer[position]))   ;  // get first two bytes
+
+uint16_t value =    buffer[position] * 256 + buffer[position + 1]  ;  // get first two bytes
+
+std::cout << "val: " << value << std::endl;
+
         position += 2;
+
 
         if (value == 0)
         {
@@ -318,7 +325,7 @@ return;  // TODO: fix this method, it's not working for some reason
 
             for (int j = 0; j < n; ++j)
                 decompressed.push_back(buffer[position + j]);
-
+prbf(decompressed,"a");
             position += n;
         }
         else
@@ -326,29 +333,36 @@ return;  // TODO: fix this method, it's not working for some reason
             // go bit by bit from the left
             for (unsigned int i = 0; i < 16 && position < bufferLen; ++i, value <<= 1)
             {
+std::cout << "bit: " << i << std::endl;
                 if (value & 0x8000)    // leftmost bit set?
                 {
+std::cout << "pos: " << position << std::endl;
+std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
                     unsigned char offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
                     unsigned char n = buffer[position + 1] & 0x0f;
-
+std::cout << "off: " << +offset << " len: " << +n << std::endl;
                     if (offset == 0)
                     {
                         n = ((n << 8) | (buffer[position + 2])) + 16;   
+std::cout << "len: " << +n << std::endl;
                         decompressed.insert(decompressed.end(),n,buffer[position + 3]);
                         position += 4;
+prbf(decompressed,"b");
                     }
                     else
                     {
                         n += 3;
-
+std::cout << "len: " << +n << std::endl;
                         if (n > offset)
                         {
                             for (int j = 0; j < n; ++j)
                                 decompressed.emplace_back(*(decompressed.end() - offset));
+prbf(decompressed,"c");
                         }
                         else
                         {
                             decompressed.insert(decompressed.end(),decompressed.end() - offset,decompressed.end() - offset + n);
+prbf(decompressed,"d");
                         }
 
                         position += 2;
@@ -357,6 +371,7 @@ return;  // TODO: fix this method, it's not working for some reason
                 else
                 {
                     decompressed.push_back(buffer[position]);
+prbf(decompressed,"e");
                     position++;
                 }
             }
