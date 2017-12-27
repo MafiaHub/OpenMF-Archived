@@ -311,7 +311,7 @@ std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << s
 //        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
 //uint16_t value =    *((uint16_t *) (&buffer[position]))   ;  // get first two bytes
 
-uint16_t value =    buffer[position] * 256 + buffer[position + 1]  ;  // get first two bytes
+uint16_t value =    ((unsigned char) buffer[position]) * 256 + ((unsigned char) buffer[position + 1])  ;  // get first two bytes
 
 std::cout << "val: " << value << std::endl;
 
@@ -372,6 +372,7 @@ prbf(decompressed,"d");
                 {
                     decompressed.push_back(buffer[position]);
 prbf(decompressed,"e");
+std::cout << "pos: " << position << std::endl;
                     position++;
                 }
             }
