@@ -21,7 +21,7 @@ public:
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
-    void decompressLZSSRLE(char *buffer, unsigned int bufferLen);
+    void decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -222,7 +222,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         {
             case BLOCK_UNCOMPRESSED: break;
             // TODO
-            case BLOCK_LZSS_RLE: decompressLZSSRLE(*dstBuffer + bufferPos,blockSize[0] - 1); break;
+            case BLOCK_LZSS_RLE: decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize[0] - 1); break;
             case BLOCK_DPCM0: break;
             case BLOCK_DPCM1: break;
             case BLOCK_DPCM2: break;
@@ -286,7 +286,7 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
     }
 }
 
-void prbf(std::vector<char> v, std::string s)
+void prbf(std::vector<unsigned char> v, std::string s)
 {
 std::cout << s << ": |";
 
@@ -298,20 +298,17 @@ std::cout << "|";
 std::cout << std::endl;
 }
 
-void DataFormatDTA::decompressLZSSRLE(char *buffer, unsigned int bufferLen)
+void DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
 {
     // rewritten version of hdmaster's source
     unsigned int position = 0;
-    std::vector<char> decompressed;
+    std::vector<unsigned char> decompressed;
 
     while (position < bufferLen)
     {
 std::cout << "pos: " << position << std::endl;
 std::cout << "bytes: " << +buffer[position] << " " << +buffer[position + 1] << std::endl;
-//        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
-//uint16_t value =    *((uint16_t *) (&buffer[position]))   ;  // get first two bytes
-
-uint16_t value =    ((unsigned char) buffer[position]) * 256 + ((unsigned char) buffer[position + 1])  ;  // get first two bytes
+        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
 
 std::cout << "val: " << value << std::endl;
 
