@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
     MFFormat::DataFormatDTA dta;
 
-    std::vector<std::string> filePath = MFUtil::strSplit(inputFile,'/');  // FIXME: platform-independece needed 
+    std::vector<std::string> filePath = MFUtil::strSplit(inputFile, ZPL_PATH_SEPARATOR);  // FIXME: platform-independece needed 
     std::string fileName = MFUtil::strToLower(filePath.back());
 
     if (fileName.compare("a0.dta") == 0)
