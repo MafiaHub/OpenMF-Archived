@@ -21,7 +21,7 @@ public:
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
-    std::vector<unsigned char> decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen);
+    std::vector<unsigned char> decompressLZSS(unsigned char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -202,13 +202,14 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
-    for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
+    for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
         // FIXME: make this function nicer
         uint32_t blockSize;     // compressed size
 
-        srcFile.read((char *) &blockSize,4);
+        srcFile.read((char *) &blockSize,sizeof(blockSize));
         blockSize = blockSize & 0xffff;
+
         char *block = (char *) malloc(blockSize);
 
         srcFile.read(block,blockSize);
@@ -217,20 +218,19 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         unsigned char blockType = block[0];
 
-        // 1 is for the block type byte
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);   // 1 - don't include the type byte
 
         std::vector<unsigned char> decompressed;
 
         switch (blockType)
         {
             case BLOCK_UNCOMPRESSED:
+                for (uint32_t j = 0; j < blockSize - 1; ++j)          // just copy the data
+                    decompressed.push_back(block[1 + j]);
                 break;
 
             case BLOCK_LZSS_RLE:
-                decompressed = decompressLZSSRLE((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
-                memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
-                blockSize = decompressed.size() + 1;
+                decompressed = decompressLZSS((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
                 break;
 
             case BLOCK_DPCM0: break;
@@ -243,7 +243,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
             default: break;
         }
 
-        bufferPos += blockSize - 1;
+        memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
+        bufferPos += (uint32_t)decompressed.size();
 
         free(block);
     }
@@ -296,20 +297,20 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
     }
 }
 
-std::vector<unsigned char> DataFormatDTA::decompressLZSSRLE(unsigned char *buffer, unsigned int bufferLen)
+std::vector<unsigned char> DataFormatDTA::decompressLZSS(unsigned char *buffer, unsigned int bufferLen)
 {
     // rewritten version of hdmaster's source
+
     unsigned int position = 0;
     std::vector<unsigned char> decompressed;
 
     while (position < bufferLen)
     {
-        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes
+        uint16_t value = (buffer[position] << 8) | (buffer[position + 1]);  // get first two bytes => 16bit LZSS group
         position += 2;
 
-        if (value == 0)
-        {
-            // copy the next at most 16 bytes
+        if (value == 0)  // 0 means just copy the next (at most) 16 bytes
+        { 
             unsigned int n = std::min(bufferLen - position,(unsigned int) 16);
 
             for (unsigned int j = 0; j < n; ++j)
@@ -319,13 +320,15 @@ std::vector<unsigned char> DataFormatDTA::decompressLZSSRLE(unsigned char *buffe
         }
         else
         {
-            // go bit by bit from the left
+            // go bit by bit in the group from the left
             for (unsigned int i = 0; i < 16 && position < bufferLen; ++i, value <<= 1)
             {
-                if (value & 0x8000)    // leftmost bit set?
+                if (value & 0x8000)    // bit set => copy a sequence from already decompressed sequence
                 {
                     uint32_t offset = (buffer[position] << 4) | (buffer[position + 1] >> 4);
                     uint32_t n = buffer[position + 1] & 0x0f;
+
+                    // offset points back to already decompressed bytes, n defines the sequence length
 
                     if (offset == 0)
                     {
@@ -349,7 +352,7 @@ std::vector<unsigned char> DataFormatDTA::decompressLZSSRLE(unsigned char *buffe
                         position += 2;
                     }
                 }
-                else
+                else    // bit not set => just copy to output
                 {
                     decompressed.push_back(buffer[position]);
                     position++;

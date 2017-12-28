@@ -4,6 +4,12 @@
 #include <utils.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
+#include <algorithm>
+
+#include <osdefines.hpp>
+
+#define ZPL_IMPLEMENTATION
+#include <zpl.h>
 
 #define ALIGN 50
 
@@ -159,7 +165,19 @@ int main(int argc, char** argv)
     if (extractMode)
     {
         std::string extractFile = arguments["e"].as<std::string>();
-        std::string outputFile = "out";
+        std::string outputFile = MFUtil::strToLower(extractFile);
+        
+
+		// TODO: Improve this
+#ifdef OMF_SYSTEM_WINDOWS
+		//system(std::string("mkdir " + ).c_str());
+		char const *baseName = zpl_path_base_name(outputFile.c_str());
+		system(std::string("mkdir \"" + std::string(baseName) + "\" && copy /y nul \"" + outputFile + "\"").c_str());
+#else 
+		outputFile = "./" + outputFile;
+		std::replace(outputFile.begin(), outputFile.end(), '\\', '/');
+        system(std::string("mkdir -p \"$(dirname \"" + outputFile + "\")\" && touch \"" + outputFile + "\"").c_str());
+#endif
 
         MFLogger::ConsoleLogger::info("Extracting " + extractFile + " to " + outputFile + ".", DTA_MODULE_STR);
 
@@ -173,7 +191,7 @@ int main(int argc, char** argv)
         }
 
         std::ofstream f2;
-        f2.open(outputFile);
+        f2.open(outputFile, std::ios::binary);
  
         if (!f2.is_open())
         {
