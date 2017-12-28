@@ -97,6 +97,7 @@ mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
     mViewer->addEventHandler(statshandler);
 
     mRootNode = new osg::Group();
+
     mViewer->setSceneData(mRootNode);
 
     mViewer->setUpViewInWindow(40,40,1024,768); 
@@ -175,7 +176,36 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         if (!n)
             MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
         else
+        {
+            // set up lights:
+
+            MFFormat::OSGScene2BinLoader::LightList lightNodes = lScene2.getLightNodes();
+
+            unsigned int lightNum = 1;
+    
+            mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::OFF);
+            
+            for (auto i = 0; i < lightNodes.size(); ++i)
+            {
+                if (lightNum > 7)
+                    break;
+
+                std::string lightTypeStr = lightNodes[i]->getName();
+
+                if (lightTypeStr.compare("directional") == 0 ||
+                    lightTypeStr.compare("ambient") == 0)
+                {
+                    MFLogger::ConsoleLogger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
+                    lightNodes[i]->getLight()->setLightNum(lightNum);
+                    mRootNode->getOrCreateStateSet()->setAttributeAndModes(lightNodes[i]->getLight());
+                    lightNum++;
+                }
+                else
+                    lightNodes[i]->getLight()->setLightNum(0);
+            }
+
             mRootNode->addChild(n);
+        }
 
         fileScene2Bin.close();
     }
@@ -203,7 +233,6 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
 
     optimize();
 
-    addDefaultLight();
     logCacheStats();
 
     return true;

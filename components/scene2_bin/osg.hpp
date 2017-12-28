@@ -29,7 +29,13 @@ namespace MFFormat
 class OSGScene2BinLoader : public OSGLoader
 {
 public:
+    typedef std::vector<osg::ref_ptr<osg::LightSource>> LightList;
+
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
+    LightList getLightNodes() { return mLightNodes; };
+
+protected:
+    LightList mLightNodes;
 };
 
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
@@ -70,8 +76,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
         group->addChild(cameraRel);
  
-        unsigned int lightNumber = 0;
-     
         for (auto pair : parser.getObjects())
         {
             auto object = pair.second;
@@ -86,27 +90,44 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             {
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
                 {
-                    if (object.mLightType != MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT)
-                        break;
+                    logStr += "light (";
+                    std::string lightTypeName;
 
-                    logStr += "light";
+                    switch (object.mLightType)
+                    {
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT: lightTypeName = "point"; break;
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL: lightTypeName = "directional"; break;
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT: lightTypeName = "ambient"; break;
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_FOG: lightTypeName = "fog"; break;
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT: lightTypeName = "point ambient"; break;
+                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_LAYERED_FOG: lightTypeName = "layered fog"; break;
+                        default: break;
+                    }
+
+                    logStr += lightTypeName + ")";
 
                     #if 0
                         // for debug
                         osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                         new osg::Sphere(osg::Vec3f(0,0,0),0.1));
                     #else
-                        if (lightNumber > 6)      // fixed pipeline only supports 7 lights
-                            break;
-
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
-                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.z,c.z) * object.mLightPower;
+                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
 
-                        lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
-                        lightNode->getLight()->setAmbient(osg::Vec4(lightColor * 0.05,1));
-                        lightNode->getLight()->setSpecular(osg::Vec4(1,1,1,1));
+                        if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
+                        {
+                            lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
+                            lightNode->getLight()->setAmbient(osg::Vec4(lightColor,1));
+                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+                        }
+                        else
+                        {
+                            lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
+                            lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
+                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+                        }
 
                         bool isPositional =
                             object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
@@ -118,13 +139,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                         lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
                             isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
- 
-                        lightNode->getLight()->setLightNum(lightNumber);         // each light must have a unique number
-                        lightNumber++;
                     #endif
 
+                    lightNode->setName(lightTypeName);
+                    mLightNodes.push_back(lightNode);
+
                     // TODO: for now, block adding lights, as they don't work
-                    // objectNode = lightNode;
+                    objectNode = lightNode;
                     break;
                 }
 
