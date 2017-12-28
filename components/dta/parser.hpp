@@ -202,7 +202,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
-    for (auto i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
+    for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
         // FIXME: make this function nicer
         uint32_t blockSize;     // compressed size
@@ -225,7 +225,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         switch (blockType)
         {
             case BLOCK_UNCOMPRESSED:
-                for (auto j = 0; j < blockSize - 1; ++j)          // just copy the data
+                for (uint32_t j = 0; j < blockSize - 1; ++j)          // just copy the data
                     decompressed.push_back(block[1 + j]);
                 break;
 
@@ -244,7 +244,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         }
 
         memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
-        bufferPos += decompressed.size();
+        bufferPos += (uint32_t)decompressed.size();
 
         free(block);
     }

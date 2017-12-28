@@ -114,7 +114,7 @@ std::string FileSystem::getFileLocation(std::string fileName)
     return "";
 }
 
-bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode)
+bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::openmode /*mode*/)
 {
     fileName = convertPathToCanonical(fileName);
 
