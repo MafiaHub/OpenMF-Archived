@@ -202,13 +202,14 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
-    for (int i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
+    for (auto i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
         // FIXME: make this function nicer
         uint32_t blockSize;     // compressed size
 
-        srcFile.read((char *) &blockSize,4);
+        srcFile.read((char *) &blockSize,sizeof(blockSize));
         blockSize = blockSize & 0xffff;
+
         char *block = (char *) malloc(blockSize);
 
         srcFile.read(block,blockSize);
@@ -217,20 +218,19 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         unsigned char blockType = block[0];
 
-        // 1 is for the block type byte
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);   // 1 - don't include the type byte
 
         std::vector<unsigned char> decompressed;
 
         switch (blockType)
         {
             case BLOCK_UNCOMPRESSED:
+                for (auto j = 0; j < blockSize - 1; ++j)          // just copy the data
+                    decompressed.push_back(block[1 + j]);
                 break;
 
             case BLOCK_LZSS_RLE:
                 decompressed = decompressLZSS((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
-                memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
-                blockSize = decompressed.size() + 1;
                 break;
 
             case BLOCK_DPCM0: break;
@@ -243,7 +243,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
             default: break;
         }
 
-        bufferPos += blockSize - 1;
+        memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
+        bufferPos += decompressed.size();
 
         free(block);
     }
