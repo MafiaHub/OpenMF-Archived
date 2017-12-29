@@ -121,8 +121,8 @@ osg::Matrixd OSGLoader::makeTransformMatrix(
     osg::Matrixd mat;
 
     mat.preMultTranslate(toOSG(p));
-    mat.preMultScale(toOSG(s));
     mat.preMultRotate(toOSG(r)); 
+    mat.preMultScale(toOSG(s));
 
     return mat;
 }
