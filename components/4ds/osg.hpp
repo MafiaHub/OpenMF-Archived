@@ -304,8 +304,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
 
     MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
-        ", instanced: " + std::to_string(standard.mInstanced),
- 
+        ", parent: " + std::to_string((int) mesh->mParentID) +
+        ", instanced: " + std::to_string(standard.mInstanced), 
         OSG4DS_MODULE_STR);
 
     const float maxDistance = 10000000.0;

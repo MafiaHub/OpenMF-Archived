@@ -47,7 +47,13 @@ protected:
 
     void optimize();
     void logCacheStats();
-    void addDefaultLight();
+
+    /**
+      Given a list of light sources in the scene, the function decides which scene node should be lit by which
+      light and applies this decision to the lights and scene, adds a defaults light if there is none etc.
+     */
+
+    void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 };
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
@@ -169,6 +175,8 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
         MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
+    bool lightsAreSet = false;
+
     if (loadScene2Bin && mFileSystem->open(fileScene2Bin,scene2BinPath))
     {
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
@@ -177,38 +185,17 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
             MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
         else
         {
-            // set up lights:
-
-            MFFormat::OSGScene2BinLoader::LightList lightNodes = lScene2.getLightNodes();
-
-            unsigned int lightNum = 1;
-    
-            mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::OFF);
-            
-            for (auto i = 0; i < lightNodes.size(); ++i)
-            {
-                if (lightNum > 7)
-                    break;
-
-                std::string lightTypeStr = lightNodes[i]->getName();
-
-                if (lightTypeStr.compare("directional") == 0 ||
-                    lightTypeStr.compare("ambient") == 0)
-                {
-                    MFLogger::ConsoleLogger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
-                    lightNodes[i]->getLight()->setLightNum(lightNum);
-                    mRootNode->getOrCreateStateSet()->setAttributeAndModes(lightNodes[i]->getLight());
-                    lightNum++;
-                }
-                else
-                    lightNodes[i]->getLight()->setLightNum(0);
-            }
-
             mRootNode->addChild(n);
+            std::vector<osg::ref_ptr<osg::LightSource>> lightNodes = lScene2.getLightNodes();
+            setUpLights(&lightNodes);
+            lightsAreSet = true;
         }
 
         fileScene2Bin.close();
     }
+
+    if (!lightsAreSet)
+        setUpLights(0);
 
     if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath)) 
     {
@@ -290,7 +277,8 @@ bool OSGRenderer::loadSingleModel(std::string model)
     file4DS.close();
 
     optimize();
-    addDefaultLight();
+    setUpLights(0);
+
     logCacheStats();
 
     return true;
@@ -317,14 +305,56 @@ void OSGRenderer::logCacheStats()
     MFLogger::ConsoleLogger::info("cache objects total: " + std::to_string(mLoaderCache.getNumObjects()),OSGRENDERER_MODULE_STR);
 }
 
-void OSGRenderer::addDefaultLight()
+void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)
 {
-    osg::ref_ptr<osg::LightSource> defaultLightNode = new osg::LightSource();
-    defaultLightNode->getLight()->setPosition(osg::Vec4f(1,1,1,0));  // w = 0 => directional
-    defaultLightNode->getLight()->setLightNum(0);
-    defaultLightNode->getLight()->setAmbient(osg::Vec4f(0.7,0.7,0.7,1.0));
-    mRootNode->addChild( defaultLightNode );
-    mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::ON);
+    if (lightNodes == 0 || lightNodes->size() == 0)
+    {
+        // no lights, add a default one
+
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT0,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT1,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT2,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT3,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT4,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT5,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT6,osg::StateAttribute::OFF);
+        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHT7,osg::StateAttribute::OFF);
+
+        osg::ref_ptr<osg::LightSource> defaultLight = new osg::LightSource;
+
+        defaultLight->getLight()->setPosition( osg::Vec4f(1,1,1,0) );  // w = 0 => directional light
+        defaultLight->getLight()->setLightNum(0);
+
+        defaultLight->getLight()->setAmbient(osg::Vec4f(0.5,0.5,0.5,1));
+        defaultLight->getLight()->setDiffuse(osg::Vec4f(1,1,1,1));
+
+        mRootNode->addChild(defaultLight);
+        mRootNode->getOrCreateStateSet()->setAttributeAndModes(defaultLight->getLight(),osg::StateAttribute::ON);
+    }
+    else
+    {
+        unsigned int lightNum = 0;
+
+        for (auto i = 0; i < lightNodes->size(); ++i)
+        {
+            if (lightNum > 7)     // fixed pipeline only supports 8 lights
+                break;
+
+            std::string lightTypeStr = (*lightNodes)[i]->getName();
+
+            // for now only add global lights, i.e. directional and ambient
+            if (lightTypeStr.compare("directional") == 0 ||
+                lightTypeStr.compare("ambient") == 0)
+            {
+                MFLogger::ConsoleLogger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
+                (*lightNodes)[i]->getLight()->setLightNum(lightNum);
+                mRootNode->getOrCreateStateSet()->setAttributeAndModes((*lightNodes)[i]->getLight());
+                lightNum++;
+            }
+            else
+                (*lightNodes)[i]->getLight()->setLightNum(0);
+        }
+    }
 }
 
 }
