@@ -26,6 +26,40 @@
 namespace MFFormat
 {
 
+class OverrideTextureWrapVisitor: public osg::NodeVisitor
+{
+public:
+    OverrideTextureWrapVisitor(osg::Texture::WrapMode mode): osg::NodeVisitor()
+    {
+        mWrapMode = mode;
+    }
+
+    virtual void apply(osg::Node &n) override
+    {
+          osg::StateSet *stateSet = n.getStateSet();
+
+          if (stateSet)
+          {
+              osg::StateAttribute *stateAttribute = stateSet->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
+
+              if (stateAttribute && stateAttribute->asTexture())
+              {
+                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_S,osg::Texture::MIRROR);    
+                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_T,osg::Texture::MIRROR);    
+              }
+          }
+
+          if (n.asGroup())  // traverse(n) didn't work somehow
+          {
+              for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+                  n.asGroup()->getChild(i)->accept(*this);
+          }
+    }
+
+protected:
+    osg::Texture::WrapMode mWrapMode;
+};
+
 class OSGScene2BinLoader : public OSGLoader
 {
 public:
@@ -33,9 +67,11 @@ public:
 
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
     LightList getLightNodes() { return mLightNodes; };
+    osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };
 
 protected:
     LightList mLightNodes;
+    osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> mCameraRelative;   ///< children of this node move relatively with the camera
 };
 
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
@@ -55,26 +91,26 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
     {
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
-        osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> cameraRel = new
-            MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
+        mCameraRelative = new MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
 
-        cameraRel->setCullingActive(false);
+        mCameraRelative->setCullingActive(false);
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;
 
         mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
         mat->setColorMode(osg::Material::OFF);
-        cameraRel->getOrCreateStateSet()->setAttributeAndModes(mat,
+        mCameraRelative->getOrCreateStateSet()->setAttributeAndModes(mat,
             osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        cameraRel->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
+        mCameraRelative->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
 
-        cameraRel->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
-        cameraRel->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
+        mCameraRelative->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
+        mCameraRelative->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
+
         // FIXME: disabling depth writing this way also disables depth test => bad (osg::ClearNode?)
 
-        group->addChild(cameraRel);
+        group->addChild(mCameraRelative);
  
         for (auto pair : parser.getObjects())
         {
@@ -207,7 +243,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             std::string parentName = pair.second->getName();
 
             if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
-                cameraRel->addChild(pair.second);
+                mCameraRelative->addChild(pair.second);
             else if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
@@ -216,6 +252,13 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             pair.second->setName("");
         }
     }
+
+    /* TODO: Skybox cannot have texture wrap set to repeat, otherwise its edges are visible, therefore
+       use the below visitor to correct the texture wrap for everything in the backdrop sector, but
+       there probably is some better way. */
+
+    OverrideTextureWrapVisitor textureCorrector(osg::Texture::MIRROR);
+    mCameraRelative->accept(textureCorrector);
 
     return group;
 }
