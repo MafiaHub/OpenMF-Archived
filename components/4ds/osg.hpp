@@ -17,6 +17,7 @@
 #include <base_loader.hpp>
 #include <osg/FrontFace>
 #include <osg/BlendFunc>
+#include <osg/BlendEquation>
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
 #include <osg/TexGen>
@@ -409,10 +410,10 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
     bool colored = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORED;
-
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
-
     bool isTransparent = false;
+
+    bool additiveBlend = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVEMIXING;
 
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
@@ -497,11 +498,26 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setUpdateCallback(cb);
     }
 
+    if (additiveBlend)
+        isTransparent = true;        
+
     if (isTransparent)
     {
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        if (additiveBlend)
+        {
+            blendFunc->setFunction(osg::BlendFunc::SRC_COLOR,osg::BlendFunc::DST_COLOR);
+
+            osg::ref_ptr<osg::BlendEquation> blendEq = new osg::BlendEquation;
+            blendEq->setEquation(osg::BlendEquation::RGBA_MAX);    // FIXME: should be FUNC_ADD, but doesn't work for some reason
+
+            stateSet->setAttributeAndModes(blendEq.get(),osg::StateAttribute::ON);
+        }
+        else
+            blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }
