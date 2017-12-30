@@ -134,6 +134,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     std::string logStr = "  Loading texture " + fileName;
 
     bool alphaTexture = fileNameAlpha.length() > 0;
+    bool diffuseTexture = fileName.length() > 0;
 
     if (alphaTexture)
         logStr += " (alpha texture: " + fileNameAlpha + ")";
@@ -161,47 +162,56 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     osg::ref_ptr<osg::Image> img;
 
-    if (fileLocation.length() == 0 && fileName.length() != 0)
+    if (diffuseTexture)
     {
-        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
-    }
-    else if (fileName.length() != 0)
-    {
-        img = osgDB::readImageFile(fileLocation);
-
-        if (colorKey)
+        if (fileLocation.length() == 0)
         {
-            MFFormat::BMPInfo bmp;
-
-            std::ifstream bmpFile;
-            bmpFile.open(fileLocation);
-            bmp.load(bmpFile);
-            bmpFile.close();
-
-            osg::Vec3f transparentColor = osg::Vec3f(     
-                bmp.mTransparentColor.r / 255.0,
-                bmp.mTransparentColor.g / 255.0,
-                bmp.mTransparentColor.b / 255.0);
-
-            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.04f );
+            MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
         }
-
-        if (alphaTexture)
+        else
         {
-            if (fileLocationAlpha.length() == 0)
+            img = osgDB::readImageFile(fileLocation);
+
+            if (colorKey)
             {
-                MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
-            }
-            else
-            {
-                osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
-                img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
+                MFFormat::BMPInfo bmp;
+
+                std::ifstream bmpFile;
+                bmpFile.open(fileLocation);
+                bmp.load(bmpFile);
+                bmpFile.close();
+
+                osg::Vec3f transparentColor = osg::Vec3f(     
+                    bmp.mTransparentColor.r / 255.0,
+                    bmp.mTransparentColor.g / 255.0,
+                    bmp.mTransparentColor.b / 255.0);
+
+                img = MFUtil::applyColorKey(img.get(), transparentColor, 0.04f );
             }
         }
-
-        tex->setImage(img);
-		tex->setMaxAnisotropy(16.0f);
     }
+
+    if (alphaTexture)
+    {
+        if (fileLocationAlpha.length() == 0)
+        {
+            MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
+        }
+        else
+        {
+            osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
+
+            if (!diffuseTexture)
+            {
+                img->allocateImage(imgAlpha->s(),imgAlpha->t(),1,imgAlpha->getPixelFormat(),imgAlpha->getDataType());
+            }
+
+            img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
+        }
+    }
+
+    tex->setImage(img);
+    tex->setMaxAnisotropy(16.0f);
 
     storeToCache(textureIdentifier,tex);
 
@@ -419,6 +429,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
+
     }
 
     char diffuseTextureName[255];
