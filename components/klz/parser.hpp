@@ -67,26 +67,34 @@ public:
     } DataHeader;
     #pragma pack(pop)
 
+    typedef struct
+    {
+        unsigned char mMaterial;
+        unsigned char mFlags;
+        unsigned char mSortInfo;   // only used with FaceCol
+        unsigned char mUnknown;    // different values for different collision types of objects
+    } Properties;
+
     #pragma pack(push, 1)
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
-        uint32_t mIndices[3];		// NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
-        Vec3 mNormal;			// NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
+        Properties mProperties; // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
+        uint32_t mIndices[3];   // NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
+        Vec3 mNormal;           // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
         float mDistance;
     } FaceCol;
 
     typedef struct 
     {    
-        uint32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
-        uint32_t mLink;			// NOTE(ASM): index into LinkNameOffsetTable
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
+        uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
         Vec3 mMin;
         Vec3 mMax;
     } ABBCol;
 
     typedef struct 
     {    
-        uint32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
         uint32_t mLink;
         // NOTE(ASM): AABB
         Vec3 mMin;
@@ -98,15 +106,15 @@ public:
 
     typedef struct 
     {    
-        int32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
+        int32_t mProperties;    // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
         uint32_t mLink;
-        Vec2 mPosition;		// NOTE(ASM): cylinders only have a 2d position!
+        Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
         float mRadius;
     } CylinderCol;
   
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
         Vec3 Extends[2];
         Mat4 mTransform;
@@ -115,7 +123,7 @@ public:
 
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
         uint32_t mLink;
         Vec3 mPosition;
         float mRadius;    

@@ -13,7 +13,7 @@
 
 #define ALIGN 50
 
-#define DTA_MODULE_STR "loader DTA"
+#define DTA_MODULE_STR "DTA util"
 
 void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
 {
