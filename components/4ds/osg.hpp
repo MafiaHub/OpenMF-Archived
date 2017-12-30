@@ -422,10 +422,12 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     MFFormat::DataFormat::Vec3 amb = material->mAmbient;
     MFFormat::DataFormat::Vec3 emi = material->mEmission;
 
-    // TODO: allowing ambient makes stuff look weird
-
-    if (!diffuseMap)
+    if (!diffuseMap || colored)
     {
+        /* source: http://djbozkosz.wz.cz/index.php?id=18
+           "Valid only if diffuse texture is used, materials without texture are colored always,
+            coloring is used for ambient and diffuse colors, emission is used always" */
+
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
         mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
     }
