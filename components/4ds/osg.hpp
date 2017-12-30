@@ -408,6 +408,8 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
+    bool colored = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORED;
+
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
 
     bool isTransparent = false;
@@ -419,17 +421,21 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     MFFormat::DataFormat::Vec3 amb = material->mAmbient;
     MFFormat::DataFormat::Vec3 emi = material->mEmission;
 
-    // TODO:
-    //mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
-    //mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
-    //mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
+    // TODO: allowing ambient makes stuff look weird
+
+    if (!diffuseMap)
+    {
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
+    }
+
+    mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
 
     if (material->mTransparency < 1)
     {
         isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
-
     }
 
     char diffuseTextureName[255];
