@@ -148,7 +148,10 @@ public:
     std::vector<OBBCol> getOBBCol()                { return mOBBCols; }
     std::vector<SphereCol> getSphereCols()         { return mSphereCols; }
     std::vector<Link> getLinks()                   { return mLinkTables; }
-private:
+    Cell *getGridCells()                           { return mGridCellsMemory; }
+    unsigned int getGridWidth()                    { return mDataHeader.mGridWidth; }
+    unsigned int getGridHeight()                   { return mDataHeader.mGridHeight; }
+protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;
     std::vector<Link> mLinkTables;
@@ -195,42 +198,42 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     read(srcFile, mCellBoundariesY, sizeof(float)* (mDataHeader.mGridHeight + 1));
     read(srcFile, &mCollisionDataMagic);
   
-    for(unsigned int i = 0; i < mDataHeader.mNumFaces; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumFaces; i++)
     {
         FaceCol newCol = {};
         read(srcFile, &newCol);
         mFaceCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
     {
         ABBCol newCol = {};
         read(srcFile, &newCol);
         mABBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)
     {
         XTOBBCol newCol = {};
         read(srcFile, &newCol);
         mXTOBBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumCylinders; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumCylinders; i++)
     {
         CylinderCol newCol = {};
         read(srcFile, &newCol);
         mCylinderCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumOBBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumOBBs; i++)
     {
         OBBCol newCol = {};
         read(srcFile, &newCol);
         mOBBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumSpheres; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumSpheres; i++)
     {
         SphereCol newCol = {};
         read(srcFile, &newCol);
@@ -241,7 +244,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     uint32_t gridSize = mDataHeader.mGridWidth * mDataHeader.mGridWidth;
     mGridCellsMemory = reinterpret_cast<Cell*>(malloc(sizeof(Cell) * gridSize));
 
-    for(unsigned int i = 0; i < gridSize; i++)
+    for (unsigned int i = 0; i < gridSize; i++)
     {
         read(srcFile, &mGridCellsMemory[i].mNumObjects);
         read(srcFile, mGridCellsMemory[i].mReserved, sizeof(uint32_t)*2);
