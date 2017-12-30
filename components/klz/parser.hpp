@@ -67,26 +67,34 @@ public:
     } DataHeader;
     #pragma pack(pop)
 
+    typedef struct
+    {
+        unsigned char mMaterial;
+        unsigned char mFlags;
+        unsigned char mSortInfo;   // only used with FaceCol
+        unsigned char mUnknown;    // different values for different collision types of objects
+    } Properties;
+
     #pragma pack(push, 1)
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
-        uint32_t mIndices[3];		// NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
-        Vec3 mNormal;			// NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
+        Properties mProperties; // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
+        uint32_t mIndices[3];   // NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
+        Vec3 mNormal;           // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
         float mDistance;
     } FaceCol;
 
     typedef struct 
     {    
-        uint32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
-        uint32_t mLink;			// NOTE(ASM): index into LinkNameOffsetTable
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
+        uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
         Vec3 mMin;
         Vec3 mMax;
     } ABBCol;
 
     typedef struct 
     {    
-        uint32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
         uint32_t mLink;
         // NOTE(ASM): AABB
         Vec3 mMin;
@@ -98,15 +106,15 @@ public:
 
     typedef struct 
     {    
-        int32_t mProperties;	// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
+        int32_t mProperties;    // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
         uint32_t mLink;
-        Vec2 mPosition;		// NOTE(ASM): cylinders only have a 2d position!
+        Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
         float mRadius;
     } CylinderCol;
   
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
         Vec3 Extends[2];
         Mat4 mTransform;
@@ -115,7 +123,7 @@ public:
 
     typedef struct 
     {    
-        uint32_t mProperties;		// NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
+        uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
         uint32_t mLink;
         Vec3 mPosition;
         float mRadius;    
@@ -133,14 +141,18 @@ public:
     } Cell;
 
     virtual bool load(std::ifstream &srcFile) override;
-    std::vector<FaceCol> getFaceCols()             { return mFaceCols; }
-    std::vector<ABBCol> getABBCols()               { return mABBCols; }
-    std::vector<XTOBBCol> getXTOBBCols()           { return mXTOBBCols; }
-    std::vector<CylinderCol> getCylinderCols()     { return mCylinderCols; }
-    std::vector<OBBCol> getOBBCol()                { return mOBBCols; }
-    std::vector<SphereCol> getSphereCols()         { return mSphereCols; }
-    std::vector<Link> getLinks()                   { return mLinkTables; }
-private:
+    std::vector<FaceCol> getFaceCols()                   { return mFaceCols; }
+    std::vector<ABBCol> getABBCols()                     { return mABBCols; }
+    std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
+    std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
+    std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
+    std::vector<SphereCol> getSphereCols()               { return mSphereCols; }
+    std::vector<Link> getLinks()                         { return mLinkTables; }
+    Cell *getGridCells()                                 { return mGridCellsMemory; }
+    Cell getGridCell(unsigned int x, unsigned int y)     { return mGridCellsMemory[y * mDataHeader.mGridWidth + x]; }
+    unsigned int getGridWidth()                          { return mDataHeader.mGridWidth; }
+    unsigned int getGridHeight()                         { return mDataHeader.mGridHeight; }
+protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;
     std::vector<Link> mLinkTables;
@@ -187,42 +199,42 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     read(srcFile, mCellBoundariesY, sizeof(float)* (mDataHeader.mGridHeight + 1));
     read(srcFile, &mCollisionDataMagic);
   
-    for(unsigned int i = 0; i < mDataHeader.mNumFaces; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumFaces; i++)
     {
         FaceCol newCol = {};
         read(srcFile, &newCol);
         mFaceCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
     {
         ABBCol newCol = {};
         read(srcFile, &newCol);
         mABBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)
     {
         XTOBBCol newCol = {};
         read(srcFile, &newCol);
         mXTOBBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumCylinders; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumCylinders; i++)
     {
         CylinderCol newCol = {};
         read(srcFile, &newCol);
         mCylinderCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumOBBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumOBBs; i++)
     {
         OBBCol newCol = {};
         read(srcFile, &newCol);
         mOBBCols.push_back(newCol);
     }
 
-    for(unsigned int i = 0; i < mDataHeader.mNumSpheres; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumSpheres; i++)
     {
         SphereCol newCol = {};
         read(srcFile, &newCol);
@@ -233,7 +245,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     uint32_t gridSize = mDataHeader.mGridWidth * mDataHeader.mGridWidth;
     mGridCellsMemory = reinterpret_cast<Cell*>(malloc(sizeof(Cell) * gridSize));
 
-    for(unsigned int i = 0; i < gridSize; i++)
+    for (unsigned int i = 0; i < gridSize; i++)
     {
         read(srcFile, &mGridCellsMemory[i].mNumObjects);
         read(srcFile, mGridCellsMemory[i].mReserved, sizeof(uint32_t)*2);

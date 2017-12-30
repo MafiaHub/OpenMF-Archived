@@ -12,52 +12,52 @@ class DataFormat4DS: public DataFormat
 public:
     typedef enum
     {
-        MATERIALFLAG_TEXTUREDIFFUSE = 0x00040000,
-        MATERIALFLAG_COLORED = 0x08000000,
+        MATERIALFLAG_TEXTUREDIFFUSE = 0x00040000,          // whether diffuse texture is present
+        MATERIALFLAG_COLORED = 0x08000000,                 // whether to use diffuse color (only applies with diffuse texture)
         MATERIALFLAG_MIPMAPPING = 0x00800000,
         MATERIALFLAG_ANIMATEDTEXTUREDIFFUSE = 0x04000000,
         MATERIALFLAG_ANIMATEXTEXTUREALPHA = 0x02000000,
-        MATERIALFLAG_DOUBLESIDEDMATERIAL = 0x10000000,
-        MATERIALFLAG_ENVIRONMENTMAP = 0x00080000,
-        MATERIALFLAG_NORMALTEXTUREBLEND = 0x00000100,
-        MATERIALFLAG_MULTIPLYTEXTUREBLEND = 0x00000200,
-        MATERIALFLAG_ADDITIVETEXTUREBLEND = 0x00000400,
+        MATERIALFLAG_DOUBLESIDEDMATERIAL = 0x10000000,     // whether backface culling should be off
+        MATERIALFLAG_ENVIRONMENTMAP = 0x00080000,          // simulates glossy material with environment texture
+        MATERIALFLAG_NORMALTEXTUREBLEND = 0x00000100,      // blend between diffuse and environment texture normally
+        MATERIALFLAG_MULTIPLYTEXTUREBLEND = 0x00000200,    // blend between diffuse and environment texture by multiplying
+        MATERIALFLAG_ADDITIVETEXTUREBLEND = 0x00000400,    // blend between diffuse and environment texture by addition
         MATERIALFLAG_CALCREFLECTTEXTUREY = 0x00001000,
         MATERIALFLAG_PROJECTREFLECTTEXTUREY = 0x00002000,
         MATERIALFLAG_PROJECTREFLECTTEXTUREZ = 0x00004000,
-        MATERIALFLAG_ADDITIONALEFFECT = 0x00008000,
+        MATERIALFLAG_ADDITIONALEFFECT = 0x00008000,        // should be ALPHATEXTURE | COLORKEY | ADDITIVEMIXING
         MATERIALFLAG_ALPHATEXTURE = 0x40000000,
         MATERIALFLAG_COLORKEY = 0x20000000,
-        MATERIALFLAG_ADDITIVEMIXING = 0x80000000
+        MATERIALFLAG_ADDITIVEMIXING = 0x80000000           // the object is blended against the world by adding RGB (see street lamps etc.)
     } MaterialFlag;
 
     typedef enum
     {
-        MESHTYPE_STANDARD = 0x01,  // visual mesh
-        MESHTYPE_COLLISION = 0x02, // NOTE(zaklaus): Imaginary type based on mesh name "wcol*"
-        MESHTYPE_SECTOR = 0x05,
-        MESHTYPE_DUMMY = 0x06,
-        MESHTYPE_TARGET = 0x07,
-        MESHTYPE_BONE = 0x0a
+        MESHTYPE_STANDARD = 0x01,           // visual mesh
+        MESHTYPE_COLLISION = 0x02,          // NOTE(zaklaus): Imaginary type based on mesh name "wcol*"
+        MESHTYPE_SECTOR = 0x05,             // part of space, used for culling, effective lighting etc.
+        MESHTYPE_DUMMY = 0x06,              // invisible bounding box
+        MESHTYPE_TARGET = 0x07,             // used in human models (as a shooting target?)
+        MESHTYPE_BONE = 0x0a                // for skeletal animation
     } MeshType;
 
     typedef enum
     {
         VISUALMESHTYPE_STANDARD = 0x0,      // normal mesh
         VISUALMESHTYPE_SINGLEMESH = 0x02,   // mesh with bones
-        VISUALMESHTYPE_SINGLEMORPH = 0x03,  // combination of morph and skeletal animation?
+        VISUALMESHTYPE_SINGLEMORPH = 0x03,  // combination of morph (for face) and skeletal (for body) animation
         VISUALMESHTYPE_BILLBOARD = 0x04,    // billboarding mesh (rotates towards camera
-        VISUALMESHTYPE_MORPH = 0x05,        // mesh with morphing (non-skeletal) animation
-        VISUALMESHTYPE_GLOW = 0x06,
-        VISUALMESHTYPE_MIRROR = 0x08
+        VISUALMESHTYPE_MORPH = 0x05,        // mesh with morphing (non-skeletal) animation, e.g. curtains in wind
+        VISUALMESHTYPE_GLOW = 0x06,         // has no geometry, only shows glow texture
+        VISUALMESHTYPE_MIRROR = 0x08        // reflects the scene
     } VisualMeshType;                       // subtype of mesh, when MeshType == MESHTYPE_STANDARD
 
     typedef enum
     {
-        MESHRENDERFLAG_USEDEPTHBIAS = 0x0001,
+        MESHRENDERFLAG_USEDEPTHBIAS = 0x0001,  // whether to receive shadows
         MESHRENDERFLAG_USESHADOWS = 0x0002,
-        MESHRENDERFLAG_UNKNOWN = 0x0008,
-        MESHRENDERFLAG_USEPROJECTION = 0x0020,
+        MESHRENDERFLAG_UNKNOWN = 0x0008,       // always 1
+        MESHRENDERFLAG_USEPROJECTION = 0x0020, // used for projecting textures, such as blood
         MESHRENDERFLAG_FORBIDFOG = 0x0080
     } MeshRenderFlag;
 
@@ -65,8 +65,8 @@ public:
     {
         MESHOCCLUDINGFLAG_NORMAL = 0x09,
         MESHOCCLUDINGFLAG_SECTOR = 0x7D,
-        MESHOCCLUDINGFLAG_WALL = 0x3D,     // mesh in sector (walls)
-        MESHOCCLUDINGFLAG_PORTAL = 0x1D,   // mesh in portal
+        MESHOCCLUDINGFLAG_WALL = 0x3D,       // mesh in sector (walls)
+        MESHOCCLUDINGFLAG_PORTAL = 0x1D,     // mesh in portal
         MESHOCCLUDINGFLAG_INACTIVE = 0x11
     } MeshOccludingFlag;
 
@@ -74,12 +74,12 @@ public:
     {
         uint32_t mFlags;
         Vec3 mAmbient;
-        Vec3 mDiffuse;
-        Vec3 mEmission;
+        Vec3 mDiffuse;                     // only used if there is no diffuse texture, or if COLORED flag is set
+        Vec3 mEmission;                    // always used
         float mTransparency; // 0.0 - invisible; 1.0 - opaque
 
         // environment map
-        float mEnvRatio;
+        float mEnvRatio;                   // parameter for interpolating between env. and diffuse map (only for NORMAL blending flag)
         char mEnvMapNameLength;
         char mEnvMapName[255];
 
@@ -91,7 +91,7 @@ public:
         char mAlphaMapName[255];
 
         // anim map
-        uint32_t mAnimSequenceLength;
+        uint32_t mAnimSequenceLength;      // how many frames animated texture has
         uint16_t mUnk0;
         uint32_t mFramePeriod;
         uint32_t mUnk1;
@@ -174,8 +174,8 @@ public:
     typedef struct
     {
         Standard mStandard;
-        uint32_t mRotationAxis;  // TODO: find out what the values mean
-        uint8_t mIgnoreCamera;
+        uint32_t mRotationAxis;  // 0 - X, 1 - Y, 2 - Z
+        uint8_t mIgnoreCamera;   // 0 - rotate around center point, 1 - rotate around mRotationAxis
     } Billboard;
 
     typedef struct
@@ -329,7 +329,7 @@ public:
             case ERROR_SIGNATURE: return "Wrong 4ds signature";
         }
 
-		return "Unknown error";
+        return "Unknown error";
     }
 
 protected:
