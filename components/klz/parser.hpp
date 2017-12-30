@@ -141,16 +141,17 @@ public:
     } Cell;
 
     virtual bool load(std::ifstream &srcFile) override;
-    std::vector<FaceCol> getFaceCols()             { return mFaceCols; }
-    std::vector<ABBCol> getABBCols()               { return mABBCols; }
-    std::vector<XTOBBCol> getXTOBBCols()           { return mXTOBBCols; }
-    std::vector<CylinderCol> getCylinderCols()     { return mCylinderCols; }
-    std::vector<OBBCol> getOBBCol()                { return mOBBCols; }
-    std::vector<SphereCol> getSphereCols()         { return mSphereCols; }
-    std::vector<Link> getLinks()                   { return mLinkTables; }
-    Cell *getGridCells()                           { return mGridCellsMemory; }
-    unsigned int getGridWidth()                    { return mDataHeader.mGridWidth; }
-    unsigned int getGridHeight()                   { return mDataHeader.mGridHeight; }
+    std::vector<FaceCol> getFaceCols()                   { return mFaceCols; }
+    std::vector<ABBCol> getABBCols()                     { return mABBCols; }
+    std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
+    std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
+    std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
+    std::vector<SphereCol> getSphereCols()               { return mSphereCols; }
+    std::vector<Link> getLinks()                         { return mLinkTables; }
+    Cell *getGridCells()                                 { return mGridCellsMemory; }
+    Cell getGridCell(unsigned int x, unsigned int y)     { return mGridCellsMemory[y * mDataHeader.mGridWidth + x]; }
+    unsigned int getGridWidth()                          { return mDataHeader.mGridWidth; }
+    unsigned int getGridHeight()                         { return mDataHeader.mGridHeight; }
 protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;

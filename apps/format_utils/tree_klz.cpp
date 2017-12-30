@@ -23,6 +23,15 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::cout << std::endl;
     std::cout << "GRID (" << klz.getGridWidth() << " x " << klz.getGridHeight() << "):" << std::endl;
+
+    for (auto y = 0; y < klz.getGridHeight(); ++y)
+        for (auto x = 0; x < klz.getGridWidth(); ++x)
+        {
+            MFFormat::DataFormatTreeKLZ::Cell cell = klz.getGridCell(x,y);
+
+            if (cell.mNumObjects > 0)
+                std::cout << "  [" << x << "," << y << "]\tobjects: " << cell.mNumObjects << std::endl;
+        }
 }
 
 int main(int argc, char** argv)
