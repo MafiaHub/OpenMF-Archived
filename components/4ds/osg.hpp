@@ -17,6 +17,7 @@
 #include <base_loader.hpp>
 #include <osg/FrontFace>
 #include <osg/BlendFunc>
+#include <osg/BlendEquation>
 #include <osg/AlphaFunc>
 #include <bmp_analyser.hpp>
 #include <osg/TexGen>
@@ -134,6 +135,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     std::string logStr = "  Loading texture " + fileName;
 
     bool alphaTexture = fileNameAlpha.length() > 0;
+    bool diffuseTexture = fileName.length() > 0;
 
     if (alphaTexture)
         logStr += " (alpha texture: " + fileNameAlpha + ")";
@@ -161,47 +163,56 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     osg::ref_ptr<osg::Image> img;
 
-    if (fileLocation.length() == 0 && fileName.length() != 0)
+    if (diffuseTexture)
     {
-        MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
-    }
-    else if (fileName.length() != 0)
-    {
-        img = osgDB::readImageFile(fileLocation);
-
-        if (colorKey)
+        if (fileLocation.length() == 0)
         {
-            MFFormat::BMPInfo bmp;
-
-            std::ifstream bmpFile;
-            bmpFile.open(fileLocation);
-            bmp.load(bmpFile);
-            bmpFile.close();
-
-            osg::Vec3f transparentColor = osg::Vec3f(     
-                bmp.mTransparentColor.r / 255.0,
-                bmp.mTransparentColor.g / 255.0,
-                bmp.mTransparentColor.b / 255.0);
-
-            img = MFUtil::applyColorKey(img.get(), transparentColor, 0.04f );
+            MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
         }
-
-        if (alphaTexture)
+        else
         {
-            if (fileLocationAlpha.length() == 0)
+            img = osgDB::readImageFile(fileLocation);
+
+            if (colorKey)
             {
-                MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
-            }
-            else
-            {
-                osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
-                img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
+                MFFormat::BMPInfo bmp;
+
+                std::ifstream bmpFile;
+                bmpFile.open(fileLocation);
+                bmp.load(bmpFile);
+                bmpFile.close();
+
+                osg::Vec3f transparentColor = osg::Vec3f(     
+                    bmp.mTransparentColor.r / 255.0,
+                    bmp.mTransparentColor.g / 255.0,
+                    bmp.mTransparentColor.b / 255.0);
+
+                img = MFUtil::applyColorKey(img.get(), transparentColor, 0.04f );
             }
         }
-
-        tex->setImage(img);
-		tex->setMaxAnisotropy(16.0f);
     }
+
+    if (alphaTexture)
+    {
+        if (fileLocationAlpha.length() == 0)
+        {
+            MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
+        }
+        else
+        {
+            osg::ref_ptr<osg::Image> imgAlpha = osgDB::readImageFile(fileLocationAlpha);
+
+            if (!diffuseTexture)
+            {
+                img->allocateImage(imgAlpha->s(),imgAlpha->t(),1,imgAlpha->getPixelFormat(),imgAlpha->getDataType());
+            }
+
+            img = MFUtil::addAlphaFromImage(img.get(),imgAlpha.get());
+        }
+    }
+
+    tex->setImage(img);
+    tex->setMaxAnisotropy(16.0f);
 
     storeToCache(textureIdentifier,tex);
 
@@ -398,9 +409,11 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
+    bool colored = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORED;
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
-
     bool isTransparent = false;
+
+    bool additiveBlend = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVEMIXING;
 
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
@@ -409,10 +422,15 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     MFFormat::DataFormat::Vec3 amb = material->mAmbient;
     MFFormat::DataFormat::Vec3 emi = material->mEmission;
 
-    // TODO:
-    //mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
-    //mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
-    //mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
+    // TODO: allowing ambient makes stuff look weird
+
+    if (!diffuseMap)
+    {
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(dif.x,dif.y,dif.z,1.0));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(amb.x,amb.y,amb.z,1.0));
+    }
+
+    mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
 
     if (material->mTransparency < 1)
     {
@@ -480,11 +498,26 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setUpdateCallback(cb);
     }
 
+    if (additiveBlend)
+        isTransparent = true;        
+
     if (isTransparent)
     {
-        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);      // FIXME: copy-paste code from above
+        stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc;
-        blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        if (additiveBlend)
+        {
+            blendFunc->setFunction(osg::BlendFunc::SRC_COLOR,osg::BlendFunc::DST_COLOR);
+
+            osg::ref_ptr<osg::BlendEquation> blendEq = new osg::BlendEquation;
+            blendEq->setEquation(osg::BlendEquation::RGBA_MAX);    // FIXME: should be FUNC_ADD, but doesn't work for some reason
+
+            stateSet->setAttributeAndModes(blendEq.get(),osg::StateAttribute::ON);
+        }
+        else
+            blendFunc->setFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateSet->setAttributeAndModes(blendFunc.get(),osg::StateAttribute::ON);
     }

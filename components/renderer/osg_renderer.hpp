@@ -117,6 +117,16 @@ mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
 
     if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
         mViewer->setCameraManipulator(cameraManipulator);
+
+    mViewer->getCamera()->setCullingMode(
+        osg::CullSettings::VIEW_FRUSTUM_CULLING |
+        osg::CullSettings::NEAR_PLANE_CULLING |
+        osg::CullSettings::FAR_PLANE_CULLING |
+        osg::CullSettings::VIEW_FRUSTUM_SIDES_CULLING |
+        osg::CullSettings::SMALL_FEATURE_CULLING
+        );
+
+    mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
 }
 
 void OSGRenderer::setFreeCameraSpeed(double newSpeed)

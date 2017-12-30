@@ -165,6 +165,7 @@ osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg
         {
             osg::Vec4f alphaPixel = alphaImg->getColor(x,y);
             osg::Vec4f srcPixel = img->getColor(x,y);
+
             dstImg->setColor(osg::Vec4f(srcPixel.x(),srcPixel.y(),srcPixel.z(),alphaPixel.x()),x,y);
         }
 
