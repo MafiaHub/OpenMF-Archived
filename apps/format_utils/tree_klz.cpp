@@ -12,11 +12,15 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::cout << "LINKS (" << links.size() << "):" << std::endl;
 
+    std::vector<std::string> linkStrings;
+
     for (auto i = 0; i < links.size(); ++i)
     {
         char buffer[255];
         memcpy(buffer,links[i].mName,255);
         buffer[links[i].mNameLength] = 0;
+
+        linkStrings.push_back(buffer);
 
         std::cout << "  " << buffer << std::endl;
     }
@@ -32,6 +36,22 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
             if (cell.mNumObjects > 0)
                 std::cout << "  [" << x << "," << y << "]\tobjects: " << cell.mNumObjects << std::endl;
         }
+
+    std::cout << std::endl;
+
+    #define dumpItems(getFunc,printCmd) \
+    {\
+        auto items = getFunc;\
+        for (auto i = 0; i < items.size(); ++i)\
+        {\
+            auto item = items[i];\
+            printCmd;\
+        }\
+    }
+
+    std::cout << "COLLISIONS:" << std::endl;
+    dumpItems(klz.getFaceCols(),std::cout << "  face" << std::endl);
+    dumpItems(klz.getAABBCols(),std::cout << "  AABB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << "\t\tlink: " << item.mLink << " (" << linkStrings[item.mLink] << ")" << std::endl);
 }
 
 int main(int argc, char** argv)

@@ -142,7 +142,7 @@ public:
 
     virtual bool load(std::ifstream &srcFile) override;
     std::vector<FaceCol> getFaceCols()                   { return mFaceCols; }
-    std::vector<ABBCol> getABBCols()                     { return mABBCols; }
+    std::vector<ABBCol> getAABBCols()                     { return mAABBCols; }
     std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
     std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
     std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
@@ -161,7 +161,7 @@ protected:
     DataHeader mDataHeader;
     uint32_t mCollisionDataMagic;
     std::vector<FaceCol> mFaceCols;
-    std::vector<ABBCol> mABBCols;
+    std::vector<ABBCol> mAABBCols;
     std::vector<XTOBBCol> mXTOBBCols;
     std::vector<CylinderCol> mCylinderCols;
     std::vector<OBBCol> mOBBCols;
@@ -210,7 +210,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     {
         ABBCol newCol = {};
         read(srcFile, &newCol);
-        mABBCols.push_back(newCol);
+        mAABBCols.push_back(newCol);
     }
 
     for (unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)
