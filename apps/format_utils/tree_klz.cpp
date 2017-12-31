@@ -22,7 +22,7 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
         linkStrings.push_back(buffer);
 
-        std::cout << "  " << buffer << std::endl;
+        std::cout << "  link " << i << ": " << buffer << std::endl;
     }
 
     std::cout << std::endl;
@@ -39,6 +39,8 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::cout << std::endl;
 
+    #define linkPrint "\t\tlink: " << item.mLink << " (" << linkStrings[item.mLink] << ")"
+
     #define dumpItems(getFunc,printCmd) \
     {\
         auto items = getFunc;\
@@ -50,8 +52,12 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
     }
 
     std::cout << "COLLISIONS:" << std::endl;
+    dumpItems(klz.getSphereCols(),std::cout << "  sphere\tr: " << item.mRadius << "\t\tp: " << item.mPosition.str() << linkPrint << std::endl);
+    dumpItems(klz.getCylinderCols(),std::cout << "  cylinder\tr: " << item.mRadius << "\t\tp: " << item.mPosition.str() << linkPrint << std::endl);
+    dumpItems(klz.getAABBCols(),std::cout << "  AABB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << linkPrint << std::endl);
+    dumpItems(klz.getOBBCols(),std::cout << "  OBB\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
+    dumpItems(klz.getXTOBBCols(),std::cout << "  XTOBB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << "\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
     dumpItems(klz.getFaceCols(),std::cout << "  face" << std::endl);
-    dumpItems(klz.getAABBCols(),std::cout << "  AABB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << "\t\tlink: " << item.mLink << " (" << linkStrings[item.mLink] << ")" << std::endl);
 }
 
 int main(int argc, char** argv)

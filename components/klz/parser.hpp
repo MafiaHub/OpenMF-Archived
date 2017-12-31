@@ -102,7 +102,7 @@ public:
         Vec3 mExtends[2];
         Mat4 mTransform;
         Mat4 mInverseTransform;
-    } XTOBBCol;
+    } XTOBBCol;                 // oriented bounding box, more general version
 
     typedef struct 
     {    
@@ -119,7 +119,7 @@ public:
         Vec3 mExtends[2];
         Mat4 mTransform;
         Mat4 mInverseTransform;
-    } OBBCol;
+    } OBBCol;                   // oriented bounding box
 
     typedef struct 
     {    
@@ -145,7 +145,7 @@ public:
     std::vector<AABBCol> getAABBCols()                   { return mAABBCols; }
     std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
     std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
-    std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
+    std::vector<OBBCol> getOBBCols()                     { return mOBBCols; }
     std::vector<SphereCol> getSphereCols()               { return mSphereCols; }
     std::vector<Link> getLinks()                         { return mLinkTables; }
     Cell *getGridCells()                                 { return mGridCellsMemory; }
