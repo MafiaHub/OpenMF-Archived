@@ -281,6 +281,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
+    bool blockDecrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
+
     for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
         // FIXME: make this function nicer
@@ -293,11 +295,12 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         srcFile.read(block,blockSize);
 
-        decrypt(block,blockSize);
+        if (blockDecrypted)
+            decrypt(block,blockSize);
 
         unsigned char blockType = block[0];
 
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);   // 1 - don't include the type byte
+        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);        // 1 - don't include the type byte
 
         std::vector<unsigned char> decompressed;
 
@@ -312,13 +315,13 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
                 decompressed = decompressLZSS((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
                 break;
 
-            case BLOCK_DPCM0: break;
-            case BLOCK_DPCM1: break;
-            case BLOCK_DPCM2: break;
-            case BLOCK_DPCM3: break;
-            case BLOCK_DPCM4: break;
-            case BLOCK_DPCM5: break;
-            case BLOCK_DPCM6: break;
+            case BLOCK_DPCM0: std::cout << "a" << std::endl; break;
+            case BLOCK_DPCM1: std::cout << "b" << std::endl; break;
+            case BLOCK_DPCM2: std::cout << "c" << std::endl; break;
+            case BLOCK_DPCM3: std::cout << "d" << std::endl; break;
+            case BLOCK_DPCM4: std::cout << "e" << std::endl; break;
+            case BLOCK_DPCM5: std::cout << "f" << std::endl; break;
+            case BLOCK_DPCM6: std::cout << "g" << std::endl; break;
             default: break;
         }
 
