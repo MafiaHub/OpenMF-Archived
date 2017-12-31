@@ -34,7 +34,7 @@ public:
         uint32_t mFlags;
         uint32_t mNameLength;
         char* mName;
-    } Link;
+    } Link;                       // links to 4DS mesh by name
 
     #pragma pack(push, 1)
     typedef struct
@@ -54,7 +54,7 @@ public:
         uint32_t mReserved2;
         uint32_t mNumXTOBBs;
         uint32_t mReserved3;
-        uint32_t mNumAAABBs;
+        uint32_t mNumAABBs;
         uint32_t mReserved4;
         uint32_t mNumSpheres;
         uint32_t mReserved5;
@@ -88,9 +88,9 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
         uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
-        Vec3 mMin;
-        Vec3 mMax;
-    } ABBCol;
+        Vec3 mMin;              // first point that defines the box in space
+        Vec3 mMax;              // second point that defines the box in space
+    } AABBCol;                  // axis-aligned bounding box
 
     typedef struct 
     {    
@@ -102,7 +102,7 @@ public:
         Vec3 mExtends[2];
         Mat4 mTransform;
         Mat4 mInverseTransform;
-    } XTOBBCol;
+    } XTOBBCol;                 // oriented bounding box, more general version
 
     typedef struct 
     {    
@@ -110,24 +110,24 @@ public:
         uint32_t mLink;
         Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
         float mRadius;
-    } CylinderCol;
+    } CylinderCol;              // cylindrical collision object
   
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
-        Vec3 Extends[2];
+        Vec3 mExtends[2];
         Mat4 mTransform;
-        Mat4 mInverseTransform;    
-    } OBBCol;
+        Mat4 mInverseTransform;
+    } OBBCol;                   // oriented bounding box
 
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
         uint32_t mLink;
         Vec3 mPosition;
-        float mRadius;    
-    } SphereCol;
+        float mRadius;
+    } SphereCol;                // spherical collision object
 
     #pragma pack(pop)
 
@@ -138,14 +138,14 @@ public:
         float mHeight;
         uint32_t* mReferences;  // NOTE(ASM): (Type (8 bit)) | (Offset into array of Type (24 bit)))
         uint8_t* mFlags;
-    } Cell;
+    } Cell;                     // grid cell, indexes collision objects in space
 
     virtual bool load(std::ifstream &srcFile) override;
     std::vector<FaceCol> getFaceCols()                   { return mFaceCols; }
-    std::vector<ABBCol> getABBCols()                     { return mABBCols; }
+    std::vector<AABBCol> getAABBCols()                   { return mAABBCols; }
     std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
     std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
-    std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
+    std::vector<OBBCol> getOBBCols()                     { return mOBBCols; }
     std::vector<SphereCol> getSphereCols()               { return mSphereCols; }
     std::vector<Link> getLinks()                         { return mLinkTables; }
     Cell *getGridCells()                                 { return mGridCellsMemory; }
@@ -161,7 +161,7 @@ protected:
     DataHeader mDataHeader;
     uint32_t mCollisionDataMagic;
     std::vector<FaceCol> mFaceCols;
-    std::vector<ABBCol> mABBCols;
+    std::vector<AABBCol> mAABBCols;
     std::vector<XTOBBCol> mXTOBBCols;
     std::vector<CylinderCol> mCylinderCols;
     std::vector<OBBCol> mOBBCols;
@@ -206,11 +206,11 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         mFaceCols.push_back(newCol);
     }
 
-    for (unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumAABBs; i++)
     {
-        ABBCol newCol = {};
+        AABBCol newCol = {};
         read(srcFile, &newCol);
-        mABBCols.push_back(newCol);
+        mAABBCols.push_back(newCol);
     }
 
     for (unsigned int i = 0; i < mDataHeader.mNumXTOBBs; i++)

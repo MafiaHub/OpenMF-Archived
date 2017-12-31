@@ -12,13 +12,17 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::cout << "LINKS (" << links.size() << "):" << std::endl;
 
+    std::vector<std::string> linkStrings;
+
     for (auto i = 0; i < links.size(); ++i)
     {
         char buffer[255];
         memcpy(buffer,links[i].mName,255);
         buffer[links[i].mNameLength] = 0;
 
-        std::cout << "  " << buffer << std::endl;
+        linkStrings.push_back(buffer);
+
+        std::cout << "  link " << i << ": " << buffer << std::endl;
     }
 
     std::cout << std::endl;
@@ -32,6 +36,28 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
             if (cell.mNumObjects > 0)
                 std::cout << "  [" << x << "," << y << "]\tobjects: " << cell.mNumObjects << std::endl;
         }
+
+    std::cout << std::endl;
+
+    #define linkPrint "\t\tlink: " << item.mLink << " (" << linkStrings[item.mLink] << ")"
+
+    #define dumpItems(getFunc,printCmd) \
+    {\
+        auto items = getFunc;\
+        for (auto i = 0; i < items.size(); ++i)\
+        {\
+            auto item = items[i];\
+            printCmd;\
+        }\
+    }
+
+    std::cout << "COLLISIONS:" << std::endl;
+    dumpItems(klz.getSphereCols(),std::cout << "  sphere\tr: " << item.mRadius << "\t\tp: " << item.mPosition.str() << linkPrint << std::endl);
+    dumpItems(klz.getCylinderCols(),std::cout << "  cylinder\tr: " << item.mRadius << "\t\tp: " << item.mPosition.str() << linkPrint << std::endl);
+    dumpItems(klz.getAABBCols(),std::cout << "  AABB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << linkPrint << std::endl);
+    dumpItems(klz.getOBBCols(),std::cout << "  OBB\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
+    dumpItems(klz.getXTOBBCols(),std::cout << "  XTOBB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << "\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
+    dumpItems(klz.getFaceCols(),std::cout << "  face" << std::endl);
 }
 
 int main(int argc, char** argv)
