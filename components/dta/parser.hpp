@@ -101,6 +101,7 @@ public:
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
     std::vector<unsigned char> decompressLZSS(unsigned char *buffer, unsigned int bufferLen);
+    std::vector<unsigned char> decompressDPCM(uint16_t *delta, unsigned char *buffer, unsigned int bufferLen);
 
     static uint32_t A0_KEYS[2];   // decrypting keys
     static uint32_t A1_KEYS[2];
@@ -315,13 +316,14 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
                 decompressed = decompressLZSS((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
                 break;
 
-            case BLOCK_DPCM0: std::cout << "a" << std::endl; break;
-            case BLOCK_DPCM1: std::cout << "b" << std::endl; break;
-            case BLOCK_DPCM2: std::cout << "c" << std::endl; break;
-            case BLOCK_DPCM3: std::cout << "d" << std::endl; break;
-            case BLOCK_DPCM4: std::cout << "e" << std::endl; break;
-            case BLOCK_DPCM5: std::cout << "f" << std::endl; break;
-            case BLOCK_DPCM6: std::cout << "g" << std::endl; break;
+            // FIXME: uncopy-paste
+            case BLOCK_DPCM0: decompressed = decompressDPCM(&WAV_DELTAS[128 * 0],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM1: decompressed = decompressDPCM(&WAV_DELTAS[128 * 1],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM2: decompressed = decompressDPCM(&WAV_DELTAS[128 * 2],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM3: decompressed = decompressDPCM(&WAV_DELTAS[128 * 3],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM4: decompressed = decompressDPCM(&WAV_DELTAS[128 * 4],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM5: decompressed = decompressDPCM(&WAV_DELTAS[128 * 5],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM6: decompressed = decompressDPCM(&WAV_DELTAS[128 * 6],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
             default: break;
         }
 
@@ -377,6 +379,16 @@ void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int r
 
         buffer[i] = (char) ( ~((~dataByte) ^ keyByte) );
     }
+}
+
+std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsigned char *buffer, unsigned int bufferLen)
+{
+    unsigned int position = 0;
+    std::vector<unsigned char> decompressed;
+
+    // TODO
+
+    return decompressed;
 }
 
 std::vector<unsigned char> DataFormatDTA::decompressLZSS(unsigned char *buffer, unsigned int bufferLen)
