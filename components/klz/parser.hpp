@@ -54,7 +54,7 @@ public:
         uint32_t mReserved2;
         uint32_t mNumXTOBBs;
         uint32_t mReserved3;
-        uint32_t mNumAAABBs;
+        uint32_t mNumAABBs;
         uint32_t mReserved4;
         uint32_t mNumSpheres;
         uint32_t mReserved5;
@@ -90,7 +90,7 @@ public:
         uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
         Vec3 mMin;
         Vec3 mMax;
-    } ABBCol;
+    } AABBCol;
 
     typedef struct 
     {    
@@ -142,7 +142,7 @@ public:
 
     virtual bool load(std::ifstream &srcFile) override;
     std::vector<FaceCol> getFaceCols()                   { return mFaceCols; }
-    std::vector<ABBCol> getAABBCols()                     { return mAABBCols; }
+    std::vector<AABBCol> getAABBCols()                   { return mAABBCols; }
     std::vector<XTOBBCol> getXTOBBCols()                 { return mXTOBBCols; }
     std::vector<CylinderCol> getCylinderCols()           { return mCylinderCols; }
     std::vector<OBBCol> getOBBCol()                      { return mOBBCols; }
@@ -161,7 +161,7 @@ protected:
     DataHeader mDataHeader;
     uint32_t mCollisionDataMagic;
     std::vector<FaceCol> mFaceCols;
-    std::vector<ABBCol> mAABBCols;
+    std::vector<AABBCol> mAABBCols;
     std::vector<XTOBBCol> mXTOBBCols;
     std::vector<CylinderCol> mCylinderCols;
     std::vector<OBBCol> mOBBCols;
@@ -206,9 +206,9 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         mFaceCols.push_back(newCol);
     }
 
-    for (unsigned int i = 0; i < mDataHeader.mNumAAABBs; i++)
+    for (unsigned int i = 0; i < mDataHeader.mNumAABBs; i++)
     {
-        ABBCol newCol = {};
+        AABBCol newCol = {};
         read(srcFile, &newCol);
         mAABBCols.push_back(newCol);
     }
