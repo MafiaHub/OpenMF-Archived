@@ -43,7 +43,7 @@ protected:
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
     MFUtil::WalkManipulator *mCameraManipulator;
-    MFFormat::OSGLoaderCache mLoaderCache;
+    MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
 
     void optimize();
     void logCacheStats();
