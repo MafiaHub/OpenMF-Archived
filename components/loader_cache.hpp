@@ -2,27 +2,26 @@
 #define LOADER_CACHE_H
 
 #include <unordered_map>
-#include <osg/Referenced>
-#include <string>
 #include <loggers/console.hpp>
 
 #define LOADERCACHE_MODULE_STR "loader cache"
 
-namespace MFFormat // TODO: MFFormat or MFRender?
+namespace MFFormat
 {
 
 /**
-  \brief Serves to only load resources (models, textures) at most once.
+  \brief Serves to only load resources (models, textures, parsed files, ...) at most once.
 */
 
-class OSGLoaderCache
+template <class T>
+class LoaderCache
 {
 public:
-    OSGLoaderCache();
-    void storeObject(std::string identifier, osg::ref_ptr<osg::Referenced> obj);
-    osg::ref_ptr<osg::Referenced> getObject(std::string identifier);
+    LoaderCache();
+    void storeObject(std::string identifier, T obj);
+    T getObject(std::string identifier);
 
-    unsigned int getCacheHits() { return mCacheHits; };
+    unsigned int getCacheHits()  { return mCacheHits;      };
     unsigned int getNumObjects() { return mObjects.size(); };
 
     void clear();
@@ -30,18 +29,20 @@ public:
     // TODO: functions for getting stats like number of loaded textures etc.?
 
 protected:
-    std::unordered_map<std::string,osg::ref_ptr<osg::Referenced>> mObjects;
+    std::unordered_map<std::string,T> mObjects;
     unsigned int mCacheHits;
 };
 
-void OSGLoaderCache::storeObject(std::string identifier, osg::ref_ptr<osg::Referenced> obj)
+template<class T>
+void LoaderCache<T>::storeObject(std::string identifier, T obj)
 {
     mObjects[identifier] = obj;
 }
 
-osg::ref_ptr<osg::Referenced> OSGLoaderCache::getObject(std::string identifier)
+template<class T>
+T LoaderCache<T>::getObject(std::string identifier)
 {
-    osg::ref_ptr<osg::Referenced> result = mObjects[identifier];
+    T result = mObjects[identifier];
 
     if (result)
     {
@@ -52,12 +53,14 @@ osg::ref_ptr<osg::Referenced> OSGLoaderCache::getObject(std::string identifier)
     return result;
 }
 
-OSGLoaderCache::OSGLoaderCache()
+template<class T>
+LoaderCache<T>::LoaderCache()
 {
     clear();
 }
 
-void OSGLoaderCache::clear()
+template<class T>
+void LoaderCache<T>::clear()
 {
     mObjects.clear();
     mCacheHits = 0;

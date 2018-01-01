@@ -15,6 +15,8 @@ namespace MFFormat
 class OSGLoader
 {
 public:
+    typedef osg::ref_ptr<osg::Referenced> OSGCached;
+
     OSGLoader();
 
     /**
@@ -27,8 +29,7 @@ public:
 
     osg::ref_ptr<osg::Node> loadFile(std::string fileName);                                   // overloading load() didn't work somehow - why?
     void setBaseDir(std::string baseDir);
-
-    void setLoaderCache(OSGLoaderCache *cache) { mLoaderCache = cache; };
+    void setLoaderCache(LoaderCache<OSGCached> *cache) { mLoaderCache = cache; };
 
     osg::Vec3f toOSG(MFFormat::DataFormat::Vec3 v);
     osg::Quat toOSG(MFFormat::DataFormat::Quat q);
@@ -49,7 +50,7 @@ protected:
     osg::Matrixd mMafiaToOSGMatrix;
     osg::Matrixd mMafiaToOSGMatrixInvert;
 
-    OSGLoaderCache *mLoaderCache;   ///< Derived classes should make use of the cache with getFromChache/storeToCache.
+    LoaderCache<OSGCached> *mLoaderCache;   ///< Derived classes should make use of the cache with getFromChache/storeToCache.
 
     osg::ref_ptr<osg::Referenced> getFromCache(std::string identifier);
     void storeToCache(std::string identifier,osg::ref_ptr<osg::Referenced> obj);
