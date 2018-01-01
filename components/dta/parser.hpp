@@ -187,6 +187,8 @@ protected:
     std::vector<DataFileHeader> mDataFileHeaders;
     uint32_t mKey1;
     uint32_t mKey2;
+    bool mWavHeaderRead;
+    WavHeader mWavHeader;
 }; 
 
 uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
@@ -284,6 +286,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     bool blockEncrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
 
+    mWavHeaderRead = false;
+
     for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
         // FIXME: make this function nicer
@@ -331,7 +335,6 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         bufferPos += (uint32_t) decompressed.size();
 
         free(block);
-break;
     }
 }
 
@@ -387,17 +390,16 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
     unsigned int position = 0;
     std::vector<unsigned char> decompressed;
 
-    WavHeader wavHeader;
+    if (!mWavHeaderRead)
+    {
+        memcpy((char *) &mWavHeader,buffer,sizeof(mWavHeader));
+        position += sizeof(mWavHeader);
+        decrypt((char *) &mWavHeader,sizeof(mWavHeader)); 
+        decompressed.insert(decompressed.end(),(char *) &mWavHeader, ((char *) &mWavHeader) + sizeof(mWavHeader));
+        mWavHeaderRead = true;
+    }
 
-    memcpy((char *) &wavHeader,buffer,sizeof(wavHeader));
-
-    position += sizeof(wavHeader);
-
-    decrypt((char *) &wavHeader,sizeof(wavHeader)); 
-   
-    decompressed.insert(decompressed.end(),(char *) &wavHeader, ((char *) &wavHeader) + sizeof(wavHeader));
-
-    if (wavHeader.mChannels == 1)
+    if (mWavHeader.mChannels == 1)
     {
         decompressed.push_back(buffer[position]);        
         decompressed.push_back(buffer[position + 1]);        
