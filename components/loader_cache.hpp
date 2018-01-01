@@ -2,8 +2,6 @@
 #define LOADER_CACHE_H
 
 #include <unordered_map>
-#include <osg/Referenced>
-#include <string>
 #include <loggers/console.hpp>
 
 #define LOADERCACHE_MODULE_STR "loader cache"
