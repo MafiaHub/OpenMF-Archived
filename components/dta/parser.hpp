@@ -328,9 +328,10 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         }
 
         memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
-        bufferPos += (uint32_t)decompressed.size();
+        bufferPos += (uint32_t) decompressed.size();
 
         free(block);
+break;
     }
 }
 
@@ -393,14 +394,28 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
     position += sizeof(wavHeader);
 
     decrypt((char *) &wavHeader,sizeof(wavHeader)); 
-    
-std::cout << wavHeader.mChunkSize << std::endl;
-std::cout << wavHeader.mChannels << std::endl;
-std::cout << wavHeader.mChunkSize2 << std::endl;
-std::cout << wavHeader.mChunkSize3 << std::endl;
+   
+    decompressed.insert(decompressed.end(),(char *) &wavHeader, ((char *) &wavHeader) + sizeof(wavHeader));
 
-    // TODO
+    if (wavHeader.mChannels == 1)
+    {
+        decompressed.push_back(buffer[position]);        
+        decompressed.push_back(buffer[position + 1]);        
 
+        uint16_t value = *((uint16_t *) &(buffer[position]));
+
+        position += 2;
+
+        while (position < bufferLen)
+        {
+            int sign = (buffer[position] & 0x80) == 0 ? 1.0 : -1.0;
+            value += sign * delta[buffer[position] & 0x7f];
+            decompressed.push_back(value & 0xff);
+            decompressed.push_back(value >> 8);
+            position += 1;
+        }
+    }
+ 
     return decompressed;
 }
 
