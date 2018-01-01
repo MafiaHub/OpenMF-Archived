@@ -417,6 +417,10 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
             position += 1;
         }
     }
+    else
+    {
+        // TODO: find a stereo WAV and implement this or prove there are no stereo WAVs
+    }
  
     return decompressed;
 }
