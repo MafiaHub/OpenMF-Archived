@@ -282,7 +282,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
-    bool blockDecrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
+    bool blockEncrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
 
     for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
@@ -296,7 +296,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         srcFile.read(block,blockSize);
 
-        if (blockDecrypted)
+        if (blockEncrypted)
             decrypt(block,blockSize);
 
         unsigned char blockType = block[0];
@@ -385,6 +385,19 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
 {
     unsigned int position = 0;
     std::vector<unsigned char> decompressed;
+
+    WavHeader wavHeader;
+
+    memcpy((char *) &wavHeader,buffer,sizeof(wavHeader));
+
+    position += sizeof(wavHeader);
+
+    decrypt((char *) &wavHeader,sizeof(wavHeader)); 
+    
+std::cout << wavHeader.mChunkSize << std::endl;
+std::cout << wavHeader.mChannels << std::endl;
+std::cout << wavHeader.mChunkSize2 << std::endl;
+std::cout << wavHeader.mChunkSize3 << std::endl;
 
     // TODO
 
