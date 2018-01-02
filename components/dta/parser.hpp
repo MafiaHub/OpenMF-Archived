@@ -187,6 +187,8 @@ protected:
     std::vector<DataFileHeader> mDataFileHeaders;
     uint32_t mKey1;
     uint32_t mKey2;
+    bool mWavHeaderRead;
+    WavHeader mWavHeader;
 }; 
 
 uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
@@ -282,7 +284,9 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
     unsigned int bufferPos = 0;
 
-    bool blockDecrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
+    bool blockEncrypted = mDataFileHeaders[index].mFlags[0] & 0x80;
+
+    mWavHeaderRead = false;
 
     for (uint32_t i = 0; i < mDataFileHeaders[index].mCompressedBlockCount; ++i)
     {
@@ -296,7 +300,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         srcFile.read(block,blockSize);
 
-        if (blockDecrypted)
+        if (blockEncrypted)
             decrypt(block,blockSize);
 
         unsigned char blockType = block[0];
@@ -328,7 +332,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         }
 
         memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
-        bufferPos += (uint32_t)decompressed.size();
+        bufferPos += (uint32_t) decompressed.size();
 
         free(block);
     }
@@ -386,8 +390,38 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
     unsigned int position = 0;
     std::vector<unsigned char> decompressed;
 
-    // TODO
+    if (!mWavHeaderRead)
+    {
+        memcpy((char *) &mWavHeader,buffer,sizeof(mWavHeader));
+        position += sizeof(mWavHeader);
+        decrypt((char *) &mWavHeader,sizeof(mWavHeader)); 
+        decompressed.insert(decompressed.end(),(char *) &mWavHeader, ((char *) &mWavHeader) + sizeof(mWavHeader));
+        mWavHeaderRead = true;
+    }
 
+    if (mWavHeader.mChannels == 1)
+    {
+        decompressed.push_back(buffer[position]);        
+        decompressed.push_back(buffer[position + 1]);        
+
+        uint16_t value = *((uint16_t *) &(buffer[position]));
+
+        position += 2;
+
+        while (position < bufferLen)
+        {
+            int sign = (buffer[position] & 0x80) == 0 ? 1.0 : -1.0;
+            value += sign * delta[buffer[position] & 0x7f];
+            decompressed.push_back(value & 0xff);
+            decompressed.push_back(value >> 8);
+            position += 1;
+        }
+    }
+    else
+    {
+        // TODO: find a stereo WAV and implement this or prove there are no stereo WAVs
+    }
+ 
     return decompressed;
 }
 
