@@ -29,14 +29,12 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
     virtual bool loadSingleModel(std::string model) override;
-
     virtual void frame() override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
-
     virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
-
     virtual void setFreeCameraSpeed(double newSpeed) override;
+    virtual bool exportScene(std::string fileName) override;
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
@@ -55,6 +53,13 @@ protected:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 };
+
+bool OSGRenderer::exportScene(std::string fileName)
+{
+    const osg::Node *n = mRootNode.get();
+    auto result = osgDB::Registry::instance()->writeNode(*n,fileName,NULL);
+    return result.success();
+}
 
 void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
 {

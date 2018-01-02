@@ -1,6 +1,8 @@
 #ifndef RENDERER_BASE_H
 #define RENDERER_BASE_H
 
+#include <fstream>
+
 namespace MFRender
 {
 
@@ -21,6 +23,7 @@ public:
 
     bool done() { return mDone; };
 
+    virtual bool exportScene(std::string fileName)=0;
 protected:
     bool mDone;
 };
