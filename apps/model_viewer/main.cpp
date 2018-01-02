@@ -61,6 +61,7 @@ int main(int argc, char** argv)
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
         ("v,verbosity","Print verbose output.")
+        ("e,export","Export scene to file and exit.",cxxopts::value<std::string>())
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
         ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
@@ -74,6 +75,10 @@ int main(int argc, char** argv)
     bool cameraInfo = arguments.count("c") > 0;
     bool cameraPlace = arguments.count("p") > 0;
     bool model = arguments.count("4") > 0;
+    std::string exportFileName;
+
+    if (arguments.count("e") > 0)
+        exportFileName = arguments["e"].as<std::string>();
 
     bool load4ds = arguments.count("no-4ds") < 1;
     bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
@@ -135,19 +140,27 @@ int main(int argc, char** argv)
 
     int infoCounter = 0;
 
-    while (!renderer.done())
+    if (exportFileName.length() > 0)
     {
-        if (cameraInfo)
+        if (!renderer.exportScene(exportFileName))
+            return 1;
+    }
+    else
+    {
+        while (!renderer.done())    // main loop
         {
-            if (infoCounter <= 0)
+            if (cameraInfo)
             {
-                std::cout << "camera: " + getCameraString(&renderer) << std::endl;
-                infoCounter = 30;
+                if (infoCounter <= 0)
+                {
+                    std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+                    infoCounter = 30;
+                }
+                infoCounter--;
             }
-            infoCounter--;
-        }
 
-        renderer.frame();
+            renderer.frame();
+        }
     }
 
     return 0;
