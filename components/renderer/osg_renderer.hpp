@@ -108,6 +108,7 @@ mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
     mViewer->addEventHandler(statshandler);
 
     mRootNode = new osg::Group();
+    mRootNode->setName("root");
 
     mViewer->setSceneData(mRootNode);
 

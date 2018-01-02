@@ -77,6 +77,7 @@ protected:
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->setName("scene2.bin");
 
     MFLogger::ConsoleLogger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
 
@@ -92,8 +93,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
         mCameraRelative = new MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
-
         mCameraRelative->setCullingActive(false);
+
+        mCameraRelative->setName("camera relative");
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;

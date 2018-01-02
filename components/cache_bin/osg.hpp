@@ -17,6 +17,7 @@ public:
 osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->setName("cache.bin");
     MFLogger::ConsoleLogger::info("loading cache.bin", OSGCACHEBIN_MOSULE_STR);
     MFFormat::DataFormatCacheBIN parser;
     MFFormat::OSG4DSLoader loader4DS;
@@ -29,8 +30,9 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
             MFLogger::ConsoleLogger::info("Loading object " + object.mObjectName + ".", OSGCACHEBIN_MOSULE_STR);
         
             osg::ref_ptr<osg::Group> objectGroup = new osg::Group();
+            group->setName("object group");
 
-            for(auto instance : object.mInstances)
+            for (auto instance : object.mInstances)
             {
                 osg::ref_ptr<osg::Node> objectNode = (osg::Node *) getFromCache(instance.mModelName).get();
 
@@ -54,6 +56,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                 if (objectNode.get())
                 {
                     osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
+                    objectTransform->setName("object transform");
 
                     osg::Matrixd m = makeTransformMatrix(instance.mPos, instance.mScale, instance.mRot);
                     m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
