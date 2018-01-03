@@ -78,11 +78,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("scene2.bin");
-
     MFLogger::ConsoleLogger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
-
     MFFormat::DataFormatScene2BIN parser;
-
     MFFormat::OSG4DSLoader loader4DS;
     loader4DS.setBaseDir(mBaseDir);
 
@@ -182,7 +179,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                     lightNode->setName(lightTypeName);
                     mLightNodes.push_back(lightNode);
 
-                    // TODO: for now, block adding lights, as they don't work
                     objectNode = lightNode;
                     break;
                 }
