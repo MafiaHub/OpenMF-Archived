@@ -4,8 +4,6 @@ We aim to create free and open-source tools for the game [Mafia](https://en.wiki
 
 We respect copyrights and intelectual property and you need to own the original game with all the game data in order for our tools to be useful to you.
 
-The project is in very early stage and cannot offer much at the moment. If you want to help, feel free to join us.
+The project is in very early stage and at the moment can offer libraries for loading some of the game files and a model/world viewer with already a pretty nice rendering. If you want to help, feel free to join us via a pull-request, issue tracker or other means.
 
-![](https://github.com/OpenMafia/openmf/blob/master/resources/screen.jpg?raw=true)
-
-![](https://github.com/OpenMafia/openmf/blob/master/resources/screen2.jpg?raw=true)
+![](https://github.com/OpenMafia/openmf/blob/master/resources/screens.jpg?raw=true)
