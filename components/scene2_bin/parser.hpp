@@ -238,6 +238,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         {
             Quat newRotation = {};
             read(srcFile, &newRotation);
+            newRotation.fromMafia();
             object->mRot = newRotation;
         } 
         break;

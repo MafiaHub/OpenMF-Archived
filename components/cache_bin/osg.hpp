@@ -59,7 +59,6 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
                     objectTransform->setName("object transform");
 
                     osg::Matrixd m = makeTransformMatrix(instance.mPos, instance.mScale, instance.mRot);
-                    m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
                     objectTransform->setMatrix(m);
 
                     objectTransform->addChild(objectNode);
