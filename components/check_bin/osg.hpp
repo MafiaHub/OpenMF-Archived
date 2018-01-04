@@ -35,7 +35,7 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
         {
             osg::Vec4f(0,0,1,0),
             osg::Vec4f(0,1,0,0),
-            osg::Vec4f(244,167,66,0),
+            osg::Vec4f(1,1,0,0),
             osg::Vec4f(1,0,0,0),
             osg::Vec4f(0,0,0,0)
         };
