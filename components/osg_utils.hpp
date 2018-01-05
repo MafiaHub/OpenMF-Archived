@@ -194,6 +194,36 @@ osg::ref_ptr<osg::Image> applyColorKey(osg::Image *img, osg::Vec3f color, float 
     return dstImg;
 }
 
+class RobustIntersectionVisitor: public osgUtil::IntersectionVisitor
+{
+public:
+    RobustIntersectionVisitor(osgUtil::Intersector* intersector=0):
+        osgUtil::IntersectionVisitor(intersector)
+    {
+    }
+
+    virtual void apply(osg::MatrixTransform& transform) override
+    {
+        osgUtil::IntersectionVisitor::apply(transform);
+    }
+
+    virtual void apply(osg::Transform& transform) override
+    {
+        return;
+    }
+};
+
+class InfoStringVisitor: public osg::NodeVisitor
+{
+public:
+    void apply(osg::Node &n)
+    {
+        info = n.className();
+    }
+
+    std::string info;
+};
+
 }
 
 #endif

@@ -16,12 +16,47 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
+#include <osgUtil/PrintVisitor>
 
 #define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
 
 {
+
+class PickHandler: public osgGA::GUIEventHandler  // FIXME: this is event handling and should be done outside renderer
+{
+    virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa) override
+    {
+        if (ea.getButton() != osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ||
+            ea.getEventType()!=osgGA::GUIEventAdapter::PUSH)
+            return false;
+
+        osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
+
+        if (!viewer)
+            return true;
+
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+            new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
+
+        MFUtil::RobustIntersectionVisitor iv(intersector.get());
+
+        viewer->getCamera()->accept(iv);
+
+        if (intersector->containsIntersections())
+        {
+            const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
+            std::cout << result.drawable << std::endl;
+
+            MFUtil::InfoStringVisitor v;
+            result.drawable->accept(v);
+            std::cout << (v.info);
+        }
+
+        return true;
+    }
+};
 
 class OSGRenderer: public MFRenderer
 {
@@ -101,6 +136,8 @@ mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
     mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
+
+mViewer->addEventHandler(new PickHandler);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
