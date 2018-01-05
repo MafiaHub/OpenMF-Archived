@@ -47,9 +47,7 @@ class PickHandler: public osgGA::GUIEventHandler  // FIXME: this is event handli
         if (intersector->containsIntersections())
         {
             const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
-            MFUtil::InfoStringVisitor v;
-            result.drawable->accept(v);
-            std::cout << (v.mInfo) << std::endl;
+            std::cout << MFUtil::makeInfoString(result.drawable.get()) << std::endl;
         }
 
         return true;
