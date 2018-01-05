@@ -216,12 +216,18 @@ public:
 class InfoStringVisitor: public osg::NodeVisitor
 {
 public:
-    void apply(osg::Node &n)
+    InfoStringVisitor(): NodeVisitor()
     {
-        info = n.className();
+        mFirst = true;
     }
 
-    std::string info;
+    void apply(osg::Node &n)
+    {
+        mInfo += n.className() + std::string(" (") + n.getName() + std::string(")");
+    }
+
+    std::string mInfo;
+    bool mFirst;
 };
 
 }
