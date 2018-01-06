@@ -205,6 +205,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         }
                     }
 
+                    objectNode->setName(object.mModelName);
+
                     break;
                 }
 
