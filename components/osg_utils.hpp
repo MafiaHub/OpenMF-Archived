@@ -232,12 +232,9 @@ public:
 
 std::string makeInfoString(osg::Node *n)
 {
-    std::string result;
     InfoStringVisitor v;
     n->accept(v);
-    result += v.mInfo;
-    result += "\n----------\n";
-    return result;
+    return v.mInfo;
 }
 
 }
