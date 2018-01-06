@@ -78,7 +78,7 @@ public:
         uint32_t mType;
         Vec3 mPos;
         Quat mRot;
-        Vec3 mPos2; // NOTE(zaklaus): Final world transform position?
+        Vec3 mPos2; // precomputed final world transform position
         Vec3 mScale;
         std::string mName;
         std::string mModelName;

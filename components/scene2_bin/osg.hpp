@@ -228,8 +228,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                 if (hasTransform)
                 {
-                    // TODO: when to use mPos vs mPos2?
-                    osg::Matrixd m = makeTransformMatrix(object.mPos2,object.mScale,object.mRot);
+                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
                     objectTransform->setMatrix(m);
                 }
 
