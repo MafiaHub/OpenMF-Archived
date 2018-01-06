@@ -224,14 +224,28 @@ std::string toString(osg::Quat q)
     return "<" + doubleToStr(q.x()) + ", " + doubleToStr(q.y()) + ", " + doubleToStr(q.z()) + ", " + doubleToStr(q.w()) + ">";
 }
 
-std::string matrixTransformToString(osg::Matrixd m)
+std::string rotationToStr(osg::Quat q)
+{
+    double y,p,r;
+    quatToEuler(q,y,p,r);
+
+    y = y / (2 * osg::PI) * 360;
+    p = p / (2 * osg::PI) * 360;
+    r = r / (2 * osg::PI) * 360;
+
+    return "{" + doubleToStr(y) + ", " + doubleToStr(p) + ", " + doubleToStr(r) + "}";
+}
+
+std::string matrixTransformToString(osg::Matrixd m, bool rotationInEuler=false)
 {
     osg::Vec3f trans, scale;
     osg::Quat rot, so;
 
     m.decompose(trans,rot,scale,so);
 
-    return toString(trans) + " " + toString(rot) + " " + toString(scale);
+    std::string rotationStr = rotationInEuler ? rotationToStr(rot) : toString(rot);
+
+    return toString(trans) + " " + rotationStr + " " + toString(scale);
 }
 
 std::string charArrayToStr(char *array, unsigned int length)
@@ -266,7 +280,7 @@ public:
     void apply(osg::MatrixTransform &t)
     {
         apply(dynamic_cast<osg::Group&>(t));
-        mInfo += ", transform: " + matrixTransformToString(t.getMatrix());
+        mInfo += ", transform: " + matrixTransformToString(t.getMatrix(),true);
     }
 
     std::string mInfo;
