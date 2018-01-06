@@ -601,7 +601,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
-            transform->setName(MFUtil::charArrayToStr(model->mMeshes[i].mMeshName,model->mMeshes[i].mMeshNameLength) + " transf");
+            std::string meshName = MFUtil::charArrayToStr(model->mMeshes[i].mMeshName,model->mMeshes[i].mMeshNameLength);
+            transform->setName(meshName + " transf");
             osg::Matrixd mat;
 
             MFFormat::DataFormat4DS::Vec3 p, s;
@@ -613,8 +614,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
             transform->setMatrix(makeTransformMatrix(p,s,r));
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
-
+                
             meshes.push_back(transform);
+
+            if (mNodeMap)
+                mNodeMap->insert(mNodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(meshName,transform));
         }
 
         for (int i = 0; i < model->mMeshCount; ++i)     // parent meshes
