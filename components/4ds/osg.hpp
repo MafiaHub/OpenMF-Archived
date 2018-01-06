@@ -435,7 +435,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
 
-    if (material->mTransparency < 1)
+    if (material->mTransparency < 1.0 && !alphaMap)
     {
         isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
