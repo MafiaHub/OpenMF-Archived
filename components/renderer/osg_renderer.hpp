@@ -59,8 +59,6 @@ public:
         {
             const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
 
-            std::cout << MFUtil::makeInfoString(result.drawable.get()) << std::endl;
-
             if (mSelected)
             {
                 if (mMaterialBackup)
@@ -73,10 +71,12 @@ public:
             mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
             mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
 
-            for (auto i = 0; i < result.nodePath.size(); ++i)
-                std::cout << "  " << MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]) << std::endl;
+            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
 
-            std::cout << "------" << std::endl;
+            for (auto i = 0; i < result.nodePath.size(); ++i)
+                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+
+            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
         }
 
         return true;

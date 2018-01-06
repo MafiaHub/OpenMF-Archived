@@ -5,6 +5,7 @@
 #include <osg/Transform>
 #include <osgGA/FirstPersonManipulator>
 #include <math.h>
+#include <utils.hpp>
 
 namespace MFUtil
 {
@@ -213,6 +214,26 @@ public:
     }
 };
 
+std::string toString(osg::Vec3f v)
+{
+    return "[" + doubleToStr(v.x()) + ", " + doubleToStr(v.y()) + ", " + doubleToStr(v.z()) + "]";
+}
+
+std::string toString(osg::Quat q)
+{
+    return "<" + doubleToStr(q.x()) + ", " + doubleToStr(q.y()) + ", " + doubleToStr(q.z()) + ", " + doubleToStr(q.w()) + ">";
+}
+
+std::string matrixTransformToString(osg::Matrixd m)
+{
+    osg::Vec3f trans, scale;
+    osg::Quat rot, so;
+
+    m.decompose(trans,rot,scale,so);
+
+    return toString(trans) + " " + toString(rot) + " " + toString(scale);
+}
+
 class InfoStringVisitor: public osg::NodeVisitor
 {
 public:
@@ -223,7 +244,19 @@ public:
 
     void apply(osg::Node &n)
     {
-        mInfo += n.className() + std::string(" (") + n.getName() + std::string(")");
+        mInfo += n.className() + std::string(" (") + n.getName() + std::string("), parents: " + std::to_string(n.getNumParents()));
+    }
+
+    void apply(osg::Group &g)
+    {
+        apply(dynamic_cast<osg::Node&>(g));
+        mInfo += ", children: " + std::to_string(g.getNumChildren());
+    }
+
+    void apply(osg::MatrixTransform &t)
+    {
+        apply(dynamic_cast<osg::Group&>(t));
+        mInfo += ", transform: " + matrixTransformToString(t.getMatrix());
     }
 
     std::string mInfo;
