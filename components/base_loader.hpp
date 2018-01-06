@@ -16,6 +16,7 @@ class OSGLoader
 {
 public:
     typedef osg::ref_ptr<osg::Referenced> OSGCached;
+    typedef std::map<std::string,osg::ref_ptr<osg::Group>> NodeMap;
 
     OSGLoader();
 
@@ -33,6 +34,8 @@ public:
 
     osg::Vec3f toOSG(MFFormat::DataFormat::Vec3 v);
     osg::Quat toOSG(MFFormat::DataFormat::Quat q);
+
+    void setNodeMap(NodeMap *nodeMap);
 
 protected:
     osg::Matrixd makeTransformMatrix(
@@ -54,7 +57,13 @@ protected:
 
     osg::ref_ptr<osg::Referenced> getFromCache(std::string identifier);
     void storeToCache(std::string identifier,OSGCached obj);
+    NodeMap *mNodeMap;
 };
+
+void OSGLoader::setNodeMap(NodeMap *nodeMap)
+{
+    mNodeMap = nodeMap;
+}
 
 osg::ref_ptr<osg::Referenced> OSGLoader::getFromCache(std::string identifier)
 {
@@ -97,6 +106,7 @@ OSGLoader::OSGLoader()
 
     mMafiaToOSGMatrixInvert = mMafiaToOSGMatrix;
     mMafiaToOSGMatrixInvert.invert(mMafiaToOSGMatrixInvert);
+    mNodeMap = 0;
 }
 
 void OSGLoader::setBaseDir(std::string baseDir)

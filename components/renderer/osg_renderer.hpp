@@ -244,6 +244,10 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
 
+    MFFormat::OSGLoader::NodeMap nodeMap;
+    l4ds.setNodeMap(&nodeMap);
+    lScene2.setNodeMap(&nodeMap);
+
     if (load4ds && mFileSystem->open(file4DS,scene4dsPath))
     {
         osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
