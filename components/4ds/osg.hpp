@@ -414,7 +414,6 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool colored = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORED;
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
     bool isTransparent = false;
-
     bool additiveBlend = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVEMIXING;
 
     unsigned int diffuseUnit = 0;
@@ -445,7 +444,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     char diffuseTextureName[255];
     memcpy(diffuseTextureName,material->mDiffuseMapName,255);
-    diffuseTextureName[static_cast<unsigned int>(material->mDiffuseMapNameLength)] = 0;  // terminate the string
+    diffuseTextureName[static_cast<unsigned char>(material->mDiffuseMapNameLength)] = 0;  // terminate the string
 
     char alphaTextureName[255];
     char envTextureName[255]; 
@@ -464,7 +463,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
 
         memcpy(envTextureName,material->mEnvMapName,255);
-        envTextureName[static_cast<unsigned int>(material->mEnvMapNameLength)] = 0;  // terminate the string
+        envTextureName[static_cast<unsigned char>(material->mEnvMapNameLength)] = 0;  // terminate the string
 
         osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen();
         texGen->setMode(osg::TexGen::SPHERE_MAP);
@@ -475,7 +474,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     {
         isTransparent = true;
         memcpy(alphaTextureName,material->mAlphaMapName,255);
-        alphaTextureName[static_cast<unsigned int>(material->mAlphaMapNameLength)] = 0;  // terminate the string
+        alphaTextureName[static_cast<unsigned char>(material->mAlphaMapNameLength)] = 0;  // terminate the string
     }
     else
     {
