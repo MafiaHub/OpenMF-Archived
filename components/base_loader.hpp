@@ -53,7 +53,7 @@ protected:
     LoaderCache<OSGCached> *mLoaderCache;   ///< Derived classes should make use of the cache with getFromChache/storeToCache.
 
     osg::ref_ptr<osg::Referenced> getFromCache(std::string identifier);
-    void storeToCache(std::string identifier,osg::ref_ptr<osg::Referenced> obj);
+    void storeToCache(std::string identifier,OSGCached obj);
 };
 
 osg::ref_ptr<osg::Referenced> OSGLoader::getFromCache(std::string identifier)
@@ -66,7 +66,7 @@ osg::ref_ptr<osg::Referenced> OSGLoader::getFromCache(std::string identifier)
     return result;
 }
 
-void OSGLoader::storeToCache(std::string identifier,osg::ref_ptr<osg::Referenced> obj)
+void OSGLoader::storeToCache(std::string identifier,OSGCached obj)
 {
     if (mLoaderCache)
         mLoaderCache->storeObject(identifier,obj);

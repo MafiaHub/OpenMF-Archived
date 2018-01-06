@@ -5,6 +5,7 @@
 #include <osg/Transform>
 #include <osgGA/FirstPersonManipulator>
 #include <math.h>
+#include <utils.hpp>
 
 namespace MFUtil
 {
@@ -192,6 +193,105 @@ osg::ref_ptr<osg::Image> applyColorKey(osg::Image *img, osg::Vec3f color, float 
         }
 
     return dstImg;
+}
+
+class RobustIntersectionVisitor: public osgUtil::IntersectionVisitor
+{
+public:
+    RobustIntersectionVisitor(osgUtil::Intersector* intersector=0):
+        osgUtil::IntersectionVisitor(intersector)
+    {
+    }
+
+    virtual void apply(osg::MatrixTransform& transform) override
+    {
+        osgUtil::IntersectionVisitor::apply(transform);
+    }
+
+    virtual void apply(osg::Transform& transform) override
+    {
+        return;
+    }
+};
+
+std::string toString(osg::Vec3f v)
+{
+    return "[" + doubleToStr(v.x()) + ", " + doubleToStr(v.y()) + ", " + doubleToStr(v.z()) + "]";
+}
+
+std::string toString(osg::Quat q)
+{
+    return "<" + doubleToStr(q.x()) + ", " + doubleToStr(q.y()) + ", " + doubleToStr(q.z()) + ", " + doubleToStr(q.w()) + ">";
+}
+
+std::string rotationToStr(osg::Quat q)
+{
+    double y,p,r;
+    quatToEuler(q,y,p,r);
+
+    y = y / (2 * osg::PI) * 360;
+    p = p / (2 * osg::PI) * 360;
+    r = r / (2 * osg::PI) * 360;
+
+    return "{" + doubleToStr(y) + ", " + doubleToStr(p) + ", " + doubleToStr(r) + "}";
+}
+
+std::string matrixTransformToString(osg::Matrixd m, bool rotationInEuler=false)
+{
+    osg::Vec3f trans, scale;
+    osg::Quat rot, so;
+
+    m.decompose(trans,rot,scale,so);
+
+    std::string rotationStr = rotationInEuler ? rotationToStr(rot) : toString(rot);
+
+    return toString(trans) + " " + rotationStr + " " + toString(scale);
+}
+
+std::string charArrayToStr(char *array, unsigned int length)
+{
+    char *buffer = (char *) malloc(length + 1);
+    memcpy(buffer,array,length);
+    buffer[length] = 0;   // terminate the string
+    std::string result = buffer;
+    free(buffer);
+    return result;
+}
+
+class InfoStringVisitor: public osg::NodeVisitor
+{
+public:
+    InfoStringVisitor(): NodeVisitor()
+    {
+        mFirst = true;
+    }
+
+    void apply(osg::Node &n)
+    {
+        mInfo += n.className() + std::string(" (") + n.getName() + std::string("), parents: " + std::to_string(n.getNumParents()));
+    }
+
+    void apply(osg::Group &g)
+    {
+        apply(dynamic_cast<osg::Node&>(g));
+        mInfo += ", children: " + std::to_string(g.getNumChildren());
+    }
+
+    void apply(osg::MatrixTransform &t)
+    {
+        apply(dynamic_cast<osg::Group&>(t));
+        mInfo += ", transform: " + matrixTransformToString(t.getMatrix(),true);
+    }
+
+    std::string mInfo;
+    bool mFirst;
+};
+
+std::string makeInfoString(osg::Node *n)
+{
+    InfoStringVisitor v;
+    n->accept(v);
+    return v.mInfo;
 }
 
 }

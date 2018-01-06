@@ -94,7 +94,10 @@ bool DataFormatCacheBIN::load(std::ifstream &srcFile)
             free(modelName);
 
             read(srcFile, &newInstance.mPos);
+
             read(srcFile, &newInstance.mRot);
+            newInstance.mRot.fromMafia();
+
             read(srcFile, &newInstance.mScale);
             read(srcFile, &newInstance.mUnk0);
             read(srcFile, &newInstance.mScale2);

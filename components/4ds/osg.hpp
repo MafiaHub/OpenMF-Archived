@@ -240,6 +240,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
     }
 
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    geom->setName("facegroup");
     geom->setVertexArray(vertices);
     geom->setNormalArray(normals);
     geom->setTexCoordArray(0,uvs);
@@ -324,6 +325,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
+    nodeLOD->setName(meshName);
+
     float previousDist = 0.0;
 
     for (int i = 0; i < standard.mLODLevel; ++i)
@@ -350,6 +353,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
         OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->setName("LOD level");
 
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
@@ -573,6 +577,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
     MFFormat::DataFormat4DS format;
 
     osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
+    group->setName("4DS model");
 
     if (format.load(srcFile))
     {
@@ -596,6 +601,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+            transform->setName(MFUtil::charArrayToStr(model->mMeshes[i].mMeshName,model->mMeshes[i].mMeshNameLength) + " transf");
             osg::Matrixd mat;
 
             MFFormat::DataFormat4DS::Vec3 p, s;

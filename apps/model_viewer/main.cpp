@@ -96,7 +96,16 @@ int main(int argc, char** argv)
     }
 
     if (arguments.count("v") > 0)
+    {
         MFLogger::ConsoleLogger::getInstance()->setVerbosityFlags(0xffff);
+    }
+    else
+    {
+        MFLogger::ConsoleLogger::getInstance()->setVerbosityFlags(0xffff);
+        MFLogger::ConsoleLogger::getInstance()->addFilter(VIEWER_MODULE_STR);
+        MFLogger::ConsoleLogger::getInstance()->addFilter(OSGRENDERER_MODULE_STR);
+        MFLogger::ConsoleLogger::getInstance()->setFilterMode(false);
+    }
 
     if (arguments.count("l") > 0)
     {

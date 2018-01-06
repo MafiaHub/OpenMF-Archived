@@ -77,11 +77,9 @@ protected:
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
-
+    group->setName("scene2.bin");
     MFLogger::ConsoleLogger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
-
     MFFormat::DataFormatScene2BIN parser;
-
     MFFormat::OSG4DSLoader loader4DS;
     loader4DS.setBaseDir(mBaseDir);
 
@@ -92,8 +90,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
 
         mCameraRelative = new MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
-
         mCameraRelative->setCullingActive(false);
+
+        mCameraRelative->setName("camera relative");
 
         // disable lights for backdrop sector:
         osg::ref_ptr<osg::Material> mat = new osg::Material;
@@ -180,7 +179,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                     lightNode->setName(lightTypeName);
                     mLightNodes.push_back(lightNode);
 
-                    // TODO: for now, block adding lights, as they don't work
                     objectNode = lightNode;
                     break;
                 }
@@ -207,6 +205,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         }
                     }
 
+                    objectNode->setName(object.mModelName);
+
                     break;
                 }
 
@@ -228,7 +228,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 {
                     // TODO: when to use mPos vs mPos2?
                     osg::Matrixd m = makeTransformMatrix(object.mPos2,object.mScale,object.mRot);
-                    m.preMult( osg::Matrixd::rotate(osg::PI,osg::Vec3f(1,0,0)) );
                     objectTransform->setMatrix(m);
                 }
 
@@ -247,9 +246,12 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             else if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
+            {
+                MFLogger::ConsoleLogger::warn("Parent " + parentName + " not found.",OSGSCENE2BIN_MODULE_STR);
                 group->addChild(pair.second);
+            }
 
-            pair.second->setName("");
+            pair.second->setName("object transform");
         }
     }
 

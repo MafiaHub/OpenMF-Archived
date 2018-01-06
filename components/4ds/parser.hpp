@@ -663,9 +663,8 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
         read(file, &newMesh.mPos);
         read(file, &newMesh.mScale);
 
-        float r[4];
-        read(file, r, sizeof(float) * 4);
-        newMesh.mRot = {r[1], r[2], r[3], -r[0]};
+        read(file, (char *) &(newMesh.mRot), sizeof(float) * 4);
+        newMesh.mRot.fromMafia();
 
         read(file, &newMesh.mCullingFlags);
         read(file, &newMesh.mMeshNameLength);

@@ -68,6 +68,21 @@ public:
 
             return sstream.str();
         }
+
+        /// Converts the quaternion from Mafia format.
+
+        void fromMafia()
+        {
+            float x0 = x;
+            float y0 = y;
+            float z0 = z;
+            float w0 = w;
+
+            x = y0;
+            y = z0;
+            z = w0;
+            w = -1 * x0;
+        }
     } Quat;
 
     typedef struct
