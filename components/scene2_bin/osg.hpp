@@ -246,7 +246,10 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             else if ( nodeMap.find(parentName) != nodeMap.end() )
                 nodeMap[parentName]->addChild(pair.second);
             else
+            {
+                MFLogger::ConsoleLogger::warn("Parent " + parentName + " not found.",OSGSCENE2BIN_MODULE_STR);
                 group->addChild(pair.second);
+            }
 
             pair.second->setName("object transform");
         }
