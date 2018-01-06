@@ -16,12 +16,77 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
+#include <osgUtil/PrintVisitor>
 
 #define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
 
 {
+
+class PickHandler: public osgGA::GUIEventHandler  // FIXME: this is event handling and should be done outside renderer
+{
+public:
+    PickHandler()
+    {
+        mHighlightMaterial = new osg::Material;
+        mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+        mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+        mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+        mMaterialBackup = 0;
+        mSelected = 0;
+    }
+
+    virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa) override
+    {
+        if (ea.getButton() != osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ||
+            ea.getEventType()!=osgGA::GUIEventAdapter::PUSH)
+            return false;
+
+        osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
+
+        if (!viewer)
+            return true;
+
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+            new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
+
+        MFUtil::RobustIntersectionVisitor iv(intersector.get());
+
+        viewer->getCamera()->accept(iv);
+
+        if (intersector->containsIntersections())
+        {
+            const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
+
+            if (mSelected)
+            {
+                if (mMaterialBackup)
+                    mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
+                else
+                    mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+            }
+
+            mSelected = result.drawable;
+            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+
+            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+
+            for (int i = 0; i < (int) result.nodePath.size(); ++i)
+                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+
+            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+        }
+
+        return true;
+    }
+
+protected:
+    osg::ref_ptr<osg::Material> mHighlightMaterial;
+    osg::Material *mMaterialBackup;
+    osg::Drawable *mSelected;
+};
 
 class OSGRenderer: public MFRenderer
 {
@@ -102,6 +167,8 @@ mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
+mViewer->addEventHandler(new PickHandler);
+
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
     statshandler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F4);
@@ -176,6 +243,10 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
+
+    MFFormat::OSGLoader::NodeMap nodeMap;
+    l4ds.setNodeMap(&nodeMap);
+    lScene2.setNodeMap(&nodeMap);
 
     if (load4ds && mFileSystem->open(file4DS,scene4dsPath))
     {
@@ -351,7 +422,7 @@ void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *light
     {
         unsigned int lightNum = 0;
 
-        for (auto i = 0; i < lightNodes->size(); ++i)
+        for (int i = 0; i < (int) lightNodes->size(); ++i)
         {
             if (lightNum > 7)     // fixed pipeline only supports 8 lights
                 break;

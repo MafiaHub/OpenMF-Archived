@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iterator>
 #include <vector>
+#include <iomanip>
 
 namespace MFUtil
 {
@@ -22,6 +23,13 @@ std::string strToUpper(std::string str)
     std::string result = str;
     std::transform(str.begin(), str.end(), str.begin(), ::toupper);
     return str;
+}
+
+std::string doubleToStr(double value, unsigned int precision=2)
+{
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(precision) << value;
+    return stream.str();
 }
 
 bool strStartsWith(std::string str, std::string prefix)
@@ -68,7 +76,7 @@ std::string arrayToString(T *array, size_t len, std::string delim)
 {
     std::stringstream sstream;
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < (int) len; i++)
     {
         sstream << std::to_string(array[i]) << delim;
     }

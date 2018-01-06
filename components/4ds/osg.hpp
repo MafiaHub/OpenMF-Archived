@@ -240,6 +240,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
     }
 
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    geom->setName("facegroup");
     geom->setVertexArray(vertices);
     geom->setNormalArray(normals);
     geom->setTexCoordArray(0,uvs);
@@ -320,7 +321,6 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         OSG4DS_MODULE_STR);
 
     const float maxDistance = 10000000.0;
-    const float stepLOD = maxDistance / standard.mLODLevel;
 
     osg::ref_ptr<osg::LOD> nodeLOD = new osg::LOD();
 
@@ -352,7 +352,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
         OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::Group> group = new osg::Group();
-    group->setName("LOD");
+    group->setName("LOD level");
 
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
@@ -408,14 +408,12 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     bool diffuseMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_TEXTUREDIFFUSE;
     bool alphaMap = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ALPHATEXTURE;
 
-    bool mixNormal = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_NORMALTEXTUREBLEND;
     bool mixAdd = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVETEXTUREBLEND;
     bool mixMultiply = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_MULTIPLYTEXTUREBLEND;
 
     bool colored = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_COLORED;
     bool hide = !diffuseMap && !alphaMap && !envMap && material->mTransparency == 1;
     bool isTransparent = false;
-
     bool additiveBlend = material->mFlags & MFFormat::DataFormat4DS::MATERIALFLAG_ADDITIVEMIXING;
 
     unsigned int diffuseUnit = 0;
@@ -446,7 +444,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     char diffuseTextureName[255];
     memcpy(diffuseTextureName,material->mDiffuseMapName,255);
-    diffuseTextureName[material->mDiffuseMapNameLength] = 0;  // terminate the string
+    diffuseTextureName[static_cast<unsigned char>(material->mDiffuseMapNameLength)] = 0;  // terminate the string
 
     char alphaTextureName[255];
     char envTextureName[255]; 
@@ -465,7 +463,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
 
         memcpy(envTextureName,material->mEnvMapName,255);
-        envTextureName[material->mEnvMapNameLength] = 0;  // terminate the string
+        envTextureName[static_cast<unsigned char>(material->mEnvMapNameLength)] = 0;  // terminate the string
 
         osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen();
         texGen->setMode(osg::TexGen::SPHERE_MAP);
@@ -476,7 +474,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     {
         isTransparent = true;
         memcpy(alphaTextureName,material->mAlphaMapName,255);
-        alphaTextureName[material->mAlphaMapNameLength] = 0;  // terminate the string
+        alphaTextureName[static_cast<unsigned char>(material->mAlphaMapNameLength)] = 0;  // terminate the string
     }
     else
     {
@@ -497,7 +495,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         std::vector<std::string> diffuseAnimationNames = makeAnimationNames(diffuseTextureName,material->mAnimSequenceLength);
         std::vector<std::string> alphaAnimationNames = makeAnimationNames(alphaTextureName,material->mAnimSequenceLength);
 
-        for (int i = 0; i < diffuseAnimationNames.size(); ++i)
+        for (int i = 0; i < (int) diffuseAnimationNames.size(); ++i)
             cb->addTexture(loadTexture(diffuseAnimationNames[i],alphaAnimationNames[i],colorKey));
 
         stateSet->setUpdateCallback(cb);
@@ -600,6 +598,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         for (int i = 0; i < model->mMeshCount; ++i)      // load meshes
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+            std::string meshName = MFUtil::charArrayToStr(model->mMeshes[i].mMeshName,model->mMeshes[i].mMeshNameLength);
+            transform->setName(meshName + " transf");
             osg::Matrixd mat;
 
             MFFormat::DataFormat4DS::Vec3 p, s;
@@ -611,8 +611,11 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
             transform->setMatrix(makeTransformMatrix(p,s,r));
             transform->addChild(make4dsMesh(&(model->mMeshes[i]),materials));
-
+                
             meshes.push_back(transform);
+
+            if (mNodeMap)
+                mNodeMap->insert(mNodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(meshName,transform));
         }
 
         for (int i = 0; i < model->mMeshCount; ++i)     // parent meshes

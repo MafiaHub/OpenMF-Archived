@@ -23,7 +23,7 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
     std::vector<MFFormat::DataFormatDTA::FileTableRecord> ftr = dta.getFileTableRecords();
     std::vector<MFFormat::DataFormatDTA::DataFileHeader> dfh = dta.getDataFileHeaders();
 
-    for (int i = 0; i < dta.getNumFiles(); ++i)
+    for (int i = 0; i < (int) dta.getNumFiles(); ++i)
     {
         if (displaySize || verbose)
             std::cout << std::setw(ALIGN) << std::left << dta.getFileName(i) << dta.getFileSize(i) << " B";
@@ -247,7 +247,7 @@ int main(int argc, char** argv)
     {
         MFLogger::ConsoleLogger::info("Extracting file " + inputFile + ".", DTA_MODULE_STR);
 
-        for (auto i = 0; i < dta.getNumFiles(); ++i)
+        for (int i = 0; i < (int) dta.getNumFiles(); ++i)
             extract(dta,f,dta.getFileName(i),MFUtil::strToLower(dta.getFileName(i)),output);
     }
     else

@@ -51,7 +51,7 @@ public:
 
           if (n.asGroup())  // traverse(n) didn't work somehow
           {
-              for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+              for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
                   n.asGroup()->getChild(i)->accept(*this);
           }
     }
@@ -87,7 +87,14 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
     if (success)
     {
-        std::map<std::string,osg::ref_ptr<osg::Group>> nodeMap;
+        NodeMap emptyNodeMap;
+        NodeMap *nodeMap = &emptyNodeMap;
+        std::vector<osg::Node *> loadedNodes;    
+
+        if (!mNodeMap)
+            MFLogger::ConsoleLogger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
+        else
+            nodeMap = mNodeMap;
 
         mCameraRelative = new MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
         mCameraRelative->setCullingActive(false);
@@ -99,11 +106,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
         mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
         mat->setColorMode(osg::Material::OFF);
-        mCameraRelative->getOrCreateStateSet()->setAttributeAndModes(mat,
-            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        mCameraRelative->getOrCreateStateSet()->setAttributeAndModes(mat,osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         mCameraRelative->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
-
         mCameraRelative->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
         mCameraRelative->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
 
@@ -114,11 +119,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         for (auto pair : parser.getObjects())
         {
             auto object = pair.second;
-
             osg::ref_ptr<osg::Node> objectNode;
-
             std::string logStr = object.mName + ": ";
-
             bool hasTransform = true;
 
             switch (object.mType)
@@ -205,6 +207,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         }
                     }
 
+                    objectNode->setName(object.mModelName);
+
                     break;
                 }
 
@@ -224,29 +228,34 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                 if (hasTransform)
                 {
-                    // TODO: when to use mPos vs mPos2?
-                    osg::Matrixd m = makeTransformMatrix(object.mPos2,object.mScale,object.mRot);
+                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
                     objectTransform->setMatrix(m);
                 }
 
                 objectTransform->addChild(objectNode);
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
-                nodeMap.insert(nodeMap.begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
+                nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
+                loadedNodes.push_back(objectTransform.get());
             }
         }   // for
 
-        for (auto pair : nodeMap)   // set parents
+        for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
         {
-            std::string parentName = pair.second->getName();
+            std::string parentName = loadedNodes[i]->getName();
 
             if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
-                mCameraRelative->addChild(pair.second);
-            else if ( nodeMap.find(parentName) != nodeMap.end() )
-                nodeMap[parentName]->addChild(pair.second);
+                mCameraRelative->addChild(loadedNodes[i]);
+            else if (parentName.compare("Primary sector") == 0 || parentName.length() == 0)
+                group->addChild(loadedNodes[i]);
+            else if ( nodeMap->find(parentName) != nodeMap->end() )
+                (*nodeMap)[parentName]->addChild(loadedNodes[i]);
             else
-                group->addChild(pair.second);
+            {
+                MFLogger::ConsoleLogger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
+                group->addChild(loadedNodes[i]);
+            }
 
-            pair.second->setName("");
+            loadedNodes[i]->setName("object transform");
         }
     }
 

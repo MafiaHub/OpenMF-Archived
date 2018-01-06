@@ -246,7 +246,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
     mDataFileHeaders.clear();
 
-    for (int i = 0; i < mFileTableRecords.size(); ++i)
+    for (int i = 0; i < (int) mFileTableRecords.size(); ++i)
     {
         DataFileHeader h;
         srcFile.seekg(mFileTableRecords[i].mHeaderOffset);
@@ -265,7 +265,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
 
 int DataFormatDTA::getFileIndex(std::string fileName)
 {
-    for (int i = 0; i < mDataFileHeaders.size(); i++)
+    for (int i = 0; i < (int) mDataFileHeaders.size(); i++)
         if (fileName.compare((char *) mDataFileHeaders[i].mName) == 0)
             return i;
 

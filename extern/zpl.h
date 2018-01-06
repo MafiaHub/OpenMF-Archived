@@ -4338,13 +4338,13 @@ extern "C" {
     }
 
 
-    ZPL__COMPARE_PROC(i16);
-    ZPL__COMPARE_PROC(i32);
-    ZPL__COMPARE_PROC(i64);
-    ZPL__COMPARE_PROC(isize);
-    ZPL__COMPARE_PROC(f32);
-    ZPL__COMPARE_PROC(f64);
-    ZPL__COMPARE_PROC(char);
+    ZPL__COMPARE_PROC(i16)
+    ZPL__COMPARE_PROC(i32)
+    ZPL__COMPARE_PROC(i64)
+    ZPL__COMPARE_PROC(isize)
+    ZPL__COMPARE_PROC(f32)
+    ZPL__COMPARE_PROC(f64)
+    ZPL__COMPARE_PROC(char)
 
     // NOTE: str_cmp is special as it requires a funny type and funny comparison
     zpl_global isize zpl__str_cmp_offset; ZPL_COMPARE_PROC(zpl__str_cmp) {
@@ -4468,10 +4468,10 @@ extern "C" {
         }                                                               \
     }
 
-    ZPL_RADIX_SORT_PROC_GEN(u8);
-    ZPL_RADIX_SORT_PROC_GEN(u16);
-    ZPL_RADIX_SORT_PROC_GEN(u32);
-    ZPL_RADIX_SORT_PROC_GEN(u64);
+    ZPL_RADIX_SORT_PROC_GEN(u8)
+    ZPL_RADIX_SORT_PROC_GEN(u16)
+    ZPL_RADIX_SORT_PROC_GEN(u32)
+    ZPL_RADIX_SORT_PROC_GEN(u64)
 
     zpl_inline isize zpl_binary_search(void const *base, isize count, isize size, void const *key, zpl_compare_proc_t compare_proc) {
         isize start = 0;
