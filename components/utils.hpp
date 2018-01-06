@@ -76,7 +76,7 @@ std::string arrayToString(T *array, size_t len, std::string delim)
 {
     std::stringstream sstream;
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < (int) len; i++)
     {
         sstream << std::to_string(array[i]) << delim;
     }

@@ -19,7 +19,7 @@ class DataFormat
 {
 public:
     virtual bool load(std::ifstream &srcFile)=0;
-	virtual bool save(std::ofstream &dstFile) { dstFile; return false; /* optional */ };
+    virtual bool save(std::ofstream &dstFile) { return false; /* optional */ };
 
     #pragma pack(push, 1)
     typedef struct

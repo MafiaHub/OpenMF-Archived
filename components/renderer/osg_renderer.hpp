@@ -73,7 +73,7 @@ public:
 
             MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
 
-            for (auto i = 0; i < result.nodePath.size(); ++i)
+            for (int i = 0; i < (int) result.nodePath.size(); ++i)
                 MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
 
             MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
@@ -422,7 +422,7 @@ void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *light
     {
         unsigned int lightNum = 0;
 
-        for (auto i = 0; i < lightNodes->size(); ++i)
+        for (int i = 0; i < (int) lightNodes->size(); ++i)
         {
             if (lightNum > 7)     // fixed pipeline only supports 8 lights
                 break;

@@ -51,7 +51,7 @@ public:
 
           if (n.asGroup())  // traverse(n) didn't work somehow
           {
-              for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+              for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
                   n.asGroup()->getChild(i)->accept(*this);
           }
     }
@@ -228,8 +228,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                 if (hasTransform)
                 {
-                    // TODO: when to use mPos vs mPos2?
-                    osg::Matrixd m = makeTransformMatrix(object.mPos2,object.mScale,object.mRot);
+                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
                     objectTransform->setMatrix(m);
                 }
 
@@ -240,7 +239,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             }
         }   // for
 
-        for (auto i = 0; i < loadedNodes.size(); ++i)   // set parents
+        for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
         {
             std::string parentName = loadedNodes[i]->getName();
 
