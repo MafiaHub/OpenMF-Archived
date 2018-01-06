@@ -234,6 +234,16 @@ std::string matrixTransformToString(osg::Matrixd m)
     return toString(trans) + " " + toString(rot) + " " + toString(scale);
 }
 
+std::string charArrayToStr(char *array, unsigned int length)
+{
+    char *buffer = (char *) malloc(length + 1);
+    memcpy(buffer,array,length);
+    buffer[length] = 0;   // terminate the string
+    std::string result = buffer;
+    free(buffer);
+    return result;
+}
+
 class InfoStringVisitor: public osg::NodeVisitor
 {
 public:

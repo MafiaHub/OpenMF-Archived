@@ -246,7 +246,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             else
                 group->addChild(pair.second);
 
-            pair.second->setName("");
+            pair.second->setName("object transform");
         }
     }
 
