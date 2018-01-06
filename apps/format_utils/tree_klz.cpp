@@ -14,7 +14,7 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::vector<std::string> linkStrings;
 
-    for (auto i = 0; i < links.size(); ++i)
+    for (int i = 0; i < (int) links.size(); ++i)
     {
         char buffer[255];
         memcpy(buffer,links[i].mName,255);
@@ -28,8 +28,8 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
     std::cout << std::endl;
     std::cout << "GRID (" << klz.getGridWidth() << " x " << klz.getGridHeight() << "):" << std::endl;
 
-    for (auto y = 0; y < klz.getGridHeight(); ++y)
-        for (auto x = 0; x < klz.getGridWidth(); ++x)
+    for (int y = 0; y < (int) klz.getGridHeight(); ++y)
+        for (int x = 0; x < (int) klz.getGridWidth(); ++x)
         {
             MFFormat::DataFormatTreeKLZ::Cell cell = klz.getGridCell(x,y);
 
@@ -44,7 +44,7 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
     #define dumpItems(getFunc,printCmd) \
     {\
         auto items = getFunc;\
-        for (auto i = 0; i < items.size(); ++i)\
+        for (int i = 0; i < (int) items.size(); ++i)\
         {\
             auto item = items[i];\
             printCmd;\
@@ -77,8 +77,6 @@ int main(int argc, char** argv)
         std::cout << options.help() << std::endl;
         return 0;
     }
-
-    bool verbose = arguments.count("v") > 0;
 
     if (arguments.count("i") < 1)
     {

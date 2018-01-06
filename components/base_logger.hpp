@@ -35,7 +35,7 @@ public:
         if (!(flags & mVerbosityFlags))
             return false;
 
-        return std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end() == mFilterExclusive;
+        return (std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end()) == mFilterExclusive;
     }
 
     void addFilter(std::string id)

@@ -70,7 +70,7 @@ FileSystem::FileSystem()
     addPath(dirpath + ".openmf");
     addPath(dirpath + ".openmf/mafia");
 #endif
-};
+}
 
 void FileSystem::prependPath(std::string path)
 {
