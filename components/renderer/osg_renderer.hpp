@@ -101,6 +101,8 @@ public:
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
 
+    osg::Group *getRootNode() { return mRootNode.get(); };
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered

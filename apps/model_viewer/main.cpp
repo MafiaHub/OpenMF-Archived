@@ -5,6 +5,7 @@
 #include <renderer/osg_renderer.hpp>
 #include <string.h>
 #include <stdlib.h>
+#include <spatial_entity/loader.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 
@@ -131,11 +132,17 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
+    MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
 
     if (model)
+    {
         renderer.loadSingleModel(inputFile);
+    }
     else
+    {
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+        MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode());
+    }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
