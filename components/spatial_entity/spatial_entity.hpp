@@ -1,6 +1,8 @@
 #ifndef SPATIAL_ENTITY_H
 #define SPATIAL_ENTITY_H
 
+#include <string>
+
 namespace MFGame
 {
 
@@ -32,6 +34,8 @@ public:
     void setPosition(Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
     Quat getRotation()                  { return mRotation;     };
     void setRotation(Quat rotation)     { mRotation = rotation; };
+    void setName(std::string name)      { mName = name;         };  
+    std::string getName()               { return mName;         };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
@@ -47,6 +51,7 @@ protected:
     Vec3 mPosition;      
     Vec3 mScale;
     Quat mRotation;
+    std::string mName;
 };
 
 };
