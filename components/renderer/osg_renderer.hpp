@@ -94,7 +94,7 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
     virtual bool loadSingleModel(std::string model) override;
-    virtual void frame() override;
+    virtual void frame(double dt) override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
     virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
@@ -373,7 +373,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame()
+void OSGRenderer::frame(double dt)
 {
     if (mViewer->done() || mDone)
     {

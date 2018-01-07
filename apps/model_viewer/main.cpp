@@ -3,12 +3,12 @@
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
+#include <physics/bullet_physics_world.hpp>
+#include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
-#include <spatial_entity/loader.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
-
 #define VIEWER_MODULE_STR "viewer"
 
 std::string getCameraString(MFRender::MFRenderer *renderer)
@@ -132,6 +132,7 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
+    MFPhysics::BulletPhysicsWorld physicsWorld;
     MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
 
     if (model)
@@ -141,6 +142,7 @@ int main(int argc, char** argv)
     else
     {
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+        physicsWorld.loadMission(inputFile);
         MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode());
     }
 
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
                 infoCounter--;
             }
 
-            renderer.frame();
+            renderer.frame(0);
         }
     }
 

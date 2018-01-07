@@ -60,11 +60,10 @@ IF(WIN32)
 	ENDIF (WARNINGS_AS_ERRORS)
 ENDIF(WIN32)
 
-
 FIND_PACKAGE(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
 FIND_PACKAGE(Threads)
-#FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
-INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS})
+FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
+INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS} ${Bullet_INCLUDE_DIRS} "/usr/include/bullet")
 
 SET(USED_OSG_PLUGINS
     osgdb_bmp
