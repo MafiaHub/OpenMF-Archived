@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
-    MFPhysics::BulletPhysicsWorld physicsWorld;
+    MFPhysics::BulletPhysicsWorld physicsWorld(1 / 60.f /* TODO grab target FPS from somewhere */);
     MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
 
     if (model)

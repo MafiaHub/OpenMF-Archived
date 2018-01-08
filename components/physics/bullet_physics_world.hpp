@@ -14,29 +14,37 @@ namespace MFPhysics
 class BulletPhysicsWorld: public MFPhysicsWorld
 {
 public:
-	BulletPhysicsWorld();
+	BulletPhysicsWorld(float time);
 	~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
 
 	btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
+	float getFrameTime()           { return mFrameTime; }
+	void  setFrameTime(float time) { mFrameTime = time; }
+
 private:
-	btDiscreteDynamicsWorld *mWorld;
-	btBroadphaseInterface *mBroadphaseInterface;
-	btDefaultCollisionConfiguration *mConfiguration;
-	btCollisionDispatcher *mCollisionDispatcher;
+	btDiscreteDynamicsWorld             *mWorld;
+	btBroadphaseInterface               *mBroadphaseInterface;
+	btDefaultCollisionConfiguration     *mConfiguration;
+	btCollisionDispatcher               *mCollisionDispatcher;
 	btSequentialImpulseConstraintSolver *mSolver;
+
+	float mFrameTime;
 };
 
-BulletPhysicsWorld::BulletPhysicsWorld()
+BulletPhysicsWorld::BulletPhysicsWorld(float time)
 {
 	mBroadphaseInterface = new btDbvtBroadphase();
-	mConfiguration = new btDefaultCollisionConfiguration();
+	mConfiguration       = new btDefaultCollisionConfiguration();
 	mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
-	mSolver = new btSequentialImpulseConstraintSolver;
-	mWorld = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
+	mSolver              = new btSequentialImpulseConstraintSolver;
+	mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
+
 	mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+
+	setFrameTime(time);
 }
 
 BulletPhysicsWorld::~BulletPhysicsWorld()
@@ -50,7 +58,7 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
 
 void BulletPhysicsWorld::frame(double dt)
 {
-	mWorld->stepSimulation(1 / /* TODO target fps */ 60.0f, 1);
+	mWorld->stepSimulation(mFrameTime, 1);
 
 	size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
 	for (size_t i = 0; i < numManifolds; i++)
