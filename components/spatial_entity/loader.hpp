@@ -22,39 +22,38 @@ public:
     /* FIXME: SpatialEntityList should be a list of SpatialEntity, but can't because
        it's abstract => find a way to do this */
 
-    SpatialEntityList loadFromScene(osg::Group *sceneRoot);
+    SpatialEntityList loadFromScene(osg::Group *sceneRoot, std::vector<MFUtil::NamedRigidBody> *treeKlzBodies);
     // void loadModel();
-
-protected:
-    class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor
-    {
-    public:
-        virtual void apply(osg::Node &n) override
-        {
-            if (n.getUserDataContainer())
-            {
-                std::vector<std::string> descriptions = n.getUserDataContainer()->getDescriptions();
- 
-                if (descriptions.size() > 0 && descriptions[0].compare("4ds mesh") == 0)
-                {
-                    MFGame::SpatialEntityImplementation newEntity;
-
-                    newEntity.setName(n.getName());
-std::cout << n.getName() << std::endl;
-                    mEntities.push_back(newEntity);
-                }
-            }
-
-            if (n.asGroup())         // FIXME: why does traverse() not work?
-                for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
-                    n.asGroup()->getChild(i)->accept(*this);
-        }
-
-        SpatialEntityList mEntities;
-    };
 };
 
-SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplementation::loadFromScene(osg::Group *sceneRoot)
+class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor
+{
+public:
+    virtual void apply(osg::Node &n) override
+    {
+        if (n.getUserDataContainer())
+        {
+            std::vector<std::string> descriptions = n.getUserDataContainer()->getDescriptions();
+
+            if (descriptions.size() > 0 && descriptions[0].compare("4ds mesh") == 0)
+            {
+                MFGame::SpatialEntityImplementation newEntity;
+
+                newEntity.setName(n.getName());
+std::cout << n.getName() << std::endl;
+                mEntities.push_back(newEntity);
+            }
+        }
+
+        if (n.asGroup())         // FIXME: why does traverse() not work?
+            for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+                n.asGroup()->getChild(i)->accept(*this);
+    }
+
+    SpatialEntityLoaderImplementation::SpatialEntityList mEntities;
+};
+
+SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplementation::loadFromScene(osg::Group *sceneRoot, std::vector<MFUtil::NamedRigidBody> *treeKlzBodies)
 {
     SpatialEntityLoaderImplementation::SpatialEntityList result;
 
