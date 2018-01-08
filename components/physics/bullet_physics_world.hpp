@@ -14,69 +14,69 @@ namespace MFPhysics
 class BulletPhysicsWorld: public MFPhysicsWorld
 {
 public:
-	BulletPhysicsWorld(float time);
-	~BulletPhysicsWorld();
+    BulletPhysicsWorld(float time);
+    ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
 
-	btDiscreteDynamicsWorld *getWorld() { return mWorld; }
+    btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
-	float getFrameTime()           { return mFrameTime; }
-	void  setFrameTime(float time) { mFrameTime = time; }
+    float getFrameTime()           { return mFrameTime; }
+    void  setFrameTime(float time) { mFrameTime = time; }
 
-private:
-	btDiscreteDynamicsWorld             *mWorld;
-	btBroadphaseInterface               *mBroadphaseInterface;
-	btDefaultCollisionConfiguration     *mConfiguration;
-	btCollisionDispatcher               *mCollisionDispatcher;
-	btSequentialImpulseConstraintSolver *mSolver;
+protected:
+    btDiscreteDynamicsWorld             *mWorld;
+    btBroadphaseInterface               *mBroadphaseInterface;
+    btDefaultCollisionConfiguration     *mConfiguration;
+    btCollisionDispatcher               *mCollisionDispatcher;
+    btSequentialImpulseConstraintSolver *mSolver;
 
-	float mFrameTime;
+    float mFrameTime;
 };
 
 BulletPhysicsWorld::BulletPhysicsWorld(float time)
 {
-	mBroadphaseInterface = new btDbvtBroadphase();
-	mConfiguration       = new btDefaultCollisionConfiguration();
-	mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
-	mSolver              = new btSequentialImpulseConstraintSolver;
-	mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
+    mBroadphaseInterface = new btDbvtBroadphase();
+    mConfiguration       = new btDefaultCollisionConfiguration();
+    mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
+    mSolver              = new btSequentialImpulseConstraintSolver;
+    mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
 
-	mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+    mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
 
-	setFrameTime(time);
+    setFrameTime(time);
 }
 
 BulletPhysicsWorld::~BulletPhysicsWorld()
 {
-	delete mWorld;
-	delete mSolver;
-	delete mCollisionDispatcher;
-	delete mConfiguration;
-	delete mBroadphaseInterface;
+    delete mWorld;
+    delete mSolver;
+    delete mCollisionDispatcher;
+    delete mConfiguration;
+    delete mBroadphaseInterface;
 }
 
 void BulletPhysicsWorld::frame(double dt)
 {
-	mWorld->stepSimulation(mFrameTime, 1);
+    mWorld->stepSimulation(mFrameTime, 1);
 
-	size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
-	for (size_t i = 0; i < numManifolds; i++)
-	{
-		btPersistentManifold *c = mWorld->getDispatcher()->getManifoldByIndexInternal(i);
-		btCollisionObject const *a = c->getBody0();
-		btCollisionObject const *b = c->getBody1();
+    size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
+    for (size_t i = 0; i < numManifolds; i++)
+    {
+        btPersistentManifold *c = mWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btCollisionObject const *a = c->getBody0();
+        btCollisionObject const *b = c->getBody1();
 
-		size_t co = c->getNumContacts();
-		for (size_t j = 0; j < co; j++)
-		{
-			btManifoldPoint &pt = c->getContactPoint(j);
-			if (pt.getDistance() < 0.0f)
-			{
-				// TODO collision has happened, do something smart.
-			}
-		}
-	}
+        size_t co = c->getNumContacts();
+        for (size_t j = 0; j < co; j++)
+        {
+            btManifoldPoint &pt = c->getContactPoint(j);
+            if (pt.getDistance() < 0.0f)
+            {
+                    // TODO collision has happened, do something smart.
+            }
+        }
+    }
 }
 
 bool BulletPhysicsWorld::loadMission(std::string mission)
