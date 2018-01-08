@@ -15,18 +15,12 @@ namespace MFPhysics
 class BulletTreeKlzLoader
 {
 public:
-    typedef struct
-    {
-        std::string mName;
-        MFUtil::FullRigidBody mRigidBody;
-    } LinkedCollisionBody;
-
-    std::vector<LinkedCollisionBody> load(std::ifstream &srcFile);
+    std::vector<MFUtil::NamedRigidBody> load(std::ifstream &srcFile);
 };
 
-std::vector<BulletTreeKlzLoader::LinkedCollisionBody> BulletTreeKlzLoader::load(std::ifstream &srcFile)
+std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &srcFile)
 {
-    std::vector<BulletTreeKlzLoader::LinkedCollisionBody> result;
+    std::vector<MFUtil::NamedRigidBody> result;
     MFFormat::DataFormatTreeKLZ klz;
     klz.load(srcFile);
     auto colsAABB = klz.getAABBCols();
@@ -39,13 +33,13 @@ std::vector<BulletTreeKlzLoader::LinkedCollisionBody> BulletTreeKlzLoader::load(
         btVector3 center = (p1 + p2) / 2.0f;
         btVector3 bboxCorner = p2 - center;
 
-        BulletTreeKlzLoader::LinkedCollisionBody newLinkedBody;
-        newLinkedBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newLinkedBody.mRigidBody.mShape.get());
-        newLinkedBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-        newLinkedBody.mRigidBody.mBody->translate(center);
+        MFUtil::NamedRigidBody newBody;
+        newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->translate(center);
 
-        result.push_back(newLinkedBody);
+        result.push_back(newBody);
     } 
 
     return result;

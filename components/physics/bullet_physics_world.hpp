@@ -21,12 +21,16 @@ public:
     virtual bool loadMission(std::string mission) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
+    std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
+
 protected:
     btDiscreteDynamicsWorld             *mWorld;
     btBroadphaseInterface               *mBroadphaseInterface;
     btDefaultCollisionConfiguration     *mConfiguration;
     btCollisionDispatcher               *mCollisionDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
+
+    std::vector<MFUtil::NamedRigidBody> mTreeKlzBodies;
 
     MFFile::FileSystem *mFileSystem;
 };
@@ -76,6 +80,11 @@ void BulletPhysicsWorld::frame(double dt)
     }
 }
 
+std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
+{
+    return mTreeKlzBodies;
+}
+
 bool BulletPhysicsWorld::loadMission(std::string mission)
 {
     MFLogger::ConsoleLogger::info("Loading physics world for mission " + mission + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
@@ -89,10 +98,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     if (mFileSystem->open(fileTreeKlz,treeKlzPath))
     {
-        std::vector<BulletTreeKlzLoader::LinkedCollisionBody> shapes = treeKlzLoader.load(fileTreeKlz);
-
-std::cout << shapes.size() << std::endl;
-
+        mTreeKlzBodies = treeKlzLoader.load(fileTreeKlz);
         fileTreeKlz.close();
     }
     else

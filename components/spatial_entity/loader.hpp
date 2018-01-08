@@ -6,6 +6,7 @@
 #include <string>
 #include <spatial_entity/spatial_entity_implementation.hpp>
 #include <osg/Node>
+#include <bullet_utils.hpp>
 
 namespace MFFormat
 {
