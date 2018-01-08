@@ -3,7 +3,7 @@
 
 #include <cache_bin/parser.hpp>
 
-#define OSGCACHEBIN_MOSULE_STR "loader cache.bin"
+#define OSGCACHEBIN_MODULE_STR "loader cache.bin"
 
 namespace MFFormat
 {
@@ -18,7 +18,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("cache.bin");
-    MFLogger::ConsoleLogger::info("loading cache.bin", OSGCACHEBIN_MOSULE_STR);
+    MFLogger::ConsoleLogger::info("loading cache.bin", OSGCACHEBIN_MODULE_STR);
     MFFormat::DataFormatCacheBIN parser;
     MFFormat::OSG4DSLoader loader4DS;
     bool success = parser.load(srcFile);
@@ -27,7 +27,7 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
     {
         for (auto object : parser.getObjects())
         {
-            MFLogger::ConsoleLogger::info("Loading object " + object.mObjectName + ".", OSGCACHEBIN_MOSULE_STR);
+            MFLogger::ConsoleLogger::info("Loading object " + object.mObjectName + ".", OSGCACHEBIN_MODULE_STR);
         
             osg::ref_ptr<osg::Group> objectGroup = new osg::Group();
             group->setName("object group");
@@ -38,12 +38,12 @@ osg::ref_ptr<osg::Node> OSGCacheBinLoader::load(std::ifstream &srcFile, std::str
 
                 if (!objectNode)
                 {
-                    MFLogger::ConsoleLogger::info("Loading model " + instance.mModelName + ". (" + instance.mPos.str() + ")",OSGCACHEBIN_MOSULE_STR);
+                    MFLogger::ConsoleLogger::info("Loading model " + instance.mModelName + ". (" + instance.mPos.str() + ")",OSGCACHEBIN_MODULE_STR);
                     std::ifstream f;
                     
                     if (!mFileSystem->open(f,"MODELS/" + instance.mModelName))
                     {
-                        MFLogger::ConsoleLogger::warn("Could not load model " + instance.mModelName + ".", OSGCACHEBIN_MOSULE_STR);
+                        MFLogger::ConsoleLogger::warn("Could not load model " + instance.mModelName + ".", OSGCACHEBIN_MODULE_STR);
                     }
                     else
                     {
