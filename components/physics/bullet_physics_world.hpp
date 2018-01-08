@@ -5,6 +5,7 @@
 #include <loggers/console.hpp>
 #include <klz/bullet.hpp>
 #include <btBulletDynamicsCommon.h>
+#include <vfs/vfs.hpp>
 
 #define BULLET_PHYSICS_WORLD_MODULE_STR "bullet world"
 
@@ -14,15 +15,11 @@ namespace MFPhysics
 class BulletPhysicsWorld: public MFPhysicsWorld
 {
 public:
-    BulletPhysicsWorld(float time);
+    BulletPhysicsWorld();
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
-
-    float getFrameTime()           { return mFrameTime; }
-    void  setFrameTime(float time) { mFrameTime = time; }
 
 protected:
     btDiscreteDynamicsWorld             *mWorld;
@@ -31,10 +28,10 @@ protected:
     btCollisionDispatcher               *mCollisionDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
 
-    float mFrameTime;
+    MFFile::FileSystem *mFileSystem;
 };
 
-BulletPhysicsWorld::BulletPhysicsWorld(float time)
+BulletPhysicsWorld::BulletPhysicsWorld()
 {
     mBroadphaseInterface = new btDbvtBroadphase();
     mConfiguration       = new btDefaultCollisionConfiguration();
@@ -44,7 +41,7 @@ BulletPhysicsWorld::BulletPhysicsWorld(float time)
 
     mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
 
-    setFrameTime(time);
+    mFileSystem = MFFile::FileSystem::getInstance();
 }
 
 BulletPhysicsWorld::~BulletPhysicsWorld()
@@ -58,7 +55,7 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
 
 void BulletPhysicsWorld::frame(double dt)
 {
-    mWorld->stepSimulation(mFrameTime, 1);
+    mWorld->stepSimulation(dt, 1);
 
     size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
     for (size_t i = 0; i < numManifolds; i++)
@@ -82,6 +79,28 @@ void BulletPhysicsWorld::frame(double dt)
 bool BulletPhysicsWorld::loadMission(std::string mission)
 {
     MFLogger::ConsoleLogger::info("Loading physics world for mission " + mission + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+
+    std::string missionDir = "missions/" + mission;
+    std::string treeKlzPath = missionDir + "/tree.klz";
+
+    std::ifstream fileTreeKlz;
+
+    BulletTreeKlzLoader treeKlzLoader;
+
+    if (mFileSystem->open(fileTreeKlz,treeKlzPath))
+    {
+        BulletTreeKlzLoader::BulletShapes shapes = treeKlzLoader.load(fileTreeKlz);
+
+std::cout << shapes.size() << std::endl;
+
+        fileTreeKlz.close();
+    }
+    else
+    {
+        MFLogger::ConsoleLogger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+        return false;
+    }
+
     return true;
 }
 

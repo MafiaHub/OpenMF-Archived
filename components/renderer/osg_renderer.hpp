@@ -17,6 +17,7 @@
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
 #include <osgUtil/PrintVisitor>
+#include <vfs/vfs.hpp>
 
 #define OSGRENDERER_MODULE_STR "renderer"
 

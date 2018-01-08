@@ -5,7 +5,7 @@
 #include <fstream>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
-namespace MFCollision
+namespace MFPhysics
 {
 
 class BulletTreeKlzLoader
@@ -17,12 +17,14 @@ public:
         btCollisionShape *mShape;
     } LinkedShape;
 
-    std::vector<BulletTreeKlzLoader::LinkedShape> load(std::ifstream &srcFile);
+    typedef std::vector<std::shared_ptr<BulletTreeKlzLoader::LinkedShape>> BulletShapes;
+
+    BulletShapes load(std::ifstream &srcFile);
 };
 
-std::vector<BulletTreeKlzLoader::LinkedShape> BulletTreeKlzLoader::load(std::ifstream &srcFile)
+BulletTreeKlzLoader::BulletShapes BulletTreeKlzLoader::load(std::ifstream &srcFile)
 {
-    std::vector<LinkedShape> result;
+    BulletTreeKlzLoader::BulletShapes result;
     return result;
 }
 

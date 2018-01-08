@@ -11,6 +11,8 @@
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
+#define UPDATE_TIME 1.0/60.0f
+
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
     double cam[6];
@@ -134,7 +136,7 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
-    MFPhysics::BulletPhysicsWorld physicsWorld(1 / 60.f /* TODO grab target FPS from somewhere */);
+    MFPhysics::BulletPhysicsWorld physicsWorld;
     MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
 
     if (model)
@@ -179,7 +181,8 @@ int main(int argc, char** argv)
                 infoCounter--;
             }
 
-            // TODO Better update loop
+            // TODO use UPDATE_TIME to make fixed-time-delta loop
+
             physicsWorld.frame(0);
             renderer.frame(0);
         }
