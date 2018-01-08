@@ -4,6 +4,8 @@
 #include <vector>
 #include <fstream>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <klz/parser.hpp>
 
 namespace MFPhysics
 {
@@ -14,17 +16,29 @@ public:
     typedef struct
     {
         std::string mName;
-        btCollisionShape *mShape;
+        std::shared_ptr<btCollisionShape> mShape;
     } LinkedShape;
 
-    typedef std::vector<std::shared_ptr<BulletTreeKlzLoader::LinkedShape>> BulletShapes;
-
-    BulletShapes load(std::ifstream &srcFile);
+    std::vector<LinkedShape> load(std::ifstream &srcFile);
 };
 
-BulletTreeKlzLoader::BulletShapes BulletTreeKlzLoader::load(std::ifstream &srcFile)
+std::vector<BulletTreeKlzLoader::LinkedShape> BulletTreeKlzLoader::load(std::ifstream &srcFile)
 {
-    BulletTreeKlzLoader::BulletShapes result;
+    std::vector<BulletTreeKlzLoader::LinkedShape> result;
+
+    MFFormat::DataFormatTreeKLZ klz;
+
+    klz.load(srcFile);
+
+    auto colsAABB = klz.getAABBCols();
+
+    for (int i = 0; i < colsAABB.size(); ++i)
+    {
+        BulletTreeKlzLoader::LinkedShape newShape;
+        newShape.mShape = std::make_shared<btBoxShape>(btVector3(1,1,1));
+        result.push_back(newShape);
+    } 
+
     return result;
 }
 

@@ -89,7 +89,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     if (mFileSystem->open(fileTreeKlz,treeKlzPath))
     {
-        BulletTreeKlzLoader::BulletShapes shapes = treeKlzLoader.load(fileTreeKlz);
+        std::vector<BulletTreeKlzLoader::LinkedShape> shapes = treeKlzLoader.load(fileTreeKlz);
 
 std::cout << shapes.size() << std::endl;
 
