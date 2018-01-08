@@ -16,6 +16,7 @@ GPATH
 GRTAGS
 GTAGS
 compile_commands.json
+CMakeSettings.json
 
 # Compiled Dynamic libraries
 *.so
@@ -40,5 +41,6 @@ compile_commands.json
 # Folders
 build/
 .vscode/
+.vs/
 mafia/
 mafia
