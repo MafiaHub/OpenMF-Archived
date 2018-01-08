@@ -50,8 +50,8 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
 
     // TODO: Improve this
     #ifdef OMF_SYSTEM_WINDOWS
-        char const *baseName = zpl_path_base_name(outputFile.c_str());
-        system(std::string("mkdir \"" + std::string(baseName) + "\" && copy /y nul \"" + outputFile + "\"").c_str());
+        char const *baseName = zpl_path_base_name(outFile.c_str());
+        system(std::string("mkdir \"" + std::string(baseName) + "\" && copy /y nul \"" + outFile + "\"").c_str());
     #else 
         outFile = "./" + outFile;
         std::replace(outFile.begin(), outFile.end(), '\\', '/');
