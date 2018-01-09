@@ -4,7 +4,6 @@
 #include <spatial_entity/spatial_entity.hpp>
 #include <osg/Node>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <loggers/console.hpp>
 
 #define SPATIAL_ENTITY_IMPLEMENTATION_STR "spatial entity"
 
@@ -24,19 +23,27 @@ public:
     void setBulletBody(btRigidBody *body)     { mBulletBody = body;    };
     osg::MatrixTransform *getOSGNode()        { return mOSGNode.get(); };
     btRigidBody *getBulletBody()              { return mBulletBody;    };
+    void setOSGRootNode(osg::Group *root)     { mOSGRoot = root;       };
 
 protected:
+    void makePhysicsDebugOSGNode();        ///< Creates a visual representation of the physical representation.
+
     osg::ref_ptr<osg::MatrixTransform> mOSGNode;
     btRigidBody *mBulletBody;
 
-    osg::Matrixd mOSGInitialTransform;     ///< captures the OSG node transform when ready() is called
-    btTransform mBulletInitialTransform;   ///< captures the Bullet body transform when ready() is called
+    osg::Group *mOSGRoot;
+
+    osg::ref_ptr<osg::MatrixTransform> mOSGPgysicsDebugNode;
+
+    osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
+    btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
 };
 
 SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
 {
     mOSGNode = 0;
     mBulletBody = 0;
+    mOSGRoot = 0;
 }
 
 void SpatialEntityImplementation::update(double dt)
@@ -48,7 +55,7 @@ std::string SpatialEntityImplementation::toString()
     int hasOSG = mOSGNode != 0;
     int hasBullet = mBulletBody != 0;
 
-    return "\"" + mName + "\", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + " pos: " + mPosition.str();
+    return "\"" + mName + "\", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
 void SpatialEntityImplementation::ready()
@@ -74,10 +81,57 @@ void SpatialEntityImplementation::ready()
         mPosition.x = pos.x();
         mPosition.y = pos.y();
         mPosition.z = pos.z();
+
+        makePhysicsDebugOSGNode();
     }
 
     MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_STR);
     mReady = true;
+}
+
+void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
+{
+    if (!mBulletBody)
+        return;
+
+    osg::Group *parentTo = mOSGNode;
+
+    if (!parentTo)
+        parentTo = mOSGRoot;
+
+    if (!parentTo)
+    {
+        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no parent.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+        return;
+    }
+
+    int shapeType = mBulletBody->getCollisionShape()->getShapeType();
+
+    osg::ref_ptr<osg::ShapeDrawable> shapeNode;
+
+    switch (shapeType)
+    {
+        case BroadphaseNativeTypes::BOX_SHAPE_PROXYTYPE:
+        {
+            osg::ref_ptr<osg::Shape> shape = new osg::Box(osg::Vec3f(0,0,0),1);
+            shapeNode = new osg::ShapeDrawable(shape.get());
+            break;
+        }
+
+        default:
+            MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+            break;
+    }
+
+    if (shapeNode)
+    {
+        mOSGPgysicsDebugNode = new osg::MatrixTransform();
+        mOSGPgysicsDebugNode->addChild(shapeNode);
+
+        mOSGPgysicsDebugNode->setMatrix(osg::Matrixd::translate(osg::Vec3f(mPosition.x,mPosition.y,mPosition.z)));
+
+        parentTo->addChild(mOSGPgysicsDebugNode);
+    }
 }
 
 void SpatialEntityImplementation::move(Vec3 destPosition)
