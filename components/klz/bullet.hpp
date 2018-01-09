@@ -6,6 +6,7 @@
 #include <bullet_utils.hpp>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <klz/parser.hpp>
 
@@ -23,27 +24,45 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
     std::vector<MFUtil::NamedRigidBody> result;
     MFFormat::DataFormatTreeKLZ klz;
     klz.load(srcFile);
-    auto colsAABB = klz.getAABBCols();
 
     std::vector<std::string> linkStrings = klz.getLinkStrings();
- 
-    for (int i = 0; i < colsAABB.size(); ++i)
-    {
-        btVector3 p1 = MFUtil::mafiaVec3ToBullet(colsAABB[i].mMin.x,colsAABB[i].mMin.y,colsAABB[i].mMin.z);
-        btVector3 p2 = MFUtil::mafiaVec3ToBullet(colsAABB[i].mMax.x,colsAABB[i].mMax.y,colsAABB[i].mMax.z);
+
+    #define loopBegin(getFunc) \
+    { \
+        auto cols = klz.getFunc(); \
+        for (int i = 0; i < cols.size(); ++i) \
+        { \
+            auto col = cols[i];\
+            MFUtil::NamedRigidBody newBody;\
+
+    #define loopEnd \
+            newBody.mName = linkStrings[cols[i].mLink]; \
+            result.push_back(newBody); \
+        } \
+    }
+
+    loopBegin(getAABBCols)
+        btVector3 p1 = MFUtil::mafiaVec3ToBullet(col.mMin.x,col.mMin.y,col.mMin.z);
+        btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mMax.x,col.mMax.y,col.mMax.z);
 
         btVector3 center = (p1 + p2) / 2.0f;
         btVector3 bboxCorner = p2 - center;
 
-        MFUtil::NamedRigidBody newBody;
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
+    loopEnd
 
-        newBody.mName = linkStrings[colsAABB[i].mLink];
-        result.push_back(newBody);
-    } 
+    loopBegin(getSphereCols)
+        btVector3 center = MFUtil::mafiaVec3ToBullet(col.mPosition.x,col.mPosition.y,col.mPosition.z);
+        float radius = col.mRadius;
+
+        newBody.mRigidBody.mShape = std::make_shared<btSphereShape>(radius);
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->translate(center);
+    loopEnd
 
     return result;
 }
