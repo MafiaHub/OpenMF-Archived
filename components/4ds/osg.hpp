@@ -255,6 +255,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard;
         billboard->addDrawable(geom);
         billboard->setAxis(billboardAxis);
+        billboard->setNodeMask(MFRender::MASK_GAME);
         return billboard;
     }
 
