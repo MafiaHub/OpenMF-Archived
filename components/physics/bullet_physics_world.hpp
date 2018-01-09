@@ -19,6 +19,7 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
+    virtual MFGame::SpatialEntity *pointCollision(double x, double y, double z) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
     std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
@@ -57,13 +58,18 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mBroadphaseInterface;
 }
 
+MFGame::SpatialEntity *BulletPhysicsWorld::pointCollision(double x, double y, double z)
+{
+    return 0;
+}
+
 void BulletPhysicsWorld::frame(double dt)
 {
     mWorld->stepSimulation(dt, 1);
 
     size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
 
-    for (size_t i = 0; i < numManifolds; i++)
+    for (size_t i = 0; i < numManifolds; ++i)
     {
         btPersistentManifold *c = mWorld->getDispatcher()->getManifoldByIndexInternal(i);
         btCollisionObject const *a = c->getBody0();
@@ -101,6 +107,12 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     {
         mTreeKlzBodies = treeKlzLoader.load(fileTreeKlz);
         fileTreeKlz.close();
+
+        for (int i = 0; i < mTreeKlzBodies.size(); ++i)
+        {
+            mTreeKlzBodies[i].mRigidBody.mBody->setActivationState(0);
+            mWorld->addRigidBody(mTreeKlzBodies[i].mRigidBody.mBody.get()); 
+        }
     }
     else
     {
