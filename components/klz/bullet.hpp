@@ -25,6 +25,8 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
     klz.load(srcFile);
     auto colsAABB = klz.getAABBCols();
 
+    std::vector<std::string> linkStrings = klz.getLinkStrings();
+ 
     for (int i = 0; i < colsAABB.size(); ++i)
     {
         btVector3 p1 = MFUtil::mafiaVec3ToBullet(colsAABB[i].mMin.x,colsAABB[i].mMin.y,colsAABB[i].mMin.z);
@@ -39,6 +41,7 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
 
+        newBody.mName = linkStrings[colsAABB[i].mLink];
         result.push_back(newBody);
     } 
 

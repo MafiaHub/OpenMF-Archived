@@ -62,6 +62,7 @@ void BulletPhysicsWorld::frame(double dt)
     mWorld->stepSimulation(dt, 1);
 
     size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
+
     for (size_t i = 0; i < numManifolds; i++)
     {
         btPersistentManifold *c = mWorld->getDispatcher()->getManifoldByIndexInternal(i);

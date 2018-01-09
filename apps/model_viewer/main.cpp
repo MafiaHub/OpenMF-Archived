@@ -148,7 +148,7 @@ int main(int argc, char** argv)
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
         physicsWorld.loadMission(inputFile);
         auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),&treeKlzBodies);
+        MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
