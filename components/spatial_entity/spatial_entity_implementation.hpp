@@ -87,6 +87,9 @@ void SpatialEntityImplementation::ready()
 
     MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_STR);
     mReady = true;
+
+    /* TODO: set user pointer of the bullet rigid body to this SpatialEntity so that we
+       have a backward association */
 }
 
 void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
@@ -126,6 +129,8 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
     if (shapeNode)
     {
+        shapeNode->setName("collision: " + getName());
+
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);
 
