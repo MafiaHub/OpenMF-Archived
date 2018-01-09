@@ -164,13 +164,11 @@ OSGRenderer::OSGRenderer(): MFRenderer()
                 
     mFileSystem = MFFile::FileSystem::getInstance();
 
-mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
-
     mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-mViewer->addEventHandler(new PickHandler);
+    mViewer->addEventHandler(new PickHandler);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
@@ -256,14 +254,14 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
         file4DS.close();
     }
     else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+        MFLogger::ConsoleLogger::warn("Could not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
     bool lightsAreSet = false;
 
@@ -272,7 +270,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
         else
         {
             mRootNode->addChild(n);
@@ -292,7 +290,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
