@@ -274,7 +274,7 @@ std::vector<std::string> DataFormatTreeKLZ::getLinkStrings()
     for (int i = 0; i < (int) mLinkTables.size(); ++i)
     {
         char buffer[255];
-        std::memcpy(buffer,mLinkTables[i].mName,255);
+        std::memcpy(buffer,mLinkTables[i].mName, mLinkTables[i].mNameLength);
         buffer[mLinkTables[i].mNameLength] = 0;
         result.push_back(buffer);
     }
