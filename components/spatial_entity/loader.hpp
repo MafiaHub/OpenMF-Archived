@@ -64,6 +64,7 @@ public:
                     if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
                     {
                         newEntity.setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
+                        mTreeKlzBodies->erase(mTreeKlzBodies->begin() + i);
                         break;    // TODO: can a node has multiple collisions/the other way around?
                     }
                 }
@@ -89,6 +90,19 @@ SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplemen
     SpatialEntityLoaderImplementation::SpatialEntityList result;
     CreateEntitiesFromSceneVisitor v(&treeKlzBodies);
     sceneRoot->accept(v);
+
+    result = v.mEntities;
+
+    // process the unmatched rigid bodies:
+
+    for (int i = 0; i < (int) treeKlzBodies.size(); ++i)
+    {
+        MFGame::SpatialEntityImplementation newEntity;
+        newEntity.setName(treeKlzBodies[i].mName);
+        newEntity.setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
+        newEntity.ready();
+        result.push_back(newEntity);
+    }
 
     // TODO: make entities for remaining collisions for which graphical node hasn't been found
 

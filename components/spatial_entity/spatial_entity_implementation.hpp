@@ -57,14 +57,12 @@ void SpatialEntityImplementation::ready()
     {
         mOSGInitialTransform = mOSGNode->getMatrix();
 
-    //    if (!mBulletBody)
+        if (!mBulletBody)
         {
             osg::Vec3d pos = mOSGInitialTransform.getTrans();
             mPosition.x = pos.x();
             mPosition.y = pos.y();
             mPosition.z = pos.z();
-
-std::cout << "o: " << mPosition.str() << std::endl;
         }
     }
 
@@ -76,10 +74,8 @@ std::cout << "o: " << mPosition.str() << std::endl;
         mPosition.x = pos.x();
         mPosition.y = pos.y();
         mPosition.z = pos.z();
-
-std::cout << "b: " << mPosition.str() << std::endl;
     }
-std::cout << "------------" << std::endl;
+
     MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_STR);
     mReady = true;
 }
