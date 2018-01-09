@@ -25,16 +25,17 @@ public:
     /* FIXME: SpatialEntityList should be a list of SpatialEntity, but can't because
        it's abstract => find a way to do this */
 
-    SpatialEntityList loadFromScene(osg::Group *sceneRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies);
+    SpatialEntityList loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies);
     // void loadModel();
 };
 
 class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor
 {
 public:
-    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies): osg::NodeVisitor()
+    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, osg::Group *sceneRoot): osg::NodeVisitor()
     {
         mTreeKlzBodies = treeKlzBodies;
+        mOSGRoot = sceneRoot;
     }
 
     virtual void apply(osg::Node &n) override
@@ -54,6 +55,7 @@ public:
             {
                 MFGame::SpatialEntityImplementation newEntity;
                 newEntity.setName(n.getName());
+                newEntity.setOSGRootNode(mOSGRoot);
 
                 newEntity.setOSGNode(&n);
 
@@ -83,13 +85,14 @@ public:
 
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
+    osg::Group *mOSGRoot;
 };
 
-SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplementation::loadFromScene(osg::Group *sceneRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies)
+SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplementation::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies)
 {
     SpatialEntityLoaderImplementation::SpatialEntityList result;
-    CreateEntitiesFromSceneVisitor v(&treeKlzBodies);
-    sceneRoot->accept(v);
+    CreateEntitiesFromSceneVisitor v(&treeKlzBodies,osgRoot);
+    osgRoot->accept(v);
 
     result = v.mEntities;
 
@@ -99,6 +102,7 @@ SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplemen
     {
         MFGame::SpatialEntityImplementation newEntity;
         newEntity.setName(treeKlzBodies[i].mName);
+        newEntity.setOSGRootNode(osgRoot);
         newEntity.setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
         newEntity.ready();
         result.push_back(newEntity);

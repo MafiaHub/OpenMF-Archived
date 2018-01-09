@@ -35,6 +35,20 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world)
+{
+    std::string result = "collision: ";
+
+    double cam[6];
+    renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+
+    MFGame::SpatialEntity *entity = world->pointCollision(cam[0],cam[1],cam[2]);
+
+    result += entity ? entity->toString() : "none";
+
+    return result;
+}
+
 void parseCameraString(std::string str, double params[6])
 {
     char *token;
@@ -63,6 +77,7 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
+        ("C,collision-info","Write camera collisions in console.")
         ("v,verbosity","Print verbose output.")
         ("e,export","Export scene to file and exit.",cxxopts::value<std::string>())
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
@@ -71,12 +86,14 @@ int main(int argc, char** argv)
         ("no-4ds","Do not load scene.4ds for the mission.")
         ("no-physics", "Do not simulate physics.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
-        ("no-cachebin","Do not load cache.bin for the mission.");
+        ("no-cachebin","Do not load cache.bin for the mission.")
+        ("m,mask","Set rendering mask.",cxxopts::value<unsigned int>());
 
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
     bool cameraInfo = arguments.count("c") > 0;
+    bool collisionInfo = arguments.count("C") > 0;
     bool cameraPlace = arguments.count("p") > 0;
     bool model = arguments.count("4") > 0;
     std::string exportFileName;
@@ -154,6 +171,11 @@ int main(int argc, char** argv)
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
 
+    if (arguments.count("m") > 0)
+    {
+        renderer.setRenderMask(arguments["m"].as<unsigned int>());
+    }
+
     if (cameraPlace)
     {
         double cam[6];
@@ -172,13 +194,19 @@ int main(int argc, char** argv)
     {
         while (!renderer.done())    // main loop
         {
-            if (cameraInfo)
+            if (cameraInfo || collisionInfo)
             {
                 if (infoCounter <= 0)
                 {
-                    std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+                    if (cameraInfo)
+                        std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+
+                    if (collisionInfo)
+                        std::cout << getCollisionString(&renderer,&physicsWorld) << std::endl;
+
                     infoCounter = 30;
                 }
+
                 infoCounter--;
             }
 

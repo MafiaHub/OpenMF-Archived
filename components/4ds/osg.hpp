@@ -13,6 +13,7 @@
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_masks.hpp>
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
@@ -178,7 +179,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
                 MFFormat::BMPInfo bmp;
 
                 std::ifstream bmpFile;
-                bmpFile.open(fileLocation);
+                bmpFile.open(fileLocation, std::ios::binary);
                 bmp.load(bmpFile);
                 bmpFile.close();
 
@@ -254,11 +255,13 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard;
         billboard->addDrawable(geom);
         billboard->setAxis(billboardAxis);
+        billboard->setNodeMask(MFRender::MASK_GAME);
         return billboard;
     }
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(geom.get());
+    geode->setNodeMask(MFRender::MASK_GAME);
     return geode;
 }
 
