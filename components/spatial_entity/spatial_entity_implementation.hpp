@@ -94,14 +94,9 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     if (!mBulletBody)
         return;
 
-    osg::Group *parentTo = mOSGNode;
-
-    if (!parentTo)
-        parentTo = mOSGRoot;
-
-    if (!parentTo)
+    if (!mOSGRoot)
     {
-        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no parent.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no access to scene root.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
         return;
     }
 
@@ -113,7 +108,13 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     {
         case BroadphaseNativeTypes::BOX_SHAPE_PROXYTYPE:
         {
-            osg::ref_ptr<osg::Shape> shape = new osg::Box(osg::Vec3f(0,0,0),1);
+            btVector3 boxExtents = static_cast<btBoxShape *>(mBulletBody->getCollisionShape())->getHalfExtentsWithoutMargin();
+
+            osg::ref_ptr<osg::Shape> shape = new osg::Box(osg::Vec3f(0,0,0),
+                2 * std::abs(boxExtents.x()),
+                2 * std::abs(boxExtents.y()),
+                2 * std::abs(boxExtents.z()));
+
             shapeNode = new osg::ShapeDrawable(shape.get());
             break;
         }
@@ -130,7 +131,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         mOSGPgysicsDebugNode->setMatrix(osg::Matrixd::translate(osg::Vec3f(mPosition.x,mPosition.y,mPosition.z)));
 
-        parentTo->addChild(mOSGPgysicsDebugNode);
+        mOSGRoot->addChild(mOSGPgysicsDebugNode);
     }
 }
 
