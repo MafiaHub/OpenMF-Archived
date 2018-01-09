@@ -7,6 +7,9 @@
 #include <spatial_entity/spatial_entity_implementation.hpp>
 #include <osg/Node>
 #include <bullet_utils.hpp>
+#include <loggers/console.hpp>
+
+#define SPATIAL_ENTITY_LOADER_MODULE_STR "spatial entity loader"
 
 namespace MFFormat
 {
@@ -43,25 +46,27 @@ public:
             if (descriptions.size() > 0 && descriptions[0].compare("4ds mesh") == 0)
             {
                 MFGame::SpatialEntityImplementation newEntity;
-
                 newEntity.setName(n.getName());
-std::cout << n.getName() << std::endl;
+
+                newEntity.setOSGNode(&n);
+
+                // find the corresponding collision:
+               
+                for (int i = 0; i < mTreeKlzBodies->size(); ++i)    // FIXME: ugly and slow?
+                { 
+                    if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
+                    {
+                        MFLogger::ConsoleLogger::info("Pairing OSG node to Bullet body: " + newEntity.getName() + ".",SPATIAL_ENTITY_LOADER_MODULE_STR);
+                        newEntity.setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
+                        break;    // TODO: can a node has multiple collisions/the other way around?
+                    }
+                }
+
                 mEntities.push_back(newEntity);
             }
         }
 
-        // find the corresponding collision:
-
-        if (mEntities.size() > 0)
-            for (int i = 0; i < mTreeKlzBodies->size(); ++i)    // FIXME: ugly and slow?
-            {
-
-    if ( (*mTreeKlzBodies)[i].mName.compare(mEntities.back().getName()) == 0)
-        std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsasas" << std::endl;
-
-            }
-
-        if (n.asGroup())         // FIXME: why does traverse() not work?
+        if (n.asGroup())          // FIXME: why does traverse() not work?
             for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
                 n.asGroup()->getChild(i)->accept(*this);
     }
@@ -77,6 +82,8 @@ SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplemen
     SpatialEntityLoaderImplementation::SpatialEntityList result;
     CreateEntitiesFromSceneVisitor v(&treeKlzBodies);
     sceneRoot->accept(v);
+
+    // TODO: make entities for remaining collisions for which graphical node hasn't been found
 
     return result;
 }
