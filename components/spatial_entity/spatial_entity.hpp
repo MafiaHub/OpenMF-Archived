@@ -6,11 +6,16 @@
 namespace MFGame
 {
 
-typedef struct
+typedef struct Vec3s
 {
     float x;
     float y;
     float z;
+ 
+    struct Vec3s operator+(struct Vec3s v) { struct Vec3s r; r.x = x + v.x; r.y = y + v.y; r.z = z + v.z; return r; };
+    struct Vec3s operator-(struct Vec3s v) { struct Vec3s r; r.x = x - v.x; r.y = y - v.y; r.z = z - v.z; return r; };
+    struct Vec3s operator*(float v) { struct Vec3s r; r.x = x * v, r.y = y * v; r.z = z * v; return r; };
+    std::string str() { return "[" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + "]"; };
 } Vec3;
 
 typedef struct
@@ -28,7 +33,17 @@ typedef struct
 class SpatialEntity
 {
 public:
+    SpatialEntity();
+
     virtual void update(double dt)=0;
+
+    /**
+      Initialises the entity with currently set data (OSG node, Bullet body, ...) so that it
+      is ready to work.
+    */
+    virtual void ready()=0;
+   
+    virtual std::string toString()      { return "";            };
  
     Vec3 getPosition()                  { return mPosition;     };
     void setPosition(Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
@@ -36,6 +51,7 @@ public:
     void setRotation(Quat rotation)     { mRotation = rotation; };
     void setName(std::string name)      { mName = name;         };  
     std::string getName()               { return mName;         };
+    bool isRead()                       { return mReady;        };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
@@ -52,7 +68,13 @@ protected:
     Vec3 mScale;
     Quat mRotation;
     std::string mName;
+    bool mReady;
 };
+
+SpatialEntity::SpatialEntity()
+{
+    mReady = true;
+}
 
 };
 #endif

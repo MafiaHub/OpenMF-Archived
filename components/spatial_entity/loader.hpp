@@ -56,12 +56,12 @@ public:
                 { 
                     if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
                     {
-                        MFLogger::ConsoleLogger::info("Pairing OSG node to Bullet body: " + newEntity.getName() + ".",SPATIAL_ENTITY_LOADER_MODULE_STR);
                         newEntity.setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
                         break;    // TODO: can a node has multiple collisions/the other way around?
                     }
                 }
-
+ 
+                newEntity.ready();
                 mEntities.push_back(newEntity);
             }
         }
