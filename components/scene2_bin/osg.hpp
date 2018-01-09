@@ -204,10 +204,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                             objectNode = loader4DS.load(f,object.mModelName);   
                             storeToCache(object.mModelName,objectNode);
                             f.close();
+                            objectNode->setName(object.mModelName);
                         }
                     }
-
-                    objectNode->setName(object.mModelName);
 
                     break;
                 }
