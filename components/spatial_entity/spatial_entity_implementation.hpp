@@ -3,6 +3,7 @@
 
 #include <spatial_entity/spatial_entity.hpp>
 #include <osg/Node>
+#include <osg/PolygonMode>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <osg_masks.hpp>
 
@@ -132,6 +133,21 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     {
         shapeNode->setName("collision: " + getName());
         shapeNode->setNodeMask(MFRender::MASK_DEBUG);
+
+        // FIXME: mate the StateSet static and shared
+        osg::ref_ptr<osg::Material> mat = new osg::Material();
+        osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
+        osg::Vec4f debugColor = osg::Vec4f(0,1,0,1);
+
+        mat->setAmbient(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setSpecular(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setEmission(osg::Material::FRONT_AND_BACK,debugColor);
+
+        shapeNode->getOrCreateStateSet()->setAttributeAndModes(mat);
+        shapeNode->getOrCreateStateSet()->setMode(osg::StateAttribute::FOG,osg::StateAttribute::OFF);   // FIXME: why no effect?
+        shapeNode->getOrCreateStateSet()->setAttributeAndModes(mode);
+
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);
         mOSGPgysicsDebugNode->setMatrix(osg::Matrixd::translate(osg::Vec3f(mPosition.x,mPosition.y,mPosition.z)));
