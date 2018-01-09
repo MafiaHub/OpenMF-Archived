@@ -124,6 +124,15 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
             break;
         }
 
+        case BroadphaseNativeTypes::SPHERE_SHAPE_PROXYTYPE:
+        {
+            osg::ref_ptr<osg::Shape> shape = new osg::Sphere(osg::Vec3f(0,0,0),
+                static_cast<btSphereShape *>(mBulletBody->getCollisionShape())->getRadius());
+
+            shapeNode = new osg::ShapeDrawable(shape.get());
+            break;
+        }
+
         default:
             MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_STR);
             break;
