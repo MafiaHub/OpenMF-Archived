@@ -9,7 +9,7 @@ namespace MFUtil
 
 inline btVector3 mafiaVec3ToBullet(double x, double y, double z)
 {
-    return btVector3(x,y,z);   //TODO: make the actual transform
+    return btVector3(x,z,y); 
 }
 
 /**

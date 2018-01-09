@@ -11,7 +11,9 @@ typedef struct Vec3s
     float x;
     float y;
     float z;
- 
+
+    Vec3s(): x(0), y(0), z(0) {};
+    Vec3s(float initX, float initY, float initZ): x(initX), y(initY), z(initZ) {};
     struct Vec3s operator+(struct Vec3s v) { struct Vec3s r; r.x = x + v.x; r.y = y + v.y; r.z = z + v.z; return r; };
     struct Vec3s operator-(struct Vec3s v) { struct Vec3s r; r.x = x - v.x; r.y = y - v.y; r.z = z - v.z; return r; };
     struct Vec3s operator*(float v) { struct Vec3s r; r.x = x * v, r.y = y * v; r.z = z * v; return r; };
@@ -73,6 +75,8 @@ protected:
 
 SpatialEntity::SpatialEntity()
 {
+    mPosition = Vec3();
+    mScale = Vec3(1,1,1);
     mReady = true;
 }
 

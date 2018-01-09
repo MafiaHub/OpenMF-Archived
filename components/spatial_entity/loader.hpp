@@ -39,6 +39,13 @@ public:
 
     virtual void apply(osg::Node &n) override
     {
+        if (n.asGroup())          // FIXME: why does traverse() not work?
+            for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+                n.asGroup()->getChild(i)->accept(*this);
+    }
+
+    virtual void apply(osg::MatrixTransform &n) override
+    {
         if (n.getUserDataContainer())
         {
             std::vector<std::string> descriptions = n.getUserDataContainer()->getDescriptions();
