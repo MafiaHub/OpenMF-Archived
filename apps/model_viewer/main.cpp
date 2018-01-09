@@ -3,12 +3,15 @@
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
+#include <physics/bullet_physics_world.hpp>
+#include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
 
 #define DEFAULT_CAMERA_SPEED 7.0
-
 #define VIEWER_MODULE_STR "viewer"
+
+#define UPDATE_TIME 1.0/60.0f
 
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
@@ -66,6 +69,7 @@ int main(int argc, char** argv)
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
         ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
         ("no-4ds","Do not load scene.4ds for the mission.")
+        ("no-physics", "Do not simulate physics.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
         ("no-cachebin","Do not load cache.bin for the mission.");
 
@@ -81,6 +85,7 @@ int main(int argc, char** argv)
         exportFileName = arguments["e"].as<std::string>();
 
     bool load4ds = arguments.count("no-4ds") < 1;
+    bool physicsState = arguments.count("no-physics") < 1;
     bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
     bool loadCacheBin = arguments.count("no-cachebin") < 1;
 
@@ -131,11 +136,20 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
+    MFPhysics::BulletPhysicsWorld physicsWorld;
+    MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
 
     if (model)
+    {
         renderer.loadSingleModel(inputFile);
+    }
     else
+    {
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+        physicsWorld.loadMission(inputFile);
+        auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
+        MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+    }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
@@ -168,7 +182,10 @@ int main(int argc, char** argv)
                 infoCounter--;
             }
 
-            renderer.frame();
+            // TODO use UPDATE_TIME to make fixed-time-delta loop
+
+            physicsWorld.frame(0);
+            renderer.frame(0);
         }
     }
 

@@ -3,6 +3,7 @@
 
 #include <base_parser.hpp>
 #include <utils.hpp>
+#include <cstring>
 
 namespace MFFormat
 {
@@ -148,10 +149,12 @@ public:
     std::vector<OBBCol> getOBBCols()                     { return mOBBCols; }
     std::vector<SphereCol> getSphereCols()               { return mSphereCols; }
     std::vector<Link> getLinks()                         { return mLinkTables; }
+    std::vector<std::string> getLinkStrings();
     Cell *getGridCells()                                 { return mGridCellsMemory; }
     Cell getGridCell(unsigned int x, unsigned int y)     { return mGridCellsMemory[y * mDataHeader.mGridWidth + x]; }
     unsigned int getGridWidth()                          { return mDataHeader.mGridWidth; }
     unsigned int getGridHeight()                         { return mDataHeader.mGridHeight; }
+
 protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;
@@ -262,6 +265,21 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         }
     }
     return true;
+}
+
+std::vector<std::string> DataFormatTreeKLZ::getLinkStrings()
+{
+    std::vector<std::string> result;
+
+    for (int i = 0; i < (int) mLinkTables.size(); ++i)
+    {
+        char buffer[255];
+        std::memcpy(buffer,mLinkTables[i].mName,255);
+        buffer[mLinkTables[i].mNameLength] = 0;
+        result.push_back(buffer);
+    }
+
+    return result;
 }
 
 }

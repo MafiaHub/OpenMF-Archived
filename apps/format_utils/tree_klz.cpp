@@ -12,18 +12,10 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
 
     std::cout << "LINKS (" << links.size() << "):" << std::endl;
 
-    std::vector<std::string> linkStrings;
+    std::vector<std::string> linkStrings = klz.getLinkStrings();
 
-    for (int i = 0; i < (int) links.size(); ++i)
-    {
-        char buffer[255];
-        memcpy(buffer,links[i].mName,255);
-        buffer[links[i].mNameLength] = 0;
-
-        linkStrings.push_back(buffer);
-
-        std::cout << "  link " << i << ": " << buffer << std::endl;
-    }
+    for (int i = 0; i < (int) linkStrings.size(); ++i)
+        std::cout << "  link " << i << ": " << linkStrings[i] << std::endl;
 
     std::cout << std::endl;
     std::cout << "GRID (" << klz.getGridWidth() << " x " << klz.getGridHeight() << "):" << std::endl;
