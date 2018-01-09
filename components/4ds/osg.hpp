@@ -179,7 +179,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
                 MFFormat::BMPInfo bmp;
 
                 std::ifstream bmpFile;
-                bmpFile.open(fileLocation);
+                bmpFile.open(fileLocation, std::ios::binary);
                 bmp.load(bmpFile);
                 bmpFile.close();
 
