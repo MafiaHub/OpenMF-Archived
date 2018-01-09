@@ -102,6 +102,7 @@ public:
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
 
+    void setRenderMask(osg::Node::NodeMask mask);
     osg::Group *getRootNode() { return mRootNode.get(); };
 
 protected:
@@ -121,6 +122,11 @@ protected:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 };
+
+void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
+{
+    mViewer->getCamera()->setCullMask(mask);
+}
 
 bool OSGRenderer::exportScene(std::string fileName)
 {
@@ -201,6 +207,7 @@ OSGRenderer::OSGRenderer(): MFRenderer()
         );
 
     mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
+    setRenderMask(MASK_GAME);
 }
 
 void OSGRenderer::setFreeCameraSpeed(double newSpeed)

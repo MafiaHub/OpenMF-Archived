@@ -71,7 +71,8 @@ int main(int argc, char** argv)
         ("no-4ds","Do not load scene.4ds for the mission.")
         ("no-physics", "Do not simulate physics.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
-        ("no-cachebin","Do not load cache.bin for the mission.");
+        ("no-cachebin","Do not load cache.bin for the mission.")
+        ("m,mask","Set rendering mask.",cxxopts::value<unsigned int>());
 
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
@@ -153,6 +154,11 @@ int main(int argc, char** argv)
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
+
+    if (arguments.count("m") > 0)
+    {
+        renderer.setRenderMask(arguments["m"].as<unsigned int>());
+    }
 
     if (cameraPlace)
     {

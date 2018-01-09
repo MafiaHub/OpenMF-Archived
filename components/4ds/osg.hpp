@@ -13,6 +13,7 @@
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_masks.hpp>
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
@@ -259,6 +260,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(geom.get());
+    geode->setNodeMask(MFRender::MASK_GAME);
     return geode;
 }
 

@@ -4,6 +4,7 @@
 #include <spatial_entity/spatial_entity.hpp>
 #include <osg/Node>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <osg_masks.hpp>
 
 #define SPATIAL_ENTITY_IMPLEMENTATION_STR "spatial entity"
 
@@ -130,12 +131,10 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     if (shapeNode)
     {
         shapeNode->setName("collision: " + getName());
-
+        shapeNode->setNodeMask(MFRender::MASK_DEBUG);
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);
-
         mOSGPgysicsDebugNode->setMatrix(osg::Matrixd::translate(osg::Vec3f(mPosition.x,mPosition.y,mPosition.z)));
-
         mOSGRoot->addChild(mOSGPgysicsDebugNode);
     }
 }
