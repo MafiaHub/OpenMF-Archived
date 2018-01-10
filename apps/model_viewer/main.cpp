@@ -35,7 +35,7 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
-std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList *entityList)
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoader::SpatialEntityList *entityList)
 {
     std::string result = "collision: ";
 
@@ -51,12 +51,12 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
         for (int i = 0; i < entityList->size(); ++i)
             if ((*entityList)[i].getID() == entityID)
             {
-                result = (*entityList)[i].toString();
+                result += (*entityList)[i].toString();
                 break;
             }
     }
     else
-        result = "none";
+        result += "none";
 
     return result;
 }
@@ -166,8 +166,8 @@ int main(int argc, char** argv)
 
     MFRender::OSGRenderer renderer;
     MFPhysics::BulletPhysicsWorld physicsWorld;
-    MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
-    MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities;
+    MFFormat::SpatialEntityLoader spatialEntityLoader;
+    MFFormat::SpatialEntityLoader::SpatialEntityList entities;
 
     if (model)
     {
