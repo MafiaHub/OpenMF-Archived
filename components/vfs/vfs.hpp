@@ -18,6 +18,7 @@
 #endif
 
 #define VFS_MODULE_STR "VFS"
+#define MAFIA_INSTALL_DIR "MAFIA_INSTALL_DIR"
 
 namespace MFFile
 {
@@ -62,6 +63,10 @@ FileSystem::FileSystem()
 {
     mSearchPaths.push_back("resources");
     mSearchPaths.push_back("mafia");
+    
+    char const *envMafiaDir = getenv(MAFIA_INSTALL_DIR); // TODO: Use Config for this.
+    if (envMafiaDir)
+        mSearchPaths.push_back(envMafiaDir);
 
 #if defined(OMF_SYSTEM_LINUX)
     struct passwd *pw = getpwuid(getuid());

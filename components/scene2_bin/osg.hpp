@@ -3,6 +3,7 @@
 
 #include <osg/Node>
 #include <osg/Geometry>
+#include <osg_masks.hpp>
 #include <osg/MatrixTransform>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>
@@ -148,7 +149,11 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
                         new osg::Sphere(osg::Vec3f(0,0,0),0.1));
                     #else
+                        // TODO: add a debug geometry for light, with MASK_DEBUG mask
+
                         osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
+
+                        lightNode->setNodeMask(MFRender::MASK_GAME);
 
                         MFFormat::DataFormat::Vec3 c = object.mLightColour;
                         osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
@@ -204,10 +209,9 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                             objectNode = loader4DS.load(f,object.mModelName);   
                             storeToCache(object.mModelName,objectNode);
                             f.close();
+                            objectNode->setName(object.mModelName);
                         }
                     }
-
-                    objectNode->setName(object.mModelName);
 
                     break;
                 }

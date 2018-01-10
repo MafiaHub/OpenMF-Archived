@@ -17,6 +17,7 @@
 #include <osgUtil/Optimizer>
 #include <osg/Fog>
 #include <osgUtil/PrintVisitor>
+#include <vfs/vfs.hpp>
 
 #define OSGRENDERER_MODULE_STR "renderer"
 
@@ -52,7 +53,6 @@ public:
             new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
 
         MFUtil::RobustIntersectionVisitor iv(intersector.get());
-
         viewer->getCamera()->accept(iv);
 
         if (intersector->containsIntersections())
@@ -84,8 +84,8 @@ public:
 
 protected:
     osg::ref_ptr<osg::Material> mHighlightMaterial;
-    osg::Material *mMaterialBackup;
-    osg::Drawable *mSelected;
+    osg::ref_ptr<osg::Material> mMaterialBackup;
+    osg::ref_ptr<osg::Drawable> mSelected;
 };
 
 class OSGRenderer: public MFRenderer
@@ -94,12 +94,15 @@ public:
     OSGRenderer();
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
     virtual bool loadSingleModel(std::string model) override;
-    virtual void frame() override;
+    virtual void frame(double dt) override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
     virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
+
+    void setRenderMask(osg::Node::NodeMask mask);
+    osg::Group *getRootNode() { return mRootNode.get(); };
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
@@ -118,6 +121,11 @@ protected:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 };
+
+void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
+{
+    mViewer->getCamera()->setCullMask(mask);
+}
 
 bool OSGRenderer::exportScene(std::string fileName)
 {
@@ -161,13 +169,11 @@ OSGRenderer::OSGRenderer(): MFRenderer()
                 
     mFileSystem = MFFile::FileSystem::getInstance();
 
-mFileSystem->addPath("../mafia/");    // drummy: I need this here, remove later
-
     mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-mViewer->addEventHandler(new PickHandler);
+    mViewer->addEventHandler(new PickHandler);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
@@ -200,6 +206,7 @@ mViewer->addEventHandler(new PickHandler);
         );
 
     mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
+    setRenderMask(MASK_GAME);
 }
 
 void OSGRenderer::setFreeCameraSpeed(double newSpeed)
@@ -253,14 +260,14 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
         file4DS.close();
     }
     else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+        MFLogger::ConsoleLogger::warn("Could not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
     bool lightsAreSet = false;
 
@@ -269,7 +276,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
         else
         {
             mRootNode->addChild(n);
@@ -289,7 +296,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::ConsoleLogger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
@@ -371,7 +378,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame()
+void OSGRenderer::frame(double dt)
 {
     if (mViewer->done() || mDone)
     {

@@ -3,12 +3,15 @@
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
+#include <physics/bullet_physics_world.hpp>
+#include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
 
 #define DEFAULT_CAMERA_SPEED 7.0
-
 #define VIEWER_MODULE_STR "viewer"
+
+#define UPDATE_TIME 1.0/60.0f
 
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
@@ -30,6 +33,32 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     }
 
     return camStr;
+}
+
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoader::SpatialEntityList *entityList)
+{
+    std::string result = "collision: ";
+
+    double cam[6];
+    renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+
+    int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
+
+    if (entityID >= 0)
+    {
+        // FIXME: this is slow, entity manager is needed to quickly find an entity by ID
+
+        for (int i = 0; i < entityList->size(); ++i)
+            if ((*entityList)[i].getID() == entityID)
+            {
+                result += (*entityList)[i].toString();
+                break;
+            }
+    }
+    else
+        result += "none";
+
+    return result;
 }
 
 void parseCameraString(std::string str, double params[6])
@@ -60,19 +89,23 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
+        ("C,collision-info","Write camera collisions in console.")
         ("v,verbosity","Print verbose output.")
         ("e,export","Export scene to file and exit.",cxxopts::value<std::string>())
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
         ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
         ("no-4ds","Do not load scene.4ds for the mission.")
+        ("no-physics", "Do not simulate physics.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
-        ("no-cachebin","Do not load cache.bin for the mission.");
+        ("no-cachebin","Do not load cache.bin for the mission.")
+        ("m,mask","Set rendering mask.",cxxopts::value<unsigned int>());
 
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
     bool cameraInfo = arguments.count("c") > 0;
+    bool collisionInfo = arguments.count("C") > 0;
     bool cameraPlace = arguments.count("p") > 0;
     bool model = arguments.count("4") > 0;
     std::string exportFileName;
@@ -81,6 +114,7 @@ int main(int argc, char** argv)
         exportFileName = arguments["e"].as<std::string>();
 
     bool load4ds = arguments.count("no-4ds") < 1;
+    bool physicsState = arguments.count("no-physics") < 1;
     bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
     bool loadCacheBin = arguments.count("no-cachebin") < 1;
 
@@ -131,14 +165,29 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
+    MFPhysics::BulletPhysicsWorld physicsWorld;
+    MFFormat::SpatialEntityLoader spatialEntityLoader;
+    MFFormat::SpatialEntityLoader::SpatialEntityList entities;
 
     if (model)
+    {
         renderer.loadSingleModel(inputFile);
+    }
     else
+    {
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+        physicsWorld.loadMission(inputFile);
+        auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
+        entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+    }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
     renderer.setFreeCameraSpeed(cameraSpeed);
+
+    if (arguments.count("m") > 0)
+    {
+        renderer.setRenderMask(arguments["m"].as<unsigned int>());
+    }
 
     if (cameraPlace)
     {
@@ -158,17 +207,26 @@ int main(int argc, char** argv)
     {
         while (!renderer.done())    // main loop
         {
-            if (cameraInfo)
+            if (cameraInfo || collisionInfo)
             {
                 if (infoCounter <= 0)
                 {
-                    std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+                    if (cameraInfo)
+                        std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+
+                    if (collisionInfo)
+                        std::cout << getCollisionString(&renderer,&physicsWorld,&entities) << std::endl;
+
                     infoCounter = 30;
                 }
+
                 infoCounter--;
             }
 
-            renderer.frame();
+            // TODO use UPDATE_TIME to make fixed-time-delta loop
+
+            physicsWorld.frame(0);
+            renderer.frame(0);
         }
     }
 

@@ -13,7 +13,7 @@ public:
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true)=0;
     virtual bool loadSingleModel(std::string model)=0;
 
-    virtual void frame()=0;
+    virtual void frame(double dt)=0;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)=0;
 
     virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)=0;

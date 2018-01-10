@@ -13,6 +13,7 @@
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
+#include <osg_masks.hpp>
 #include <osg_utils.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
@@ -178,7 +179,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
                 MFFormat::BMPInfo bmp;
 
                 std::ifstream bmpFile;
-                bmpFile.open(fileLocation);
+                bmpFile.open(fileLocation, std::ios::binary);
                 bmp.load(bmpFile);
                 bmpFile.close();
 
@@ -254,11 +255,13 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard;
         billboard->addDrawable(geom);
         billboard->setAxis(billboardAxis);
+        billboard->setNodeMask(MFRender::MASK_GAME);
         return billboard;
     }
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(geom.get());
+    geode->setNodeMask(MFRender::MASK_GAME);
     return geode;
 }
 
@@ -435,7 +438,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
 
     mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(emi.x,emi.y,emi.z,1.0));
 
-    if (material->mTransparency < 1)
+    if (material->mTransparency < 1.0 && !alphaMap)
     {
         isTransparent = true;
         osg::Vec4f d = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
@@ -599,7 +602,10 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         {
             osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
             std::string meshName = MFUtil::charArrayToStr(model->mMeshes[i].mMeshName,model->mMeshes[i].mMeshNameLength);
-            transform->setName(meshName + " transf");
+            transform->setName(meshName);  // don't mess with this name, it's needed to link with collisions etc.
+
+            transform->getOrCreateUserDataContainer()->addDescription("4ds mesh");    // mark the node as a 4DS mesh
+
             osg::Matrixd mat;
 
             MFFormat::DataFormat4DS::Vec3 p, s;
