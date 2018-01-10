@@ -106,25 +106,6 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
 void BulletPhysicsWorld::frame(double dt)
 {
     mWorld->stepSimulation(dt, 1);
-
-    size_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
-
-    for (size_t i = 0; i < numManifolds; ++i)
-    {
-        btPersistentManifold *c = mWorld->getDispatcher()->getManifoldByIndexInternal(i);
-        btCollisionObject const *a = c->getBody0();
-        btCollisionObject const *b = c->getBody1();
-
-        size_t co = c->getNumContacts();
-        for (size_t j = 0; j < co; j++)
-        {
-            btManifoldPoint &pt = c->getContactPoint(j);
-            if (pt.getDistance() < 0.0f)
-            {
-                    // TODO collision has happened, do something smart.
-            }
-        }
-    }
 }
 
 std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
