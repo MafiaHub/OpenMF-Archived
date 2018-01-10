@@ -103,6 +103,25 @@ public:
             
             return sstream.str();
         }
+
+        Vec3 getTranslation()
+        {
+            Vec3 result;
+            result.x = d0;
+            result.y = d1;
+            result.z = d2;
+            return result;
+        }
+
+        Vec3 getScale()
+        {
+            Vec3 result;
+            result.x = sqrt(a0 * a0 + a1 * a1 + a2 * a2);
+            result.y = sqrt(b0 * b0 + b1 * b1 + b2 * b2);
+            result.z = sqrt(c0 * c0 + c1 * c1 + c2 * c2);
+            return result;
+        }
+
     } Mat4;
     #pragma pack(pop)
 

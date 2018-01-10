@@ -64,6 +64,26 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
+    loopBegin(getOBBCols)
+        btVector3 p1 = MFUtil::mafiaVec3ToBullet(col.mExtends[0].x,col.mExtends[0].y,col.mExtends[0].z);
+        btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mExtends[1].x,col.mExtends[1].y,col.mExtends[1].z);
+
+        btVector3 center = (p1 + p2) / 2.0f;
+        btVector3 bboxCorner = p2 - center;
+
+        btTransform transform;
+
+        MFFormat::DataFormat::Vec3 trans = col.mTransform.getTranslation();
+        transform.setOrigin(MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
+
+        // note: scale seems to never be used
+
+        newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->setWorldTransform(transform);
+    loopEnd
+
     return result;
 }
 
