@@ -19,10 +19,35 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-    virtual MFGame::SpatialEntity *pointCollision(double x, double y, double z) override;
+    virtual int pointCollision(double x, double y, double z) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
     std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
+
+    class ContactSensorCallback : public btCollisionWorld::ContactResultCallback
+    {
+    public:
+        ContactSensorCallback(btRigidBody *body): btCollisionWorld::ContactResultCallback()
+        {
+            mBody = body;
+            mResult = 0;
+        }
+
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+            const btCollisionObjectWrapper* colObj0,int partId0,int index0,
+            const btCollisionObjectWrapper* colObj1,int partId1,int index1) override
+        {
+            const btCollisionObjectWrapper *colObj = colObj0->getCollisionObject() == mBody ? colObj1 : colObj0;
+            mResult = colObj->getCollisionObject();
+
+            return 0;
+        }
+
+        const btCollisionObject *mResult;
+
+    protected:
+        btRigidBody *mBody;
+    };
 
 protected:
     btDiscreteDynamicsWorld             *mWorld;
@@ -58,9 +83,24 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mBroadphaseInterface;
 }
 
-MFGame::SpatialEntity *BulletPhysicsWorld::pointCollision(double x, double y, double z)
+int BulletPhysicsWorld::pointCollision(double x, double y, double z)
 {
-    return 0;
+    btCollisionShape* sphere = new btSphereShape(0.01);  // can't make a point, so make a small sphere
+    btRigidBody::btRigidBodyConstructionInfo ci(0,0,sphere,btVector3(0,0,0));
+    btRigidBody* pointRigidBody = new btRigidBody(ci);
+    pointRigidBody->translate(btVector3(x,y,z));
+
+    ContactSensorCallback cb(pointRigidBody);
+
+    mWorld->contactTest(pointRigidBody,cb);
+
+    delete pointRigidBody;
+    delete sphere;
+
+    if (cb.mResult)
+        return cb.mResult->getUserIndex();
+
+    return -1;
 }
 
 void BulletPhysicsWorld::frame(double dt)

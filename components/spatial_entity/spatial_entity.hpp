@@ -25,6 +25,7 @@ typedef struct
     float x;
     float y;
     float z;
+    float w;
 } Quat;
 
 /**
@@ -54,6 +55,7 @@ public:
     void setName(std::string name)      { mName = name;         };  
     std::string getName()               { return mName;         };
     bool isRead()                       { return mReady;        };
+    int getID()                         { return mID;           };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
@@ -65,16 +67,23 @@ public:
     */
 //    void moveBy(Vec3 positionDiff);
 
+    static int sNextID;
+
 protected:
     Vec3 mPosition;      
     Vec3 mScale;
     Quat mRotation;
     std::string mName;
     bool mReady;
+    int mID;
 };
+
+int SpatialEntity::sNextID = 0;
 
 SpatialEntity::SpatialEntity()
 {
+    mID = sNextID;
+    sNextID++;
     mPosition = Vec3();
     mScale = Vec3(1,1,1);
     mReady = true;
