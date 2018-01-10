@@ -142,7 +142,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         shapeNode->setName("collision: " + getName());
         shapeNode->setNodeMask(MFRender::MASK_DEBUG);
 
-        // FIXME: mate the StateSet static and shared
+        // FIXME: make the StateSet static and shared
         osg::ref_ptr<osg::Material> mat = new osg::Material();
         osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
         osg::Vec4f debugColor = osg::Vec4f(0,1,0,1);
@@ -158,7 +158,18 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);
-        mOSGPgysicsDebugNode->setMatrix(osg::Matrixd::translate(osg::Vec3f(mPosition.x,mPosition.y,mPosition.z)));
+
+        btTransform transform = mBulletBody->getWorldTransform();
+        btVector3 position = transform.getOrigin();
+        btQuaternion rotation = transform.getRotation();
+
+        osg::Matrixd transformMat;
+        
+        transformMat.makeTranslate(osg::Vec3f(position.x(),position.y(),position.z()));
+        transformMat.preMult(osg::Matrixd::rotate(osg::Quat(rotation.x(),rotation.y(),rotation.z(),rotation.w())));
+
+        mOSGPgysicsDebugNode->setMatrix(transformMat);
+
         mOSGRoot->addChild(mOSGPgysicsDebugNode);
     }
 }

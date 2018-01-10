@@ -71,10 +71,20 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         btVector3 center = (p1 + p2) / 2.0f;
         btVector3 bboxCorner = p2 - center;
 
-        btTransform transform;
-
         MFFormat::DataFormat::Vec3 trans = col.mTransform.getTranslation();
-        transform.setOrigin(MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
+
+        MFFormat::DataFormat::Mat4 rot = col.mTransform;
+        rot.separateRotation();
+
+        btMatrix3x3 rotMat;
+
+        rotMat.setValue(
+            rot.a0,rot.a1,rot.a2,
+            rot.b0,rot.b1,rot.b2,
+            rot.c0,rot.c1,rot.c2
+        );
+
+        btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
 
         // note: scale seems to never be used
 

@@ -85,12 +85,24 @@ public:
         }
     } Quat;
 
-    typedef struct
+    typedef struct Mat4s
     {
         float a0, a1, a2, a3;
         float b0, b1, b2, b3;
         float c0, c1, c2, c3;
         float d0, d1, d2, d3;
+
+        Mat4s()
+        {
+        }
+
+        Mat4s(const Mat4s &copyFrom)
+        {
+            a0 = copyFrom.a0; a1 = copyFrom.a1; a2 = copyFrom.a2; a3 = copyFrom.a3;
+            b0 = copyFrom.b0; b1 = copyFrom.b1; b2 = copyFrom.b2; b3 = copyFrom.b3;
+            c0 = copyFrom.c0; c1 = copyFrom.c1; c2 = copyFrom.c2; c3 = copyFrom.c3;
+            d0 = copyFrom.d0; d1 = copyFrom.d1; d2 = copyFrom.d2; d3 = copyFrom.d3;
+        }
 
         inline std::string str()
         {
@@ -122,6 +134,41 @@ public:
             return result;
         }
 
+        void separateRotation()
+        {
+            d0 = 0;
+            d1 = 0;
+            d2 = 0;
+
+            Vec3 scale = getScale();
+
+            a0 /= scale.x;
+            a1 /= scale.x;
+            a2 /= scale.x;
+
+            b0 /= scale.y;
+            b1 /= scale.y;
+            b2 /= scale.y;
+
+            c0 /= scale.z;
+            c1 /= scale.z;
+            c2 /= scale.z;
+        }
+
+        Quat getRotation()
+        {
+            Quat result;
+            Mat4s helper(*this);
+
+            helper.separateRotation();
+
+            result.w = sqrt(1 + a0 + b1 + c2) / 2.0;
+            result.x = (c1 - b2) / (4 * result.w);
+            result.y = (a2 - c0) / (4 * result.w);
+            result.z = (b0 - a1) / (4 * result.w);
+
+            return result;
+        }
     } Mat4;
     #pragma pack(pop)
 
