@@ -51,12 +51,12 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
         for (int i = 0; i < entityList->size(); ++i)
             if ((*entityList)[i].getID() == entityID)
             {
-                result = (*entityList)[i].toString();
+                result += (*entityList)[i].toString();
                 break;
             }
     }
     else
-        result = "none";
+        result += "none";
 
     return result;
 }

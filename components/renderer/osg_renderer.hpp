@@ -53,7 +53,6 @@ public:
             new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
 
         MFUtil::RobustIntersectionVisitor iv(intersector.get());
-
         viewer->getCamera()->accept(iv);
 
         if (intersector->containsIntersections())
@@ -85,8 +84,8 @@ public:
 
 protected:
     osg::ref_ptr<osg::Material> mHighlightMaterial;
-    osg::Material *mMaterialBackup;
-    osg::Drawable *mSelected;
+    osg::ref_ptr<osg::Material> mMaterialBackup;
+    osg::ref_ptr<osg::Drawable> mSelected;
 };
 
 class OSGRenderer: public MFRenderer
