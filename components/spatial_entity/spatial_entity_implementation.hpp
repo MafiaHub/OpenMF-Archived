@@ -57,7 +57,7 @@ std::string SpatialEntityImplementation::toString()
     int hasOSG = mOSGNode != 0;
     int hasBullet = mBulletBody != 0;
 
-    return "\"" + mName + "\", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
+    return "\"" + mName + "\", ID: " + std::to_string(mID) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
 void SpatialEntityImplementation::ready()
@@ -84,14 +84,13 @@ void SpatialEntityImplementation::ready()
         mPosition.y = pos.y();
         mPosition.z = pos.z();
 
+        mBulletBody->setUserIndex(mID);
+
         makePhysicsDebugOSGNode();
     }
 
     MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_STR);
     mReady = true;
-
-    /* TODO: set user pointer of the bullet rigid body to this SpatialEntity so that we
-       have a backward association */
 }
 
 void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.

@@ -17,9 +17,9 @@ public:
     virtual bool loadMission(std::string mission)=0;
 
     /**
-      Perform collision query on given point in the world, return colliding entity or 0.
+      Perform collision query on given point in the world, return colliding entity ID or -1.
     */
-    virtual MFGame::SpatialEntity *pointCollision(double x, double y, double z)=0;
+    virtual int pointCollision(double x, double y, double z)=0;
 };
 
 };

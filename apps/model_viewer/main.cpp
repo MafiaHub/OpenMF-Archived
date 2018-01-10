@@ -35,16 +35,28 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
-std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world)
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList *entityList)
 {
     std::string result = "collision: ";
 
     double cam[6];
     renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
 
-    MFGame::SpatialEntity *entity = world->pointCollision(cam[0],cam[1],cam[2]);
+    int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
 
-    result += entity ? entity->toString() : "none";
+    if (entityID >= 0)
+    {
+        // FIXME: this is slow, entity manager is needed to quickly find an entity by ID
+
+        for (int i = 0; i < entityList->size(); ++i)
+            if ((*entityList)[i].getID() == entityID)
+            {
+                result = (*entityList)[i].toString();
+                break;
+            }
+    }
+    else
+        result = "none";
 
     return result;
 }
@@ -155,6 +167,7 @@ int main(int argc, char** argv)
     MFRender::OSGRenderer renderer;
     MFPhysics::BulletPhysicsWorld physicsWorld;
     MFFormat::SpatialEntityLoaderImplementation spatialEntityLoader;
+    MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities;
 
     if (model)
     {
@@ -165,7 +178,7 @@ int main(int argc, char** argv)
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
         physicsWorld.loadMission(inputFile);
         auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        MFFormat::SpatialEntityLoaderImplementation::SpatialEntityList entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+        entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
@@ -202,7 +215,7 @@ int main(int argc, char** argv)
                         std::cout << "camera: " + getCameraString(&renderer) << std::endl;
 
                     if (collisionInfo)
-                        std::cout << getCollisionString(&renderer,&physicsWorld) << std::endl;
+                        std::cout << getCollisionString(&renderer,&physicsWorld,&entities) << std::endl;
 
                     infoCounter = 30;
                 }
