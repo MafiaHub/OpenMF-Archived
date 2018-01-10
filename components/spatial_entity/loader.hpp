@@ -18,7 +18,7 @@ namespace MFFormat
   Handles creating spatial entities from different loaded files.
  */
 
-class SpatialEntityLoaderImplementation
+class SpatialEntityLoader
 {
 public:
     typedef std::vector<MFGame::SpatialEntityImplementation> SpatialEntityList;
@@ -81,16 +81,16 @@ public:
                 n.asGroup()->getChild(i)->accept(*this);
     }
 
-    SpatialEntityLoaderImplementation::SpatialEntityList mEntities;
+    SpatialEntityLoader::SpatialEntityList mEntities;
 
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
     osg::Group *mOSGRoot;
 };
 
-SpatialEntityLoaderImplementation::SpatialEntityList SpatialEntityLoaderImplementation::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies)
+SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies)
 {
-    SpatialEntityLoaderImplementation::SpatialEntityList result;
+    SpatialEntityLoader::SpatialEntityList result;
     CreateEntitiesFromSceneVisitor v(&treeKlzBodies,osgRoot);
     osgRoot->accept(v);
 
