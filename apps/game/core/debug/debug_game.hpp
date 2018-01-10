@@ -37,7 +37,7 @@ void DebugGame::init()
     auto treeKlzBodies = mPhysicsWorld.getTreeKlzBodies();
     mEntities = mSpatialEntityLoader.loadFromScene(mRenderer.getRootNode(), treeKlzBodies);
 
-    mRenderer.setCameraParameters(true, 0, 75.0f, 0.25, 2000);
+    mRenderer.setCameraParameters(true, 75.0f, 0.0f, 0.25, 2000);
 
     // TODO replace this by actual player actor, who will have the camera attached on itself.
     mRenderer.setFreeCameraSpeed(7.0);
