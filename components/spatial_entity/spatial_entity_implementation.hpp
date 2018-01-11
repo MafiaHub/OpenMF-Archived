@@ -106,7 +106,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
     int shapeType = mBulletBody->getCollisionShape()->getShapeType();
 
-    osg::ref_ptr<osg::ShapeDrawable> shapeNode;
+    osg::ref_ptr<osg::Node> shapeNode;
 
     switch (shapeType)
     {
@@ -129,6 +129,14 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
                 static_cast<btSphereShape *>(mBulletBody->getCollisionShape())->getRadius());
 
             shapeNode = new osg::ShapeDrawable(shape.get());
+            break;
+        }
+
+        case BroadphaseNativeTypes::CYLINDER_SHAPE_PROXYTYPE:
+        {
+            btCylinderShape *cylinder = static_cast<btCylinderShape *>(mBulletBody->getCollisionShape());
+            osg::ref_ptr<osg::Shape> shape = new osg::Cylinder(osg::Vec3f(0,0,0),cylinder->getRadius(),cylinder->getHalfExtentsWithoutMargin().z() * 2);
+            shapeNode = new osg::ShapeDrawable(shape.get()); // toBulletNode;
             break;
         }
 

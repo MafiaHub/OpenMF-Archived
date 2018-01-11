@@ -7,6 +7,7 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <klz/parser.hpp>
 
@@ -91,6 +92,16 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->setWorldTransform(transform);
+    loopEnd
+    
+    loopBegin(getCylinderCols)
+        btVector3 center = btVector3(col.mPosition.x,col.mPosition.y,0);
+        float radius = col.mRadius;
+
+        newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,50.0));  // FIXME: cylinder height infinite?
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
     return result;
