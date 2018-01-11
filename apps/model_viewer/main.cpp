@@ -99,6 +99,7 @@ int main(int argc, char** argv)
         ("no-physics", "Do not simulate physics.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
         ("no-cachebin","Do not load cache.bin for the mission.")
+        ("no-treeklz","Do not load tree.klz (collisions) for the mission.")
         ("m,mask","Set rendering mask.",cxxopts::value<unsigned int>());
 
     options.parse_positional({"i"});
@@ -117,6 +118,7 @@ int main(int argc, char** argv)
     bool physicsState = arguments.count("no-physics") < 1;
     bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
     bool loadCacheBin = arguments.count("no-cachebin") < 1;
+    bool loadTreeKlz = arguments.count("no-treeklz") < 1;
 
     double cameraSpeed = DEFAULT_CAMERA_SPEED;
 
@@ -176,7 +178,10 @@ int main(int argc, char** argv)
     else
     {
         renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
-        physicsWorld.loadMission(inputFile);
+
+        if (loadTreeKlz)
+            physicsWorld.loadMission(inputFile);
+
         auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
         entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
     }
