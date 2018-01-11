@@ -294,6 +294,69 @@ std::string makeInfoString(osg::Node *n)
     return v.mInfo;
 }
 
+class PickHandler : public osgGA::GUIEventHandler  // FIXME: this is event handling and should be done outside renderer
+{
+public:
+    PickHandler()
+    {
+        mHighlightMaterial = new osg::Material;
+        mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.5, 0, 0, 1));
+        mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.5, 0, 0, 1));
+        mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.5, 0, 0, 1));
+        mMaterialBackup = 0;
+        mSelected = 0;
+    }
+
+    virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override
+    {
+        if (ea.getButton() != osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ||
+            ea.getEventType() != osgGA::GUIEventAdapter::PUSH)
+            return false;
+
+        osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
+
+        if (!viewer)
+            return true;
+
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+            new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
+
+        MFUtil::RobustIntersectionVisitor iv(intersector.get());
+        viewer->getCamera()->accept(iv);
+
+        if (intersector->containsIntersections())
+        {
+            const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
+
+            if (mSelected)
+            {
+                if (mMaterialBackup)
+                    mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
+                else
+                    mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+            }
+
+            mSelected = result.drawable;
+            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+
+            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()), "");
+
+            for (int i = 0; i < (int)result.nodePath.size(); ++i)
+                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]), "");
+
+            MFLogger::ConsoleLogger::info("------", "");
+        }
+
+        return true;
+    }
+
+protected:
+    osg::ref_ptr<osg::Material> mHighlightMaterial;
+    osg::ref_ptr<osg::Material> mMaterialBackup;
+    osg::ref_ptr<osg::Drawable> mSelected;
+};
+
 }
 
 #endif

@@ -24,6 +24,7 @@ public:
     bool done() { return mDone; };
 
     virtual bool exportScene(std::string fileName)=0;
+    virtual bool debugPick(int screenX, int screenY) { return false; };
 protected:
     bool mDone;
 };
