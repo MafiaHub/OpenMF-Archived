@@ -76,11 +76,19 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
 
         MFFormat::DataFormat::Mat4 rot = col.mTransform;
 
-        MFFormat::DataFormat::Quat q = col.mTransform.getRotation();
+        rot.separateRotation();
+        btMatrix3x3 rotMat;
 
-        btTransform transform;
-        transform.setOrigin(MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
-        transform.setRotation(btQuaternion(q.x,q.z,q.y,q.w));
+        rotMat.setValue(
+            rot.a0,rot.a1,rot.a2,
+            rot.b0,rot.b1,rot.b2,
+            rot.c0,rot.c1,rot.c2
+            );
+
+        btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
+
+        btQuaternion q = transform.getRotation();
+        transform.setRotation(btQuaternion(q.x(),q.z(),q.y(),q.w())); // TODO: find out why Y and Z have to be switched here
 
         // note: scale seems to never be used
 

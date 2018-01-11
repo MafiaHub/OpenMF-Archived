@@ -166,10 +166,17 @@ public:
 
             helper.separateRotation();
 
-            result.w = sqrt(1 + a0 + b1 + c2) / 2.0;
-            result.x = (c1 - b2) / (4 * result.w);
-            result.y = (a2 - c0) / (4 * result.w);
-            result.z = (b0 - a1) / (4 * result.w);
+            double v = 1 + a0 + b1 + c2;
+            v = v < 0.0 ? 0.0 : v;
+
+            result.w = sqrt(v) / 2.0;
+
+            double divisor = (4 * result.w);
+            divisor = divisor == 0 ? 0.00001 : divisor;
+
+            result.x = (c1 - b2) / divisor;
+            result.y = (a2 - c0) / divisor;
+            result.z = (b0 - a1) / divisor;
 
             return result;
         }
