@@ -81,8 +81,7 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         rotMat.setValue(
             rot.a0,rot.a1,rot.a2,
             rot.b0,rot.b1,rot.b2,
-            rot.c0,rot.c1,rot.c2
-        );
+            rot.c0,rot.c1,rot.c2);
 
         btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
 

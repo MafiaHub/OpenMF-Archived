@@ -117,7 +117,7 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
-        Vec3 mExtends[2];
+        Vec3 mExtends[2];       // two box corners, however the box seems to be symmetrical around [0,0,0], so one is redundant
         Mat4 mTransform;
         Mat4 mInverseTransform;
     } OBBCol;                   // oriented bounding box

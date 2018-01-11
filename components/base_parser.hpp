@@ -140,6 +140,11 @@ public:
             d1 = 0;
             d2 = 0;
 
+            a3 = 0;
+            b3 = 0;
+            c3 = 0;
+            d3 = 1;
+
             Vec3 scale = getScale();
 
             a0 /= scale.x;
