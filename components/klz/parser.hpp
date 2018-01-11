@@ -97,13 +97,12 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
         uint32_t mLink;
-        // NOTE(ASM): AABB
-        Vec3 mMin;
+        Vec3 mMin;              // precomputed AABB
         Vec3 mMax;
-        Vec3 mExtends[2];
+        Vec3 mExtends[2];       // BB corners to be transformed
         Mat4 mTransform;
         Mat4 mInverseTransform;
-    } XTOBBCol;                 // oriented bounding box, more general version
+    } XTOBBCol;                 // oriented bounding box, in addition to OBB has an additional precomputed AABB
 
     typedef struct 
     {    

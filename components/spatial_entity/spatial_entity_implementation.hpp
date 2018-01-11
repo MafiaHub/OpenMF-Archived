@@ -176,8 +176,13 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         transformMat.makeTranslate(osg::Vec3f(position.x(),position.y(),position.z()));
         transformMat.preMult(osg::Matrixd::rotate(osg::Quat(rotation.x(),rotation.y(),rotation.z(),rotation.w())));
 
-        mOSGPgysicsDebugNode->setMatrix(transformMat);
+        if (transformMat.isNaN())
+        {
+            MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+            transformMat = osg::Matrixd::identity();
+        }
 
+        mOSGPgysicsDebugNode->setMatrix(transformMat);
         mOSGRoot->addChild(mOSGPgysicsDebugNode);
     }
 }

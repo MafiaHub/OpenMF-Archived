@@ -65,37 +65,31 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
-    loopBegin(getOBBCols)
-        btVector3 p1 = MFUtil::mafiaVec3ToBullet(col.mExtends[0].x,col.mExtends[0].y,col.mExtends[0].z);
-        btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mExtends[1].x,col.mExtends[1].y,col.mExtends[1].z);
-
-        btVector3 center = (p1 + p2) / 2.0f;
-        btVector3 bboxCorner = p2 - center;
-
-        MFFormat::DataFormat::Vec3 trans = col.mTransform.getTranslation();
-
-        MFFormat::DataFormat::Mat4 rot = col.mTransform;
-
-        rot.separateRotation();
-        btMatrix3x3 rotMat;
-
-        rotMat.setValue(
-            rot.a0,rot.a1,rot.a2,
-            rot.b0,rot.b1,rot.b2,
-            rot.c0,rot.c1,rot.c2
-            );
-
-        btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z));
-
-        btQuaternion q = transform.getRotation();
-        transform.setRotation(btQuaternion(q.x(),q.z(),q.y(),q.w())); // TODO: find out why Y and Z have to be switched here
-
-        // note: scale seems to never be used
-
-        newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
-        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+    #define loadOBBOrXTOBB \
+        btVector3 p1 = MFUtil::mafiaVec3ToBullet(col.mExtends[0].x,col.mExtends[0].y,col.mExtends[0].z); \
+        btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mExtends[1].x,col.mExtends[1].y,col.mExtends[1].z); \
+        btVector3 center = (p1 + p2) / 2.0f; \
+        btVector3 bboxCorner = p2 - center; \
+        MFFormat::DataFormat::Vec3 trans = col.mTransform.getTranslation(); \
+        MFFormat::DataFormat::Mat4 rot = col.mTransform; \
+        rot.separateRotation(); \
+        btMatrix3x3 rotMat; \
+        rotMat.setValue(rot.a0,rot.a1,rot.a2,rot.b0,rot.b1,rot.b2,rot.c0,rot.c1,rot.c2); \
+        btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z)); \
+        btQuaternion q = transform.getRotation(); \
+        transform.setRotation(btQuaternion(q.x(),q.z(),q.y(),q.w()));   /* TODO: find out why Y and Z have to be switched here */ \
+        /* note: scale seems to never be used */ \
+        newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
         newBody.mRigidBody.mBody->setWorldTransform(transform);
+
+    loopBegin(getOBBCols)
+        loadOBBOrXTOBB
+    loopEnd
+
+    loopBegin(getXTOBBCols)
+        loadOBBOrXTOBB
     loopEnd
     
     loopBegin(getCylinderCols)

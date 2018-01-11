@@ -128,9 +128,20 @@ public:
         Vec3 getScale()
         {
             Vec3 result;
-            result.x = sqrt(a0 * a0 + a1 * a1 + a2 * a2);
-            result.y = sqrt(b0 * b0 + b1 * b1 + b2 * b2);
-            result.z = sqrt(c0 * c0 + c1 * c1 + c2 * c2);
+            double v;
+
+            v = a0 * a0 + a1 * a1 + a2 * a2;
+            v = v < 0 ? 0 : v;
+            result.x = sqrt(v);
+
+            v = b0 * b0 + b1 * b1 + b2 * b2;
+            v = v < 0 ? 0 : v;
+            result.y = sqrt(v);
+
+            v = c0 * c0 + c1 * c1 + c2 * c2;
+            v = v < 0 ? 0 : v;
+            result.z = sqrt(v);
+
             return result;
         }
 
@@ -145,6 +156,10 @@ public:
             d3 = 1;
 
             Vec3 scale = getScale();
+
+            scale.x = scale.x == 0 ? 0.000001 : scale.x;
+            scale.y = scale.y == 0 ? 0.000001 : scale.y;
+            scale.z = scale.z == 0 ? 0.000001 : scale.z;
 
             a0 /= scale.x;
             a1 /= scale.y;
