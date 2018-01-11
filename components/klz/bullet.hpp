@@ -17,12 +17,27 @@ namespace MFPhysics
 class BulletTreeKlzLoader
 {
 public:
-    std::vector<MFUtil::NamedRigidBody> load(std::ifstream &srcFile);
+    typedef struct
+    {
+        unsigned int i1;
+        unsigned int i2;
+        unsigned int i3;
+    } FaceIndices;
+
+    typedef struct
+    {
+        std::string mMeshName;
+        std::vector<FaceIndices> mFaces;
+    } MeshFaceCollision;
+
+    void load(std::ifstream &srcFile);
+
+    std::vector<MFUtil::NamedRigidBody> mRigidBodies;
+    std::vector<MeshFaceCollision> mFaceCollisions;
 };
 
-std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &srcFile)
+void BulletTreeKlzLoader::load(std::ifstream &srcFile)
 {
-    std::vector<MFUtil::NamedRigidBody> result;
     MFFormat::DataFormatTreeKLZ klz;
     klz.load(srcFile);
 
@@ -38,7 +53,7 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
 
     #define loopEnd \
             newBody.mName = linkStrings[cols[i].mLink]; \
-            result.push_back(newBody); \
+            mRigidBodies.push_back(newBody); \
         } \
     }
 
@@ -101,8 +116,6 @@ std::vector<MFUtil::NamedRigidBody> BulletTreeKlzLoader::load(std::ifstream &src
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
-
-    return result;
 }
 
 };

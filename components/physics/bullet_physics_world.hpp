@@ -126,7 +126,8 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     if (mFileSystem->open(fileTreeKlz,treeKlzPath))
     {
-        mTreeKlzBodies = treeKlzLoader.load(fileTreeKlz);
+        treeKlzLoader.load(fileTreeKlz);
+        mTreeKlzBodies = treeKlzLoader.mRigidBodies; 
         fileTreeKlz.close();
 
         for (int i = 0; i < mTreeKlzBodies.size(); ++i)
