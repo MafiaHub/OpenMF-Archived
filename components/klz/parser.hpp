@@ -76,12 +76,18 @@ public:
         unsigned char mUnknown;    // different values for different collision types of objects
     } Properties;
 
+    typedef struct
+    {
+        uint16_t mIndex;
+        uint16_t mLink;            // index to link table, this will be the same for all three indices of one face
+    } FaceVertexIndex;
+
     #pragma pack(push, 1)
     typedef struct 
     {    
-        Properties mProperties; // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
-        uint32_t mIndices[3];   // NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
-        Vec3 mNormal;           // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
+        Properties mProperties;        // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
+        FaceVertexIndex mIndices[3];   
+        Vec3 mNormal;                  // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
         float mDistance;
     } FaceCol;
 

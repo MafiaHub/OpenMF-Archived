@@ -49,7 +49,7 @@ void dump(MFFormat::DataFormatTreeKLZ &klz)
     dumpItems(klz.getAABBCols(),std::cout << "  AABB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << linkPrint << std::endl);
     dumpItems(klz.getOBBCols(),std::cout << "  OBB\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
     dumpItems(klz.getXTOBBCols(),std::cout << "  XTOBB\t\tp1: " << item.mMin.str() << "\t\tp2: " << item.mMax.str() << "\t\textends: [" << item.mExtends[0].str() << "] [" << item.mExtends[2].str() << "] " << linkPrint << std::endl);
-    dumpItems(klz.getFaceCols(),std::cout << "  face" << std::endl);
+    dumpItems(klz.getFaceCols(),std::cout << "  face\t (" << item.mIndices[0].mIndex << ", " << item.mIndices[1].mIndex << ", " << item.mIndices[2].mIndex << "), normal: " << item.mNormal.str() << ", link: " << item.mIndices[0].mLink << " (" << linkStrings[item.mIndices[0].mLink] << ")" << std::endl);
 }
 
 int main(int argc, char** argv)
