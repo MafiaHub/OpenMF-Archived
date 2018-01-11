@@ -139,7 +139,6 @@ public:
             d0 = 0;
             d1 = 0;
             d2 = 0;
-
             a3 = 0;
             b3 = 0;
             c3 = 0;
@@ -148,15 +147,15 @@ public:
             Vec3 scale = getScale();
 
             a0 /= scale.x;
-            a1 /= scale.x;
-            a2 /= scale.x;
+            a1 /= scale.y;
+            a2 /= scale.z;
 
-            b0 /= scale.y;
+            b0 /= scale.x;
             b1 /= scale.y;
-            b2 /= scale.y;
+            b2 /= scale.z;
 
-            c0 /= scale.z;
-            c1 /= scale.z;
+            c0 /= scale.x;
+            c1 /= scale.y;
             c2 /= scale.z;
         }
 
