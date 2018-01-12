@@ -195,14 +195,23 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
             continue;
         }
 
+        auto vertices = &(m->mStandard.mLODs[0].mVertices);
+
         MFUtil::NamedRigidBody newBody;
         newBody.mRigidBody.mMesh = std::make_shared<btTriangleMesh>();
 
         for (int j = 0; j < (int) mFaceCollisions[i].mFaces.size(); ++j)
         {
-            btVector3 v0(0,1,2);
-            btVector3 v1(3,4,5);
-            btVector3 v2(6,7,8);
+            auto indices = mFaceCollisions[i].mFaces[j];
+            auto v = (*vertices)[indices.mI1].mPos;
+            btVector3 v0(v.x,v.y,v.z);
+
+            v = (*vertices)[indices.mI2].mPos;
+            btVector3 v1(v.x,v.y,v.z);
+
+            v = (*vertices)[indices.mI3].mPos;
+            btVector3 v2(v.x,v.y,v.z);
+
             newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
         }
 
