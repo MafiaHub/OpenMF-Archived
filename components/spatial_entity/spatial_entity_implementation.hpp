@@ -158,14 +158,23 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
                 break;
             }
 
-            std::vector<MFGame::Vec3> vertices;
+            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+            osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
             for (int i = 0; i < numVertices; ++i)
             {
                 MFGame::Vec3 v;
                 memcpy(&v,vertexData + i * vertexStride,sizeof(v));
-                vertices.push_back(v);
-            } 
+                vertices->push_back(osg::Vec3f(v.x,v.y,v.z));
+                indices->push_back(i);
+            }
+
+            osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+            geom->setVertexArray(vertices);
+            geom->addPrimitiveSet(indices.get());
+            osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+            geode->addDrawable(geom.get());
+            shapeNode = geode;
 
             break;
         }
