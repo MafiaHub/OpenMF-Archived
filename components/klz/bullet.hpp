@@ -204,13 +204,13 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         {
             auto indices = mFaceCollisions[i].mFaces[j];
             auto v = (*vertices)[indices.mI1].mPos;
-            btVector3 v0(v.x,v.y,v.z);
+            btVector3 v0 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
 
             v = (*vertices)[indices.mI2].mPos;
-            btVector3 v1(v.x,v.y,v.z);
+            btVector3 v1 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
 
             v = (*vertices)[indices.mI3].mPos;
-            btVector3 v2(v.x,v.y,v.z);
+            btVector3 v2 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
 
             newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
         }

@@ -140,6 +140,21 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
             break;
         }
 
+        case BroadphaseNativeTypes::TRIANGLE_MESH_SHAPE_PROXYTYPE:
+        {
+            btTriangleMesh *mesh =
+                static_cast<btTriangleMesh *>(
+                    static_cast<btTriangleMeshShape *>(mBulletBody->getCollisionShape())->getMeshInterface());
+
+            unsigned char *vertexData,*indexData;
+            int numVertices, numFaces, vertexStride, indexStride;
+            PHY_ScalarType vertexType, indexType;
+
+            mesh->getLockedVertexIndexBase(&vertexData,numVertices,vertexType,vertexStride,&indexData,indexStride,numFaces,indexType);
+
+            break;
+        }
+
         default:
             MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_STR);
             break;
