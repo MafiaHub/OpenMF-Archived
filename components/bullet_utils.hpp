@@ -3,6 +3,7 @@
 
 #include <string>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 namespace MFUtil
 {
@@ -20,6 +21,7 @@ typedef struct
 {
     std::shared_ptr<btRigidBody> mBody;
     std::shared_ptr<btCollisionShape> mShape;
+    std::shared_ptr<btTriangleMesh> mMesh;
 } FullRigidBody;
 
 typedef struct

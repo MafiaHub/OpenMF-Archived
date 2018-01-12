@@ -8,8 +8,10 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <klz/parser.hpp>
+#include <4ds/parser.hpp>    // needed for face collisions
 
 namespace MFPhysics
 {
@@ -17,6 +19,11 @@ namespace MFPhysics
 class BulletTreeKlzLoader
 {
 public:
+    void load(std::ifstream &srcFile);
+
+    std::vector<MFUtil::NamedRigidBody> mRigidBodies;
+
+protected:
     typedef struct
     {
         unsigned int mI1;
@@ -30,9 +37,6 @@ public:
         std::vector<FaceIndices> mFaces;
     } MeshFaceCollision;
 
-    void load(std::ifstream &srcFile);
-
-    std::vector<MFUtil::NamedRigidBody> mRigidBodies;
     std::vector<MeshFaceCollision> mFaceCollisions;
 };
 
@@ -43,18 +47,18 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
 
     std::vector<std::string> linkStrings = klz.getLinkStrings();
 
-    #define loopBegin(getFunc) \
-    { \
+    #define loopBegin(getFunc)\
+    {\
         auto cols = klz.getFunc(); \
-        for (int i = 0; i < (int) cols.size(); ++i) \
-        { \
+        for (int i = 0; i < (int) cols.size(); ++i)\
+        {\
             auto col = cols[i];\
             MFUtil::NamedRigidBody newBody;\
 
     #define loopEnd \
-            newBody.mName = linkStrings[cols[i].mLink]; \
-            mRigidBodies.push_back(newBody); \
-        } \
+            newBody.mName = linkStrings[cols[i].mLink];\
+            mRigidBodies.push_back(newBody);\
+        }\
     }
 
     loopBegin(getAABBCols)
@@ -65,6 +69,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
         btVector3 bboxCorner = p2 - center;
 
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
+
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
@@ -75,6 +80,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
         float radius = col.mRadius;
 
         newBody.mRigidBody.mShape = std::make_shared<btSphereShape>(radius);
+
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
@@ -115,6 +121,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
+
     loopEnd
 
     // load face collisions:
@@ -152,6 +159,31 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
 
         if (i == ((int) cols.size()) - 1)   // last one => push
             mFaceCollisions.push_back(faceCol);
+    }
+
+    // make the bodies now:
+
+    for (int i = 0; i < (int) mFaceCollisions.size(); ++i)
+    {
+        MFUtil::NamedRigidBody newBody;
+        newBody.mRigidBody.mMesh = std::make_shared<btTriangleMesh>();
+
+        for (int j = 0; j < (int) mFaceCollisions[i].mFaces.size(); ++j)
+        {
+            btVector3 v0(0,1,2);
+            btVector3 v1(3,4,5);
+            btVector3 v2(6,7,8);
+            newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
+        }
+
+        newBody.mRigidBody.mShape = std::make_shared<btBvhTriangleMeshShape>(newBody.mRigidBody.mMesh.get(),true);
+
+        newBody.mName = mFaceCollisions[i].mMeshName;
+
+        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+
+        mRigidBodies.push_back(newBody);
     }
 }
 

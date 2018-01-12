@@ -108,8 +108,6 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
         result.push_back(newEntity);
     }
 
-    // TODO: make entities for remaining collisions for which graphical node hasn't been found
-
     return result;
 }
 
