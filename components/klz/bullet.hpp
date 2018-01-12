@@ -222,6 +222,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
 
+        newBody.mRigidBody.mBody->translate(MFUtil::mafiaVec3ToBullet(m->mPos.x,m->mPos.y,m->mPos.z));
+
         mRigidBodies.push_back(newBody);
     }
 }
