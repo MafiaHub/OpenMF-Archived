@@ -5,6 +5,9 @@
 
 #include <base_parser.hpp>
 
+#include <stdio.h>
+#include <iostream>
+
 namespace MFFormat
 {
 
@@ -43,7 +46,8 @@ public:
         OBJECT_LIGHT_UNK_1 = 0x4043,
         OBJECT_LIGHT_RANGE = 0x4044,
         OBJECT_LIGHT_FLAGS = 0x4045,
-        OBJECT_LIGHT_SECTOR= 0x4046
+        OBJECT_LIGHT_SECTOR= 0x4046,
+        OBJECT_LIGHT_MAP= 0x40A0
     } ObjectProperty;
 
     typedef enum {
@@ -282,6 +286,33 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
             object->mParentName = parentObject.mName;
         }
         break;
+        case OBJECT_LIGHT_MAP:
+        {
+            uint8_t numberOfLightmapLevels;
+            read(srcFile, &numberOfLightmapLevels);
+            // According to docs, unk word should be 2015/2016
+            uint16_t unknownWord;
+            read(srcFile, &unknownWord);
+            // 01 00 00 00
+            uint32_t unknownDword;
+            read(srcFile, &unknownDword);
+
+            float unkFloatA;
+            read(srcFile, &unkFloatA);
+
+            float unkFloatB;
+            read(srcFile, &unkFloatB);
+
+            std::cout << "Obj. lightmap " <<  srcFile.tellg() << "\n";
+            std::cout << "\t" <<  (int) numberOfLightmapLevels << unkFloatA << unkFloatB << "\n";
+
+            uint8_t numberOfLevels;
+            read(srcFile, &numberOfLevels);
+            std::cout << "\t" <<  (int) numberOfLevels << " levels" << "\n";
+        
+        }
+        break;
+
     }
 }
 
