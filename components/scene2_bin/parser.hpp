@@ -303,13 +303,32 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
             float unkFloatB;
             read(srcFile, &unkFloatB);
 
-            std::cout << "Obj. lightmap " <<  srcFile.tellg() << "\n";
-            std::cout << "\t" <<  (int) numberOfLightmapLevels << unkFloatA << unkFloatB << "\n";
+            std::cout << "Obj. lightmap starting offset: " <<  srcFile.tellg() << "\n";
+            std::cout << "\tSection1:" << "\n";
+            std::cout << "\tLightmap levels:\t" << (int) numberOfLightmapLevels << "\n";
+            std::cout << "\tFloat A:\t" << unkFloatA<< "\n";
+            std::cout << "\tFloat B:\t" << unkFloatB<< "\n";
 
             uint8_t numberOfLevels;
             read(srcFile, &numberOfLevels);
             std::cout << "\t" <<  (int) numberOfLevels << " levels" << "\n";
         
+            uint16_t numberOfVertices;
+            read(srcFile, &numberOfVertices);
+
+            uint16_t numberOfLBMP;
+            read(srcFile, &numberOfLBMP);
+
+            uint16_t typeOfFollowing;
+            read(srcFile, &typeOfFollowing);
+
+
+            std::cout << "\t" << "Section2:\n";
+            std::cout << "\t\t" << "noVert:\t"<<numberOfVertices<<"\n";
+            std::cout << "\t\t" << "noLBMP:\t"<<numberOfLBMP<<"\n";
+            std::cout << "\t\t" << "typeFollows:\t"<<typeOfFollowing<<"\n";
+
+            
         }
         break;
 
