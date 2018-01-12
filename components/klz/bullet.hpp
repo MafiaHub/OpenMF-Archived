@@ -13,6 +13,8 @@
 #include <klz/parser.hpp>
 #include <4ds/parser.hpp>    // needed for face collisions
 
+#define TREE_KLZ_BULLET_LOADER_MODULE_STR "loader tree klz"
+
 namespace MFPhysics
 {
 
@@ -162,9 +164,37 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
     }
 
     // make the bodies now:
+    
+    auto model = scene4ds.getModel();
 
     for (int i = 0; i < (int) mFaceCollisions.size(); ++i)
     {
+        MFFormat::DataFormat4DS::Mesh *m = 0;
+
+        // find the corresponding mesh
+
+        for (int j = 0; j < (int) model.mMeshCount; ++j)
+        {
+            MFFormat::DataFormat4DS::Mesh *mesh = &(model.mMeshes[j]);            
+
+            char buffer[255];   // TODO: make util function for this
+            memcpy(buffer,mesh->mMeshName,mesh->mMeshNameLength);
+            buffer[mesh->mMeshNameLength] = 0;
+            std::string meshName = buffer;
+
+            if (meshName.compare(mFaceCollisions[i].mMeshName) == 0)
+            {
+                m = mesh;
+                break;
+            }
+        }
+
+        if (m == 0 || (m->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD))  // TODO: find out if other meshes than standard are allowed
+        {
+            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\".",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            continue;
+        }
+
         MFUtil::NamedRigidBody newBody;
         newBody.mRigidBody.mMesh = std::make_shared<btTriangleMesh>();
 
