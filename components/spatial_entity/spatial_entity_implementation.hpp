@@ -191,6 +191,6 @@ void SpatialEntityImplementation::move(Vec3 destPosition)
 {
 }
 
-};
+}
 
 #endif

@@ -130,7 +130,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
         mTreeKlzBodies = treeKlzLoader.mRigidBodies; 
         fileTreeKlz.close();
 
-        for (int i = 0; i < mTreeKlzBodies.size(); ++i)
+        for (int i = 0; i < (int) mTreeKlzBodies.size(); ++i)
         {
             mTreeKlzBodies[i].mRigidBody.mBody->setActivationState(0);
             mWorld->addRigidBody(mTreeKlzBodies[i].mRigidBody.mBody.get()); 
@@ -145,6 +145,6 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     return true;
 }
 
-};
+}
 
 #endif

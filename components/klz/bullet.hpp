@@ -19,9 +19,9 @@ class BulletTreeKlzLoader
 public:
     typedef struct
     {
-        unsigned int i1;
-        unsigned int i2;
-        unsigned int i3;
+        unsigned int mI1;
+        unsigned int mI2;
+        unsigned int mI3;
     } FaceIndices;
 
     typedef struct
@@ -46,7 +46,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
     #define loopBegin(getFunc) \
     { \
         auto cols = klz.getFunc(); \
-        for (int i = 0; i < cols.size(); ++i) \
+        for (int i = 0; i < (int) cols.size(); ++i) \
         { \
             auto col = cols[i];\
             MFUtil::NamedRigidBody newBody;\
@@ -116,8 +116,45 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile)
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
+
+    // load face collisions:
+
+    auto cols = klz.getFaceCols();
+
+    int currentLink = -1;
+    MeshFaceCollision faceCol;
+
+    // TODO: the following loop supposes the cols are grouped by link, find out whether that is always true
+
+    for (int i = 0; i < (int) cols.size(); ++i)
+    {
+        auto col = cols[i];
+
+        FaceIndices face;
+        face.mI1 = col.mIndices[0].mIndex;
+        face.mI2 = col.mIndices[1].mIndex;
+        face.mI3 = col.mIndices[2].mIndex;
+
+        if (currentLink < 0 || currentLink != col.mIndices[0].mLink)
+        {
+            // start loading a new mesh
+            
+            if (currentLink >= 0)
+                mFaceCollisions.push_back(faceCol);
+
+            faceCol.mFaces.clear();
+            currentLink = col.mIndices[0].mLink;
+
+            faceCol.mMeshName = linkStrings[currentLink];
+        }
+
+        faceCol.mFaces.push_back(face);
+
+        if (i == ((int) cols.size()) - 1)   // last one => push
+            mFaceCollisions.push_back(faceCol);
+    }
 }
 
-};
+}
 
 #endif

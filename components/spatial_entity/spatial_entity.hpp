@@ -89,5 +89,5 @@ SpatialEntity::SpatialEntity()
     mReady = true;
 }
 
-};
+}
 #endif

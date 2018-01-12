@@ -28,7 +28,6 @@ typedef struct
     FullRigidBody mRigidBody;
 } NamedRigidBody;
 
-
-};
+}
 
 #endif
