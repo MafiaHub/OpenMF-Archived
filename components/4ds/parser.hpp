@@ -3,6 +3,7 @@
 
 #include <base_parser.hpp>
 #include <cstring>
+#include <math.hpp>
 
 namespace MFFormat
 {
@@ -73,9 +74,9 @@ public:
     typedef struct
     {
         uint32_t mFlags;
-        Vec3 mAmbient;
-        Vec3 mDiffuse;                     // only used if there is no diffuse texture, or if COLORED flag is set
-        Vec3 mEmission;                    // always used
+        MFMath::Vec3 mAmbient;
+        MFMath::Vec3 mDiffuse;                     // only used if there is no diffuse texture, or if COLORED flag is set
+        MFMath::Vec3 mEmission;                    // always used
         float mTransparency; // 0.0 - invisible; 1.0 - opaque
 
         // environment map
@@ -100,9 +101,9 @@ public:
 
     typedef struct
     {
-        Vec3 mPos;
-        Vec3 mNormal;
-        Vec2 mUV;
+        MFMath::Vec3 mPos;
+        MFMath::Vec3 mNormal;
+        MFMath::Vec2 mUV;
     } Vertex;
 
     typedef struct
@@ -154,7 +155,7 @@ public:
         uint8_t mVertexCount;
         uint32_t mUnk0; // always 4.
         uint32_t mUnk1[6];
-        std::vector<Vec3> mVertices;
+        std::vector<MFMath::Vec3> mVertices;
     } Portal;
 
     typedef struct
@@ -163,10 +164,10 @@ public:
         uint32_t mUnk1; // always 0.
         uint32_t mVertexCount;
         uint32_t mFaceCount;
-        std::vector<Vec3> mVertices;
+        std::vector<MFMath::Vec3> mVertices;
         std::vector<Face> mFaces;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         uint8_t mPortalCount;
         std::vector<Portal> mPortals;
     } Sector;
@@ -181,8 +182,8 @@ public:
     typedef struct
     {
         // bounding box
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
     } Dummy;
 
     typedef struct
@@ -199,22 +200,22 @@ public:
 
     typedef struct
     {
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         float mUnk[4];
-        Mat4 mReflectionMatrix;
-        Vec3 mBackgroundColor;
+        MFMath::Mat4 mReflectionMatrix;
+        MFMath::Vec3 mBackgroundColor;
         float mViewDistance;
         uint32_t mVertexCount;
         uint32_t mFaceCount;
-        std::vector<Vec3> mVertices;
+        std::vector<MFMath::Vec3> mVertices;
         std::vector<Face> mFaces;
     } Mirror;
 
     typedef struct
     {
-        Vec3 mPosition;
-        Vec3 mNormals;
+        MFMath::Vec3 mPosition;
+        MFMath::Vec3 mNormals;
     } MorphLodVertex;
 
     typedef struct
@@ -232,8 +233,8 @@ public:
         uint8_t mLODLevel;      // should be equal to Standard.LODLevel
         uint8_t mUnk0;
         std::vector<MorphLod> mLODs;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         float mUnk1[4];
     } Morph;
 
@@ -243,8 +244,8 @@ public:
         uint32_t mUnk0;
         uint32_t mAdditionalValuesCount;
         uint32_t mBoneID;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         std::vector<float> mAdditionalValues;
     } SingleMeshLodJoint;
 
@@ -252,8 +253,8 @@ public:
     {
         uint8_t mJointCount;
         uint32_t mUnk0;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         std::vector<SingleMeshLodJoint> mJoints;
     } SingleMeshLod;
 
@@ -276,9 +277,9 @@ public:
         uint8_t mVisualMeshType;
         uint16_t mMeshRenderFlags;
         uint16_t mParentID; // 0 - not connected
-        Vec3 mPos;
-        Vec3 mScale;
-        Quat mRot;
+        MFMath::Vec3 mPos;
+        MFMath::Vec3 mScale;
+        MFMath::Quat mRot;
         uint8_t mCullingFlags;
         uint8_t mMeshNameLength;
         char mMeshName[255];
@@ -308,9 +309,9 @@ public:
         std::vector<Mesh> mMeshes;
         uint8_t mUse5DS;
 
-        Vec3 computeWorldPos(uint16_t meshIndex)
+        MFMath::Vec3 computeWorldPos(uint16_t meshIndex)
         {
-            Vec3 result;
+            MFMath::Vec3 result;
 
             meshIndex += 1;  // convert to 1-based
 
@@ -482,7 +483,7 @@ DataFormat4DS::Mirror DataFormat4DS::loadMirror(std::ifstream &file)
 
     for (size_t i = 0; i < newMirror.mVertexCount; ++i)
     {
-        Vec3 v;
+        MFMath::Vec3 v;
         read(file,&v,sizeof(v));
         newMirror.mVertices.push_back(v);
     }
@@ -522,7 +523,7 @@ DataFormat4DS::Portal DataFormat4DS::loadPortal(std::ifstream &file)
 
     for (size_t i = 0; i < newPortal.mVertexCount; ++i)
     {
-        Vec3 v;
+        MFMath::Vec3 v;
         read(file,&v,sizeof(v));
         newPortal.mVertices.push_back(v);
     }
@@ -540,7 +541,7 @@ DataFormat4DS::Sector DataFormat4DS::loadSector(std::ifstream &file)
 
     for (size_t i = 0; i < newSector.mVertexCount; ++i)
     {
-        Vec3 v;
+        MFMath::Vec3 v;
         read(file,&v,sizeof(v));
         newSector.mVertices.push_back(v);
     }

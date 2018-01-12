@@ -87,7 +87,7 @@ public:
     {    
         Properties mProperties;        // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
         FaceVertexIndex mIndices[3];   
-        Vec3 mNormal;                  // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
+        MFMath::Vec3 mNormal;                  // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
         float mDistance;
     } FaceCol;
 
@@ -95,26 +95,26 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
         uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
-        Vec3 mMin;              // first point that defines the box in space
-        Vec3 mMax;              // second point that defines the box in space
+        MFMath::Vec3 mMin;              // first point that defines the box in space
+        MFMath::Vec3 mMax;              // second point that defines the box in space
     } AABBCol;                  // axis-aligned bounding box
 
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
         uint32_t mLink;
-        Vec3 mMin;              // precomputed AABB
-        Vec3 mMax;
-        Vec3 mExtends[2];       // BB corners to be transformed
-        Mat4 mTransform;
-        Mat4 mInverseTransform;
+        MFMath::Vec3 mMin;              // precomputed AABB
+        MFMath::Vec3 mMax;
+        MFMath::Vec3 mExtends[2];       // BB corners to be transformed
+        MFMath::Mat4 mTransform;
+        MFMath::Mat4 mInverseTransform;
     } XTOBBCol;                 // oriented bounding box, in addition to OBB has an additional precomputed AABB
 
     typedef struct 
     {    
         int32_t mProperties;    // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
         uint32_t mLink;
-        Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
+        MFMath::Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
         float mRadius;
     } CylinderCol;              // cylindrical collision object
   
@@ -122,16 +122,16 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
-        Vec3 mExtends[2];       // two box corners, however the box seems to be symmetrical around [0,0,0], so one is redundant
-        Mat4 mTransform;
-        Mat4 mInverseTransform;
+        MFMath::Vec3 mExtends[2];       // two box corners, however the box seems to be symmetrical around [0,0,0], so one is redundant
+        MFMath::Mat4 mTransform;
+        MFMath::Mat4 mInverseTransform;
     } OBBCol;                   // oriented bounding box
 
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
         uint32_t mLink;
-        Vec3 mPosition;
+        MFMath::Vec3 mPosition;
         float mRadius;
     } SphereCol;                // spherical collision object
 

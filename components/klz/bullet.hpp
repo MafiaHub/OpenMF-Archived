@@ -93,8 +93,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mExtends[1].x,col.mExtends[1].y,col.mExtends[1].z); \
         btVector3 center = (p1 + p2) / 2.0f; \
         btVector3 bboxCorner = p2 - center; \
-        MFFormat::DataFormat::Vec3 trans = col.mTransform.getTranslation(); \
-        MFFormat::DataFormat::Mat4 rot = col.mTransform; \
+        MFMath::Vec3 trans = col.mTransform.getTranslation(); \
+        MFMath::Mat4 rot = col.mTransform; \
         rot.separateRotation(); \
         btMatrix3x3 rotMat; \
         rotMat.setValue(rot.a0,rot.a1,rot.a2,rot.b0,rot.b1,rot.b2,rot.c0,rot.c1,rot.c2); \
@@ -232,7 +232,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
 
-        MFFormat::DataFormat4DS::Vec3 pos = model.computeWorldPos(meshIndex);
+        MFMath::Vec3 pos = model.computeWorldPos(meshIndex);
         newBody.mRigidBody.mBody->translate(MFUtil::mafiaVec3ToBullet(pos.x,pos.y,pos.z));
 
         // TODO: apply world rotation

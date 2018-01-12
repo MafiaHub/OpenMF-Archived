@@ -422,9 +422,9 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     unsigned int diffuseUnit = 0;
     unsigned int envUnit = diffuseMap ? 1 : 0;
 
-    MFFormat::DataFormat::Vec3 dif = material->mDiffuse;
-    MFFormat::DataFormat::Vec3 amb = material->mAmbient;
-    MFFormat::DataFormat::Vec3 emi = material->mEmission;
+    MFMath::Vec3 dif = material->mDiffuse;
+    MFMath::Vec3 amb = material->mAmbient;
+    MFMath::Vec3 emi = material->mEmission;
 
     if (!diffuseMap || colored)
     {
@@ -608,8 +608,8 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
             osg::Matrixd mat;
 
-            MFFormat::DataFormat4DS::Vec3 p, s;
-            MFFormat::DataFormat4DS::Quat r;
+            MFMath::Vec3 p, s;
+            MFMath::Quat r;
 
             p = model.mMeshes[i].mPos;
             s = model.mMeshes[i].mScale;
