@@ -173,6 +173,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         // find the corresponding mesh
 
+        unsigned int meshIndex = 0;
+
         for (int j = 0; j < (int) model.mMeshCount; ++j)
         {
             MFFormat::DataFormat4DS::Mesh *mesh = &(model.mMeshes[j]);            
@@ -185,6 +187,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
             if (meshName.compare(mFaceCollisions[i].mMeshName) == 0)
             {
                 m = mesh;
+                meshIndex = j;
                 break;
             }
         }
@@ -229,7 +232,10 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
 
-        newBody.mRigidBody.mBody->translate(MFUtil::mafiaVec3ToBullet(m->mPos.x,m->mPos.y,m->mPos.z));
+        MFFormat::DataFormat4DS::Vec3 pos = model.computeWorldPos(meshIndex);
+        newBody.mRigidBody.mBody->translate(MFUtil::mafiaVec3ToBullet(pos.x,pos.y,pos.z));
+
+        // TODO: apply world rotation
 
         mRigidBodies.push_back(newBody);
     }

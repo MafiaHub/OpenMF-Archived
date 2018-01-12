@@ -22,11 +22,13 @@ public:
     virtual bool save(std::ofstream &dstFile) { return false; /* optional */ };
 
     #pragma pack(push, 1)
-    typedef struct
+    typedef struct Vec3s
     {
         float x;
         float y;
         float z;
+
+        Vec3s() { x = 0; y = 0; z = 0; };
 
         inline std::string str()
         {

@@ -307,6 +307,26 @@ public:
         uint16_t mMeshCount;
         std::vector<Mesh> mMeshes;
         uint8_t mUse5DS;
+
+        Vec3 computeWorldPos(uint16_t meshIndex)
+        {
+            Vec3 result;
+
+            meshIndex += 1;  // convert to 1-based
+
+            while (meshIndex > 0 && meshIndex <= mMeshCount)
+            {
+                Mesh m = mMeshes[meshIndex - 1];
+
+                result.x += m.mPos.x;
+                result.y += m.mPos.y;
+                result.z += m.mPos.z;
+
+                meshIndex = m.mParentID;
+            }
+
+            return result;
+        }
     } Model;
 
     virtual bool load(std::ifstream &srcFile) override;
