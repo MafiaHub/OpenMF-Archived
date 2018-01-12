@@ -7,7 +7,7 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <osg_masks.hpp>
 
-#define SPATIAL_ENTITY_IMPLEMENTATION_STR "spatial entity"
+#define SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR "spatial entity"
 
 namespace MFGame
 {
@@ -89,7 +89,7 @@ void SpatialEntityImplementation::ready()
         makePhysicsDebugOSGNode();
     }
 
-    MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_STR);
+    MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
     mReady = true;
 }
 
@@ -100,7 +100,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
     if (!mOSGRoot)
     {
-        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no access to scene root.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no access to scene root.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
         return;
     }
 
@@ -152,11 +152,26 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
             mesh->getLockedVertexIndexBase(&vertexData,numVertices,vertexType,vertexStride,&indexData,indexStride,numFaces,indexType);
 
+            if (vertexType != PHY_FLOAT)  // TODO: maybe support also double?
+            {
+                MFLogger::ConsoleLogger::warn("Vertex type not supported: " + std::to_string(vertexType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+                break;
+            }
+
+            std::vector<MFGame::Vec3> vertices;
+
+            for (int i = 0; i < numVertices; ++i)
+            {
+                MFGame::Vec3 v;
+                memcpy(&v,vertexData + i * vertexStride,sizeof(v));
+                vertices.push_back(v);
+            } 
+
             break;
         }
 
         default:
-            MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+            MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
             break;
     }
 
@@ -193,7 +208,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         if (transformMat.isNaN())
         {
-            MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_STR);
+            MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
             transformMat = osg::Matrixd::identity();
         }
 
