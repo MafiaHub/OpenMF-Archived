@@ -19,7 +19,7 @@ namespace MFPhysics
 class BulletTreeKlzLoader
 {
 public:
-    void load(std::ifstream &srcFile);
+    void load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds);
 
     std::vector<MFUtil::NamedRigidBody> mRigidBodies;
 
@@ -40,7 +40,7 @@ protected:
     std::vector<MeshFaceCollision> mFaceCollisions;
 };
 
-void BulletTreeKlzLoader::load(std::ifstream &srcFile)
+void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds)
 {
     MFFormat::DataFormatTreeKLZ klz;
     klz.load(srcFile);

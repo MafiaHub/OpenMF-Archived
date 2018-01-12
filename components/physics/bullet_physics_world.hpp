@@ -4,6 +4,7 @@
 #include <physics/base_physics_world.hpp>
 #include <loggers/console.hpp>
 #include <klz/bullet.hpp>
+#include <4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
 
@@ -119,14 +120,24 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     std::string missionDir = "missions/" + mission;
     std::string treeKlzPath = missionDir + "/tree.klz";
+    std::string scene4dsPath = missionDir + "/scene.4ds";
 
     std::ifstream fileTreeKlz;
+    std::ifstream fileScene4ds;
 
     BulletTreeKlzLoader treeKlzLoader;
+    MFFormat::DataFormat4DS loader4DS;
+
+    if (!mFileSystem->open(fileScene4ds,scene4dsPath))    // FIXME: parsed files should be retrieved from LoaderCache to avoid parsing the same file twice
+    {
+        MFLogger::ConsoleLogger::warn("Couldn't open scene.4ds file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+        return false;
+    }
 
     if (mFileSystem->open(fileTreeKlz,treeKlzPath))
     {
-        treeKlzLoader.load(fileTreeKlz);
+        loader4DS.load(fileScene4ds);
+        treeKlzLoader.load(fileTreeKlz,loader4DS);
         mTreeKlzBodies = treeKlzLoader.mRigidBodies; 
         fileTreeKlz.close();
 
@@ -138,6 +149,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     }
     else
     {
+        fileScene4ds.close();
         MFLogger::ConsoleLogger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
         return false;
     }
