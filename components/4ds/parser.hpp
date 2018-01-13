@@ -319,7 +319,11 @@ public:
             {
                 Mesh *m = &(mMeshes[meshIndex - 1]);
                 MFMath::Mat4 meshTransform = MFMath::translationMatrix(MFMath::Vec3(m->mPos.x,m->mPos.y,m->mPos.z));
-                result = MFMath::mul(result,meshTransform);
+
+                meshTransform = MFMath::mul(meshTransform,MFMath::rotationMatrix(MFMath::Quat(m->mRot.x,m->mRot.y,m->mRot.z,m->mRot.w)));
+
+
+                result = MFMath::mul(meshTransform,result);
                 meshIndex = m->mParentID;
             }
 
