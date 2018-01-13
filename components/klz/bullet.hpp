@@ -94,7 +94,6 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 center = (p1 + p2) / 2.0f; \
         btVector3 bboxCorner = p2 - center; \
         btTransform transform = MFUtil::mafiaMat4ToBullet(col.mTransform); \
-        /* note: scale seems to never be used */ \
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \

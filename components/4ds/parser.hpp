@@ -321,6 +321,7 @@ public:
                 MFMath::Mat4 meshTransform = MFMath::translationMatrix(MFMath::Vec3(m->mPos.x,m->mPos.y,m->mPos.z));
 
                 meshTransform = MFMath::mul(meshTransform,MFMath::rotationMatrix(MFMath::Quat(m->mRot.x,m->mRot.y,m->mRot.z,m->mRot.w)));
+                meshTransform = MFMath::mul(meshTransform,MFMath::scalingMatrix(MFMath::Vec3(m->mScale.x,m->mScale.y,m->mScale.z)));
 
                 result = MFMath::mul(meshTransform,result);
                 meshIndex = m->mParentID;
