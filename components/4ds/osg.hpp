@@ -312,7 +312,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         return emptyNode;
     }
 
-    std::string meshName = MFUtil::charBufferToStr(mesh->mMeshName,mesh->mMeshNameLength);
+    std::string meshName = std::string(mesh->mMeshName,0,mesh->mMeshNameLength);
 
     MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
@@ -442,7 +442,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
     }
 
-    std::string diffuseTextureName = MFUtil::charBufferToStr(material->mDiffuseMapName,material->mDiffuseMapNameLength);
+    std::string diffuseTextureName = std::string(material->mDiffuseMapName,0,material->mDiffuseMapNameLength);
     std::string alphaTextureName;
     std::string envTextureName; 
 
@@ -459,7 +459,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
             
         stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
 
-        envTextureName = MFUtil::charBufferToStr(material->mEnvMapName,material->mEnvMapNameLength);
+        envTextureName = std::string(material->mEnvMapName,0,material->mEnvMapNameLength);
 
         osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen();
         texGen->setMode(osg::TexGen::SPHERE_MAP);
@@ -469,7 +469,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     if (alphaMap)
     {
         isTransparent = true;
-        alphaTextureName = MFUtil::charBufferToStr(material->mAlphaMapName,material->mAlphaMapNameLength);
+        alphaTextureName = std::string(material->mAlphaMapName,0,material->mAlphaMapNameLength);
     }
     else
     {
