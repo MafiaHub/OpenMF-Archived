@@ -97,7 +97,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         MFMath::Mat4 rot = col.mTransform; \
         rot.separateRotation(); \
         btMatrix3x3 rotMat; \
-        rotMat.setValue(rot.a0,rot.a1,rot.a2,rot.b0,rot.b1,rot.b2,rot.c0,rot.c1,rot.c2); \
+        rotMat.setValue(rot[0][0],rot[0][1],rot[0][2],rot[1][0],rot[1][1],rot[1][2],rot[2][0],rot[2][1],rot[2][2]); \
         btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z)); \
         btQuaternion q = transform.getRotation(); \
         transform.setRotation(btQuaternion(q.x(),q.z(),q.y(),q.w()));   /* TODO: find out why Y and Z have to be switched here */ \
