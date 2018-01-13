@@ -98,6 +98,9 @@ protected:
 WalkManipulator::WalkManipulator(): osgGA::FirstPersonManipulator()
 {
     setAllowThrow(false);
+    mForw = 0;
+    mRight = 0;
+    mUp = 0; 
 }
 
 bool WalkManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
