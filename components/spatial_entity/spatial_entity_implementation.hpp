@@ -27,6 +27,8 @@ public:
     btRigidBody *getBulletBody()              { return mBulletBody;    };
     void setOSGRootNode(osg::Group *root)     { mOSGRoot = root;       };
 
+    static osg::ref_ptr<osg::StateSet> sDebugStateSet;
+
 protected:
     void makePhysicsDebugOSGNode();        ///< Creates a visual representation of the physical representation.
 
@@ -41,8 +43,28 @@ protected:
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
 };
 
+osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
+
 SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
 {
+    if (!SpatialEntityImplementation::sDebugStateSet)
+    {
+        // let the first entity create the shared debug material
+        SpatialEntityImplementation::sDebugStateSet = new osg::StateSet;
+
+        osg::ref_ptr<osg::Material> mat = new osg::Material();
+        osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
+        osg::Vec4f debugColor = osg::Vec4f(0,1,0,1);
+
+        mat->setAmbient(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setSpecular(osg::Material::FRONT_AND_BACK,debugColor);
+        mat->setEmission(osg::Material::FRONT_AND_BACK,debugColor);
+
+        SpatialEntityImplementation::sDebugStateSet->setAttributeAndModes(mat);
+        SpatialEntityImplementation::sDebugStateSet->setAttributeAndModes(mode);
+    }
+
     mOSGNode = 0;
     mBulletBody = 0;
     mOSGRoot = 0;
@@ -189,19 +211,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         shapeNode->setName("collision: " + getName());
         shapeNode->setNodeMask(MFRender::MASK_DEBUG);
 
-        // FIXME: make the StateSet static and shared
-        osg::ref_ptr<osg::Material> mat = new osg::Material();
-        osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
-        osg::Vec4f debugColor = osg::Vec4f(0,1,0,1);
-
-        mat->setAmbient(osg::Material::FRONT_AND_BACK,debugColor);
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK,debugColor);
-        mat->setSpecular(osg::Material::FRONT_AND_BACK,debugColor);
-        mat->setEmission(osg::Material::FRONT_AND_BACK,debugColor);
-
-        shapeNode->getOrCreateStateSet()->setAttributeAndModes(mat);
-        shapeNode->getOrCreateStateSet()->setMode(osg::StateAttribute::FOG,osg::StateAttribute::OFF);   // FIXME: why no effect?
-        shapeNode->getOrCreateStateSet()->setAttributeAndModes(mode);
+        shapeNode->setStateSet(SpatialEntityImplementation::sDebugStateSet);
 
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);

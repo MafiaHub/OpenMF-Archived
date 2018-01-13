@@ -93,15 +93,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 p2 = MFUtil::mafiaVec3ToBullet(col.mExtends[1].x,col.mExtends[1].y,col.mExtends[1].z); \
         btVector3 center = (p1 + p2) / 2.0f; \
         btVector3 bboxCorner = p2 - center; \
-        MFMath::Vec3 trans = col.mTransform.getTranslation(); \
-        MFMath::Mat4 rot = col.mTransform; \
-        rot.separateRotation(); \
-        btMatrix3x3 rotMat; \
-        rotMat.setValue(rot.a0,rot.a1,rot.a2,rot.b0,rot.b1,rot.b2,rot.c0,rot.c1,rot.c2); \
-        btTransform transform(rotMat,MFUtil::mafiaVec3ToBullet(trans.x,trans.y,trans.z)); \
-        btQuaternion q = transform.getRotation(); \
-        transform.setRotation(btQuaternion(q.x(),q.z(),q.y(),q.w()));   /* TODO: find out why Y and Z have to be switched here */ \
-        /* note: scale seems to never be used */ \
+        btTransform transform = MFUtil::mafiaMat4ToBullet(col.mTransform); \
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
@@ -119,7 +111,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 center = btVector3(col.mPosition.x,col.mPosition.y,0);
         float radius = col.mRadius;
 
-        newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,50.0));  // FIXME: cylinder height infinite?
+        newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,200.0));  // FIXME: cylinder height infinite?
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
@@ -178,11 +170,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         for (int j = 0; j < (int) model.mMeshCount; ++j)
         {
             MFFormat::DataFormat4DS::Mesh *mesh = &(model.mMeshes[j]);            
-
-            char buffer[255];   // TODO: make util function for this
-            memcpy(buffer,mesh->mMeshName,mesh->mMeshNameLength);
-            buffer[mesh->mMeshNameLength] = 0;
-            std::string meshName = buffer;
+            std::string meshName = std::string(mesh->mMeshName,0,mesh->mMeshNameLength);
 
             if (meshName.compare(mFaceCollisions[i].mMeshName) == 0)
             {
@@ -205,6 +193,12 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
             continue;
         }
 
+        if (m->mStandard.mLODs.size() == 0)
+        {
+            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - no LODs.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            continue;
+        }
+
         auto vertices = &(m->mStandard.mLODs[0].mVertices);
 
         MFUtil::NamedRigidBody newBody;
@@ -221,7 +215,6 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
             v = (*vertices)[indices.mI3].mPos;
             btVector3 v2 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
-
             newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
         }
 
@@ -231,12 +224,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-
-        MFMath::Vec3 pos = model.computeWorldPos(meshIndex);
-        newBody.mRigidBody.mBody->translate(MFUtil::mafiaVec3ToBullet(pos.x,pos.y,pos.z));
-
-        // TODO: apply world rotation
-
+        newBody.mRigidBody.mBody->setWorldTransform(MFUtil::mafiaMat4ToBullet(model.computeWorldTransform(meshIndex)));
         mRigidBodies.push_back(newBody);
     }
 }
