@@ -322,7 +322,6 @@ public:
 
                 meshTransform = MFMath::mul(meshTransform,MFMath::rotationMatrix(MFMath::Quat(m->mRot.x,m->mRot.y,m->mRot.z,m->mRot.w)));
 
-
                 result = MFMath::mul(meshTransform,result);
                 meshIndex = m->mParentID;
             }
