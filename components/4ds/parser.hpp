@@ -309,21 +309,21 @@ public:
         std::vector<Mesh> mMeshes;
         uint8_t mUse5DS;
 
-        MFMath::Vec3 computeWorldPos(uint16_t meshIndex)
+        MFMath::Mat4 computeWorldTransform(uint16_t meshIndex)
         {
-            MFMath::Vec3 result;
-
             meshIndex += 1;  // convert to 1-based
+
+            MFMath::Mat4 result = MFMath::identity;
 
             while (meshIndex > 0 && meshIndex <= mMeshCount)
             {
-                Mesh m = mMeshes[meshIndex - 1];
+                Mesh *m = &(mMeshes[meshIndex - 1]);
+                MFMath::Mat4 meshTransform = MFMath::translationMatrix(MFMath::Vec3(m->mPos.x,m->mPos.y,m->mPos.z));
 
-                result.x += m.mPos.x;
-                result.y += m.mPos.y;
-                result.z += m.mPos.z;
+                meshTransform = MFMath::mul(meshTransform,MFMath::rotationMatrix(MFMath::Quat(m->mRot.x,m->mRot.y,m->mRot.z,m->mRot.w)));
 
-                meshIndex = m.mParentID;
+                result = MFMath::mul(meshTransform,result);
+                meshIndex = m->mParentID;
             }
 
             return result;
