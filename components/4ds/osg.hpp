@@ -312,10 +312,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
         return emptyNode;
     }
 
-    char meshName[255];
-
-    memcpy(meshName,mesh->mMeshName,255);
-    meshName[mesh->mMeshNameLength] = 0;
+    std::string meshName = MFUtil::charBufferToStr(mesh->mMeshName,mesh->mMeshNameLength);
 
     MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
@@ -445,12 +442,9 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
         mat->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(d.x(),d.y(),d.z(),material->mTransparency));
     }
 
-    char diffuseTextureName[255];
-    memcpy(diffuseTextureName,material->mDiffuseMapName,255);
-    diffuseTextureName[static_cast<unsigned char>(material->mDiffuseMapNameLength)] = 0;  // terminate the string
-
-    char alphaTextureName[255];
-    char envTextureName[255]; 
+    std::string diffuseTextureName = MFUtil::charBufferToStr(material->mDiffuseMapName,material->mDiffuseMapNameLength);
+    std::string alphaTextureName;
+    std::string envTextureName; 
 
     if (envMap)
     {
@@ -465,8 +459,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
             
         stateSet->setTextureAttributeAndModes(diffuseUnit,texEnv);
 
-        memcpy(envTextureName,material->mEnvMapName,255);
-        envTextureName[static_cast<unsigned char>(material->mEnvMapNameLength)] = 0;  // terminate the string
+        envTextureName = MFUtil::charBufferToStr(material->mEnvMapName,material->mEnvMapNameLength);
 
         osg::ref_ptr<osg::TexGen> texGen = new osg::TexGen();
         texGen->setMode(osg::TexGen::SPHERE_MAP);
@@ -476,8 +469,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     if (alphaMap)
     {
         isTransparent = true;
-        memcpy(alphaTextureName,material->mAlphaMapName,255);
-        alphaTextureName[static_cast<unsigned char>(material->mAlphaMapNameLength)] = 0;  // terminate the string
+        alphaTextureName = MFUtil::charBufferToStr(material->mAlphaMapName,material->mAlphaMapNameLength);
     }
     else
     {

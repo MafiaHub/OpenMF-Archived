@@ -170,11 +170,13 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         for (int j = 0; j < (int) model.mMeshCount; ++j)
         {
             MFFormat::DataFormat4DS::Mesh *mesh = &(model.mMeshes[j]);            
-
+/*
             char buffer[255];   // TODO: make util function for this
             memcpy(buffer,mesh->mMeshName,mesh->mMeshNameLength);
             buffer[mesh->mMeshNameLength] = 0;
             std::string meshName = buffer;
+*/
+            std::string meshName = MFUtil::charBufferToStr(mesh->mMeshName,mesh->mMeshNameLength);
 
             if (meshName.compare(mFaceCollisions[i].mMeshName) == 0)
             {

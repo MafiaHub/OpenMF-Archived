@@ -7,9 +7,20 @@
 #include <iterator>
 #include <vector>
 #include <iomanip>
+#include <cstring>
 
 namespace MFUtil
 {
+
+std::string charBufferToStr(char *buffer, unsigned int bufferLen)
+{
+    char *tmp = (char *) malloc(bufferLen + 1);
+    memcpy(tmp,buffer,bufferLen);
+    tmp[bufferLen] = 0;                // terminate the string
+    std::string result = tmp;
+    free(tmp);
+    return result;
+}
 
 std::string strToLower(std::string str)
 {
