@@ -309,20 +309,17 @@ public:
         std::vector<Mesh> mMeshes;
         uint8_t mUse5DS;
 
-        MFMath::Vec3 computeWorldPos(uint16_t meshIndex)
+        MFMath::Mat4 computeWorldTransform(uint16_t meshIndex)
         {
-            MFMath::Vec3 result;
+            MFMath::Mat4 result;
 
             meshIndex += 1;  // convert to 1-based
 
             while (meshIndex > 0 && meshIndex <= mMeshCount)
             {
                 Mesh m = mMeshes[meshIndex - 1];
-
-                result.x += m.mPos.x;
-                result.y += m.mPos.y;
-                result.z += m.mPos.z;
-
+                MFMath::Mat4 meshTransform = MFMath::identity;
+                result = result * meshTransform;
                 meshIndex = m.mParentID;
             }
 
