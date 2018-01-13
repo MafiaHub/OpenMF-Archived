@@ -163,9 +163,9 @@ namespace MFMath
                                                                           sqrt(z.x * z.x + z.y * z.y + z.z * z.z)); }
         void                        separateRotation()                  { x.w = 0; y.w = 0; z.w = 0; w.x = 0; w.y = 0; w.z = 0; w.w = 1; 
                                                                           vec<T,3> s = getScale();
-                                                                          x.x /= s.x;     x.y /= s.y;    x.z /= s.z;
-                                                                          y.x /= s.x;     y.y /= s.y;    y.z /= s.z;
-                                                                          z.x /= s.x;     z.y /= s.y;    z.z /= s.z; }
+                                                                          x.x /= s.x;     x.y /= s.x;    x.z /= s.x;
+                                                                          y.x /= s.y;     y.y /= s.y;    y.z /= s.y;
+                                                                          z.x /= s.z;     z.y /= s.z;    z.z /= s.z; }
     };
 
     // Type traits for a binary operation involving linear algebra types, used for SFINAE on templated functions and operator overloads

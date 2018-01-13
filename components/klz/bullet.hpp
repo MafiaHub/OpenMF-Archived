@@ -94,7 +94,6 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 center = (p1 + p2) / 2.0f; \
         btVector3 bboxCorner = p2 - center; \
         btTransform transform = MFUtil::mafiaMat4ToBullet(col.mTransform); \
-        /* note: scale seems to never be used */ \
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
@@ -198,6 +197,12 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
             continue;
         }
 
+        if (m->mStandard.mLODs.size() == 0)
+        {
+            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - no LODs.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            continue;
+        }
+
         auto vertices = &(m->mStandard.mLODs[0].mVertices);
 
         MFUtil::NamedRigidBody newBody;
@@ -214,7 +219,6 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
             v = (*vertices)[indices.mI3].mPos;
             btVector3 v2 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
-
             newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
         }
 
