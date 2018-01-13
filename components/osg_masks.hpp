@@ -10,6 +10,6 @@ typedef enum
     MASK_DEBUG = 2       ///< anything that serves debugging and should not be displayed by default
 } NodeMask;
 
-};
+}
 
 #endif

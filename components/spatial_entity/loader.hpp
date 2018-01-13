@@ -41,7 +41,7 @@ public:
     virtual void apply(osg::Node &n) override
     {
         if (n.asGroup())          // FIXME: why does traverse() not work?
-            for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+            for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
                 n.asGroup()->getChild(i)->accept(*this);
     }
 
@@ -61,7 +61,7 @@ public:
 
                 // find the corresponding collision:
                
-                for (int i = 0; i < mTreeKlzBodies->size(); ++i)    // FIXME: ugly and slow?
+                for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)    // FIXME: ugly and slow?
                 { 
                     if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
                     {
@@ -77,7 +77,7 @@ public:
         }
 
         if (n.asGroup())          // FIXME: why does traverse() not work?
-            for (int i = 0; i < n.asGroup()->getNumChildren(); ++i)
+            for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
                 n.asGroup()->getChild(i)->accept(*this);
     }
 
@@ -108,11 +108,9 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
         result.push_back(newEntity);
     }
 
-    // TODO: make entities for remaining collisions for which graphical node hasn't been found
-
     return result;
 }
 
-};
+}
 
 #endif

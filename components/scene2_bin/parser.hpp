@@ -2,7 +2,7 @@
 #define FORMAT_PARSERS_SCENE2_BIN_H
 
 #include <cstring>
-
+#include <math.hpp>
 #include <base_parser.hpp>
 
 namespace MFFormat
@@ -76,17 +76,17 @@ public:
     typedef struct _Object
     {
         uint32_t mType;
-        Vec3 mPos;
-        Quat mRot;
-        Vec3 mPos2; // precomputed final world transform position
-        Vec3 mScale;
+        MFMath::Vec3 mPos;
+        MFMath::Quat mRot;
+        MFMath::Vec3 mPos2; // precomputed final world transform position
+        MFMath::Vec3 mScale;
         std::string mName;
         std::string mModelName;
         std::string mParentName;
 
         // Light properties
         uint32_t mLightType;
-        Vec3 mLightColour;
+        MFMath::Vec3 mLightColour;
         int32_t mLightFlags;
         float mLightPower;
         float mLightUnk0;
@@ -105,8 +105,8 @@ public:
     inline void setFov(float value)                             { mFov = value; }
     inline float getViewDistance()                              { return mViewDistance; }
     inline void setViewDistance(float value)                    { mViewDistance = value; }
-    inline Vec2  getClippingPlanes()                            { return mClippingPlanes; }
-    inline void  setClippingPlanes(Vec2 value)                  { mClippingPlanes = value; }
+    inline MFMath::Vec2  getClippingPlanes()                            { return mClippingPlanes; }
+    inline void  setClippingPlanes(MFMath::Vec2 value)                  { mClippingPlanes = value; }
 
 private:
     void readHeader(std::ifstream &srcFile, Header* header, uint32_t offset);
@@ -116,7 +116,7 @@ private:
     std::unordered_map<std::string, Object> mObjects;
     float mFov;
     float mViewDistance;
-    Vec2  mClippingPlanes;
+    MFMath::Vec2  mClippingPlanes;
 };
 
 bool DataFormatScene2BIN::load(std::ifstream &srcFile)
@@ -228,7 +228,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
         case OBJECT_POSITION:
         {
-            Vec3 newPosition = {};
+            MFMath::Vec3 newPosition = {};
             read(srcFile, &newPosition);
             object->mPos = newPosition;
         } 
@@ -236,7 +236,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
         case OBJECT_ROTATION:
         {
-            Quat newRotation = {};
+            MFMath::Quat newRotation = {};
             read(srcFile, &newRotation);
             newRotation.fromMafia();
             object->mRot = newRotation;
@@ -245,7 +245,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
         case OBJECT_POSITION_2:
         {
-            Vec3 newPosition = {};
+            MFMath::Vec3 newPosition = {};
             read(srcFile, &newPosition);
             object->mPos2 = newPosition;
         } 
@@ -253,7 +253,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
         case OBJECT_SCALE:
         {
-            Vec3 newScale = {};
+            MFMath::Vec3 newScale = {};
             read(srcFile, &newScale);
             object->mScale = newScale;
         } 

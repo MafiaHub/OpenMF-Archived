@@ -3,6 +3,7 @@
 
 #include <base_parser.hpp>
 #include <cstring>
+#include <math.hpp>
 
 namespace MFFormat
 {
@@ -73,9 +74,9 @@ public:
     typedef struct
     {
         uint32_t mFlags;
-        Vec3 mAmbient;
-        Vec3 mDiffuse;                     // only used if there is no diffuse texture, or if COLORED flag is set
-        Vec3 mEmission;                    // always used
+        MFMath::Vec3 mAmbient;
+        MFMath::Vec3 mDiffuse;                     // only used if there is no diffuse texture, or if COLORED flag is set
+        MFMath::Vec3 mEmission;                    // always used
         float mTransparency; // 0.0 - invisible; 1.0 - opaque
 
         // environment map
@@ -100,9 +101,9 @@ public:
 
     typedef struct
     {
-        Vec3 mPos;
-        Vec3 mNormal;
-        Vec2 mUV;
+        MFMath::Vec3 mPos;
+        MFMath::Vec3 mNormal;
+        MFMath::Vec2 mUV;
     } Vertex;
 
     typedef struct
@@ -115,7 +116,7 @@ public:
     typedef struct
     {
         uint16_t mFaceCount;
-        Face *mFaces;
+        std::vector<Face> mFaces;
         uint16_t mMaterialID;      // 1-based, 0 = default material
     } FaceGroup;
 
@@ -123,9 +124,9 @@ public:
     {
         float mRelativeDistance;
         uint16_t mVertexCount;
-        Vertex *mVertices;
+        std::vector<Vertex> mVertices;
         uint8_t mFaceGroupCount;
-        FaceGroup *mFaceGroups;
+        std::vector<FaceGroup> mFaceGroups;
     } Lod;
 
     typedef struct
@@ -133,14 +134,14 @@ public:
         uint16_t mInstanced;
         // for non-instanced mesh
         uint8_t mLODLevel;
-        Lod *mLODs;
+        std::vector<Lod> mLODs;
     } Standard;
 
     typedef struct
     {
         uint16_t mUnk0;
         uint8_t mTargetCount;
-        uint16_t *mTargets;
+        std::vector<uint16_t> mTargets;
     } Target;
 
     typedef struct
@@ -154,7 +155,7 @@ public:
         uint8_t mVertexCount;
         uint32_t mUnk0; // always 4.
         uint32_t mUnk1[6];
-        Vec3 *mVertices;
+        std::vector<MFMath::Vec3> mVertices;
     } Portal;
 
     typedef struct
@@ -163,12 +164,12 @@ public:
         uint32_t mUnk1; // always 0.
         uint32_t mVertexCount;
         uint32_t mFaceCount;
-        Vec3 *mVertices;
-        Face *mFaces;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        std::vector<MFMath::Vec3> mVertices;
+        std::vector<Face> mFaces;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         uint8_t mPortalCount;
-        Portal *mPortals;
+        std::vector<Portal> mPortals;
     } Sector;
 
     typedef struct
@@ -181,8 +182,8 @@ public:
     typedef struct
     {
         // bounding box
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
     } Dummy;
 
     typedef struct
@@ -194,35 +195,35 @@ public:
     typedef struct
     {
         uint8_t mGlowCount;
-        GlowData *mGlowData;
+        std::vector<GlowData> mGlowData;
     } Glow;
 
     typedef struct
     {
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         float mUnk[4];
-        Mat4 mReflectionMatrix;
-        Vec3 mBackgroundColor;
+        MFMath::Mat4 mReflectionMatrix;
+        MFMath::Vec3 mBackgroundColor;
         float mViewDistance;
         uint32_t mVertexCount;
         uint32_t mFaceCount;
-        Vec3 *mVertices;
-        Face *mFaces;
+        std::vector<MFMath::Vec3> mVertices;
+        std::vector<Face> mFaces;
     } Mirror;
 
     typedef struct
     {
-        Vec3 mPosition;
-        Vec3 mNormals;
+        MFMath::Vec3 mPosition;
+        MFMath::Vec3 mNormals;
     } MorphLodVertex;
 
     typedef struct
     {
         uint16_t mVertexCount;
-        MorphLodVertex *mVertices;
+        std::vector<MorphLodVertex> mVertices;
         uint8_t mUnk0;
-        uint16_t *mVertexLinks; // addresses vertices from Standard's LOD mesh  
+        std::vector<uint16_t> mVertexLinks; // addresses vertices from Standard's LOD mesh  
     } MorphLod;
 
     typedef struct
@@ -231,9 +232,9 @@ public:
         uint8_t mFrameCount;
         uint8_t mLODLevel;      // should be equal to Standard.LODLevel
         uint8_t mUnk0;
-        MorphLod *mLODs;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
+        std::vector<MorphLod> mLODs;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
         float mUnk1[4];
     } Morph;
 
@@ -243,24 +244,24 @@ public:
         uint32_t mUnk0;
         uint32_t mAdditionalValuesCount;
         uint32_t mBoneID;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
-        float *mAdditionalValues;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
+        std::vector<float> mAdditionalValues;
     } SingleMeshLodJoint;
 
     typedef struct
     {
         uint8_t mJointCount;
         uint32_t mUnk0;
-        Vec3 mMinBox;
-        Vec3 mMaxBox;
-        SingleMeshLodJoint *mJoints;
+        MFMath::Vec3 mMinBox;
+        MFMath::Vec3 mMaxBox;
+        std::vector<SingleMeshLodJoint> mJoints;
     } SingleMeshLod;
 
     typedef struct
     {
         Standard mStandard;
-        SingleMeshLod *mLODs; // LODLevel == Standard.LODLevel.
+        std::vector<SingleMeshLod> mLODs; // LODLevel == Standard.LODLevel.
     } SingleMesh;
 
     typedef struct
@@ -276,9 +277,9 @@ public:
         uint8_t mVisualMeshType;
         uint16_t mMeshRenderFlags;
         uint16_t mParentID; // 0 - not connected
-        Vec3 mPos;
-        Vec3 mScale;
-        Quat mRot;
+        MFMath::Vec3 mPos;
+        MFMath::Vec3 mScale;
+        MFMath::Quat mRot;
         uint8_t mCullingFlags;
         uint8_t mMeshNameLength;
         char mMeshName[255];
@@ -297,21 +298,41 @@ public:
         SingleMorph mSingleMorph;
     } Mesh;
 
-    typedef struct
+    typedef struct sModel
     {
         uint8_t mSignature[4];
         uint16_t mFormatVersion; // PC : 0x1D (29)
         uint64_t mTimestamp;
         uint16_t mMaterialCount;
-        Material *mMaterials;
+        std::vector<Material> mMaterials;
         uint16_t mMeshCount;
-        Mesh *mMeshes;
+        std::vector<Mesh> mMeshes;
         uint8_t mUse5DS;
+
+        MFMath::Vec3 computeWorldPos(uint16_t meshIndex)
+        {
+            MFMath::Vec3 result;
+
+            meshIndex += 1;  // convert to 1-based
+
+            while (meshIndex > 0 && meshIndex <= mMeshCount)
+            {
+                Mesh m = mMeshes[meshIndex - 1];
+
+                result.x += m.mPos.x;
+                result.y += m.mPos.y;
+                result.z += m.mPos.z;
+
+                meshIndex = m.mParentID;
+            }
+
+            return result;
+        }
     } Model;
 
     virtual bool load(std::ifstream &srcFile) override;
     
-    inline Model* getModel()
+    inline Model getModel()
     {
         return mLoadedModel;
     }
@@ -347,14 +368,13 @@ protected:
     SingleMesh loadSingleMesh(std::ifstream &file);
     SingleMorph loadSingleMorph(std::ifstream &file);
     void loadMesh(Model *model, std::ifstream &file);
-    Model* loadModel(std::ifstream &file);
-    Model* mLoadedModel;
+    Model loadModel(std::ifstream &file);
+    Model mLoadedModel;
 };
 
 void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
 {
     read(file, &model->mMaterialCount);
-    model->mMaterials = reinterpret_cast<Material*>(malloc(sizeof(Material) * model->mMaterialCount));
     
     for(size_t i = 0; i < model->mMaterialCount; ++i) 
     {
@@ -391,7 +411,7 @@ void DataFormat4DS::loadMaterial(Model *model, std::ifstream &file)
             read(file, &mat.mUnk2);
         }
 
-        model->mMaterials[i] = mat;
+        model->mMaterials.push_back(mat);
     }  
 }
 
@@ -401,21 +421,29 @@ DataFormat4DS::Lod DataFormat4DS::loadLod(std::ifstream &file)
     read(file, &newLod.mRelativeDistance);
     read(file, &newLod.mVertexCount);
 
-    newLod.mVertices = reinterpret_cast<Vertex*>(malloc(sizeof(Vertex)* newLod.mVertexCount));
-    read(file, newLod.mVertices, sizeof(Vertex)*newLod.mVertexCount);
+    for (size_t i = 0; i < newLod.mVertexCount; ++i)
+    {
+        Vertex v;
+        read(file,&v,sizeof(v));
+        newLod.mVertices.push_back(v);
+    }
+
     read(file, &newLod.mFaceGroupCount); 
 
-    newLod.mFaceGroups = reinterpret_cast<FaceGroup*>(malloc(sizeof(FaceGroup)*newLod.mFaceGroupCount));
-    
-    for(size_t i = 0; i < newLod.mFaceGroupCount; ++i)
+    for (size_t i = 0; i < newLod.mFaceGroupCount; ++i)
     {
-        FaceGroup new_face_group = {};
-        read(file, &new_face_group.mFaceCount);
-        new_face_group.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*new_face_group.mFaceCount));
-        read(file, new_face_group.mFaces, sizeof(Face)*new_face_group.mFaceCount);
-        read(file, &new_face_group.mMaterialID);
+        FaceGroup newFaceGroup = {};
+        read(file, &newFaceGroup.mFaceCount);
 
-        newLod.mFaceGroups[i] = new_face_group;
+        for (size_t j = 0; j < newFaceGroup.mFaceCount; ++j)
+        {
+           Face f;
+           read(file,&f,sizeof(f));
+           newFaceGroup.mFaces.push_back(f);
+        }
+
+        read(file, &newFaceGroup.mMaterialID);
+        newLod.mFaceGroups.push_back(newFaceGroup);
     }
 
     return newLod;
@@ -429,13 +457,12 @@ DataFormat4DS::Standard DataFormat4DS::loadStandard(std::ifstream &file)
     if(!newStandard.mInstanced)
     {
         read(file, &newStandard.mLODLevel);
-        newStandard.mLODs = reinterpret_cast<Lod*>(malloc(sizeof(Lod)*newStandard.mLODLevel));
 
         for(size_t i = 0; i < newStandard.mLODLevel; ++i)
         {
             Lod newLod = {};
             newLod = loadLod(file);
-            newStandard.mLODs[i] = newLod;
+            newStandard.mLODs.push_back(newLod);
         }
     }
 
@@ -454,12 +481,20 @@ DataFormat4DS::Mirror DataFormat4DS::loadMirror(std::ifstream &file)
     read(file, &newMirror.mVertexCount);
     read(file, &newMirror.mFaceCount);
 
-    newMirror.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newMirror.mVertexCount));
-    newMirror.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*newMirror.mFaceCount));
-    
-    read(file, newMirror.mVertices, sizeof(Vec3)*newMirror.mVertexCount);
-    read(file, newMirror.mFaces, sizeof(Face)*newMirror.mFaceCount);
-    
+    for (size_t i = 0; i < newMirror.mVertexCount; ++i)
+    {
+        MFMath::Vec3 v;
+        read(file,&v,sizeof(v));
+        newMirror.mVertices.push_back(v);
+    }
+
+    for (size_t i = 0; i < newMirror.mFaceCount; ++i)
+    {
+        Face f;
+        read(file,&f,sizeof(f));
+        newMirror.mFaces.push_back(f);
+    }
+
     return newMirror;
 }
 
@@ -467,15 +502,13 @@ DataFormat4DS::Glow DataFormat4DS::loadGlow(std::ifstream &file)
 {
     Glow newGlow = {};
     read(file, &newGlow.mGlowCount);
-    newGlow.mGlowData = reinterpret_cast<GlowData*>(malloc(sizeof(GlowData)*newGlow.mGlowCount));
     
-    for(size_t i = 0; i < newGlow.mGlowCount; ++i)
+    for (size_t i = 0; i < newGlow.mGlowCount; ++i)
     {
         GlowData newGlow_data = {};
         read(file, &newGlow_data.mPosition);
         read(file, &newGlow_data.mMaterialID);
-        
-        newGlow.mGlowData[i] = newGlow_data;
+        newGlow.mGlowData.push_back(newGlow_data);
     }
     
     return newGlow;
@@ -487,8 +520,13 @@ DataFormat4DS::Portal DataFormat4DS::loadPortal(std::ifstream &file)
     read(file, &newPortal.mVertexCount);
     read(file, &newPortal.mUnk0);
     read(file, newPortal.mUnk1, sizeof(float) * 6);
-    newPortal.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newPortal.mVertexCount));
-    read(file, newPortal.mVertices, sizeof(Vec3)*newPortal.mVertexCount); 
+
+    for (size_t i = 0; i < newPortal.mVertexCount; ++i)
+    {
+        MFMath::Vec3 v;
+        read(file,&v,sizeof(v));
+        newPortal.mVertices.push_back(v);
+    }
    
     return newPortal;
 }
@@ -501,23 +539,29 @@ DataFormat4DS::Sector DataFormat4DS::loadSector(std::ifstream &file)
     read(file, &newSector.mVertexCount);
     read(file, &newSector.mFaceCount);
 
-    newSector.mVertices = reinterpret_cast<Vec3*>(malloc(sizeof(Vec3)*newSector.mVertexCount));
-    read(file, newSector.mVertices, sizeof(Vec3)*newSector.mVertexCount);
+    for (size_t i = 0; i < newSector.mVertexCount; ++i)
+    {
+        MFMath::Vec3 v;
+        read(file,&v,sizeof(v));
+        newSector.mVertices.push_back(v);
+    }
 
-    newSector.mFaces = reinterpret_cast<Face*>(malloc(sizeof(Face)*newSector.mFaceCount));
-    read(file, newSector.mFaces, sizeof(Face) *newSector.mFaceCount);
+    for (size_t i = 0; i < newSector.mFaceCount; ++i)
+    {
+        Face f;
+        read(file,&f,sizeof(f));
+        newSector.mFaces.push_back(f);
+    }
 
     read(file, &newSector.mMinBox);
     read(file, &newSector.mMaxBox);
     read(file, &newSector.mPortalCount);
 
-    newSector.mPortals = reinterpret_cast<Portal*>(malloc(sizeof(Portal)*newSector.mPortalCount));
-
     for(size_t i = 0; i < newSector.mPortalCount; ++i) 
     {
         Portal newPortal = {};
         newPortal = loadPortal(file);
-        newSector.mPortals[i] = newPortal;
+        newSector.mPortals.push_back(newPortal);
     }
 
     return newSector;
@@ -528,10 +572,14 @@ DataFormat4DS::Target DataFormat4DS::loadTarget(std::ifstream &file)
     Target newTarget = {};
     read(file, &newTarget.mUnk0);
     read(file, &newTarget.mTargetCount);
-    
-    newTarget.mTargets = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*newTarget.mTargetCount));
-    read(file, newTarget.mTargets, sizeof(uint16_t)*newTarget.mTargetCount);
-    
+   
+    for (size_t i = 0; i < newTarget.mTargetCount; ++i)
+    {
+        uint16_t t;
+        read(file,&t,sizeof(t));
+        newTarget.mTargets.push_back(t);
+    }
+ 
     return newTarget;
 }
 
@@ -539,7 +587,7 @@ DataFormat4DS::Morph DataFormat4DS::loadMorph(std::ifstream &file, bool ignoreSt
 {
     Morph newMorph = { };
     // NOTE(zaklaus): Single Morph contains Standard Mesh in Single Mesh already.
-    if(!ignoreStandard) 
+    if (!ignoreStandard) 
     {
         newMorph.mStandard = loadStandard(file);
     } 
@@ -547,30 +595,36 @@ DataFormat4DS::Morph DataFormat4DS::loadMorph(std::ifstream &file, bool ignoreSt
     
     read(file, &newMorph.mFrameCount);
     
-    if(newMorph.mFrameCount)
+    if (newMorph.mFrameCount)
     {
         read(file, &newMorph.mLODLevel);
         read(file, &newMorph.mUnk0);
 
-        newMorph.mLODs = reinterpret_cast<MorphLod*>(malloc(sizeof(MorphLod)*newMorph.mLODLevel));
-
-        for(size_t i = 0; i < newMorph.mLODLevel; ++i) 
+        for (size_t i = 0; i < newMorph.mLODLevel; ++i) 
         {
             MorphLod newMorphLod = {};
             read(file, &newMorphLod.mVertexCount);
 
-            newMorphLod.mVertices = reinterpret_cast<MorphLodVertex*>(malloc(sizeof(MorphLodVertex)*newMorphLod.mVertexCount * newMorph.mFrameCount));
-            read(file, newMorphLod.mVertices, sizeof(MorphLodVertex)*newMorphLod.mVertexCount * newMorph.mFrameCount);
+            for (size_t j = 0; j < newMorph.mFrameCount * newMorphLod.mVertexCount; ++j)
+            {
+                MorphLodVertex v;
+                read(file,&v,sizeof(v));
+                newMorphLod.mVertices.push_back(v);
+            }
 
-            if(newMorphLod.mVertexCount * newMorph.mFrameCount) 
+            if (newMorphLod.mVertexCount * newMorph.mFrameCount) 
             {
                 read(file, &newMorphLod.mUnk0);
             }
 
-            newMorphLod.mVertexLinks = reinterpret_cast<uint16_t*>(malloc(sizeof(uint16_t)*newMorphLod.mVertexCount));
-            read(file, newMorphLod.mVertexLinks, sizeof(uint16_t)*newMorphLod.mVertexCount);
+            for (size_t j = 0; j < newMorphLod.mVertexCount; ++j)
+            {
+                uint16_t v;
+                read(file,&v,sizeof(v));
+                newMorphLod.mVertexLinks.push_back(v);
+            }
 
-            newMorph.mLODs[i] = newMorphLod;
+            newMorph.mLODs.push_back(newMorphLod);
         }
         
         read(file, &newMorph.mMinBox);
@@ -590,10 +644,14 @@ DataFormat4DS::SingleMeshLodJoint DataFormat4DS::loadSingleMeshLodJoint(std::ifs
     read(file, &newJoint.mBoneID);
     read(file, &newJoint.mMinBox);
     read(file, &newJoint.mMaxBox);
+  
+    for (size_t i = 0; i < newJoint.mAdditionalValuesCount; ++i)
+    {
+        float f;
+        read(file,&f,sizeof(f));
+        newJoint.mAdditionalValues.push_back(f);
+    }
 
-    newJoint.mAdditionalValues = reinterpret_cast<float*>(malloc(sizeof(float)*newJoint.mAdditionalValuesCount));
-    read(file, newJoint.mAdditionalValues, sizeof(float)*newJoint.mAdditionalValuesCount);
-   
     return newJoint;
 }
 
@@ -605,12 +663,11 @@ DataFormat4DS::SingleMeshLod DataFormat4DS::loadSingleMeshLod(std::ifstream &fil
     read(file, &newLod.mMinBox);
     read(file, &newLod.mMaxBox);
 
-    newLod.mJoints = reinterpret_cast<SingleMeshLodJoint*>(malloc(sizeof(SingleMeshLodJoint)*newLod.mJointCount));
-    for(size_t i = 0; i < newLod.mJointCount; ++i) 
+    for (size_t i = 0; i < newLod.mJointCount; ++i) 
     {
         SingleMeshLodJoint newJoint = {};
         newJoint = loadSingleMeshLodJoint(file);
-        newLod.mJoints[i] = newJoint;
+        newLod.mJoints.push_back(newJoint);
     }  
       
     return newLod;
@@ -622,13 +679,11 @@ DataFormat4DS::SingleMesh DataFormat4DS::loadSingleMesh(std::ifstream &file)
     
     newMesh.mStandard = loadStandard(file);
     
-    newMesh.mLODs = reinterpret_cast<SingleMeshLod*>(malloc(sizeof(SingleMeshLod)*newMesh.mStandard.mLODLevel));
-    
     for(size_t i = 0; i < newMesh.mStandard.mLODLevel; ++i) 
     {
         SingleMeshLod newLod = {};
         newLod = loadSingleMeshLod(file);
-        newMesh.mLODs[i] = newLod;
+        newMesh.mLODs.push_back(newLod);
     }
     
     return newMesh;
@@ -646,9 +701,8 @@ DataFormat4DS::SingleMorph DataFormat4DS::loadSingleMorph(std::ifstream &file)
 void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
 {
     read(file, &model->mMeshCount);
-    model->mMeshes = reinterpret_cast<Mesh*>(malloc(sizeof(Mesh)*model->mMeshCount));
 
-    for(size_t i = 0; i < model->mMeshCount; ++i)
+    for (size_t i = 0; i < model->mMeshCount; ++i)
     {
         Mesh newMesh = {};
         read(file, &newMesh.mMeshType);
@@ -793,35 +847,36 @@ void DataFormat4DS::loadMesh(Model *model, std::ifstream &file)
             newMesh.mMeshType = MESHTYPE_COLLISION;
         }
 
-        model->mMeshes[i] = newMesh;
+        model->mMeshes.push_back(newMesh);
     }
 }
 
-DataFormat4DS::Model* DataFormat4DS::loadModel(std::ifstream &file)
+DataFormat4DS::Model DataFormat4DS::loadModel(std::ifstream &file)
 {
-    Model *model = reinterpret_cast<Model*>(malloc(sizeof(Model)));
-    read(file, &model->mSignature, 4);
+    Model model;
+    read(file, &model.mSignature, 4);
 
-    if (strncmp(reinterpret_cast<char*>(model->mSignature), "4DS", 3) != 0)
+    if (strncmp(reinterpret_cast<char*>(model.mSignature), "4DS", 3) != 0)
     {
         mErrorCode = DataFormat4DS::ERROR_SIGNATURE;
-        return nullptr;
+        return model;
     }
 
-    read(file, &model->mFormatVersion);
-    read(file, &model->mTimestamp);
+    read(file, &model.mFormatVersion);
+    read(file, &model.mTimestamp);
     
-    loadMaterial(model, file);
-    loadMesh(model, file);
-    read(file, &model->mUse5DS);
-    
+    loadMaterial(&model, file);
+    loadMesh(&model, file);
+    read(file, &model.mUse5DS);
+   
+    mErrorCode = DataFormat4DS::ERROR_SUCCESS;
     return model;
 }
 
 bool DataFormat4DS::load(std::ifstream &srcFile)
 {
     mLoadedModel = loadModel(srcFile);
-    return mLoadedModel != nullptr;
+    return mErrorCode == DataFormat4DS::ERROR_SUCCESS;
 }
 
 }

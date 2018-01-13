@@ -155,7 +155,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
                         lightNode->setNodeMask(MFRender::MASK_GAME);
 
-                        MFFormat::DataFormat::Vec3 c = object.mLightColour;
+                        MFMath::Vec3 c = object.mLightColour;
                         osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
 
                         if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
