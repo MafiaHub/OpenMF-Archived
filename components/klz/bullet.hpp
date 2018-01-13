@@ -198,6 +198,12 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
             continue;
         }
 
+        if (m->mStandard.mLODs.size() == 0)
+        {
+            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - no LODs.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            continue;
+        }
+
         auto vertices = &(m->mStandard.mLODs[0].mVertices);
 
         MFUtil::NamedRigidBody newBody;
@@ -214,7 +220,6 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
             v = (*vertices)[indices.mI3].mPos;
             btVector3 v2 = MFUtil::mafiaVec3ToBullet(v.x,v.y,v.z);
-
             newBody.mRigidBody.mMesh->addTriangle(v0,v1,v2);
         }
 
