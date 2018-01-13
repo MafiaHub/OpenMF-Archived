@@ -311,16 +311,16 @@ public:
 
         MFMath::Mat4 computeWorldTransform(uint16_t meshIndex)
         {
-            MFMath::Mat4 result;
-
             meshIndex += 1;  // convert to 1-based
+
+            MFMath::Mat4 result = MFMath::identity;
 
             while (meshIndex > 0 && meshIndex <= mMeshCount)
             {
-                Mesh m = mMeshes[meshIndex - 1];
-                MFMath::Mat4 meshTransform = MFMath::identity;
-                result = result * meshTransform;
-                meshIndex = m.mParentID;
+                Mesh *m = &(mMeshes[meshIndex - 1]);
+                MFMath::Mat4 meshTransform = MFMath::translationMatrix(MFMath::Vec3(m->mPos.x,m->mPos.y,m->mPos.z));
+                result = MFMath::mul(result,meshTransform);
+                meshIndex = m->mParentID;
             }
 
             return result;
