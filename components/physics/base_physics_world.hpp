@@ -22,6 +22,6 @@ public:
     virtual int pointCollision(double x, double y, double z)=0;
 };
 
-};
+}
 
 #endif

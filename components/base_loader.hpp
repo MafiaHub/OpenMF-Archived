@@ -6,6 +6,7 @@
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
 #include <loader_cache.hpp>
+#include <math.hpp>
 
 #define OSGLOADER_MODULE_STR "OSG loader"
 
@@ -32,16 +33,16 @@ public:
     void setBaseDir(std::string baseDir);
     void setLoaderCache(LoaderCache<OSGCached> *cache) { mLoaderCache = cache; };
 
-    osg::Vec3f toOSG(MFFormat::DataFormat::Vec3 v);
-    osg::Quat toOSG(MFFormat::DataFormat::Quat q);
+    osg::Vec3f toOSG(MFMath::Vec3 v);
+    osg::Quat toOSG(MFMath::Quat q);
 
     void setNodeMap(NodeMap *nodeMap);
 
 protected:
     osg::Matrixd makeTransformMatrix(
-        MFFormat::DataFormat::Vec3 p,
-        MFFormat::DataFormat::Vec3 s,
-        MFFormat::DataFormat::Quat r);
+        MFMath::Vec3 p,
+        MFMath::Vec3 s,
+        MFMath::Quat r);
 
     std::string getTextureDir();
     std::string getModelDir();
@@ -81,12 +82,12 @@ void OSGLoader::storeToCache(std::string identifier,OSGCached obj)
         mLoaderCache->storeObject(identifier,obj);
 }
 
-osg::Vec3f OSGLoader::toOSG(MFFormat::DataFormat::Vec3 v)
+osg::Vec3f OSGLoader::toOSG(MFMath::Vec3 v)
 {
     return mMafiaToOSGMatrix.preMult(osg::Vec3(v.x,v.y,v.z));
 }
 
-osg::Quat OSGLoader::toOSG(MFFormat::DataFormat::Quat q)
+osg::Quat OSGLoader::toOSG(MFMath::Quat q)
 {
     osg::Matrixd transform;
     transform.preMult(mMafiaToOSGMatrix);
@@ -125,9 +126,9 @@ std::string OSGLoader::getModelDir()
 }
 
 osg::Matrixd OSGLoader::makeTransformMatrix(
-    MFFormat::DataFormat::Vec3 p,
-    MFFormat::DataFormat::Vec3 s,
-    MFFormat::DataFormat::Quat r)
+    MFMath::Vec3 p,
+    MFMath::Vec3 s,
+    MFMath::Quat r)
 {
     osg::Matrixd mat;
 

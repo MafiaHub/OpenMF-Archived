@@ -21,14 +21,14 @@ public:
     {
         Header mHeader;
         std::string mModelName;
-        Vec3 mPos;
-        Quat mRot;
-        Vec3 mScale;
+        MFMath::Vec3 mPos;
+        MFMath::Quat mRot;
+        MFMath::Vec3 mScale;
         uint32_t mUnk0;
 
         // NOTE(zaklaus): This field is rarely used for some instances
         // around the docks or right next to Central Hoboken station.
-        Vec3 mScale2;
+        MFMath::Vec3 mScale2;
     } Instance;
 
     typedef struct
