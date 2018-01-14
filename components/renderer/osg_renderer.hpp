@@ -67,16 +67,23 @@ public:
                     mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
             }
 
-            mSelected = result.drawable;
-            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+            if (mSelected == result.drawable)  // clicking the same node twice will deselect it
+            {
+                mSelected = 0;
+            }
+            else
+            {
+                mSelected = result.drawable;
+                mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+                mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
 
-            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+                MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
 
-            for (int i = 0; i < (int) result.nodePath.size(); ++i)
-                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+                for (int i = 0; i < (int) result.nodePath.size(); ++i)
+                    MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
 
-            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+                MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+            }
         }
 
         return true;
