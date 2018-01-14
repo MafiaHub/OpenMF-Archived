@@ -73,7 +73,55 @@ public:
 protected:
     LightList mLightNodes;
     osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> mCameraRelative;   ///< children of this node move relatively with the camera
+    osg::ref_ptr<osg::Node> makeLightNode(MFFormat::DataFormatScene2BIN::Object object);
 };
+
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
+{
+    osg::ref_ptr<osg::Group> lightGroup = new osg::Group;
+
+    osg::ref_ptr<osg::ShapeDrawable> debugNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),0.05));
+    debugNode->setNodeMask(MFRender::MASK_DEBUG);
+    lightGroup->addChild(debugNode);
+
+    osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
+
+    lightNode->setNodeMask(MFRender::MASK_GAME);
+
+    MFMath::Vec3 c = object.mLightColour;
+    osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
+
+    if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
+    {
+        lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
+        lightNode->getLight()->setAmbient(osg::Vec4(lightColor,1));
+        lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+    }
+    else
+    {
+        lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
+        lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
+        lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+    }
+
+    bool isPositional =
+        object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
+        object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT;
+
+    osg::Vec3f lightPos = isPositional ?
+        osg::Vec3f(0,0,0) :             // position will be set via transform node
+        toOSG(object.mPos);             // for directional lights position usually defines direction - is this the right field though?
+
+    lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
+        isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
+
+    lightGroup->addChild(lightNode);
+
+    lightNode->setName(MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType));
+    mLightNodes.push_back(lightNode);
+
+    return lightGroup;
+}
 
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
@@ -128,65 +176,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             {
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
                 {
-                    logStr += "light (";
-                    std::string lightTypeName;
-
-                    switch (object.mLightType)
-                    {
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT: lightTypeName = "point"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL: lightTypeName = "directional"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT: lightTypeName = "ambient"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_FOG: lightTypeName = "fog"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT: lightTypeName = "point ambient"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_LAYERED_FOG: lightTypeName = "layered fog"; break;
-                        default: break;
-                    }
-
-                    logStr += lightTypeName + ")";
-
-                    #if 0
-                        // for debug
-                        osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
-                        new osg::Sphere(osg::Vec3f(0,0,0),0.1));
-                    #else
-                        // TODO: add a debug geometry for light, with MASK_DEBUG mask
-
-                        osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
-
-                        lightNode->setNodeMask(MFRender::MASK_GAME);
-
-                        MFMath::Vec3 c = object.mLightColour;
-                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
-
-                        if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
-                        {
-                            lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
-                            lightNode->getLight()->setAmbient(osg::Vec4(lightColor,1));
-                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
-                        }
-                        else
-                        {
-                            lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
-                            lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
-                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
-                        }
-
-                        bool isPositional =
-                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
-                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT;
-
-                        osg::Vec3f lightPos = isPositional ?
-                            osg::Vec3f(0,0,0) :             // position will be set via transform node
-                            toOSG(object.mPos);             // for directional lights position usually defines direction - is this the right field though?
-
-                        lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
-                            isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
-                    #endif
-
-                    lightNode->setName(lightTypeName);
-                    mLightNodes.push_back(lightNode);
-
-                    objectNode = lightNode;
+                    logStr += "light (" + MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType) + ")";
+                    objectNode = makeLightNode(object);
                     break;
                 }
 
