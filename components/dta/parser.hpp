@@ -309,10 +309,12 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         std::vector<unsigned char> decompressed;
 
+        int dpcmType = -1;
+
         switch (blockType)
         {
             case BLOCK_UNCOMPRESSED:
-                for (uint32_t j = 0; j < blockSize - 1; ++j)          // just copy the data
+                for (uint32_t j = 0; j < blockSize - 1; ++j)           // just copy the data
                     decompressed.push_back(block[1 + j]);
                 break;
 
@@ -320,16 +322,18 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
                 decompressed = decompressLZSS((unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
                 break;
 
-            // FIXME: uncopy-paste
-            case BLOCK_DPCM0: decompressed = decompressDPCM(&WAV_DELTAS[128 * 0],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM1: decompressed = decompressDPCM(&WAV_DELTAS[128 * 1],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM2: decompressed = decompressDPCM(&WAV_DELTAS[128 * 2],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM3: decompressed = decompressDPCM(&WAV_DELTAS[128 * 3],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM4: decompressed = decompressDPCM(&WAV_DELTAS[128 * 4],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM5: decompressed = decompressDPCM(&WAV_DELTAS[128 * 5],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
-            case BLOCK_DPCM6: decompressed = decompressDPCM(&WAV_DELTAS[128 * 6],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1); break;
+            case BLOCK_DPCM0: dpcmType = 0; break;
+            case BLOCK_DPCM1: dpcmType = 1; break; 
+            case BLOCK_DPCM2: dpcmType = 2; break; 
+            case BLOCK_DPCM3: dpcmType = 3; break;
+            case BLOCK_DPCM4: dpcmType = 4; break;
+            case BLOCK_DPCM5: dpcmType = 5; break;
+            case BLOCK_DPCM6: dpcmType = 6; break;
             default: break;
         }
+
+        if (dpcmType >= 0)
+            decompressed = decompressDPCM(&WAV_DELTAS[128 * dpcmType],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
 
         memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
         bufferPos += (uint32_t) decompressed.size();
