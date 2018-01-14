@@ -40,9 +40,7 @@ public:
 
     virtual void apply(osg::Node &n) override
     {
-        if (n.asGroup())          // FIXME: why does traverse() not work?
-            for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
-                n.asGroup()->getChild(i)->accept(*this);
+        MFUtil::traverse(this,n);
     }
 
     virtual void apply(osg::MatrixTransform &n) override
@@ -76,9 +74,7 @@ public:
             }
         }
 
-        if (n.asGroup())          // FIXME: why does traverse() not work?
-            for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
-                n.asGroup()->getChild(i)->accept(*this);
+        MFUtil::traverse(this,n);
     }
 
     SpatialEntityLoader::SpatialEntityList mEntities;

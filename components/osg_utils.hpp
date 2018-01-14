@@ -10,6 +10,15 @@
 namespace MFUtil
 {
 
+/*** Call accept(v) on all children of n. */
+
+void traverse(osg::NodeVisitor *v,osg::Node &n)
+{
+    if (n.asGroup())
+        for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
+            n.asGroup()->getChild(i)->accept(*v);
+}
+
 /** Convert quaternion rotation to yaw, pitch, roll (Euler angles), in radians. */
 
 void quatToEuler(osg::Quat q, double &yaw, double &pitch, double &roll)

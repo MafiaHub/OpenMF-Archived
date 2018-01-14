@@ -37,24 +37,20 @@ public:
 
     virtual void apply(osg::Node &n) override
     {
-          osg::StateSet *stateSet = n.getStateSet();
+        osg::StateSet *stateSet = n.getStateSet();
 
-          if (stateSet)
-          {
-              osg::StateAttribute *stateAttribute = stateSet->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
+        if (stateSet)
+        {
+            osg::StateAttribute *stateAttribute = stateSet->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
 
-              if (stateAttribute && stateAttribute->asTexture())
-              {
-                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_S,osg::Texture::MIRROR);    
-                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_T,osg::Texture::MIRROR);    
-              }
-          }
+            if (stateAttribute && stateAttribute->asTexture())
+            {
+                stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_S,osg::Texture::MIRROR);    
+                stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_T,osg::Texture::MIRROR);    
+            }
+        }
 
-          if (n.asGroup())  // traverse(n) didn't work somehow
-          {
-              for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
-                  n.asGroup()->getChild(i)->accept(*this);
-          }
+        MFUtil::traverse(this,n);
     }
 
 protected:
