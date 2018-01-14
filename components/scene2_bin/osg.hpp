@@ -66,40 +66,85 @@ class OSGScene2BinLoader : public OSGLoader
 public:
     typedef std::vector<osg::ref_ptr<osg::LightSource>> LightList;
 
+    OSGScene2BinLoader();
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
     LightList getLightNodes() { return mLightNodes; };
     osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };
 
 protected:
     LightList mLightNodes;
+    osg::ref_ptr<osg::Node> mDebugPointLightNode;
+    osg::ref_ptr<osg::Node> mDebugDirectionalLightNode;
+    osg::ref_ptr<osg::Node> mDebugOtherLightNode;
+
     osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> mCameraRelative;   ///< children of this node move relatively with the camera
     osg::ref_ptr<osg::Node> makeLightNode(MFFormat::DataFormatScene2BIN::Object object);
 };
 
+OSGScene2BinLoader::OSGScene2BinLoader(): OSGLoader()
+{
+    mDebugPointLightNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),1));
+    mDebugPointLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugPointLightNode->setName("debug point light node");
+
+    mDebugDirectionalLightNode = new osg::ShapeDrawable(new osg::Cone(osg::Vec3f(0,0,0),1,1));
+    mDebugDirectionalLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugDirectionalLightNode->setName("debug directional light node");
+
+    mDebugOtherLightNode = new osg::ShapeDrawable(new osg::Box(osg::Vec3f(0,0,0),1));
+    mDebugOtherLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugOtherLightNode->setName("debug other light node");
+}
+
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
 {
     osg::ref_ptr<osg::Group> lightGroup = new osg::Group;
+    lightGroup->setName(MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType));
 
-    osg::ref_ptr<osg::ShapeDrawable> debugNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),0.05));
-    debugNode->setNodeMask(MFRender::MASK_DEBUG);
-    lightGroup->addChild(debugNode);
+    float debugNodeSize = 0.01 + object.mLightPower * 0.1;
+
+    osg::ref_ptr<osg::MatrixTransform> debugNodeTransform = new osg::MatrixTransform;
+
+    switch (object.mLightType)
+    {
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT:
+            debugNodeTransform->addChild(mDebugPointLightNode);
+            break;
+
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL:
+            debugNodeTransform->addChild(mDebugDirectionalLightNode);
+            break;
+
+        default:
+            debugNodeTransform->addChild(mDebugOtherLightNode);
+            break;
+    }
+
+    debugNodeTransform->setMatrix(osg::Matrixd::scale(osg::Vec3f(debugNodeSize,debugNodeSize,debugNodeSize)));
+    lightGroup->addChild(debugNodeTransform);
+
+    MFMath::Vec3 c = object.mLightColour;
+    osg::Vec4f lightColor = osg::Vec4f(c.x,c.y,c.z,1);
+
+    osg::ref_ptr<osg::Material> debugMat = new osg::Material;
+    debugMat->setDiffuse(osg::Material::FRONT_AND_BACK,lightColor);
+    debugMat->setAmbient(osg::Material::FRONT_AND_BACK,lightColor);
+    debugMat->setEmission(osg::Material::FRONT_AND_BACK,lightColor);
+    debugNodeTransform->getOrCreateStateSet()->setAttributeAndModes(debugMat);
 
     osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
 
     lightNode->setNodeMask(MFRender::MASK_GAME);
 
-    MFMath::Vec3 c = object.mLightColour;
-    osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
-
     if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
     {
         lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
-        lightNode->getLight()->setAmbient(osg::Vec4(lightColor,1));
+        lightNode->getLight()->setAmbient(lightColor * object.mLightPower);
         lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
     }
     else
     {
-        lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
+        lightNode->getLight()->setDiffuse(lightColor * object.mLightPower);
         lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
         lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
     }

@@ -88,7 +88,7 @@ public:
         LightType mLightType;
         MFMath::Vec3 mLightColour;
         int32_t mLightFlags;
-        float mLightPower;
+        float mLightPower;           // 1.0 = 100% (can be even over 1.0)
         float mLightUnk0;
         float mLightUnk1;
         float mLightNear;
