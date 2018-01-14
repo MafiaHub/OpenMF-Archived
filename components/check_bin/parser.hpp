@@ -47,7 +47,7 @@ private:
 bool DataFormatCheckBIN::load(std::ifstream &srcFile)
 {
     Header header = {};
-    uint32_t magic = read(srcFile, &header);
+    read(srcFile, &header);
 
     if (header.mMagic != 0x1ABCEDF)
     {
