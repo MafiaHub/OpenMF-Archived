@@ -24,14 +24,28 @@ public:
     unsigned int getCacheHits()  { return mCacheHits;      };
     unsigned int getNumObjects() { return mObjects.size(); };
 
+    /**
+      Gets the size of the cache alone in bytes (NOT including allocated pointed to memory).
+    */
+    unsigned int getCacheSize()  { return mObjects.size() * sizeof(T); };
+
     void clear();
 
-    // TODO: functions for getting stats like number of loaded textures etc.?
+    void logStats();
 
 protected:
     std::unordered_map<std::string,T> mObjects;
     unsigned int mCacheHits;
 };
+
+template<class T>
+void LoaderCache<T>::logStats()
+{
+    MFLogger::ConsoleLogger::info("CACHE STATS:",LOADERCACHE_MODULE_STR);
+    MFLogger::ConsoleLogger::info("  objects: " + std::to_string(getNumObjects()),LOADERCACHE_MODULE_STR);
+    MFLogger::ConsoleLogger::info("  cache hits: " + std::to_string(getCacheHits()),LOADERCACHE_MODULE_STR);
+    MFLogger::ConsoleLogger::info("  cache array memory size: " + std::to_string(getCacheSize()),LOADERCACHE_MODULE_STR);
+}
 
 template<class T>
 void LoaderCache<T>::storeObject(std::string identifier, T obj)

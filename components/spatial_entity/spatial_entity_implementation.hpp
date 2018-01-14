@@ -158,7 +158,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         {
             btCylinderShape *cylinder = static_cast<btCylinderShape *>(mBulletBody->getCollisionShape());
             osg::ref_ptr<osg::Shape> shape = new osg::Cylinder(osg::Vec3f(0,0,0),cylinder->getRadius(),cylinder->getHalfExtentsWithoutMargin().z() * 2);
-            shapeNode = new osg::ShapeDrawable(shape.get()); // toBulletNode;
+            shapeNode = new osg::ShapeDrawable(shape.get());
             break;
         }
 

@@ -112,7 +112,6 @@ protected:
     MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
 
     void optimize();
-    void logCacheStats();
 
     /**
       Given a list of light sources in the scene, the function decides which scene node should be lit by which
@@ -314,7 +313,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
 
     optimize();
 
-    logCacheStats();
+    mLoaderCache.logStats();
 
     return true;
 }
@@ -373,7 +372,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     optimize();
     setUpLights(0);
 
-    logCacheStats();
+    mLoaderCache.logStats();
 
     return true;
 }
@@ -391,12 +390,6 @@ void OSGRenderer::frame(double dt)
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
     }
-}
-
-void OSGRenderer::logCacheStats()
-{
-    MFLogger::ConsoleLogger::info("cache hits: " + std::to_string(mLoaderCache.getCacheHits()),OSGRENDERER_MODULE_STR);
-    MFLogger::ConsoleLogger::info("cache objects total: " + std::to_string(mLoaderCache.getNumObjects()),OSGRENDERER_MODULE_STR);
 }
 
 void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)
