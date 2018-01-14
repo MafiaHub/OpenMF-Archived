@@ -61,13 +61,13 @@ public:
 
                 // find the corresponding collision:
                
-                for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)    // FIXME: ugly and slow?
+                for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)      // FIXME: ugly and slow?
                 { 
                     if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
                     {
                         newEntity.setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
                         mTreeKlzBodies->erase(mTreeKlzBodies->begin() + i);
-                        break;    // TODO: can a node has multiple collisions/the other way around?
+                        break;    // TODO: can a node have multiple collisions/the other way around?
                     }
                 }
  
