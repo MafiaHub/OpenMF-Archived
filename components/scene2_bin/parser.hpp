@@ -328,6 +328,23 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
             std::cout << "\t\t" << "noLBMP:\t"<<numberOfLBMP<<"\n";
             std::cout << "\t\t" << "typeFollows:\t"<<typeOfFollowing<<"\n";
 
+            uint8_t hasDword;
+            read(srcFile, &hasDword);
+			
+			
+            uint32_t countOfSomething;
+            read(srcFile, &countOfSomething);
+
+            uint32_t sizeA;
+            read(srcFile, &sizeA);
+
+            uint32_t sizeB;
+            read(srcFile, &sizeB);
+
+		
+            std::cout << "\t\t" << "Flag:\t"<<(int) hasDword<<"\n";
+            std::cout << "\t\t" << "SizeA:\t"<<sizeA<<"\n";
+            std::cout << "\t\t" << "SizeB:\t"<<sizeB<<"\n";
             
         }
         break;
