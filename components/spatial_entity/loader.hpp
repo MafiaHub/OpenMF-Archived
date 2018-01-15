@@ -23,7 +23,7 @@ class SpatialEntityLoader
 public:
     typedef std::vector<MFGame::SpatialEntityImplementation> SpatialEntityList;
     /* FIXME: SpatialEntityList should be a list of SpatialEntity, but can't because
-       it's abstract => find a way to do this */
+       it's abstract => find a way to do this, maybe std::shared_ptr */
 
     SpatialEntityList loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies);
     // void loadModel();
