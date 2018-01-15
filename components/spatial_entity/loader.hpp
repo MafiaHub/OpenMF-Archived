@@ -36,7 +36,7 @@ public:
         mModelName = "";
 
         for (int i = 0; i < (int) treeKlzBodies->size(); ++i)
-            mPhysicsNodesMatched.push_back(false);
+            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>((*treeKlzBodies)[i].mName,&((*treeKlzBodies)[i])));
     }
 
     virtual void apply(osg::Node &n) override
@@ -67,25 +67,31 @@ public:
 
                     // find the corresponding collision:
     
-                    // TODO: do this much faster
-              
-                    bool found = false;
+                    MFUtil::NamedRigidBody *matchedBody = 0;
 
-                    for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)      // FIXME: ugly and slow?
+                    auto findResult = mNameToBody.find(n.getName());
+
+                    if (findResult != mNameToBody.end())
                     {
-                        if (namesMatch(n.getName(),(*mTreeKlzBodies)[i].mName,mModelName))
-                        {
-                            ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
-                            found = true;
-                            mPhysicsNodesMatched[i] = true;
-                            // TODO: can there be other than 1:1 assoctiations, i.e. can we break/delete here?
-                            mTreeKlzBodies->erase(mTreeKlzBodies->begin() + i);
-                            break;
-                        }
+                        matchedBody = findResult->second;
+                    }
+                    else
+                    {
+                        findResult = mNameToBody.find(mModelName + "." + n.getName());
+
+                        if (findResult != mNameToBody.end())
+                            matchedBody = findResult->second;
                     }
 
-                    if (!found)
+                    if (!matchedBody)
+                    {
                         MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + newEntity->getName() + "\".",SPATIAL_ENTITY_LOADER_MODULE_STR);
+                    }
+                    else
+                    {
+                        ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody(matchedBody->mRigidBody.mBody.get());
+                        mMatchedBodies.insert(matchedBody->mName);
+                    }
 
                     newEntity->ready();
 
@@ -96,7 +102,7 @@ public:
         }
 
         if (modelName.size() > 0)
-            mModelName = modelName;   // traverse downwards with given name prefix
+            mModelName = modelName;          // traverse downwards with given name prefix
 
         MFUtil::traverse(this,n);
 
@@ -105,12 +111,13 @@ public:
     }
 
     SpatialEntityLoader::SpatialEntityList mEntities;
-    std::vector<bool> mPhysicsNodesMatched;
+    std::set<std::string> mMatchedBodies;
 
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
     osg::Group *mOSGRoot;
-    std::string mModelName;      // when traversin into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
+    std::string mModelName;                  // when traversin into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
+    std::map<std::string,MFUtil::NamedRigidBody *> mNameToBody;
 
     bool namesMatch(std::string nameVisual, std::string nameCol, std::string nameModel)
     {
@@ -139,7 +146,7 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
 
     for (int i = 0; i < (int) treeKlzBodies.size(); ++i)
     {
-        if (v.mPhysicsNodesMatched[i])
+        if (v.mMatchedBodies.find(treeKlzBodies[i].mName) != v.mMatchedBodies.end())
             continue;
 
         std::shared_ptr<MFGame::SpatialEntity> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
