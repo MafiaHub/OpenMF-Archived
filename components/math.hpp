@@ -158,9 +158,9 @@ namespace MFMath
         V &                         operator[] (int j)                  { return (&x)[j]; }
         vec<T,3>                    getTranslation()                    { return vec<T,3>(w.x,w.y,w.z); }
         vec<T,3>                    getScale()                          { return vec<T,3>(
-                                                                          sqrt(x.x * x.x + x.y * x.y + x.z * x.z),
-                                                                          sqrt(y.x * y.x + y.y * y.y + y.z * y.z),
-                                                                          sqrt(z.x * z.x + z.y * z.y + z.z * z.z)); }
+                                                                          sqrtf(x.x * x.x + x.y * x.y + x.z * x.z),
+                                                                          sqrtf(y.x * y.x + y.y * y.y + y.z * y.z),
+                                                                          sqrtf(z.x * z.x + z.y * z.y + z.z * z.z)); }
         void                        separateRotation()                  { x.w = 0; y.w = 0; z.w = 0; w.x = 0; w.y = 0; w.z = 0; w.w = 1; 
                                                                           vec<T,3> s = getScale();
                                                                           x.x /= s.x;     x.y /= s.x;    x.z /= s.x;
