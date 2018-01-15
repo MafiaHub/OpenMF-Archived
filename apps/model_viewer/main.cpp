@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <spatial_entity/spatial_entity.hpp>
+#include <spatial_entity/manager.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -36,7 +37,8 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
-std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoader::SpatialEntityList *entityList)
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world,
+    MFGame::SpatialEntityManager *entityManager)
 {
     std::string result = "collision: ";
 
@@ -46,16 +48,7 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
     int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
 
     if (entityID >= 0)
-    {
-        // FIXME: this is slow, entity manager is needed to quickly find an entity by ID
-
-        for (int i = 0; i < (int) entityList->size(); ++i)
-            if ((*entityList)[i].getID() == static_cast<MFGame::SpatialEntity::Id>(entityID))
-            {
-                result += (*entityList)[i].toString();
-                break;
-            }
-    }
+        result += entityManager->getEntityById(entityID)->toString();
     else
         result += "none";
 
@@ -168,7 +161,7 @@ int main(int argc, char** argv)
     MFRender::OSGRenderer renderer;
     MFPhysics::BulletPhysicsWorld physicsWorld;
     MFFormat::SpatialEntityLoader spatialEntityLoader;
-    MFFormat::SpatialEntityLoader::SpatialEntityList entities;
+    MFGame::SpatialEntityManager entityManager;
 
     if (model)
     {
@@ -182,7 +175,10 @@ int main(int argc, char** argv)
             physicsWorld.loadMission(inputFile);
 
         auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+        auto entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+
+        for (int i = 0; i < (int) entities.size(); ++i)
+            entityManager.addEntity(entities[i]);
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
@@ -219,7 +215,7 @@ int main(int argc, char** argv)
                         std::cout << "camera: " + getCameraString(&renderer) << std::endl;
 
                     if (collisionInfo)
-                        std::cout << getCollisionString(&renderer,&physicsWorld,&entities) << std::endl;
+                        std::cout << getCollisionString(&renderer,&physicsWorld,&entityManager) << std::endl;
 
                     infoCounter = 30;
                 }

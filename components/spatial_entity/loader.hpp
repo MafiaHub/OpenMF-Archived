@@ -21,10 +21,7 @@ namespace MFFormat
 class SpatialEntityLoader
 {
 public:
-    typedef std::vector<MFGame::SpatialEntityImplementation> SpatialEntityList;
-    /* FIXME: SpatialEntityList should be a list of SpatialEntity, but can't because
-       it's abstract => find a way to do this, maybe std::shared_ptr */
-
+    typedef std::vector<std::shared_ptr<MFGame::SpatialEntity>> SpatialEntityList;
     SpatialEntityList loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies);
     // void loadModel();
 };
@@ -51,26 +48,27 @@ public:
 
             if (descriptions.size() > 0 && descriptions[0].compare("4ds mesh") == 0)
             {
-                MFGame::SpatialEntityImplementation newEntity;
-                newEntity.setName(n.getName());
-                newEntity.setOSGRootNode(mOSGRoot);
-
-                newEntity.setOSGNode(&n);
+                std::shared_ptr<MFGame::SpatialEntity> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
+                newEntity->setName(n.getName());
+                ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGRootNode(mOSGRoot);
+                ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGNode(&n);
 
                 // find the corresponding collision:
                
                 for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)      // FIXME: ugly and slow?
                 { 
-                    if ((*mTreeKlzBodies)[i].mName.compare(newEntity.getName()) == 0)
+                    if ((*mTreeKlzBodies)[i].mName.compare(newEntity->getName()) == 0)
                     {
-                        newEntity.setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
+                        ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
                         mTreeKlzBodies->erase(mTreeKlzBodies->begin() + i);
                         break;    // TODO: can a node have multiple collisions/the other way around?
                     }
                 }
  
-                newEntity.ready();
-                mEntities.push_back(newEntity);
+                newEntity->ready();
+
+                std::shared_ptr<MFGame::SpatialEntity> newPtr = newEntity;
+                mEntities.push_back(newPtr);
             }
         }
 
@@ -96,11 +94,11 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
 
     for (int i = 0; i < (int) treeKlzBodies.size(); ++i)
     {
-        MFGame::SpatialEntityImplementation newEntity;
-        newEntity.setName(treeKlzBodies[i].mName);
-        newEntity.setOSGRootNode(osgRoot);
-        newEntity.setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
-        newEntity.ready();
+        std::shared_ptr<MFGame::SpatialEntity> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
+        newEntity->setName(treeKlzBodies[i].mName);
+        ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGRootNode(osgRoot);
+        ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
+        newEntity->ready();
         result.push_back(newEntity);
     }
 

@@ -79,7 +79,7 @@ std::string SpatialEntityImplementation::toString()
     int hasOSG = mOSGNode != 0;
     int hasBullet = mBulletBody != 0;
 
-    return "\"" + mName + "\", ID: " + std::to_string(mID) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
+    return "\"" + mName + "\", ID: " + std::to_string(mId) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
 void SpatialEntityImplementation::ready()
@@ -106,7 +106,7 @@ void SpatialEntityImplementation::ready()
         mPosition.y = pos.y();
         mPosition.z = pos.z();
 
-        mBulletBody->setUserIndex(mID);
+        mBulletBody->setUserIndex(mId);
 
         makePhysicsDebugOSGNode();
     }

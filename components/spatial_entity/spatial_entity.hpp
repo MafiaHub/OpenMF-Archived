@@ -34,30 +34,30 @@ public:
     void setName(std::string name)              { mName = name;         };  
     std::string getName()                       { return mName;         };
     bool isRead()                               { return mReady;        };
-    Id getID()                                  { return mID;           };
+    Id getId()                                  { return mId;           };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
     */
     virtual void move(MFMath::Vec3 destPosition)=0;
 
-    static Id sNextID;
+    static Id sNextId;
 
 protected:
-    MFMath::Vec3 mPosition;      
+    MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
     std::string mName;
     bool mReady;
-    Id mID;
+    Id mId;
 };
 
-SpatialEntity::Id SpatialEntity::sNextID = 0;
+SpatialEntity::Id SpatialEntity::sNextId = 0;
 
 SpatialEntity::SpatialEntity()
 {
-    mID = sNextID;
-    sNextID++;
+    mId = sNextId;
+    sNextId++;
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
