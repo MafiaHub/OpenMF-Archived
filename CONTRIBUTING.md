@@ -31,6 +31,8 @@ Large parts of the game (formats, game formulas, mechanics, ...) are uncovered a
 - Writing a description and commiting to /docs folder. (Note that not all currently uncovered formats are in the folder, we didn't get to write the docs yet.)
 - Writing or finding a description and sending it to us, preferably via our discord (see README.md for the link).
 
+Note that the original game runs well even on Linux under Wine.
+
 ## Testing
 
 Simply play around with the engine and report any yet unreported bugs to our GitHub issue tracker - make a new issue per bug - or tell us via our discord (see README.md for the link).
