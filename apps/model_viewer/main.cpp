@@ -7,6 +7,7 @@
 #include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
+#include <spatial_entity/spatial_entity.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -49,7 +50,7 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
         // FIXME: this is slow, entity manager is needed to quickly find an entity by ID
 
         for (int i = 0; i < (int) entityList->size(); ++i)
-            if ((*entityList)[i].getID() == entityID)
+            if ((*entityList)[i].getID() == static_cast<MFGame::SpatialEntity::Id>(entityID))
             {
                 result += (*entityList)[i].toString();
                 break;
