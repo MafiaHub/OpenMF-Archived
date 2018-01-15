@@ -18,7 +18,7 @@ public:
     SpatialEntityImplementation();
     virtual void update(double dt) override;
     virtual void ready() override;
-    virtual void move(Vec3 destPosition) override;
+    virtual void move(MFMath::Vec3 destPosition) override;
     virtual std::string toString() override;
 
     void setOSGNode(osg::MatrixTransform *t)  { mOSGNode = t;          };
@@ -185,7 +185,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
             for (int i = 0; i < numVertices; ++i)
             {
-                MFGame::Vec3 v;
+                MFMath::Vec3 v;
                 memcpy(&v,vertexData + i * vertexStride,sizeof(v));
                 vertices->push_back(osg::Vec3f(v.x,v.y,v.z));
                 indices->push_back(i);
@@ -236,7 +236,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     }
 }
 
-void SpatialEntityImplementation::move(Vec3 destPosition)
+void SpatialEntityImplementation::move(MFMath::Vec3 destPosition)
 {
 }
 
