@@ -180,6 +180,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         NodeMap emptyNodeMap;
         NodeMap *nodeMap = &emptyNodeMap;
         std::vector<osg::Node *> loadedNodes;    
+        std::vector<std::string> loadedNames;
 
         if (!mNodeMap)
             MFLogger::ConsoleLogger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
@@ -272,12 +273,14 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
                 nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
                 loadedNodes.push_back(objectTransform.get());
+                loadedNames.push_back(object.mName);
             }
         }   // for
 
         for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
         {
             std::string parentName = loadedNodes[i]->getName();
+            loadedNodes[i]->setName(loadedNames[i]);
 
             if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
                 mCameraRelative->addChild(loadedNodes[i]);
@@ -290,8 +293,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 MFLogger::ConsoleLogger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
                 group->addChild(loadedNodes[i]);
             }
-
-            loadedNodes[i]->setName("object transform");
         }
     }
 

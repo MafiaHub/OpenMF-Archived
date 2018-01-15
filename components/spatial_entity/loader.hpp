@@ -54,16 +54,22 @@ public:
                 ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGNode(&n);
 
                 // find the corresponding collision:
-               
+              
+                bool found = false;
+ 
                 for (int i = 0; i < (int) mTreeKlzBodies->size(); ++i)      // FIXME: ugly and slow?
-                { 
+                {
                     if ((*mTreeKlzBodies)[i].mName.compare(newEntity->getName()) == 0)
                     {
                         ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody((*mTreeKlzBodies)[i].mRigidBody.mBody.get());
                         mTreeKlzBodies->erase(mTreeKlzBodies->begin() + i);
+                        found = true;
                         break;    // TODO: can a node have multiple collisions/the other way around?
                     }
                 }
+
+                if (!found)
+                    MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\".",SPATIAL_ENTITY_LOADER_MODULE_STR);
  
                 newEntity->ready();
 
