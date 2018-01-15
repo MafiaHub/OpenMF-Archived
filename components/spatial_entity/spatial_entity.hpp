@@ -26,15 +26,17 @@ public:
       is ready to work.
     */
     virtual void ready()=0;
-    virtual std::string toString()              { return "";            };
-    MFMath::Vec3 getPosition()                  { return mPosition;     };
-    void setPosition(MFMath::Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
-    MFMath::Quat getRotation()                  { return mRotation;     };
-    void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
-    void setName(std::string name)              { mName = name;         };  
-    std::string getName()                       { return mName;         };
-    bool isRead()                               { return mReady;        };
-    Id getId()                                  { return mId;           };
+    virtual std::string toString()                      { return "";            };
+    MFMath::Vec3 getPosition()                          { return mPosition;     };
+    virtual void setPosition(MFMath::Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
+    MFMath::Quat getRotation()                          { return mRotation;     };
+    virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
+    virtual bool hasVisual()=0;
+    virtual bool hasCollision()=0;
+    void setName(std::string name)                      { mName = name;         };  
+    std::string getName()                               { return mName;         };
+    bool isRead()                                       { return mReady;        };
+    Id getId()                                          { return mId;           };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
@@ -47,6 +49,7 @@ protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
+
     std::string mName;
     bool mReady;
     Id mId;

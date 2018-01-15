@@ -207,6 +207,8 @@ int main(int argc, char** argv)
     {
         while (!renderer.done())    // main loop
         {
+            double dt = 0.05;
+
             if (cameraInfo || collisionInfo)
             {
                 if (infoCounter <= 0)
@@ -225,8 +227,9 @@ int main(int argc, char** argv)
 
             // TODO use UPDATE_TIME to make fixed-time-delta loop
 
-            physicsWorld.frame(0);
-            renderer.frame(0);
+            entityManager.update(dt);
+            physicsWorld.frame(dt);
+            renderer.frame(dt);
         }
     }
 

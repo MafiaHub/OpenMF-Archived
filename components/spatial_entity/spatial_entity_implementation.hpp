@@ -20,6 +20,9 @@ public:
     virtual void ready() override;
     virtual void move(MFMath::Vec3 destPosition) override;
     virtual std::string toString() override;
+    virtual void setPosition(MFMath::Vec3 position) override;
+    virtual bool hasVisual() override;
+    virtual bool hasCollision() override;
 
     void setOSGNode(osg::MatrixTransform *t)  { mOSGNode = t;          };
     void setBulletBody(btRigidBody *body)     { mBulletBody = body;    };
@@ -32,18 +35,96 @@ public:
 protected:
     void makePhysicsDebugOSGNode();        ///< Creates a visual representation of the physical representation.
 
+    void computeCurrentTransform();        ///< Sets the values of position, rotation and scale of the entity from the current state of the managed nodes.
+    void applyCurrentTransform();          ///< Sets the states of managed nodes from current values of position, rotation and scale.
+    void syncDebugPhysicsNode();
+
+    MFMath::Vec3 mInitialPosition;
+    MFMath::Vec3 mInitialScale;
+    MFMath::Quat mInitialRotation;
+
     osg::ref_ptr<osg::MatrixTransform> mOSGNode;
     btRigidBody *mBulletBody;
-
     osg::Group *mOSGRoot;
-
     osg::ref_ptr<osg::MatrixTransform> mOSGPgysicsDebugNode;
-
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
 };
 
 osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
+
+bool SpatialEntityImplementation::hasVisual()
+{
+    return mOSGNode != 0;
+}
+
+bool SpatialEntityImplementation::hasCollision()
+{
+    return mBulletBody != 0;
+}
+
+void SpatialEntityImplementation::computeCurrentTransform()
+{
+    if (mBulletBody)
+    {
+        btTransform t = mBulletBody->getWorldTransform();
+        btVector3 bPos = t.getOrigin();
+
+        mInitialPosition = MFMath::Vec3(bPos.x(),bPos.y(),bPos.z());
+        // TODO
+    }
+    else if (mOSGNode)
+    {
+        osg::Vec3f oPos = mOSGNode->getMatrix().getTrans();
+
+        mInitialPosition = MFMath::Vec3(oPos.x(),oPos.y(),oPos.z());
+        // TODO
+    }
+    else
+    {
+        mInitialPosition = MFMath::Vec3(0,0,0);
+        mInitialRotation = MFMath::Quat(0,0,0,1);
+        mInitialScale = MFMath::Vec3(1,1,1);
+    }
+}
+
+void SpatialEntityImplementation::applyCurrentTransform()
+{
+    MFMath::Vec3 relPos = mPosition - mInitialPosition;
+
+    /* TODO: if a visual node has parents, its world transform will
+       be affected by it and will possibly be desynced with the collision
+       node as a result - we should resolve this somehow (disallow movement,
+       forcefully set the same transform,  don't care?) */
+
+    if (mBulletBody)
+    {
+        btTransform t = mBulletBody->getWorldTransform();
+
+        t.setOrigin(mBulletInitialTransform.getOrigin() + btVector3(relPos.x,relPos.y,relPos.z));
+        // TODO
+
+        mBulletBody->setWorldTransform(t);
+
+        syncDebugPhysicsNode();
+    }   
+
+    if (mOSGNode)
+    {
+        osg::Matrixd m = mOSGNode->getMatrix();
+
+        m.setTrans(mOSGInitialTransform.getTrans() + osg::Vec3f(relPos.x,relPos.y,relPos.z));
+        // TODO
+
+        mOSGNode->setMatrix(m);
+    }     
+}
+
+void SpatialEntityImplementation::setPosition(MFMath::Vec3 position)
+{
+    SpatialEntity::setPosition(position);
+    applyCurrentTransform();
+}
 
 SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
 {
@@ -84,34 +165,22 @@ std::string SpatialEntityImplementation::toString()
 
 void SpatialEntityImplementation::ready()
 {
+    MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+
     if (mOSGNode)
-    {
         mOSGInitialTransform = mOSGNode->getMatrix();
 
-        if (!mBulletBody)
-        {
-            osg::Vec3d pos = mOSGInitialTransform.getTrans();
-            mPosition.x = pos.x();
-            mPosition.y = pos.y();
-            mPosition.z = pos.z();
-        }
-    }
-
     if (mBulletBody)
-    {
         mBulletInitialTransform = mBulletBody->getWorldTransform();
 
-        btVector3 pos = mBulletInitialTransform.getOrigin();
-        mPosition.x = pos.x();
-        mPosition.y = pos.y();
-        mPosition.z = pos.z();
+    computeCurrentTransform();
 
-        mBulletBody->setUserIndex(mId);
+    mInitialPosition = mPosition;
+    mInitialRotation = mRotation;
+    mInitialScale = mScale;
 
-        makePhysicsDebugOSGNode();
-    }
+    makePhysicsDebugOSGNode();
 
-    MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
     mReady = true;
 }
 
@@ -216,24 +285,33 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         mOSGPgysicsDebugNode = new osg::MatrixTransform();
         mOSGPgysicsDebugNode->addChild(shapeNode);
 
-        btTransform transform = mBulletBody->getWorldTransform();
-        btVector3 position = transform.getOrigin();
-        btQuaternion rotation = transform.getRotation();
+        syncDebugPhysicsNode();
 
-        osg::Matrixd transformMat;
-        
-        transformMat.makeTranslate(osg::Vec3f(position.x(),position.y(),position.z()));
-        transformMat.preMult(osg::Matrixd::rotate(osg::Quat(rotation.x(),rotation.y(),rotation.z(),rotation.w())));
-
-        if (transformMat.isNaN())
-        {
-            MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
-            transformMat = osg::Matrixd::identity();
-        }
-
-        mOSGPgysicsDebugNode->setMatrix(transformMat);
         mOSGRoot->addChild(mOSGPgysicsDebugNode);
     }
+}
+
+void SpatialEntityImplementation::syncDebugPhysicsNode()
+{
+    if (!mBulletBody)
+        return;
+
+    btTransform transform = mBulletBody->getWorldTransform();
+    btVector3 position = transform.getOrigin();
+    btQuaternion rotation = transform.getRotation();
+
+    osg::Matrixd transformMat;
+    
+    transformMat.makeTranslate(osg::Vec3f(position.x(),position.y(),position.z()));
+    transformMat.preMult(osg::Matrixd::rotate(osg::Quat(rotation.x(),rotation.y(),rotation.z(),rotation.w())));
+
+    if (transformMat.isNaN())
+    {
+        MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+        transformMat = osg::Matrixd::identity();
+    }
+
+    mOSGPgysicsDebugNode->setMatrix(transformMat);
 }
 
 void SpatialEntityImplementation::move(MFMath::Vec3 destPosition)
