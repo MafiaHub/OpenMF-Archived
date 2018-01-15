@@ -21,6 +21,8 @@ Ideal code contribution looks like this:
    - You can (and are encouraged to) make a PR even if you're not finished yet so that we can see what you're working on, can give you feedback and discuss your code. In such case, prepend the PR title with [DON'T MERGE] or similar (e.g. `[DON'T MERGE YET] Add my feature`).
 6. Wait for discussion and reviews, address any issues before the merge. You may want to [squash](https://git-scm.com/book/en/v2/Git-Branching-Rebasing) some smaller commits together if there is too many of them etc.
 
+**When in doubt, take a look at similar projects' approach** ([OpenMW](https://github.com/OpenMW/openmw), [OpenRW](https://github.com/rwengine/openrw) etc.).
+
 We sometimes break these rules in the current early stage of the project, but with more code and devs they'll become more important and also more strictly enforced.
 
 ## Researching the Original Engine
