@@ -270,6 +270,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 }
 
                 objectTransform->addChild(objectNode);
+                objectTransform->getOrCreateUserDataContainer()->addDescription("scene2.bin model"); // mark the node as a model loaded from scene2.bin
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
                 nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
                 loadedNodes.push_back(objectTransform.get());
