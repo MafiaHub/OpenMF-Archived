@@ -33,15 +33,25 @@ public:
         uint16_t mAreaSize;
         uint8_t mUnk[10];
         uint8_t mEnterLinks;
-        uint8_t mExitLinks;
+        uint8_t mExitLinks; // equals mEnterLinks
     } Point;
+
+    typedef struct
+    {
+        uint16_t mTargetPoint;
+        uint16_t mLinkType;
+        float mUnk;
+    } Link;
     #pragma pop()
 
     inline std::vector<Point> getPoints()     { return mPoints; }
     inline size_t getNumPoints()              { return mPoints.size(); }
+    inline std::vector<Link> getLinks()       { return mLinks; }
+    inline size_t getNumLinks()               { return mLinks.size(); }
 
 private:
     std::vector<Point> mPoints;
+    std::vector<Link> mLinks;
 };
 
 bool DataFormatCheckBIN::load(std::ifstream &srcFile)
@@ -54,12 +64,27 @@ bool DataFormatCheckBIN::load(std::ifstream &srcFile)
         return false;
     }
 
+    int numLinks = 0;
+
     for (int i = 0; i < header.mNumPoints; i++)
     {
         Point point = {};
         read(srcFile, &point);
 
+        numLinks += point.mEnterLinks;
+
         mPoints.push_back(point);
+    }
+
+    // Each point references 0 or more links.
+    // For example, if point 0 has mEnterLinks = 2, it means that the first 2 links belong to it.
+    // Consequent links in a row belong to point 1, 2 and so on.
+    for (int i = 0; i < numLinks; i++)
+    {
+        Link link = {};
+        read(srcFile, &link);
+
+        mLinks.push_back(link);
     }
 }
 
