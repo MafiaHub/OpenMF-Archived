@@ -42,9 +42,18 @@ std::string getStringPointType(uint32_t pointType)
 
 void dump(MFFormat::DataFormatCheckBIN checkBin)
 {
-    for (auto point : checkBin.getPoints())
+    uint linkIter = 0;
+    for (std::size_t i = 0; i != checkBin.getNumPoints(); ++i)
     {
-        ConsoleLogger::raw("[" + getStringPointType(point.mType) + "] " + std::to_string(point.mPos.x) + " " + std::to_string(point.mPos.y) + " " + std::to_string(point.mPos.z) + " links " + std::to_string(point.mEnterLinks), "dump");
+        auto point = checkBin.getPoints()[i];
+        ConsoleLogger::raw("[P" + std::to_string(i) + "][" + getStringPointType(point.mType) + "] " + std::to_string(point.mPos.x) + " " + std::to_string(point.mPos.y) + " " + std::to_string(point.mPos.z), "dump");
+        for (uint j = 0; j < point.mEnterLinks; j++)
+        {
+            auto link = checkBin.getLinks()[linkIter+j];
+            auto targetPoint = checkBin.getPoints()[link.mTargetPoint];
+            ConsoleLogger::raw("[P" + std::to_string(i) + "] Link to [P" + std::to_string(link.mTargetPoint) + "][" + getStringPointType(targetPoint.mType) + "] " + std::to_string(targetPoint.mPos.x) + " " + std::to_string(targetPoint.mPos.y) + " " + std::to_string(point.mPos.z), "dump");
+        }
+        linkIter += point.mEnterLinks;
     }
     ConsoleLogger::raw("number of points: " + std::to_string(checkBin.getNumPoints()), "dump");
     ConsoleLogger::raw("number of links: " + std::to_string(checkBin.getNumLinks()), "dump");
