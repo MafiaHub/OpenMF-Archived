@@ -80,16 +80,21 @@ void SpatialEntityImplementation::computeCurrentTransform()
     {
         btTransform t = mBulletBody->getWorldTransform();
         btVector3 bPos = t.getOrigin();
+        btQuaternion bRot = t.getRotation();
 
         mInitialPosition = MFMath::Vec3(bPos.x(),bPos.y(),bPos.z());
-        // TODO
+        mInitialRotation = MFMath::Quat(bRot.x(),bRot.y(),bRot.z(),bRot.w());
+        mInitialScale = MFMath::Vec3(1,1,1);
     }
     else if (mOSGNode)
     {
         osg::Vec3f oPos = mOSGNode->getMatrix().getTrans();
+        osg::Quat oRot = mOSGNode->getMatrix().getRotate();
+        osg::Vec3f oScale = mOSGNode->getMatrix().getScale();
 
         mInitialPosition = MFMath::Vec3(oPos.x(),oPos.y(),oPos.z());
-        // TODO
+        mInitialRotation = MFMath::Quat(oRot.x(),oRot.y(),oRot.z(),oRot.w());
+        mInitialScale = MFMath::Vec3(oScale.x(),oScale.y(),oScale.z());
     }
     else
     {
@@ -182,15 +187,17 @@ void SpatialEntityImplementation::ready()
         mOSGInitialTransform = mOSGNode->getMatrix();
 
     if (mBulletBody)
+    {
+        mBulletBody->setUserIndex(mId);
         mBulletInitialTransform = mBulletBody->getWorldTransform();
+        makePhysicsDebugOSGNode();
+    }
 
     computeCurrentTransform();
 
     mInitialPosition = mPosition;
     mInitialRotation = mRotation;
     mInitialScale = mScale;
-
-    makePhysicsDebugOSGNode();
 
     mReady = true;
 }

@@ -99,8 +99,9 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
     delete sphere;
 
     if (cb.mResult)
+{
         return cb.mResult->getUserIndex();
-
+}
     return -1;
 }
 

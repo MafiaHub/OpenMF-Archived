@@ -230,7 +230,7 @@ int main(int argc, char** argv)
             // TODO use UPDATE_TIME to make fixed-time-delta loop
 
             entityManager.update(dt);
-            physicsWorld.frame(dt);
+//            physicsWorld.frame(dt);
             renderer.frame(dt);
         }
     }

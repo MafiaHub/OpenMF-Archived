@@ -31,10 +31,10 @@ public:
 class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor
 {
 public:
-    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, osg::Group *sceneRoot): osg::NodeVisitor()
+    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, MFGame::SpatialEntityFactory *entityFactory): osg::NodeVisitor()
     {
         mTreeKlzBodies = treeKlzBodies;
-        mOSGRoot = sceneRoot;
+        mEntityFactory = entityFactory;
         mModelName = "";
 
         for (int i = 0; i < (int) treeKlzBodies->size(); ++i)
@@ -62,9 +62,7 @@ public:
                 }
                 else if (descriptions[0].compare("4ds mesh") == 0)
                 {
-                    std::shared_ptr<MFGame::SpatialEntity> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
-                    newEntity->setName(n.getName());
-                    ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGRootNode(mOSGRoot);
+                    std::shared_ptr<MFGame::SpatialEntity> newEntity = mEntityFactory->createEntity(n.getName());
                     ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGNode(&n);
 
                     // find the corresponding collision:
@@ -117,7 +115,7 @@ public:
 
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
-    osg::Group *mOSGRoot;
+    MFGame::SpatialEntityFactory *mEntityFactory;
     std::string mModelName;                  // when traversin into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
     std::map<std::string,MFUtil::NamedRigidBody *> mNameToBody;
 
@@ -139,7 +137,7 @@ protected:
 SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies, MFGame::SpatialEntityFactory *entityFactory)
 {
     SpatialEntityLoader::SpatialEntityList result;
-    CreateEntitiesFromSceneVisitor v(&treeKlzBodies,osgRoot);
+    CreateEntitiesFromSceneVisitor v(&treeKlzBodies,entityFactory);
     osgRoot->accept(v);
 
     result = v.mEntities;
