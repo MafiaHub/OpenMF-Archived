@@ -10,12 +10,21 @@ class DataFormatCheckBIN: public DataFormat
 {
 public:
     typedef enum {
-        PEDESTRIANTS_PATH_POINT = 0x1,
-        NAVIGATION_POINT = 0x2,
-        VEHICLE_POINT = 0x4,
-        TRAM_STATION = 0x8,
-        SPECIAL_POINT = 0x10,
+        POINTTYPE_PEDESTRIAN = 0x1,
+        POINTTYPE_AI = 0x2,
+        POINTTYPE_VEHICLE = 0x4,
+        POINTTYPE_TRAM_STATION = 0x8,
+        POINTTYPE_SPECIAL = 0x10,
     } PointType;
+
+    typedef enum
+    {
+        LINKTYPE_PEDESTRIAN = 1,
+        LINKTYPE_AI = 2,
+        LINKTYPE_TRAINSANDSALINAS_FORWARD = 4,
+        LINKTYPE_TRAINSANDSALINAS_REVERSE = 0x8400,
+        LINKTYPE_OTHER = 0x1000
+    } LinkType;
 
     #pragma pack(push,1)
     typedef struct
@@ -42,8 +51,9 @@ public:
         uint16_t mLinkType;
         float mUnk;
     } Link;
-    #pragma pop()
+    #pragma pack(pop)
 
+    virtual bool load(std::ifstream &srcFile) override;
     inline std::vector<Point> getPoints()     { return mPoints; }
     inline size_t getNumPoints()              { return mPoints.size(); }
     inline std::vector<Link> getLinks()       { return mLinks; }
@@ -64,9 +74,9 @@ bool DataFormatCheckBIN::load(std::ifstream &srcFile)
         return false;
     }
 
-    int numLinks = 0;
+    uint numLinks = 0;
 
-    for (int i = 0; i < header.mNumPoints; i++)
+    for (uint i = 0; i < header.mNumPoints; i++)
     {
         Point point = {};
         read(srcFile, &point);
@@ -79,13 +89,15 @@ bool DataFormatCheckBIN::load(std::ifstream &srcFile)
     // Each point references 0 or more links.
     // For example, if point 0 has mEnterLinks = 2, it means that the first 2 links belong to it.
     // Consequent links in a row belong to point 1, 2 and so on.
-    for (int i = 0; i < numLinks; i++)
+    for (uint i = 0; i < numLinks; i++)
     {
         Link link = {};
         read(srcFile, &link);
 
         mLinks.push_back(link);
     }
+
+    return true;
 }
 
 }
