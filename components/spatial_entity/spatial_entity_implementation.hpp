@@ -25,11 +25,13 @@ public:
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
 
-    void setOSGNode(osg::MatrixTransform *t)  { mOSGNode = t;          };
-    void setBulletBody(btRigidBody *body)     { mBulletBody = body;    };
-    osg::MatrixTransform *getOSGNode()        { return mOSGNode.get(); };
-    btRigidBody *getBulletBody()              { return mBulletBody;    };
-    void setOSGRootNode(osg::Group *root)     { mOSGRoot = root;       };
+    void setOSGNode(osg::MatrixTransform *t)              { mOSGNode = t;          };
+    void setBulletBody(btRigidBody *body)                 { mBulletBody = body;    };
+    osg::MatrixTransform *getOSGNode()                    { return mOSGNode.get(); };
+    btRigidBody *getBulletBody()                          { return mBulletBody;    };
+
+    void setOSGRootNode(osg::Group *root)                 { mOSGRoot = root;       };
+    void setBulletWorld(btDiscreteDynamicsWorld *world)   { mBulletWorld = world;  };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
 
@@ -46,7 +48,10 @@ protected:
 
     osg::ref_ptr<osg::MatrixTransform> mOSGNode;
     btRigidBody *mBulletBody;
+
     osg::Group *mOSGRoot;
+    btDiscreteDynamicsWorld *mBulletWorld;
+
     osg::ref_ptr<osg::MatrixTransform> mOSGPgysicsDebugNode;
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
@@ -164,7 +169,9 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
 
     mOSGNode = 0;
     mBulletBody = 0;
+
     mOSGRoot = 0;
+    mBulletBody = 0;
 }
 
 void SpatialEntityImplementation::update(double dt)
