@@ -8,6 +8,7 @@
 #include <osg/Node>
 #include <bullet_utils.hpp>
 #include <loggers/console.hpp>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
 #define SPATIAL_ENTITY_LOADER_MODULE_STR "spatial entity loader"
 
@@ -155,6 +156,16 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
         ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
         newEntity->ready();
         result.push_back(newEntity);
+    }
+
+    // set additional properties of loaded entities:
+
+    for (int i = 0; i < (int) result.size(); ++i)
+    {
+        btRigidBody *body = ((MFGame::SpatialEntityImplementation*) result[i].get())->getBulletBody();
+
+        if (body)
+            body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
     }
 
     return result;

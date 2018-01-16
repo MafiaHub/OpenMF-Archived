@@ -32,8 +32,13 @@ public:
     MFMath::Quat getRotation()                          { return mRotation;     };
     virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
     virtual bool hasVisual()=0;
+
+    virtual bool canBeMoved()=0;                        ///< Says whether the entity can be transformed with setPosition(...) etc.
+//  detach()
+//  mergeWithChildren()
+
     virtual bool hasCollision()=0;
-    void setName(std::string name)                      { mName = name;         };  
+    void setName(std::string name)                      { mName = name;         };
     std::string getName()                               { return mName;         };
     bool isRead()                                       { return mReady;        };
     Id getId()                                          { return mId;           };

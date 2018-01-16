@@ -23,6 +23,7 @@ public:
     virtual void setPosition(MFMath::Vec3 position) override;
     virtual bool hasVisual() override;
     virtual bool hasCollision() override;
+    virtual bool canBeMoved() override;
 
     void setOSGNode(osg::MatrixTransform *t)  { mOSGNode = t;          };
     void setBulletBody(btRigidBody *body)     { mBulletBody = body;    };
@@ -52,6 +53,16 @@ protected:
 };
 
 osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
+
+bool SpatialEntityImplementation::canBeMoved()
+{
+    if (!mBulletBody)    // no physical representation => nothing stops the entity from moving
+        return true;
+
+    // TODO
+
+    return false;
+}
 
 bool SpatialEntityImplementation::hasVisual()
 {
