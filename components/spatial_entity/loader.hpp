@@ -9,6 +9,7 @@
 #include <bullet_utils.hpp>
 #include <loggers/console.hpp>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <spatial_entity/factory.hpp>
 
 #define SPATIAL_ENTITY_LOADER_MODULE_STR "spatial entity loader"
 
@@ -23,7 +24,7 @@ class SpatialEntityLoader
 {
 public:
     typedef std::vector<std::shared_ptr<MFGame::SpatialEntity>> SpatialEntityList;
-    SpatialEntityList loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies);
+    SpatialEntityList loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies,MFGame::SpatialEntityFactory *entityFactory);
     // void loadModel();
 };
 
@@ -135,7 +136,7 @@ protected:
     }
 };
 
-SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies)
+SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::Group *osgRoot, std::vector<MFUtil::NamedRigidBody> treeKlzBodies, MFGame::SpatialEntityFactory *entityFactory)
 {
     SpatialEntityLoader::SpatialEntityList result;
     CreateEntitiesFromSceneVisitor v(&treeKlzBodies,osgRoot);
@@ -150,9 +151,7 @@ SpatialEntityLoader::SpatialEntityList SpatialEntityLoader::loadFromScene(osg::G
         if (v.mMatchedBodies.find(treeKlzBodies[i].mName) != v.mMatchedBodies.end())
             continue;
 
-        std::shared_ptr<MFGame::SpatialEntity> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
-        newEntity->setName(treeKlzBodies[i].mName);
-        ((MFGame::SpatialEntityImplementation *) newEntity.get())->setOSGRootNode(osgRoot);
+        std::shared_ptr<MFGame::SpatialEntity> newEntity = entityFactory->createEntity(treeKlzBodies[i].mName);
         ((MFGame::SpatialEntityImplementation *) newEntity.get())->setBulletBody(treeKlzBodies[i].mRigidBody.mBody.get());
         newEntity->ready();
         result.push_back(newEntity);

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <spatial_entity/spatial_entity.hpp>
 #include <spatial_entity/manager.hpp>
+#include <spatial_entity/factory.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -162,6 +163,7 @@ int main(int argc, char** argv)
     MFPhysics::BulletPhysicsWorld physicsWorld;
     MFFormat::SpatialEntityLoader spatialEntityLoader;
     MFGame::SpatialEntityManager entityManager;
+    MFGame::SpatialEntityFactory entityFactory(renderer.getRootNode(),&physicsWorld);
 
     if (model)
     {
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
             physicsWorld.loadMission(inputFile);
 
         auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        auto entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+        auto entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies,&entityFactory);
 
         for (int i = 0; i < (int) entities.size(); ++i)
             entityManager.addEntity(entities[i]);
