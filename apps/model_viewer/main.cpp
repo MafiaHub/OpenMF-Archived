@@ -4,7 +4,6 @@
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
 #include <physics/bullet_physics_world.hpp>
-#include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
 #include <spatial_entity/spatial_entity.hpp>
@@ -161,9 +160,8 @@ int main(int argc, char** argv)
 
     MFRender::OSGRenderer renderer;
     MFPhysics::BulletPhysicsWorld physicsWorld;
-    MFFormat::SpatialEntityLoader spatialEntityLoader;
     MFGame::SpatialEntityManager entityManager;
-    MFGame::SpatialEntityFactory entityFactory(renderer.getRootNode(),&physicsWorld);
+    MFGame::SpatialEntityFactory entityFactory(&renderer,&physicsWorld,&entityManager);
 
     if (model)
     {
@@ -176,11 +174,7 @@ int main(int argc, char** argv)
         if (loadTreeKlz)
             physicsWorld.loadMission(inputFile);
 
-        auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        auto entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies,&entityFactory);
-
-        for (int i = 0; i < (int) entities.size(); ++i)
-            entityManager.addEntity(entities[i]);
+        entityFactory.createMissionEntities();
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);

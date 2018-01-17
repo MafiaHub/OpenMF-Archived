@@ -25,13 +25,11 @@ public:
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
 
-    void setOSGNode(osg::MatrixTransform *t)              { mOSGNode = t;          };
-    void setBulletBody(btRigidBody *body)                 { mBulletBody = body;    };
-    osg::MatrixTransform *getOSGNode()                    { return mOSGNode.get(); };
-    btRigidBody *getBulletBody()                          { return mBulletBody;    };
-
-    void setOSGRootNode(osg::Group *root)                 { mOSGRoot = root;       };
-    void setBulletWorld(btDiscreteDynamicsWorld *world)   { mBulletWorld = world;  };
+    void setVisualNode(osg::MatrixTransform *t)            { mOSGNode = t;          };
+    void setPhysicsBody(btRigidBody *body)                 { mBulletBody = body;    };
+    osg::MatrixTransform *getVisualNode()                  { return mOSGNode.get(); };
+    btRigidBody *getPhysicsBody()                          { return mBulletBody;    };
+    void setOSGRootNode(osg::Group *root)                  { mOSGRoot = root;       };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
 
@@ -50,7 +48,6 @@ protected:
     btRigidBody *mBulletBody;
 
     osg::Group *mOSGRoot;
-    btDiscreteDynamicsWorld *mBulletWorld;
 
     osg::ref_ptr<osg::MatrixTransform> mOSGPgysicsDebugNode;
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
@@ -123,22 +120,23 @@ void SpatialEntityImplementation::applyCurrentTransform()
         btTransform t = mBulletBody->getWorldTransform();
 
         t.setOrigin(mBulletInitialTransform.getOrigin() + btVector3(relPos.x,relPos.y,relPos.z));
-        // TODO
+//        t.setRotation(mBulletInitialTransform.getRotation() * btQuaternion(mRotation.x,mRotation.y,mRotation.z,mRotation.w));
 
         mBulletBody->setWorldTransform(t);
-
         syncDebugPhysicsNode();
     }   
 
     if (mOSGNode)
     {
-        osg::Matrixd m = mOSGNode->getMatrix();
+        osg::Matrixd m = mOSGInitialTransform;
 
+//        m.preMultRotate(osg::Quat(mRotation.x,mRotation.y,mRotation.z,mRotation.w));
         m.setTrans(mOSGInitialTransform.getTrans() + osg::Vec3f(relPos.x,relPos.y,relPos.z));
-        // TODO
+
+        // TODO: scale
 
         mOSGNode->setMatrix(m);
-    }     
+    }
 }
 
 void SpatialEntityImplementation::setPosition(MFMath::Vec3 position)
