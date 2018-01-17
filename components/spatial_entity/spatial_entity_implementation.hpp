@@ -26,9 +26,9 @@ public:
     virtual bool canBeMoved() override;
 
     void setVisualNode(osg::MatrixTransform *t)            { mOSGNode = t;          };
-    void setPhysicsBody(btRigidBody *body)                 { mBulletBody = body;    };
+    void setPhysicsBody(std::shared_ptr<btRigidBody> body) { mBulletBody = body;    };
     osg::MatrixTransform *getVisualNode()                  { return mOSGNode.get(); };
-    btRigidBody *getPhysicsBody()                          { return mBulletBody;    };
+    std::shared_ptr<btRigidBody> getPhysicsBody()          { return mBulletBody;    };
     void setOSGRootNode(osg::Group *root)                  { mOSGRoot = root;       };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
@@ -45,7 +45,7 @@ protected:
     MFMath::Quat mInitialRotation;
 
     osg::ref_ptr<osg::MatrixTransform> mOSGNode;
-    btRigidBody *mBulletBody;
+    std::shared_ptr<btRigidBody> mBulletBody;
 
     osg::Group *mOSGRoot;
 
