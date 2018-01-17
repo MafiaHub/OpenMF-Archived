@@ -160,6 +160,8 @@ public:
     unsigned int getGridWidth()                          { return mDataHeader.mGridWidth; }
     unsigned int getGridHeight()                         { return mDataHeader.mGridHeight; }
 
+    ~DataFormatTreeKLZ();
+
 protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;
@@ -178,6 +180,24 @@ protected:
     Cell* mGridCellsMemory;
 };
 
+DataFormatTreeKLZ::~DataFormatTreeKLZ()
+{
+    for (unsigned int i = 0; i < mDataHeader.mGridWidth * mDataHeader.mGridWidth; ++i)
+    {
+        free(mGridCellsMemory[i].mReferences);
+        free(mGridCellsMemory[i].mFlags);
+    }
+
+    free(mGridCellsMemory);
+
+    for (unsigned int i = 0; i < mLinkTables.size(); ++i)
+        free(mLinkTables[i].mName);
+
+    free(mLinkNameOffsetTable);
+    free(mCellBoundariesX); 
+    free(mCellBoundariesY); 
+}
+
 bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
 {
     read(srcFile, &mHeader);
@@ -185,7 +205,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     mLinkNameOffsetTable = reinterpret_cast<uint32_t*>(malloc(sizeof(uint32_t)*mHeader.mNumLinks));
     read(srcFile, mLinkNameOffsetTable, sizeof(uint32_t)*mHeader.mNumLinks);
 
-    for(unsigned int i = 0; i < mHeader.mNumLinks; i++) 
+    for (unsigned int i = 0; i < mHeader.mNumLinks; i++) 
     {
         Link newLink = {};
         srcFile.seekg(mLinkNameOffsetTable[i], srcFile.beg);
@@ -259,7 +279,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         read(srcFile, mGridCellsMemory[i].mReserved, sizeof(uint32_t)*2);
         read(srcFile, &mGridCellsMemory[i].mHeight);
 
-        if(mGridCellsMemory[i].mNumObjects)
+        if (mGridCellsMemory[i].mNumObjects)
         {
             mGridCellsMemory[i].mReferences = reinterpret_cast<uint32_t*>(malloc(sizeof(uint32_t) * mGridCellsMemory[i].mNumObjects));
             read(srcFile, mGridCellsMemory[i].mReferences, sizeof(uint32_t) * mGridCellsMemory[i].mNumObjects);
@@ -269,6 +289,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
             read(srcFile, mGridCellsMemory[i].mFlags, (mGridCellsMemory[i].mNumObjects + 3) /4 * sizeof(uint32_t));
         }
     }
+
     return true;
 }
 
