@@ -190,16 +190,16 @@ int main(int argc, char** argv)
         double cam[6];
         parseCameraString(arguments["p"].as<std::string>(),cam);
         renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
-    }
-
-    int infoCounter = 0;
 
 // TMP test:
 MFGame::SpatialEntity::Id testId = entityFactory.createTestBallEntity();
 entityManager.getEntityById(testId)->setPosition(
-MFMath::Vec3(-1757.803223,-5.598587,6.004786)
+MFMath::Vec3(cam[0],cam[1],cam[2])
 );
 // --------
+    }
+
+    int infoCounter = 0;
 
     if (exportFileName.length() > 0)
     {
