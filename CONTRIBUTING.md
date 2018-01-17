@@ -39,6 +39,11 @@ Note that the original game runs well even on Linux under Wine.
 
 Simply play around with the engine and report any yet unreported bugs to our GitHub issue tracker - make a new issue per bug - or tell us via our discord (see README.md for the link).
 
+For effective testing:
+- use tool such as valgrind, cppcheck etc.
+- find a way to reproduce given bug
+- provide info on your testing environment (software versions, OS, GPU, compiler etc.)
+
 We'll also need automated tests later, so if you're interested in making some, we'll be more than glad to hear from you.
 
 ## Discussing With the Community
