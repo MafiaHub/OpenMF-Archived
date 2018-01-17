@@ -184,8 +184,11 @@ DataFormatTreeKLZ::~DataFormatTreeKLZ()
 {
     for (unsigned int i = 0; i < mDataHeader.mGridWidth * mDataHeader.mGridWidth; ++i)
     {
-        free(mGridCellsMemory[i].mReferences);
-        free(mGridCellsMemory[i].mFlags);
+        if (mGridCellsMemory[i].mNumObjects)
+        {
+            free(mGridCellsMemory[i].mReferences);
+            free(mGridCellsMemory[i].mFlags);
+        }
     }
 
     free(mGridCellsMemory);

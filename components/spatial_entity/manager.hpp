@@ -14,6 +14,7 @@ class SpatialEntityManager
 {
 public:
     SpatialEntity *getEntityById(SpatialEntity::Id id);
+    SpatialEntity *getEntityByIndex(unsigned int index);
     void addEntity(std::shared_ptr<SpatialEntity> entity);
 
     /**
@@ -25,6 +26,11 @@ public:
 protected:
     std::vector<std::shared_ptr<SpatialEntity>> mEntities;
 };
+
+SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
+{
+    return mEntities[index].get();
+}
 
 SpatialEntity *SpatialEntityManager::getEntityById(SpatialEntity::Id id)
 {
