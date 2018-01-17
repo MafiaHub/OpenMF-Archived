@@ -210,7 +210,7 @@ MFMath::Vec3(-1757.803223,-5.598587,6.004786)
     {
         while (!renderer.done())    // main loop
         {
-            double dt = 0.05;
+            double dt = 0.005;
 
             if (cameraInfo || collisionInfo)
             {

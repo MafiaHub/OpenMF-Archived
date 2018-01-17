@@ -87,9 +87,9 @@ void SpatialEntityImplementation::computeCurrentTransform()
         btVector3 bPos = t.getOrigin();
         btQuaternion bRot = t.getRotation();
 
-        mInitialPosition = MFMath::Vec3(bPos.x(),bPos.y(),bPos.z());
-        mInitialRotation = MFMath::Quat(bRot.x(),bRot.y(),bRot.z(),bRot.w());
-        mInitialScale = MFMath::Vec3(1,1,1);
+        mPosition = MFMath::Vec3(bPos.x(),bPos.y(),bPos.z());
+        mRotation = MFMath::Quat(bRot.x(),bRot.y(),bRot.z(),bRot.w());
+        mScale = MFMath::Vec3(1,1,1);
     }
     else if (mOSGNode)
     {
@@ -97,15 +97,15 @@ void SpatialEntityImplementation::computeCurrentTransform()
         osg::Quat oRot = mOSGNode->getMatrix().getRotate();
         osg::Vec3f oScale = mOSGNode->getMatrix().getScale();
 
-        mInitialPosition = MFMath::Vec3(oPos.x(),oPos.y(),oPos.z());
-        mInitialRotation = MFMath::Quat(oRot.x(),oRot.y(),oRot.z(),oRot.w());
-        mInitialScale = MFMath::Vec3(oScale.x(),oScale.y(),oScale.z());
+        mPosition = MFMath::Vec3(oPos.x(),oPos.y(),oPos.z());
+        mRotation = MFMath::Quat(oRot.x(),oRot.y(),oRot.z(),oRot.w());
+        mScale = MFMath::Vec3(oScale.x(),oScale.y(),oScale.z());
     }
     else
     {
-        mInitialPosition = MFMath::Vec3(0,0,0);
-        mInitialRotation = MFMath::Quat(0,0,0,1);
-        mInitialScale = MFMath::Vec3(1,1,1);
+        mPosition = MFMath::Vec3(0,0,0);
+        mRotation = MFMath::Quat(0,0,0,1);
+        mScale = MFMath::Vec3(1,1,1);
     }
 }
 
@@ -178,7 +178,10 @@ void SpatialEntityImplementation::update(double dt)
     // TODO: make use of MotionState to see if the transform has to be updated
 
     if (mBulletBody && mBulletMotionState)
-        syncDebugPhysicsNode();
+    {
+        computeCurrentTransform();
+        applyCurrentTransform();
+    }
 }
 
 std::string SpatialEntityImplementation::toString()
