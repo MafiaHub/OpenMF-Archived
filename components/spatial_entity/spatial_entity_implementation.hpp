@@ -25,11 +25,13 @@ public:
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
 
-    void setVisualNode(osg::MatrixTransform *t)            { mOSGNode = t;          };
-    void setPhysicsBody(std::shared_ptr<btRigidBody> body) { mBulletBody = body;    };
-    osg::MatrixTransform *getVisualNode()                  { return mOSGNode.get(); };
-    std::shared_ptr<btRigidBody> getPhysicsBody()          { return mBulletBody;    };
-    void setOSGRootNode(osg::Group *root)                  { mOSGRoot = root;       };
+    void setVisualNode(osg::MatrixTransform *t)                                    { mOSGNode = t;                     };
+    void setPhysicsBody(std::shared_ptr<btRigidBody> body)                         { mBulletBody = body;               };
+    osg::MatrixTransform *getVisualNode()                                          { return mOSGNode.get();            };
+    std::shared_ptr<btRigidBody> getPhysicsBody()                                  { return mBulletBody;               };
+    void setOSGRootNode(osg::Group *root)                                          { mOSGRoot = root;                  };
+    void setPhysicsMotionState(std::shared_ptr<btDefaultMotionState> motionState)  { mBulletMotionState = motionState; };
+    std::shared_ptr<btDefaultMotionState> getPhysicsMotionState()                  { return mBulletMotionState;        };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
 
@@ -46,6 +48,7 @@ protected:
 
     osg::ref_ptr<osg::MatrixTransform> mOSGNode;
     std::shared_ptr<btRigidBody> mBulletBody;
+    std::shared_ptr<btDefaultMotionState> mBulletMotionState;
 
     osg::Group *mOSGRoot;
 
@@ -167,13 +170,15 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
 
     mOSGNode = 0;
     mBulletBody = 0;
-
-    mOSGRoot = 0;
-    mBulletBody = 0;
+    mBulletMotionState = 0;
 }
 
 void SpatialEntityImplementation::update(double dt)
 {
+    // TODO: make use of MotionState to see if the transform has to be updated
+
+    if (mBulletBody && mBulletMotionState)
+        syncDebugPhysicsNode();
 }
 
 std::string SpatialEntityImplementation::toString()

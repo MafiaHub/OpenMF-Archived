@@ -194,6 +194,13 @@ int main(int argc, char** argv)
 
     int infoCounter = 0;
 
+// TMP test:
+MFGame::SpatialEntity::Id testId = entityFactory.createTestBallEntity();
+entityManager.getEntityById(testId)->setPosition(
+MFMath::Vec3(-1757.803223,-5.598587,6.004786)
+);
+// --------
+
     if (exportFileName.length() > 0)
     {
         if (!renderer.exportScene(exportFileName))
@@ -224,7 +231,7 @@ int main(int argc, char** argv)
             // TODO use UPDATE_TIME to make fixed-time-delta loop
 
             entityManager.update(dt);
-//            physicsWorld.frame(dt);
+            physicsWorld.frame(dt);
             renderer.frame(dt);
         }
     }

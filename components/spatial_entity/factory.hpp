@@ -23,8 +23,10 @@ protected:
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFRender::OSGRenderer *mRenderer;
 
-    osg::ref_ptr<osg::Shape> mTestSphereShape;
+    osg::ref_ptr<osg::Shape> mTestVisualSphereShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestSphereNode;
+
+    std::shared_ptr<btCollisionShape> mTestPhysicalSphereShape;
 };
 
 SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager)
@@ -33,8 +35,10 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mPhysicsWorld = physicsWorld;
     mEntityManager = entityManager;
 
-    mTestSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),2);
-    mTestSphereNode = new osg::ShapeDrawable(mTestSphereShape);
+    mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),2);
+    mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
+
+    mTestPhysicalSphereShape = std::make_shared<btSphereShape>(2);
 }
 
 SpatialEntity::Id SpatialEntityFactory::createEntity(osg::MatrixTransform *graphicNode, std::shared_ptr<btRigidBody> physicsBody, std::string name)
@@ -51,10 +55,24 @@ SpatialEntity::Id SpatialEntityFactory::createEntity(osg::MatrixTransform *graph
 
 SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
 {
-   osg::ref_ptr<osg::MatrixTransform> visualNode = new osg::MatrixTransform();
-   visualNode->addChild(mTestSphereNode);
-   mRenderer->getRootNode()->addChild(visualNode);
-   return createEntity(visualNode.get(),0,"test sphere");
+    osg::ref_ptr<osg::MatrixTransform> visualNode = new osg::MatrixTransform();
+    visualNode->addChild(mTestSphereNode);
+    mRenderer->getRootNode()->addChild(visualNode);
+
+    std::shared_ptr<btDefaultMotionState> motionState = std::make_shared<btDefaultMotionState>();
+
+    btScalar mass = 1;
+    btVector3 fallInertia(0, 0, 0);
+    mTestPhysicalSphereShape->calculateLocalInertia(mass,fallInertia);
+    btRigidBody::btRigidBodyConstructionInfo ci(mass,motionState.get(),mTestPhysicalSphereShape.get(),fallInertia);
+    std::shared_ptr<btRigidBody> physicalBody = std::make_shared<btRigidBody>(ci);
+    SpatialEntity::Id id = createEntity(visualNode.get(),physicalBody,"test sphere");
+
+    mPhysicsWorld->getWorld()->addRigidBody(physicalBody.get());
+
+    ((SpatialEntityImplementation *) mEntityManager->getEntityById(id))->setPhysicsMotionState(motionState);
+
+    return id;
 }
 
 class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor

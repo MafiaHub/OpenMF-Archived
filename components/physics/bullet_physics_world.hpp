@@ -70,7 +70,7 @@ BulletPhysicsWorld::BulletPhysicsWorld()
     mSolver              = new btSequentialImpulseConstraintSolver;
     mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
 
-    mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+    mWorld->setGravity(btVector3(0.0f, 0.0f, -9.81f));
 
     mFileSystem = MFFile::FileSystem::getInstance();
 }
@@ -107,7 +107,7 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
 
 void BulletPhysicsWorld::frame(double dt)
 {
-    mWorld->stepSimulation(dt, 1);
+    mWorld->stepSimulation(dt,1);
 }
 
 std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
