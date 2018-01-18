@@ -215,6 +215,7 @@ if (ballCounter % 200 == 0)
 {
     entityManager.getEntityById(testId)->setPosition(renderer.getCameraPosition() - MFMath::Vec3(0,0,5));
     entityManager.getEntityById(testId)->setVelocity(MFMath::Vec3(0,0,0));
+    entityManager.getEntityById(testId)->setAngularVelocity(MFMath::Vec3(0,0,0));
 }
 
 ballCounter++;

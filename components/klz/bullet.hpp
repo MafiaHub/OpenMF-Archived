@@ -74,6 +74,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->setCollisionFlags(newBody.mRigidBody.mBody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
@@ -85,6 +86,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->setCollisionFlags(newBody.mRigidBody.mBody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
@@ -97,6 +99,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
+        newBody.mRigidBody.mBody->setCollisionFlags(newBody.mRigidBody.mBody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); \
         newBody.mRigidBody.mBody->setWorldTransform(transform);
 
     loopBegin(getOBBCols)
@@ -114,8 +117,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,200.0));  // FIXME: cylinder height infinite?
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->setCollisionFlags(newBody.mRigidBody.mBody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
         newBody.mRigidBody.mBody->translate(center);
-
     loopEnd
 
     // load face collisions:
@@ -224,6 +227,7 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
+        newBody.mRigidBody.mBody->setCollisionFlags(newBody.mRigidBody.mBody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
         newBody.mRigidBody.mBody->setWorldTransform(MFUtil::mafiaMat4ToBullet(model.computeWorldTransform(meshIndex)));
         mRigidBodies.push_back(newBody);
     }

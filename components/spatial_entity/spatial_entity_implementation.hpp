@@ -22,6 +22,7 @@ public:
     virtual std::string toString() override;
     virtual void setPosition(MFMath::Vec3 position) override;
     virtual void setVelocity(MFMath::Vec3 velocity) override;
+    virtual void setAngularVelocity(MFMath::Vec3 velocity) override;
     virtual bool hasVisual() override;
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
@@ -86,6 +87,14 @@ void SpatialEntityImplementation::setVelocity(MFMath::Vec3 velocity)
         return;
 
     mBulletBody->setLinearVelocity(btVector3(velocity.x,velocity.y,velocity.z));
+}
+
+void SpatialEntityImplementation::setAngularVelocity(MFMath::Vec3 velocity)
+{
+    if (!mBulletBody)
+        return;
+
+    mBulletBody->setAngularVelocity(btVector3(velocity.x,velocity.y,velocity.z));
 }
 
 void SpatialEntityImplementation::computeCurrentTransform()
