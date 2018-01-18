@@ -83,6 +83,7 @@ SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
     btRigidBody::btRigidBodyConstructionInfo ci(mass,motionState.get(),mTestPhysicalSphereShape.get(),fallInertia);
 
     std::shared_ptr<btRigidBody> physicalBody = std::make_shared<btRigidBody>(ci);
+    physicalBody->setActivationState(DISABLE_DEACTIVATION);
     mPhysicsWorld->getWorld()->addRigidBody(physicalBody.get());
     return createEntity(visualNode.get(), physicalBody, motionState, "test sphere");
 }
