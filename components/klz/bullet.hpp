@@ -71,11 +71,10 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 bboxCorner = p2 - center;
 
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
-        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(btTransform(btQuaternion(0,0,0,1),center));
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-        newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
     loopBegin(getSphereCols)
@@ -83,11 +82,10 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         float radius = col.mRadius;
 
         newBody.mRigidBody.mShape = std::make_shared<btSphereShape>(radius);
-        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(btTransform(btQuaternion(0,0,0,1),center));
 
         btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-        newBody.mRigidBody.mBody->translate(center);
     loopEnd
 
     #define loadOBBOrXTOBB \
@@ -97,10 +95,9 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 bboxCorner = p2 - center; \
         btTransform transform = MFUtil::mafiaMat4ToBullet(col.mTransform); \
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
-        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(); \
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(transform); \
         btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get()); \
-        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
-        newBody.mRigidBody.mBody->setWorldTransform(transform);
+        newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
 
     loopBegin(getOBBCols)
         loadOBBOrXTOBB
@@ -115,11 +112,9 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         float radius = col.mRadius;
 
         newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,200.0));  // FIXME: cylinder height infinite?
-        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(btTransform(btQuaternion(0,0,0,1),center));
         btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-        newBody.mRigidBody.mBody->translate(center);
-
     loopEnd
 
     // load face collisions:
@@ -223,12 +218,11 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         }
 
         newBody.mRigidBody.mShape = std::make_shared<btBvhTriangleMeshShape>(newBody.mRigidBody.mMesh.get(),true);
-
         newBody.mName = mFaceCollisions[i].mMeshName;
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(MFUtil::mafiaMat4ToBullet(model.computeWorldTransform(meshIndex)));
 
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
-        newBody.mRigidBody.mBody->setWorldTransform(MFUtil::mafiaMat4ToBullet(model.computeWorldTransform(meshIndex)));
         mRigidBodies.push_back(newBody);
     }
 }
