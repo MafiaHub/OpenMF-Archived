@@ -57,6 +57,8 @@ protected:
     btCollisionDispatcher               *mCollisionDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
 
+btOverlappingPairCache *mPairCache;
+
     std::vector<MFUtil::NamedRigidBody> mTreeKlzBodies;
 
     MFFile::FileSystem *mFileSystem;
@@ -64,7 +66,8 @@ protected:
 
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
-    mBroadphaseInterface = new btSimpleBroadphase();   // TODO: choose the right algorithm
+    mPairCache = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
+    mBroadphaseInterface = new btAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache);   // TODO: choose the right algorithm
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
@@ -82,6 +85,7 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mCollisionDispatcher;
     delete mConfiguration;
     delete mBroadphaseInterface;
+    delete mPairCache;
 }
 
 int BulletPhysicsWorld::pointCollision(double x, double y, double z)
