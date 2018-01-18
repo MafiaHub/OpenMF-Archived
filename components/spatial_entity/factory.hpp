@@ -23,16 +23,22 @@ public:
         std::string name="");
 
     SpatialEntity::Id createTestBallEntity();
+    SpatialEntity::Id createTestBoxEntity();
 
 protected:
+    SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+
     MFGame::SpatialEntityManager *mEntityManager;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFRender::OSGRenderer *mRenderer;
 
     osg::ref_ptr<osg::Shape> mTestVisualSphereShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestSphereNode;
-
     std::shared_ptr<btCollisionShape> mTestPhysicalSphereShape;
+
+    osg::ref_ptr<osg::Shape> mTestVisualBoxShape;
+    osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
+    std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
 };
 
 SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager)
@@ -42,11 +48,15 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mEntityManager = entityManager;
 
     const double r = 0.7;
+    const double l = 1.0;
 
     mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),r);
     mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
-
     mTestPhysicalSphereShape = std::make_shared<btSphereShape>(r);
+
+    mTestVisualBoxShape = new osg::Box(osg::Vec3f(0,0,0),l);
+    mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
+    mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 }
 
 SpatialEntity::Id SpatialEntityFactory::createEntity(
@@ -69,23 +79,34 @@ SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
+SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
 {
-    osg::ref_ptr<osg::MatrixTransform> visualNode = new osg::MatrixTransform();
-    visualNode->addChild(mTestSphereNode);
-    mRenderer->getRootNode()->addChild(visualNode);
+    osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+    visualTransform->addChild(visualNode);
+    mRenderer->getRootNode()->addChild(visualTransform);
 
     std::shared_ptr<btDefaultMotionState> motionState = std::make_shared<btDefaultMotionState>();
 
     btScalar mass = 1;
-    btVector3 fallInertia(0, 0, 0);
+    btVector3 fallInertia(0,0,0);
     mTestPhysicalSphereShape->calculateLocalInertia(mass,fallInertia);
-    btRigidBody::btRigidBodyConstructionInfo ci(mass,motionState.get(),mTestPhysicalSphereShape.get(),fallInertia);
+    btRigidBody::btRigidBodyConstructionInfo ci(mass,motionState.get(),colShape,fallInertia);
 
     std::shared_ptr<btRigidBody> physicalBody = std::make_shared<btRigidBody>(ci);
     physicalBody->setActivationState(DISABLE_DEACTIVATION);
     mPhysicsWorld->getWorld()->addRigidBody(physicalBody.get());
-    return createEntity(visualNode.get(), physicalBody, motionState, "test sphere");
+
+    return createEntity(visualTransform.get(),physicalBody,motionState,"test");
+}
+
+SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
+{
+    return createTestShapeEntity(mTestPhysicalSphereShape.get(),mTestSphereNode.get());
+}
+
+SpatialEntity::Id SpatialEntityFactory::createTestBoxEntity()
+{
+    return createTestShapeEntity(mTestPhysicalBoxShape.get(),mTestBoxNode.get());
 }
 
 class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor

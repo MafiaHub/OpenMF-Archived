@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     }
 
 // TMP test:
-MFGame::SpatialEntity::Id testId = entityFactory.createTestBallEntity();
+MFGame::SpatialEntity::Id testId = entityFactory.createTestBoxEntity();
 int ballCounter = 0;
 // --------
 
