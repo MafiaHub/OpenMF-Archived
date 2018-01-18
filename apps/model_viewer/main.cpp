@@ -208,7 +208,7 @@ int ballCounter = 0;
     {
         while (!renderer.done())    // main loop
         {
-            double dt = 0.005;
+            double dt = 0.1;
 
 // TMP test:
 if (ballCounter % 500 == 0)

@@ -64,7 +64,7 @@ protected:
 
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
-    mBroadphaseInterface = new btDbvtBroadphase();
+    mBroadphaseInterface = new btSimpleBroadphase();   // TODO: choose the right algorithm
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
@@ -106,7 +106,7 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
 
 void BulletPhysicsWorld::frame(double dt)
 {
-    mWorld->stepSimulation(dt,1);
+    mWorld->stepSimulation(dt,1);     // TODO: number of steps?
 }
 
 std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()

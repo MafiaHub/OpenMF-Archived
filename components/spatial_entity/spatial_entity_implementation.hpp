@@ -190,6 +190,7 @@ void SpatialEntityImplementation::update(double dt)
     {
         computeCurrentTransform();
         applyCurrentTransform();
+        mBulletBody->activate();    // TODO: move this somewhere else?
     }
 }
 
