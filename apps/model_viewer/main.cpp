@@ -208,10 +208,10 @@ int ballCounter = 0;
     {
         while (!renderer.done())    // main loop
         {
-            double dt = 0.1;
+            double dt = 0.005;
 
 // TMP test:
-if (ballCounter % 200 == 0)
+if (ballCounter % 500 == 0)
 {
     entityManager.getEntityById(testId)->setPosition(renderer.getCameraPosition() - MFMath::Vec3(0,0,5));
     entityManager.getEntityById(testId)->setVelocity(MFMath::Vec3(0,0,0));

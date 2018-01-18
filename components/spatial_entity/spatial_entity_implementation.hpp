@@ -145,13 +145,13 @@ void SpatialEntityImplementation::applyCurrentTransform()
 
         mBulletBody->setWorldTransform(t);
         syncDebugPhysicsNode();
-    }   
+    } 
 
     if (mOSGNode)
     {
         osg::Matrixd m = mOSGInitialTransform;
 
-//        m.preMultRotate(osg::Quat(mRotation.x,mRotation.y,mRotation.z,mRotation.w));
+        m.preMultRotate(osg::Quat(mRotation.x,mRotation.y,mRotation.z,mRotation.w));
         m.setTrans(mOSGInitialTransform.getTrans() + osg::Vec3f(relPos.x,relPos.y,relPos.z));
 
         // TODO: scale
