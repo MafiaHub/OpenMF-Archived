@@ -193,8 +193,14 @@ int main(int argc, char** argv)
     }
 
 // TMP test:
-MFGame::SpatialEntity::Id testId = entityFactory.createTestBoxEntity();
-int ballCounter = 0;
+
+MFGame::SpatialEntity::Id testEnts[3][3];
+
+for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+        testEnts[i][j] = i == j ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
+
+int entCounter = 0;
 // --------
 
     int infoCounter = 0;
@@ -211,14 +217,20 @@ int ballCounter = 0;
             double dt = 0.005;
 
 // TMP test:
-if (ballCounter % 500 == 0)
+
+if (entCounter % 1500 == 0)
 {
-    entityManager.getEntityById(testId)->setPosition(renderer.getCameraPosition() - MFMath::Vec3(0,0,5));
-    entityManager.getEntityById(testId)->setVelocity(MFMath::Vec3(0,0,0));
-    entityManager.getEntityById(testId)->setAngularVelocity(MFMath::Vec3(0,0,0));
+for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+    {
+        MFGame::SpatialEntity *e = entityManager.getEntityById(testEnts[i][j]);
+        e->setPosition(renderer.getCameraPosition() - MFMath::Vec3( (i - 1) * 2, (j - 1) * 2 ,5));
+        e->setVelocity(MFMath::Vec3(0,0,0));
+        e->setAngularVelocity(MFMath::Vec3(0,0,0));
+    }
 }
 
-ballCounter++;
+entCounter++;
 // --------
 
             if (cameraInfo || collisionInfo)
