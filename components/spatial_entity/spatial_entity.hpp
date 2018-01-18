@@ -29,6 +29,7 @@ public:
     virtual std::string toString()                      { return "";            };
     MFMath::Vec3 getPosition()                          { return mPosition;     };
     virtual void setPosition(MFMath::Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
+    virtual void setVelocity(MFMath::Vec3 velocity)=0;
     MFMath::Quat getRotation()                          { return mRotation;     };
     virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
     virtual bool hasVisual()=0;

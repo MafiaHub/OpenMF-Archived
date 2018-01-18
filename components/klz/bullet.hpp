@@ -71,8 +71,9 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 bboxCorner = p2 - center;
 
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner);
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
 
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
@@ -82,8 +83,9 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         float radius = col.mRadius;
 
         newBody.mRigidBody.mShape = std::make_shared<btSphereShape>(radius);
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
 
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
     loopEnd
@@ -95,7 +97,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         btVector3 bboxCorner = p2 - center; \
         btTransform transform = MFUtil::mafiaMat4ToBullet(col.mTransform); \
         newBody.mRigidBody.mShape = std::make_shared<btBoxShape>(bboxCorner); \
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get()); \
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>(); \
+        btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get()); \
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci); \
         newBody.mRigidBody.mBody->setWorldTransform(transform);
 
@@ -112,7 +115,8 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
         float radius = col.mRadius;
 
         newBody.mRigidBody.mShape = std::make_shared<btCylinderShapeZ>(btVector3(radius,0,200.0));  // FIXME: cylinder height infinite?
-        btRigidBody::btRigidBodyConstructionInfo ci(0,0,newBody.mRigidBody.mShape.get());
+        newBody.mRigidBody.mMotionState = std::make_shared<btDefaultMotionState>();
+        btRigidBody::btRigidBodyConstructionInfo ci(0,newBody.mRigidBody.mMotionState.get(),newBody.mRigidBody.mShape.get());
         newBody.mRigidBody.mBody = std::make_shared<btRigidBody>(ci);
         newBody.mRigidBody.mBody->translate(center);
 

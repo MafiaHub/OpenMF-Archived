@@ -55,6 +55,9 @@ SpatialEntity::Id SpatialEntityFactory::createEntity(
     std::shared_ptr<btDefaultMotionState> physicsMotionsState, 
     std::string name)
 {
+    if (physicsBody && physicsMotionsState && physicsBody->getMotionState() != physicsMotionsState.get())
+        physicsBody->setMotionState(physicsMotionsState.get());
+
     std::shared_ptr<MFGame::SpatialEntityImplementation> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
     newEntity->setName(name);
     newEntity->setOSGRootNode(mRenderer->getRootNode());
@@ -139,7 +142,10 @@ public:
                     if (!matchedBody)
                         MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\".",SPATIAL_ENTITY_FACTORY_MODULE_STR);
 
-                    mEntityFactory->createEntity(&n, matchedBody ? matchedBody->mRigidBody.mBody : 0, 0, n.getName());
+                    mEntityFactory->createEntity(&n,
+                        matchedBody ? matchedBody->mRigidBody.mBody : 0,
+                        matchedBody ? matchedBody->mRigidBody.mMotionState : 0,
+                        n.getName());
                 }
             }
         }
@@ -190,7 +196,10 @@ void SpatialEntityFactory::createMissionEntities()
         if (v.mMatchedBodies.find(treeKlzBodies[i].mName) != v.mMatchedBodies.end())
             continue;
 
-        createEntity(0,treeKlzBodies[i].mRigidBody.mBody,0,treeKlzBodies[i].mName);
+        createEntity(0,
+            treeKlzBodies[i].mRigidBody.mBody,
+            treeKlzBodies[i].mRigidBody.mMotionState,
+            treeKlzBodies[i].mName);
     }
 
     // TODO: set the static flag to the loaded bodies here

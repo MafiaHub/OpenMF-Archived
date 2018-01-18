@@ -190,14 +190,12 @@ int main(int argc, char** argv)
         double cam[6];
         parseCameraString(arguments["p"].as<std::string>(),cam);
         renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+    }
 
 // TMP test:
 MFGame::SpatialEntity::Id testId = entityFactory.createTestBallEntity();
-entityManager.getEntityById(testId)->setPosition(
-MFMath::Vec3(cam[0],cam[1],cam[2])
-);
+int ballCounter = 0;
 // --------
-    }
 
     int infoCounter = 0;
 
@@ -211,6 +209,16 @@ MFMath::Vec3(cam[0],cam[1],cam[2])
         while (!renderer.done())    // main loop
         {
             double dt = 0.005;
+
+// TMP test:
+if (ballCounter % 500 == 0)
+{
+    entityManager.getEntityById(testId)->setPosition(renderer.getCameraPosition() - MFMath::Vec3(0,0,5));
+    entityManager.getEntityById(testId)->setVelocity(MFMath::Vec3(0,0,0));
+}
+
+ballCounter++;
+// --------
 
             if (cameraInfo || collisionInfo)
             {

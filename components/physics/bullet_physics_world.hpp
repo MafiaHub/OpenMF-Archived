@@ -68,7 +68,7 @@ BulletPhysicsWorld::BulletPhysicsWorld()
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
-    mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
+    mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher,mBroadphaseInterface,mSolver,mConfiguration);
 
     mWorld->setGravity(btVector3(0.0f, 0.0f, -9.81f));
 
@@ -99,9 +99,8 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
     delete sphere;
 
     if (cb.mResult)
-{
         return cb.mResult->getUserIndex();
-}
+
     return -1;
 }
 
