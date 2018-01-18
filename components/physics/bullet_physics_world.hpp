@@ -67,7 +67,8 @@ btOverlappingPairCache *mPairCache;
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
     mPairCache = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
-    mBroadphaseInterface = new btAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache);   // TODO: choose the right algorithm
+    // TODO: compute the world bounding box for the axis sweep algorithm - can be done from the tree.klz grid
+    mBroadphaseInterface = new bt32BitAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache);   // TODO: choose the right algorithm
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
