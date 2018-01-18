@@ -297,6 +297,7 @@ std::string makeInfoString(osg::Node *n)
     return v.mInfo;
 }
 
+
 }
 
 #endif

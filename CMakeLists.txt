@@ -41,6 +41,14 @@ IF (WIN32)
         SET(BULLET_ROOT "${BULLET_ROOT}")
         SET(BULLET_INCLUDE_DIR "${BULLET_ROOT}/../src;")
     ENDIF(NOT BULLET_ROOT)
+    
+    SET(SDL2_ROOT CACHE PATH "Path where to find SDL2")
+    IF(NOT SDL2_ROOT)
+        MESSAGE(FATAL_ERROR "Error: SDL2 not found.")
+    ELSE(NOT SDL2_ROOT)
+        SET(SDL2_ROOT "${SDL2_ROOT}")
+    ENDIF(NOT SDL2_ROOT)
+
 ENDIF(WIN32)
 
 IF(CMAKE_CONFIGURATION_TYPES)
@@ -75,9 +83,10 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_PACKAGE(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
+FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
+FIND_PACKAGE(SDL2 REQUIRED SDL2 SDL2main)
 FIND_PACKAGE(Threads)
 
-FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
 
 INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS} ${BULLET_INCLUDE_DIRS} "/usr/include/bullet")
 
