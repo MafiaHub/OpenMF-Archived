@@ -8,6 +8,7 @@
 #include <osg/ShapeDrawable>
 #include <utils.hpp>
 #include <base_loader.hpp>
+#include <osg_masks.hpp>
 
 #define OSGCHECKBIN_MODULE_STR "loader check.bin"
 
@@ -96,6 +97,7 @@ size_t OSGCheckBinLoader::getColorFromIndexOfType(uint16_t type)
 osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
+    group->setNodeMask(MFRender::MASK_DEBUG);
     group->setName("check.bin");
     MFLogger::ConsoleLogger::info("loading check.bin", OSGCHECKBIN_MODULE_STR);
     MFFormat::DataFormatCheckBIN parser;
@@ -107,20 +109,20 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
         std::vector<osg::Vec4f> debugNodesColors = 
         {
             osg::Vec4f(0,0,1,0),
-            osg::Vec4f(0,1,0,0),
+            osg::Vec4f(0,1,1,0),
             osg::Vec4f(1,1,0,0),
             osg::Vec4f(1,0,0,0),
             osg::Vec4f(0,0,0,0)
         };
         
-        for(size_t i = 0; i < debugNodesColors.size(); i++) 
+        for (size_t i = 0; i < debugNodesColors.size(); i++) 
         {
             debugNodes[i] = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),0.1));
             debugNodes[i]->setColor(debugNodesColors.at(i));
             debugNodes[i]->setUseDisplayList(false);
         }
 
-        for(auto line : resolveLinks(parser))
+        for (auto line : resolveLinks(parser))
         {
             osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
             osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
@@ -129,10 +131,10 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
             points->push_back(line.mStart);
             points->push_back(line.mEnd);
             color->push_back(debugNodesColors.at(getColorFromIndexOfType(line.mType)));
-            geometry ->setVertexArray(points.get());
-            geometry ->setColorArray(color.get());
-            geometry ->setColorBinding(osg::Geometry::BIND_OVERALL);
-            geometry ->addPrimitiveSet(new osg::DrawArrays(GL_LINES,0, points->size())); 
+            geometry->setVertexArray(points.get());
+            geometry->setColorArray(color.get());
+            geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+            geometry->addPrimitiveSet(new osg::DrawArrays(GL_LINES,0, points->size())); 
             group->addChild(geometry);
 
         } //for links
