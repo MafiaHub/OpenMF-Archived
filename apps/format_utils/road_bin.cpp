@@ -51,9 +51,9 @@ int main(int argc, char** argv)
 
     std::ifstream f;
 
-    f.open(inputFile, std::ifstream::binary);
+    auto fs = MFFile::FileSystem::getInstance();
 
-    if (!f.is_open())
+    if (!fs->open(f, inputFile, std::ifstream::binary))
     {
         MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;

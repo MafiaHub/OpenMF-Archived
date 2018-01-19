@@ -42,12 +42,12 @@ std::string getStringPointType(uint32_t pointType)
 
 void dump(MFFormat::DataFormatCheckBIN checkBin)
 {
-    uint linkIter = 0;
+    uint32_t linkIter = 0;
     for (std::size_t i = 0; i != checkBin.getNumPoints(); ++i)
     {
         auto point = checkBin.getPoints()[i];
         ConsoleLogger::raw("[P" + std::to_string(i) + "][" + getStringPointType(point.mType) + "] " + std::to_string(point.mPos.x) + " " + std::to_string(point.mPos.y) + " " + std::to_string(point.mPos.z), "dump");
-        for (uint j = 0; j < point.mEnterLinks; j++)
+        for (uint32_t j = 0; j < point.mEnterLinks; j++)
         {
             auto link = checkBin.getLinks()[linkIter+j];
             auto targetPoint = checkBin.getPoints()[link.mTargetPoint];
@@ -90,9 +90,9 @@ int main(int argc, char** argv)
 
     std::ifstream f;
 
-    f.open(inputFile, std::ifstream::binary);
+    auto fs = MFFile::FileSystem::getInstance();
 
-    if (!f.is_open())
+    if (!fs->open(f, inputFile, std::ifstream::binary))
     {
         ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;

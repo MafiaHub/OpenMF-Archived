@@ -74,9 +74,9 @@ bool DataFormatCheckBIN::load(std::ifstream &srcFile)
         return false;
     }
 
-    uint numLinks = 0;
+    uint32_t numLinks = 0;
 
-    for (uint i = 0; i < header.mNumPoints; i++)
+    for (uint32_t i = 0; i < header.mNumPoints; i++)
     {
         Point point = {};
         read(srcFile, &point);
@@ -89,7 +89,7 @@ bool DataFormatCheckBIN::load(std::ifstream &srcFile)
     // Each point references 0 or more links.
     // For example, if point 0 has mEnterLinks = 2, it means that the first 2 links belong to it.
     // Consequent links in a row belong to point 1, 2 and so on.
-    for (uint i = 0; i < numLinks; i++)
+    for (uint32_t i = 0; i < numLinks; i++)
     {
         Link link = {};
         read(srcFile, &link);

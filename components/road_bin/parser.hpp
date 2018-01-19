@@ -85,7 +85,7 @@ bool DataFormatRoadBIN::load(std::ifstream &srcFile)
     uint32_t numCrossroads = 0;
     read(srcFile, &numCrossroads);
 
-    for (uint i = 0; i < numCrossroads; i++)
+    for (uint32_t  i = 0; i < numCrossroads; i++)
     {
         Crossroad crossroad = {};
         read(srcFile, &crossroad);
@@ -96,7 +96,7 @@ bool DataFormatRoadBIN::load(std::ifstream &srcFile)
     uint32_t numWaypoints = 0;
     read(srcFile, &numWaypoints);
 
-    for (uint i = 0; i < numWaypoints; i++)
+    for (uint32_t  i = 0; i < numWaypoints; i++)
     {
         Waypoint waypoint = {};
         read(srcFile, &waypoint);
