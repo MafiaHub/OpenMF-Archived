@@ -54,7 +54,7 @@ protected:
 
     osg::Group *mOSGRoot;
 
-    osg::ref_ptr<osg::MatrixTransform> mOSGPgysicsDebugNode;
+    osg::ref_ptr<osg::MatrixTransform> mOSGPhysicsDebugNode;
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
 };
@@ -331,12 +331,12 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         shapeNode->setStateSet(SpatialEntityImplementation::sDebugStateSet);
 
-        mOSGPgysicsDebugNode = new osg::MatrixTransform();
-        mOSGPgysicsDebugNode->addChild(shapeNode);
+        mOSGPhysicsDebugNode = new osg::MatrixTransform();
+        mOSGPhysicsDebugNode->addChild(shapeNode);
 
         syncDebugPhysicsNode();
 
-        mOSGRoot->addChild(mOSGPgysicsDebugNode);
+        mOSGRoot->addChild(mOSGPhysicsDebugNode);
     }
 }
 
@@ -360,7 +360,7 @@ void SpatialEntityImplementation::syncDebugPhysicsNode()
         transformMat = osg::Matrixd::identity();
     }
 
-    mOSGPgysicsDebugNode->setMatrix(transformMat);
+    mOSGPhysicsDebugNode->setMatrix(transformMat);
 }
 
 void SpatialEntityImplementation::move(MFMath::Vec3 destPosition)
