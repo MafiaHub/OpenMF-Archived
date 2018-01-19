@@ -2,8 +2,8 @@
 
 This file should help mainly new developers get familiar with the code and development process. Please:
 
-- See also [CONTRIBUTING.md]().
-- For any question or suggestions, contact us on our discord (link in [README.md]()) or issue tracker.
+- See also [CONTRIBUTING.md](https://github.com/OpenMafia/OpenMF/tree/master/CONTRIBUTING.md).
+- For any question or suggestions, contact us on our discord (link in [README.md](https://github.com/OpenMafia/OpenMF/tree/master/README.md)) or issue tracker.
 
 ## Compiling
 
@@ -46,7 +46,7 @@ on the game files.
 [OpenRW](https://github.com/rwengine/openrw), [REGoth](https://github.com/REGoth-project/REGoth), ...)
 - GPLv3 license
 - issue tracker: GitHub
-- see also [CONTRIBUTING.md]()
+- see also [CONTRIBUTING.md](https://github.com/OpenMafia/OpenMF/tree/master/CONTRIBUTING.md)
 
 ## Repo structure
 
