@@ -8,7 +8,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
 
-#define BULLET_PHYSICS_WORLD_MODULE_STR "bullet world"
+#define BULLET_PHYSICS_WORLD_MODULE_STR "physics world"
 
 namespace MFPhysics
 {
@@ -21,6 +21,7 @@ public:
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
     virtual int pointCollision(double x, double y, double z) override;
+    virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
     std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
@@ -56,19 +57,18 @@ protected:
     btDefaultCollisionConfiguration     *mConfiguration;
     btCollisionDispatcher               *mCollisionDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
-
-btOverlappingPairCache *mPairCache;
-
+    btOverlappingPairCache *mPairCache;
     std::vector<MFUtil::NamedRigidBody> mTreeKlzBodies;
-
     MFFile::FileSystem *mFileSystem;
 };
 
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
-    mPairCache = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
-    // TODO: compute the world bounding box for the axis sweep algorithm - can be done from the tree.klz grid
-    mBroadphaseInterface = new bt32BitAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache);   // TODO: choose the right algorithm
+    MFLogger::ConsoleLogger::info("Initializing physics world.",BULLET_PHYSICS_WORLD_MODULE_STR);
+    mPairCache           = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
+
+    // TODO: How to determine the world AABB for Axis Sweep when the bodies aren't loaded yet? Maybe from tree.klz grid?
+    mBroadphaseInterface = new bt32BitAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache); 
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
@@ -112,6 +112,38 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
 void BulletPhysicsWorld::frame(double dt)
 {
     mWorld->stepSimulation(dt,1);     // TODO: number of steps?
+}
+
+void BulletPhysicsWorld::getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max)
+{
+    // FIXME: find/implement a way to get a list of all rigid bodies in a world
+
+    if (mTreeKlzBodies.size() > 0)
+    {
+        min = MFMath::Vec3(0,0,0);
+        max = MFMath::Vec3(0,0,0);
+
+        for (int i = 0; i < (int) mTreeKlzBodies.size(); ++i)
+        {
+            btVector3 p1,p2;
+
+            mTreeKlzBodies[i].mRigidBody.mBody->getAabb(p1,p2);
+
+            min.x = std::min(min.x,std::min(p1.x(),p2.x()));
+            min.y = std::min(min.y,std::min(p1.y(),p2.y()));
+            min.z = std::min(min.z,std::min(p1.z(),p2.z()));
+
+            max.x = std::max(max.x,std::max(p1.x(),p2.x()));
+            max.y = std::max(max.y,std::max(p1.y(),p2.y()));
+            max.z = std::max(max.z,std::max(p1.z(),p2.z()));
+        }
+    }
+    else
+    {
+        // TMP: assign some default values here, the above FIXME should get rid of this
+        min = MFMath::Vec3(-100,-100,-100);
+        max = MFMath::Vec3(100,100,100);
+    }
 }
 
 std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
