@@ -8,6 +8,7 @@
 #include <4ds/osg.hpp>
 #include <scene2_bin/osg.hpp>
 #include <cache_bin/osg.hpp>
+#include <check_bin/osg.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
@@ -244,10 +245,12 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     std::string scene4dsPath = missionDir + "/scene.4ds";
     std::string scene2BinPath = missionDir + "/scene2.bin";
     std::string cacheBinPath = missionDir + "/cache.bin";
+    std::string checkBinPath = missionDir + "/check.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
     MFFormat::OSGCacheBinLoader lCache;
+    MFFormat::OSGCheckBinLoader lCheck;
 
     l4ds.setLoaderCache(&mLoaderCache);
     lScene2.setLoaderCache(&mLoaderCache);
@@ -256,6 +259,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
+    std::ifstream fileCheckBin;
 
     MFFormat::OSGLoader::NodeMap nodeMap;
     l4ds.setNodeMap(&nodeMap);
@@ -307,6 +311,18 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
             mRootNode->addChild(n);
 
         fileCacheBin.close();
+    }
+
+    //NOTE(DavoSK): Only for debug 
+    if(mFileSystem->open(fileCheckBin,checkBinPath))
+    {
+        osg::ref_ptr<osg::Node> n = lCheck.load(fileCheckBin);
+        if (!n)
+            MFLogger::ConsoleLogger::warn("Couldn't not parse check.bin file: " + checkBinPath + ".", OSGRENDERER_MODULE_STR);
+        else
+            mRootNode->addChild(n);
+
+        fileCheckBin.close();    
     }
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
