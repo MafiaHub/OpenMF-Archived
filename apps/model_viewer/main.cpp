@@ -192,15 +192,18 @@ int main(int argc, char** argv)
         renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
     }
 
-// TMP test:
+#define TEST_PHYSICS 0
 
+// TMP test:
+#if TEST_PHYSICS
 MFGame::SpatialEntity::Id testEnts[3][3];
 
 for (int i = 0; i < 3; ++i)
     for (int j = 0; j < 3; ++j)
-        testEnts[i][j] = i == j ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
+        testEnts[i][j] = (i % 2) == (j % 2) ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
 
 int entCounter = 0;
+#endif
 // --------
 
     int infoCounter = 0;
@@ -217,7 +220,7 @@ int entCounter = 0;
             double dt = 0.005;
 
 // TMP test:
-
+#if TEST_PHYSICS
 if (entCounter % 1500 == 0)
 {
 for (int i = 0; i < 3; ++i)
@@ -231,6 +234,7 @@ for (int i = 0; i < 3; ++i)
 }
 
 entCounter++;
+#endif
 // --------
 
             if (cameraInfo || collisionInfo)
@@ -252,7 +256,11 @@ entCounter++;
             // TODO use UPDATE_TIME to make fixed-time-delta loop
 
             entityManager.update(dt);
+
+#if TEST_PHYSICS
             physicsWorld.frame(dt);
+#endif
+
             renderer.frame(dt);
         }
     }
