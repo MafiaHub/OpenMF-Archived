@@ -217,7 +217,7 @@ int entCounter = 0;
     {
         while (!renderer.done())    // main loop
         {
-            double dt = 0.005;
+            double dt = 1 / 60.0; // 0.005;
 
 // TMP test:
 #if TEST_PHYSICS
