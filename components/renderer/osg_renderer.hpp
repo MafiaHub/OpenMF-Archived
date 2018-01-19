@@ -68,16 +68,23 @@ public:
                     mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
             }
 
-            mSelected = result.drawable;
-            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+            if (mSelected == result.drawable)  // clicking the same node twice will deselect it
+            {
+                mSelected = 0;
+            }
+            else
+            {
+                mSelected = result.drawable;
+                mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+                mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
 
-            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+                MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
 
-            for (int i = 0; i < (int) result.nodePath.size(); ++i)
-                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+                for (int i = 0; i < (int) result.nodePath.size(); ++i)
+                    MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
 
-            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+                MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+            }
         }
 
         return true;
@@ -113,7 +120,6 @@ protected:
     MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
 
     void optimize();
-    void logCacheStats();
 
     /**
       Given a list of light sources in the scene, the function decides which scene node should be lit by which
@@ -330,7 +336,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
 
     optimize();
 
-    logCacheStats();
+    mLoaderCache.logStats();
 
     return true;
 }
@@ -389,7 +395,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     optimize();
     setUpLights(0);
 
-    logCacheStats();
+    mLoaderCache.logStats();
 
     return true;
 }
@@ -407,12 +413,6 @@ void OSGRenderer::frame(double dt)
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
     }
-}
-
-void OSGRenderer::logCacheStats()
-{
-    MFLogger::ConsoleLogger::info("cache hits: " + std::to_string(mLoaderCache.getCacheHits()),OSGRENDERER_MODULE_STR);
-    MFLogger::ConsoleLogger::info("cache objects total: " + std::to_string(mLoaderCache.getNumObjects()),OSGRENDERER_MODULE_STR);
 }
 
 void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)

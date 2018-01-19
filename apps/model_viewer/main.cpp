@@ -4,9 +4,11 @@
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
 #include <physics/bullet_physics_world.hpp>
-#include <spatial_entity/loader.hpp>
 #include <string.h>
 #include <stdlib.h>
+#include <spatial_entity/spatial_entity.hpp>
+#include <spatial_entity/manager.hpp>
+#include <spatial_entity/factory.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -35,7 +37,8 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
-std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world, MFFormat::SpatialEntityLoader::SpatialEntityList *entityList)
+std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world,
+    MFGame::SpatialEntityManager *entityManager)
 {
     std::string result = "collision: ";
 
@@ -45,16 +48,7 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
     int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
 
     if (entityID >= 0)
-    {
-        // FIXME: this is slow, entity manager is needed to quickly find an entity by ID
-
-        for (int i = 0; i < (int) entityList->size(); ++i)
-            if ((*entityList)[i].getID() == entityID)
-            {
-                result += (*entityList)[i].toString();
-                break;
-            }
-    }
+        result += entityManager->getEntityById(entityID)->toString();
     else
         result += "none";
 
@@ -166,8 +160,8 @@ int main(int argc, char** argv)
 
     MFRender::OSGRenderer renderer;
     MFPhysics::BulletPhysicsWorld physicsWorld;
-    MFFormat::SpatialEntityLoader spatialEntityLoader;
-    MFFormat::SpatialEntityLoader::SpatialEntityList entities;
+    MFGame::SpatialEntityManager entityManager;
+    MFGame::SpatialEntityFactory entityFactory(&renderer,&physicsWorld,&entityManager);
 
     if (model)
     {
@@ -180,8 +174,7 @@ int main(int argc, char** argv)
         if (loadTreeKlz)
             physicsWorld.loadMission(inputFile);
 
-        auto treeKlzBodies = physicsWorld.getTreeKlzBodies();
-        entities = spatialEntityLoader.loadFromScene(renderer.getRootNode(),treeKlzBodies);
+        entityFactory.createMissionEntities();
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
@@ -199,6 +192,20 @@ int main(int argc, char** argv)
         renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
     }
 
+#define TEST_PHYSICS 0
+
+// TMP test:
+#if TEST_PHYSICS
+MFGame::SpatialEntity::Id testEnts[3][3];
+
+for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+        testEnts[i][j] = (i % 2) == (j % 2) ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
+
+int entCounter = 0;
+#endif
+// --------
+
     int infoCounter = 0;
 
     if (exportFileName.length() > 0)
@@ -210,6 +217,26 @@ int main(int argc, char** argv)
     {
         while (!renderer.done())    // main loop
         {
+            double dt = 0.005;
+
+// TMP test:
+#if TEST_PHYSICS
+if (entCounter % 1500 == 0)
+{
+for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+    {
+        MFGame::SpatialEntity *e = entityManager.getEntityById(testEnts[i][j]);
+        e->setPosition(renderer.getCameraPosition() - MFMath::Vec3( (i - 1) * 2, (j - 1) * 2 ,5));
+        e->setVelocity(MFMath::Vec3(0,0,0));
+        e->setAngularVelocity(MFMath::Vec3(0,0,0));
+    }
+}
+
+entCounter++;
+#endif
+// --------
+
             if (cameraInfo || collisionInfo)
             {
                 if (infoCounter <= 0)
@@ -218,7 +245,7 @@ int main(int argc, char** argv)
                         std::cout << "camera: " + getCameraString(&renderer) << std::endl;
 
                     if (collisionInfo)
-                        std::cout << getCollisionString(&renderer,&physicsWorld,&entities) << std::endl;
+                        std::cout << getCollisionString(&renderer,&physicsWorld,&entityManager) << std::endl;
 
                     infoCounter = 30;
                 }
@@ -228,8 +255,13 @@ int main(int argc, char** argv)
 
             // TODO use UPDATE_TIME to make fixed-time-delta loop
 
-            physicsWorld.frame(0);
-            renderer.frame(0);
+            entityManager.update(dt);
+
+#if TEST_PHYSICS
+            physicsWorld.frame(dt);
+#endif
+
+            renderer.frame(dt);
         }
     }
 

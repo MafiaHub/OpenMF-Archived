@@ -37,24 +37,20 @@ public:
 
     virtual void apply(osg::Node &n) override
     {
-          osg::StateSet *stateSet = n.getStateSet();
+        osg::StateSet *stateSet = n.getStateSet();
 
-          if (stateSet)
-          {
-              osg::StateAttribute *stateAttribute = stateSet->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
+        if (stateSet)
+        {
+            osg::StateAttribute *stateAttribute = stateSet->getTextureAttribute(0,osg::StateAttribute::TEXTURE);
 
-              if (stateAttribute && stateAttribute->asTexture())
-              {
-                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_S,osg::Texture::MIRROR);    
-                  stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_T,osg::Texture::MIRROR);    
-              }
-          }
+            if (stateAttribute && stateAttribute->asTexture())
+            {
+                stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_S,osg::Texture::MIRROR);    
+                stateAttribute->asTexture()->setWrap(osg::Texture::WRAP_T,osg::Texture::MIRROR);    
+            }
+        }
 
-          if (n.asGroup())  // traverse(n) didn't work somehow
-          {
-              for (int i = 0; i < (int) n.asGroup()->getNumChildren(); ++i)
-                  n.asGroup()->getChild(i)->accept(*this);
-          }
+        MFUtil::traverse(this,n);
     }
 
 protected:
@@ -66,14 +62,107 @@ class OSGScene2BinLoader : public OSGLoader
 public:
     typedef std::vector<osg::ref_ptr<osg::LightSource>> LightList;
 
+    OSGScene2BinLoader();
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
     LightList getLightNodes() { return mLightNodes; };
     osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };
 
 protected:
     LightList mLightNodes;
+    osg::ref_ptr<osg::Node> mDebugPointLightNode;
+    osg::ref_ptr<osg::Node> mDebugDirectionalLightNode;
+    osg::ref_ptr<osg::Node> mDebugOtherLightNode;
+
     osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> mCameraRelative;   ///< children of this node move relatively with the camera
+    osg::ref_ptr<osg::Node> makeLightNode(MFFormat::DataFormatScene2BIN::Object object);
 };
+
+OSGScene2BinLoader::OSGScene2BinLoader(): OSGLoader()
+{
+    mDebugPointLightNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),1));
+    mDebugPointLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugPointLightNode->setName("debug point light node");
+
+    mDebugDirectionalLightNode = new osg::ShapeDrawable(new osg::Cone(osg::Vec3f(0,0,0),1,1));
+    mDebugDirectionalLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugDirectionalLightNode->setName("debug directional light node");
+
+    mDebugOtherLightNode = new osg::ShapeDrawable(new osg::Box(osg::Vec3f(0,0,0),1));
+    mDebugOtherLightNode->setNodeMask(MFRender::MASK_DEBUG);
+    mDebugOtherLightNode->setName("debug other light node");
+}
+
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
+{
+    osg::ref_ptr<osg::Group> lightGroup = new osg::Group;
+    lightGroup->setName(MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType));
+
+    float debugNodeSize = 0.01 + object.mLightPower * 0.1;
+
+    osg::ref_ptr<osg::MatrixTransform> debugNodeTransform = new osg::MatrixTransform;
+
+    switch (object.mLightType)
+    {
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT:
+            debugNodeTransform->addChild(mDebugPointLightNode);
+            break;
+
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL:
+            debugNodeTransform->addChild(mDebugDirectionalLightNode);
+            break;
+
+        default:
+            debugNodeTransform->addChild(mDebugOtherLightNode);
+            break;
+    }
+
+    debugNodeTransform->setMatrix(osg::Matrixd::scale(osg::Vec3f(debugNodeSize,debugNodeSize,debugNodeSize)));
+    lightGroup->addChild(debugNodeTransform);
+
+    MFMath::Vec3 c = object.mLightColour;
+    osg::Vec4f lightColor = osg::Vec4f(c.x,c.y,c.z,1);
+
+    osg::ref_ptr<osg::Material> debugMat = new osg::Material;
+    debugMat->setDiffuse(osg::Material::FRONT_AND_BACK,lightColor);
+    debugMat->setAmbient(osg::Material::FRONT_AND_BACK,lightColor);
+    debugMat->setEmission(osg::Material::FRONT_AND_BACK,lightColor);
+    debugNodeTransform->getOrCreateStateSet()->setAttributeAndModes(debugMat);
+
+    osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
+
+    lightNode->setNodeMask(MFRender::MASK_GAME);
+
+    if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
+    {
+        lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
+        lightNode->getLight()->setAmbient(lightColor * object.mLightPower);
+        lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+    }
+    else
+    {
+        lightNode->getLight()->setDiffuse(lightColor * object.mLightPower);
+        lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
+        lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
+    }
+
+    bool isPositional =
+        object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
+        object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT;
+
+    osg::Vec3f lightPos = isPositional ?
+        osg::Vec3f(0,0,0) :             // position will be set via transform node
+        toOSG(object.mPos);             // for directional lights position usually defines direction - is this the right field though?
+
+    lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
+        isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
+
+    lightGroup->addChild(lightNode);
+
+    lightNode->setName(MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType));
+    mLightNodes.push_back(lightNode);
+
+    return lightGroup;
+}
 
 osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
 {
@@ -91,6 +180,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         NodeMap emptyNodeMap;
         NodeMap *nodeMap = &emptyNodeMap;
         std::vector<osg::Node *> loadedNodes;    
+        std::vector<std::string> loadedNames;
 
         if (!mNodeMap)
             MFLogger::ConsoleLogger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
@@ -128,65 +218,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
             {
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
                 {
-                    logStr += "light (";
-                    std::string lightTypeName;
-
-                    switch (object.mLightType)
-                    {
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT: lightTypeName = "point"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL: lightTypeName = "directional"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT: lightTypeName = "ambient"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_FOG: lightTypeName = "fog"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT: lightTypeName = "point ambient"; break;
-                        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_LAYERED_FOG: lightTypeName = "layered fog"; break;
-                        default: break;
-                    }
-
-                    logStr += lightTypeName + ")";
-
-                    #if 0
-                        // for debug
-                        osg::ref_ptr<osg::ShapeDrawable> lightNode = new osg::ShapeDrawable(
-                        new osg::Sphere(osg::Vec3f(0,0,0),0.1));
-                    #else
-                        // TODO: add a debug geometry for light, with MASK_DEBUG mask
-
-                        osg::ref_ptr<osg::LightSource> lightNode = new osg::LightSource();
-
-                        lightNode->setNodeMask(MFRender::MASK_GAME);
-
-                        MFMath::Vec3 c = object.mLightColour;
-                        osg::Vec3f lightColor = osg::Vec3f(c.x,c.y,c.z) * object.mLightPower;
-
-                        if (object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT)
-                        {
-                            lightNode->getLight()->setDiffuse(osg::Vec4(0,0,0,0));
-                            lightNode->getLight()->setAmbient(osg::Vec4(lightColor,1));
-                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
-                        }
-                        else
-                        {
-                            lightNode->getLight()->setDiffuse(osg::Vec4(lightColor,1));
-                            lightNode->getLight()->setAmbient(osg::Vec4(0,0,0,0));
-                            lightNode->getLight()->setSpecular(osg::Vec4(0,0,0,0));
-                        }
-
-                        bool isPositional =
-                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT ||
-                            object.mLightType == MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT;
-
-                        osg::Vec3f lightPos = isPositional ?
-                            osg::Vec3f(0,0,0) :             // position will be set via transform node
-                            toOSG(object.mPos);             // for directional lights position usually defines direction - is this the right field though?
-
-                        lightNode->getLight()->setPosition( osg::Vec4f(lightPos,
-                            isPositional ? 1.0f : 0.0f) );  // see OpenGL light types
-                    #endif
-
-                    lightNode->setName(lightTypeName);
-                    mLightNodes.push_back(lightNode);
-
-                    objectNode = lightNode;
+                    logStr += "light (" + MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType) + ")";
+                    objectNode = makeLightNode(object);
                     break;
                 }
 
@@ -237,15 +270,18 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 }
 
                 objectTransform->addChild(objectNode);
+                objectTransform->getOrCreateUserDataContainer()->addDescription("scene2.bin model"); // mark the node as a model loaded from scene2.bin
                 objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
                 nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
                 loadedNodes.push_back(objectTransform.get());
+                loadedNames.push_back(object.mName);
             }
         }   // for
 
         for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
         {
             std::string parentName = loadedNodes[i]->getName();
+            loadedNodes[i]->setName(loadedNames[i]);
 
             if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
                 mCameraRelative->addChild(loadedNodes[i]);
@@ -258,8 +294,6 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 MFLogger::ConsoleLogger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
                 group->addChild(loadedNodes[i]);
             }
-
-            loadedNodes[i]->setName("object transform");
         }
     }
 

@@ -85,10 +85,10 @@ public:
         std::string mParentName;
 
         // Light properties
-        uint32_t mLightType;
+        LightType mLightType;
         MFMath::Vec3 mLightColour;
         int32_t mLightFlags;
-        float mLightPower;
+        float mLightPower;           // 1.0 = 100% (can be even over 1.0)
         float mLightUnk0;
         float mLightUnk1;
         float mLightNear;
@@ -107,6 +107,7 @@ public:
     inline void setViewDistance(float value)                    { mViewDistance = value; }
     inline MFMath::Vec2  getClippingPlanes()                            { return mClippingPlanes; }
     inline void  setClippingPlanes(MFMath::Vec2 value)                  { mClippingPlanes = value; }
+    static std::string lightTypeToStr(LightType t);
 
 private:
     void readHeader(std::ifstream &srcFile, Header* header, uint32_t offset);
@@ -118,6 +119,22 @@ private:
     float mViewDistance;
     MFMath::Vec2  mClippingPlanes;
 };
+
+std::string DataFormatScene2BIN::lightTypeToStr(LightType t)
+{
+    switch (t)
+    {
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT: return "point"; break;
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_DIRECTIONAL: return "directional"; break;
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_AMBIENT: return "ambient"; break;
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_FOG: return "fog"; break;
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_POINT_AMBIENT: return "point ambient"; break;
+        case MFFormat::DataFormatScene2BIN::LIGHT_TYPE_LAYERED_FOG: return "layered fog"; break;
+        default: break;
+    }
+
+    return "unknown";
+}
 
 bool DataFormatScene2BIN::load(std::ifstream &srcFile)
 {
