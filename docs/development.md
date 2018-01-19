@@ -64,6 +64,7 @@ The folder structure is inspired by OpenMW:
 - `extern`: third party libraries we decided to include in our repository (so that we can edit them etc.)
 - `tests`: automated tests
 - `resources`: our own resources (e.g. icons, shaders, screenshots, ...)
+- `docs`: documentation files, such as this one
 
 ## Architecture and philosophy
 
