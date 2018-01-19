@@ -90,10 +90,11 @@ public:
         return true;
     }
 
+    osg::ref_ptr<osg::Drawable> mSelected;
+
 protected:
     osg::ref_ptr<osg::Material> mHighlightMaterial;
     osg::ref_ptr<osg::Material> mMaterialBackup;
-    osg::ref_ptr<osg::Drawable> mSelected;
 };
 
 class OSGRenderer: public MFRenderer
@@ -108,6 +109,7 @@ public:
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
+    virtual int getSelectedEntityId() override;
 
     void setRenderMask(osg::Node::NodeMask mask);
     osg::Group *getRootNode() { return mRootNode.get(); };
@@ -127,6 +129,8 @@ protected:
      */
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
+
+    osg::ref_ptr<PickHandler> mPickHandler;
 };
 
 void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
@@ -169,6 +173,26 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
     mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
 }
 
+int OSGRenderer::getSelectedEntityId()
+{
+    if (mPickHandler->mSelected)
+    {
+        osg::UserDataContainer *cont = mPickHandler->mSelected->getOrCreateUserDataContainer();
+
+        if (cont->getNumUserObjects() > 0)
+        {
+            osg::Object *o = cont->getUserObject(0);
+
+            if (std::string("UserIntData").compare(o->className()) == 0)
+            {
+                return ((MFUtil::UserIntData *) o)->mValue;
+            }
+        }
+    }
+    
+    return -1; 
+}
+
 OSGRenderer::OSGRenderer(): MFRenderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
@@ -180,7 +204,8 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    mViewer->addEventHandler(new PickHandler);
+    mPickHandler = new PickHandler;
+    mViewer->addEventHandler(mPickHandler);
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);

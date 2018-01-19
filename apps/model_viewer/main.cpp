@@ -192,6 +192,8 @@ int main(int argc, char** argv)
         renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
     }
 
+    int lastSelectedEntity = -1;
+
 #define TEST_PHYSICS 0
 
 // TMP test:
@@ -218,6 +220,14 @@ int entCounter = 0;
         while (!renderer.done())    // main loop
         {
             double dt = 0.005;
+
+            int selectedId = renderer.getSelectedEntityId();
+
+            if (selectedId >= 0 && selectedId != lastSelectedEntity)
+            {
+                std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
+                lastSelectedEntity = selectedId;
+            }
 
 // TMP test:
 #if TEST_PHYSICS

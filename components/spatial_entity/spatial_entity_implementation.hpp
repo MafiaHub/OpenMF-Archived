@@ -215,7 +215,13 @@ void SpatialEntityImplementation::ready()
     MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
 
     if (mOSGNode)
+    {
         mOSGInitialTransform = mOSGNode->getMatrix();
+
+        osg::ref_ptr<MFUtil::UserIntData> intData = new MFUtil::UserIntData(mId);
+        MFUtil::AssignUserDataVisitor v(intData.get());
+        mOSGNode->accept(v);
+    }
 
     if (mBulletBody)
     {

@@ -20,6 +20,7 @@ public:
     virtual void setFreeCameraSpeed(double newSpeed)=0;
     bool done() { return mDone; };
     virtual bool exportScene(std::string fileName)=0;
+    virtual int getSelectedEntityId()=0;
 
     MFMath::Vec3 getCameraPosition() { double x,y,z,ya,pi,ro; getCameraPositionRotation(x,y,z,ya,pi,ro); return MFMath::Vec3(x,y,z); };
 

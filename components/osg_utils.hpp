@@ -306,6 +306,52 @@ std::string makeInfoString(osg::Node *n)
     return v.mInfo;
 }
 
+/**
+  User data that can be assigned to OSG objects.
+*/
+
+class UserData: public osg::Object
+{
+public:
+    UserData(): osg::Object() { strcpy(mLibraryName,"MFUtil"); strcpy(mClassName,"UserData"); };
+
+    virtual osg::Object *cloneType() const override                 { return 0;            };
+    virtual osg::Object *clone(const osg::CopyOp &) const override  { return 0;            };
+    virtual const char *libraryName() const override                { return mLibraryName; };
+    virtual const char *className() const override                  { return mClassName;   };
+
+protected:
+    char mLibraryName[255];
+    char mClassName[255];
+};
+
+class UserIntData: public UserData
+{
+public:
+    UserIntData(int value): UserData() { mValue = value; strcpy(mClassName,"UserIntData"); };
+
+    int mValue;
+};
+
+/**
+  Assigns user data to given node and all children;
+*/
+
+class AssignUserDataVisitor: public osg::NodeVisitor
+{
+public:
+    AssignUserDataVisitor(UserData *data): osg::NodeVisitor() { mData = data; };
+
+    virtual void apply(osg::Node &n) override
+    {
+        n.getOrCreateUserDataContainer()->addUserObject(mData);
+        MFUtil::traverse(this,n);
+    }
+
+protected:
+    osg::ref_ptr<UserData> mData;
+};
+
 }
 
 #endif
