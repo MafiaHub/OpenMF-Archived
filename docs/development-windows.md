@@ -43,9 +43,8 @@ Once we get all our dependencies compiled, we're finally ready to compile OpenMF
 1. Clone/Download [this repository](https://github.com/OpenMafia/OpenMF/) to a convenient location (e.g. `W:\openmf`.)
 2. Navigate to our newly designated folder and create a build directory inside of it.
 3. To successfully generate project files, we need to provide the paths to our dependencies (If using command-line CMake, to define a variable, use `-D<NAME>=<VALUE>` format, otherwise rely on GUI prompts.):
-3.1. `OSG_THIRD_PARTY_DIR`: points to our `W:\3rdparty` directory.
-3.2. `OSG_DIR`: points to our `W:\osg` directory.
-3.3. `BULLET_ROOT`: points to our `W:\bullet3` directory.
+   * `OSG_THIRD_PARTY_DIR`: points to our `W:\3rdparty` directory.
+   * `OSG_DIR`: points to our `W:\osg` directory.
+   * `BULLET_ROOT`: points to our `W:\bullet3` directory.
 4. Having done that, we can finally build our project!
 5. Refer back to our [development](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md) for more instructions on how to make use of our newly compiled binaries.
-4. 
