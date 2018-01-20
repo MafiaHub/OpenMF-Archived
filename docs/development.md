@@ -24,13 +24,12 @@ We're using the standard CMake build:
 ## Compilation (Windows)
   See [development-windows](https://github.com/OpenMafia/OpenMF/tree/master/docs/development-windows.md) for information on how to build the project on Windows.
 
+## Running
 
 Now, you should have the built binaries in `bin` subfolder of the `build` folder. These include format
 utilities to inspect Mafia files and more importantly, the **world/model viewer**. Each program includes a help section
 when run from command line. You'll need to do some additional setup to be able to run the executables
 on the game files.
-
-## Running
 
 1. Get the original game (for example [here](http://store.steampowered.com/app/40990/Mafia/)).
 2. Install the game (on Linux this can be done using Wine).
