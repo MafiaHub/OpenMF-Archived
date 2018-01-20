@@ -227,7 +227,7 @@ int entCounter = 0;
         {
             inputManager.processEvents();
 
-            double dt = 1 / 60.0; // 0.005;
+            double dt = 1 / 60.0;
 
             int selectedId = renderer.getSelectedEntityId();
 

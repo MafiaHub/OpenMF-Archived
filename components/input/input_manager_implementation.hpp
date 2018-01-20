@@ -19,14 +19,19 @@ public:
     virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y) override;
     virtual void destroyWindow() override;
     virtual bool windowClosed() override;
+    virtual void getWindowSize(unsigned int &width, unsigned int &height) override;
     virtual bool keyPressed(unsigned int keyCode) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
+
+    
 
     SDLUtil::GraphicsWindowSDL2 *getWindow() { return mOSGWindow.get(); };
 
 protected:
     SDL_Window *mWindow;
+    unsigned int mWindowWidth;
+    unsigned int mWindowHeight;
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> mOSGWindow;
 
     bool mClosed;
@@ -36,6 +41,14 @@ InputManagerImplementation::InputManagerImplementation(): InputManager()
 {
     mWindow = 0;
     mClosed = false;
+    mWindowWidth = 0;
+    mWindowHeight = 0;
+}
+
+void InputManagerImplementation::getWindowSize(unsigned int &width, unsigned int &height)
+{
+    width = mWindowWidth;
+    height = mWindowHeight;
 }
 
 bool InputManagerImplementation::windowClosed()
@@ -46,6 +59,9 @@ bool InputManagerImplementation::windowClosed()
 void InputManagerImplementation::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
 {
     // taken from https://github.com/OpenMW/openmw/blob/c7f60a6dc87db0f59a064415ba844917a394af78/apps/openmw/engine.cpp#L317
+
+    mWindowWidth = width;
+    mWindowHeight = height;
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(0),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(0);
@@ -95,9 +111,19 @@ void InputManagerImplementation::processEvents()
         switch (event.type)
         {
             case SDL_WINDOWEVENT:
-                if (event.window.type == SDL_WINDOWEVENT_CLOSE)
-                    mClosed = true;
+                switch (event.window.event)
+                {
+                    case SDL_WINDOWEVENT_CLOSE:
+                        mClosed = true;
+                        break;
 
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        mWindowWidth = event.window.data1;
+                        mWindowHeight = event.window.data2;
+                        break;
+
+                    default: break;
+                }
                 break;
 
             case SDL_QUIT:
