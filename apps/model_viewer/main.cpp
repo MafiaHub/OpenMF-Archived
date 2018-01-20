@@ -160,12 +160,14 @@ int main(int argc, char** argv)
     std::string inputFile = arguments["i"].as<std::string>();
 
     MFRender::OSGRenderer renderer;
+
     MFPhysics::BulletPhysicsWorld physicsWorld;
     MFGame::SpatialEntityManager entityManager;
     MFGame::SpatialEntityFactory entityFactory(&renderer,&physicsWorld,&entityManager);
 
-MFInput::InputManagerImplementation inputManager;
-inputManager.initWindow(800,600,100,100);
+    MFInput::InputManagerImplementation inputManager;
+    inputManager.initWindow(800,600,100,100);
+    renderer.setUpInWindow(inputManager.getWindow());
 
     if (model)
     {
@@ -198,7 +200,7 @@ inputManager.initWindow(800,600,100,100);
 
     int lastSelectedEntity = -1;
 
-#define TEST_PHYSICS 0
+#define TEST_PHYSICS 1
 
 // TMP test:
 #if TEST_PHYSICS

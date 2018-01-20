@@ -111,8 +111,15 @@ public:
     virtual bool exportScene(std::string fileName) override;
     virtual int getSelectedEntityId() override;
 
+    /**
+      Sets a custom viewer window to display the rendering. Do not use this if setUpInWindow is called.
+    */
+    void setUpInCustomWindow(unsigned int width, unsigned int height);
+    void setUpInWindow(osgViewer::GraphicsWindow *window);
+
     void setRenderMask(osg::Node::NodeMask mask);
-    osg::Group *getRootNode() { return mRootNode.get(); };
+    osg::Group *getRootNode()                      { return mRootNode.get(); };
+    osgViewer::Viewer *getViewer()                 { return mViewer.get();   };
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
@@ -161,6 +168,25 @@ void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, dou
     z = translation.z();
 
     MFUtil::quatToEuler(rotation,yaw,pitch,roll);
+}
+
+void OSGRenderer::setUpInCustomWindow(unsigned int width, unsigned int height)
+{
+    mViewer->setUpViewInWindow(40,40,width,height); 
+
+    if (!mViewer->isRealized())
+        mViewer->realize();
+}
+
+void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
+{
+    int x,y,w,h;
+    window->getWindowRectangle(x,y,w,h);
+    mViewer->getCamera()->setGraphicsContext(window);
+    mViewer->getCamera()->setViewport(0,0,w,h);
+
+    if (!mViewer->isRealized())
+        mViewer->realize();
 }
 
 void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll)
@@ -216,11 +242,6 @@ OSGRenderer::OSGRenderer(): MFRenderer()
     mRootNode->setName("root");
 
     mViewer->setSceneData(mRootNode);
-
-    mViewer->setUpViewInWindow(40,40,1024,768); 
-
-    if (!mViewer->isRealized())
-        mViewer->realize();
 
     osg::ref_ptr<MFUtil::WalkManipulator> cameraManipulator = new MFUtil::WalkManipulator();
 
