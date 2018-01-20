@@ -1,6 +1,6 @@
 # Development
 
-This file should help mainly new developers get familiar with the code and development process. Please:
+This file should help potential new developers to get familiar with the code and development process. Please:
 
 - See also [CONTRIBUTING.md](https://github.com/OpenMafia/OpenMF/tree/master/CONTRIBUTING.md).
 - For any question or suggestions, contact us on our discord (link in [README.md](https://github.com/OpenMafia/OpenMF/tree/master/README.md)) or issue tracker.
@@ -19,8 +19,8 @@ We're using the standard CMake build:
 3. Enter the folder (`cd build`) and run `cmake ..`.
 4. On Linux, run `make`. On Windows ???.
 
-You should now have the built binaries in `bin` subfolder of the `build` folder. These include format
-utilities to inspect Mafia files and mainly the **world/model viewer**. Each program includes a help
+Now, you should have the built binaries in `bin` subfolder of the `build` folder. These include format
+utilities to inspect Mafia files and more importantly, the **world/model viewer**. Each program includes a help section
 when run from command line. You'll need to do some additional setup to be able to run the executables
 on the game files.
 
@@ -59,7 +59,7 @@ The folder structure is inspired by OpenMW:
     - `bullet.hpp` creates a Bullet Physics representation of the format data
 - `apps`: executable sources, which make use of the components
   - `model_viewer`: interactive model and mission/world viewer
-  - `format_utils`: sources of command line utilities for each Mafia format, mostly for dumping/extracting the content
+  - `format_utils`: sources of command line utilities for each Mafia format, mostly used for dumping/extracting the content
   - `game`: will contain the final game engine
 - `extern`: third party libraries we decided to include in our repository (so that we can edit them etc.)
 - `tests`: automated tests
@@ -74,7 +74,7 @@ Bullet rigid bodies) of in-game objects.
 - Keep minimal dependencies, i.e. for example a format parser must not depend on Bullet Physics library etc.
 - Try to make everything replaceable by first creating an independent abstract class (an interface) for a component, then subclass it with
 a concrete implementation (see for example renderer).
-- Make good use of design patterns.
+- Make a good use of design patterns.
 
 ## Useful resources
 
