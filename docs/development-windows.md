@@ -1,4 +1,4 @@
-# Development on Windows
+# Developing on Windows
 
 Considering the fact that workspace setup on Windows is slightly more involving, we've decided to dedicate a whole section to the process.
 
