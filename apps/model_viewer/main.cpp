@@ -10,13 +10,14 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 #include <input/input_manager_implementation.hpp>
+#include <free_camera_controller.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
 #define UPDATE_TIME 1.0/60.0f
 
-std::string getCameraString(MFRender::MFRenderer *renderer)
+std::string getCameraString(MFRender::Renderer *renderer)
 {
     double cam[6];
     renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
@@ -38,7 +39,7 @@ std::string getCameraString(MFRender::MFRenderer *renderer)
     return camStr;
 }
 
-std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhysicsWorld *world,
+std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysicsWorld *world,
     MFGame::SpatialEntityManager *entityManager)
 {
     std::string result = "collision: ";
@@ -169,6 +170,8 @@ int main(int argc, char** argv)
     inputManager.initWindow(800,600,100,100);
     renderer.setUpInWindow(inputManager.getWindow());
 
+    MFGame::FreeCameraController cameraController(&renderer,&inputManager);
+
     if (model)
     {
         renderer.loadSingleModel(inputFile);
@@ -200,7 +203,7 @@ int main(int argc, char** argv)
 
     int lastSelectedEntity = -1;
 
-#define TEST_PHYSICS 1
+#define TEST_PHYSICS 0
 
 // TMP test:
 #if TEST_PHYSICS
@@ -225,8 +228,6 @@ int entCounter = 0;
     {
         while (!inputManager.windowClosed())    // main loop
         {
-            inputManager.processEvents();
-
             double dt = 1 / 60.0;
 
             int selectedId = renderer.getSelectedEntityId();
@@ -280,10 +281,12 @@ entCounter++;
 #endif
 
             renderer.frame(dt);
+
+            inputManager.processEvents();
+            cameraController.update(dt);
         }
     }
 
-inputManager.destroyWindow();
-
+    inputManager.destroyWindow();
     return 0;
 }

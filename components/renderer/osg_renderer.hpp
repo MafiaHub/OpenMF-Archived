@@ -97,7 +97,7 @@ protected:
     osg::ref_ptr<osg::Material> mMaterialBackup;
 };
 
-class OSGRenderer: public MFRenderer
+class OSGRenderer: public Renderer
 {
 public:
     OSGRenderer();
@@ -109,7 +109,7 @@ public:
     virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
-    virtual int getSelectedEntityId() override;
+    virtual int  getSelectedEntityId() override;
 
     /**
       Sets a custom viewer window to display the rendering. Do not use this if setUpInWindow is called.
@@ -195,7 +195,7 @@ void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double
 
     viewMatrix.setTrans(osg::Vec3(x,y,z));
 
-    viewMatrix.setRotate( MFUtil::eulerToQuat(yaw,pitch,roll) );
+    viewMatrix.setRotate(MFUtil::eulerToQuat(yaw,pitch,roll));
     mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
 }
 
@@ -219,7 +219,7 @@ int OSGRenderer::getSelectedEntityId()
     return -1; 
 }
 
-OSGRenderer::OSGRenderer(): MFRenderer()
+OSGRenderer::OSGRenderer(): Renderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();

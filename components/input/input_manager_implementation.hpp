@@ -161,7 +161,7 @@ void InputManagerImplementation::processEvents()
 
 bool InputManagerImplementation::keyPressed(unsigned int keyCode)
 {
-    return false;
+    return mKeyboardState[keyCode];
 }
 
 bool InputManagerImplementation::mouseButtonPressed(unsigned int button)
