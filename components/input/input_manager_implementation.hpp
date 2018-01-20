@@ -8,6 +8,7 @@
 #include <sdl_graphics_window.hpp>
 
 #define INPUT_MANAGER_MODULE_STRING "input manager"
+#define NUMBER_OF_KEYS 1024
 
 namespace MFInput
 {
@@ -24,8 +25,6 @@ public:
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
 
-    
-
     SDLUtil::GraphicsWindowSDL2 *getWindow() { return mOSGWindow.get(); };
 
 protected:
@@ -35,6 +34,7 @@ protected:
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> mOSGWindow;
 
     bool mClosed;
+    bool mKeyboardState[NUMBER_OF_KEYS];
 };
 
 InputManagerImplementation::InputManagerImplementation(): InputManager()
@@ -110,6 +110,29 @@ void InputManagerImplementation::processEvents()
     {
         switch (event.type)
         {
+            case SDL_KEYDOWN:
+            {
+                if (event.key.repeat)
+                    break;
+
+                unsigned int code = event.key.keysym.scancode;
+
+                if (code < NUMBER_OF_KEYS)
+                    mKeyboardState[code] = true;
+
+                break;
+            }
+
+            case SDL_KEYUP:
+            {
+                unsigned int code = event.key.keysym.scancode;
+
+                if (code < NUMBER_OF_KEYS)
+                    mKeyboardState[code] = false;
+
+                break;
+            }
+
             case SDL_WINDOWEVENT:
                 switch (event.window.event)
                 {
