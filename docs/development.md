@@ -1,6 +1,6 @@
 # Development
 
-This file should help potential new developers to get familiar with the code and development process. Please:
+This file should help potentially new developers to get familiar with the code and development process. Please:
 
 - See also [CONTRIBUTING.md](https://github.com/OpenMafia/OpenMF/tree/master/CONTRIBUTING.md).
 - For any question or suggestions, contact us on our discord (link in [README.md](https://github.com/OpenMafia/OpenMF/tree/master/README.md)) or issue tracker.
