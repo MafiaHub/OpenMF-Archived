@@ -40,7 +40,7 @@ We respect copyrights and intelectual property and you need to own the original 
 
 The project is in very early stage and at the moment can offer libraries for loading some of the game files and a model/world viewer with already a pretty nice rendering and a basic physics simulation.
 
-## Contribution
+## Contributing
 
 If you'd like to join us and contribute, see [development.md](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md).
 
