@@ -9,6 +9,7 @@
 #include <spatial_entity/spatial_entity.hpp>
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
+#include <input/input_manager_implementation.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -163,6 +164,9 @@ int main(int argc, char** argv)
     MFGame::SpatialEntityManager entityManager;
     MFGame::SpatialEntityFactory entityFactory(&renderer,&physicsWorld,&entityManager);
 
+MFInput::InputManagerImplementation inputManager;
+inputManager.initWindow(800,600,100,100);
+
     if (model)
     {
         renderer.loadSingleModel(inputFile);
@@ -219,6 +223,8 @@ int entCounter = 0;
     {
         while (!renderer.done())    // main loop
         {
+inputManager.processEvents();
+
             double dt = 1 / 60.0; // 0.005;
 
             int selectedId = renderer.getSelectedEntityId();
@@ -274,6 +280,8 @@ entCounter++;
             renderer.frame(dt);
         }
     }
+
+inputManager.destroyWindow();
 
     return 0;
 }
