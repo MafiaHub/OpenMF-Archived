@@ -223,9 +223,9 @@ int entCounter = 0;
     }
     else
     {
-        while (!renderer.done())    // main loop
+        while (!inputManager.windowClosed())    // main loop
         {
-inputManager.processEvents();
+            inputManager.processEvents();
 
             double dt = 1 / 60.0; // 0.005;
 

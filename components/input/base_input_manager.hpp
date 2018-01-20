@@ -13,6 +13,7 @@ class InputManager
 public:
     virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)=0;
     virtual void destroyWindow()=0;
+    virtual bool windowClosed()=0;
     virtual bool keyPressed(unsigned int keyCode)=0;
     virtual bool mouseButtonPressed(unsigned int button)=0;
     virtual void processEvents()=0;

@@ -18,6 +18,7 @@ public:
     InputManagerImplementation();
     virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y) override;
     virtual void destroyWindow() override;
+    virtual bool windowClosed() override;
     virtual bool keyPressed(unsigned int keyCode) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
@@ -27,11 +28,19 @@ public:
 protected:
     SDL_Window *mWindow;
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> mOSGWindow;
+
+    bool mClosed;
 };
 
 InputManagerImplementation::InputManagerImplementation(): InputManager()
 {
     mWindow = 0;
+    mClosed = false;
+}
+
+bool InputManagerImplementation::windowClosed()
+{
+    return mClosed;
 }
 
 void InputManagerImplementation::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
@@ -79,6 +88,26 @@ void InputManagerImplementation::destroyWindow()
 
 void InputManagerImplementation::processEvents()
 {
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+            case SDL_WINDOWEVENT:
+                if (event.window.type == SDL_WINDOWEVENT_CLOSE)
+                    mClosed = true;
+
+                break;
+
+            case SDL_QUIT:
+                mClosed = true;
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 bool InputManagerImplementation::keyPressed(unsigned int keyCode)
