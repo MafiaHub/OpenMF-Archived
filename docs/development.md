@@ -5,19 +5,25 @@ This file should help potential new developers to get familiar with the code and
 - See also [CONTRIBUTING.md](https://github.com/OpenMafia/OpenMF/tree/master/CONTRIBUTING.md).
 - For any question or suggestions, contact us on our discord (link in [README.md](https://github.com/OpenMafia/OpenMF/tree/master/README.md)) or issue tracker.
 
-## Compiling
+## Compilation
 
 required libraries:
 
 - OpenSceneGraph, at least 3.4.1
 - Bullet Physics, at least 2.88
 
+## Compilation (Linux)
+
 We're using the standard CMake build:
 
 1. Download/clone the repository.
 2. Create a `build` subfolder in it (`mkdir build`).
 3. Enter the folder (`cd build`) and run `cmake ..`.
-4. On Linux, run `make`. On Windows ???.
+4. On Linux, run `make`.
+
+## Compilation (Windows)
+  See [development-windows](https://github.com/OpenMafia/OpenMF/tree/master/docs/development-windows.md) for information on how to build the project on Windows.
+
 
 Now, you should have the built binaries in `bin` subfolder of the `build` folder. These include format
 utilities to inspect Mafia files and more importantly, the **world/model viewer**. Each program includes a help section
