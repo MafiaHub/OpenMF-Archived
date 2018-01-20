@@ -1,6 +1,6 @@
 # Development on Windows
 
-Considering the fact, that workspace setup on Windows is slightly more involving, we've decided to dedicate a whole section to the process.
+Considering the fact that workspace setup on Windows is slightly more involving, we've decided to dedicate a whole section to the process.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ It's quite straightforward to build our bullet3 dependency.
 4. Open the solution inside Visual Studio and compile the project.
 
 
-## Compilation
+## Compiling
 
 Once we get all our dependencies compiled, we're finally ready to compile OpenMF.
 
