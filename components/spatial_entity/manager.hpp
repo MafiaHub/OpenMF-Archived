@@ -15,6 +15,11 @@ namespace MFGame
 class SpatialEntityManager
 {
 public:
+    SpatialEntityManager()
+    {
+        mIDManager = std::make_shared<BackingIDManager>();
+    }
+
     SpatialEntity *getEntityById(MFGame::Id id);
 
     /**
@@ -43,10 +48,13 @@ public:
      **/
     unsigned int getNumEntitySlots();
 
+    void setIDManager(std::shared_ptr<IDManager> manager) { mIDManager = manager; }
+    IDManager *getIDManager()                       const { return mIDManager.get(); }
+
 protected:
     std::vector<std::shared_ptr<SpatialEntity>> mEntities;
     size_t mNumEntities;
-    BackingIDManager mIDManager;
+    std::shared_ptr<IDManager> mIDManager;
 };
 
 SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
@@ -68,7 +76,7 @@ SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
 
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
 {
-    auto index = mIDManager.getSlot(MFGame::Id(id));
+    auto index = mIDManager->getSlot(MFGame::Id(id));
 
     if (index == NullId.Index)
     {
@@ -81,7 +89,7 @@ SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
 
 bool SpatialEntityManager::isValid(Id ident)
 {
-    return mIDManager.isValid(ident);
+    return mIDManager->isValid(ident);
 }
 
 Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
@@ -93,7 +101,7 @@ Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
         return NullId;
     }
 
-    auto id = mIDManager.allocate();
+    auto id = mIDManager->allocate();
     entity->setId(id.Value);
 
     if (id.Index < mEntities.size())
@@ -107,7 +115,7 @@ Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
 
 void SpatialEntityManager::removeEntity(Id ident)
 {
-    auto index = mIDManager.getSlot(ident);
+    auto index = mIDManager->getSlot(ident);
     if (index == NullId.Index)
     {
         MFLogger::ConsoleLogger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
@@ -116,7 +124,7 @@ void SpatialEntityManager::removeEntity(Id ident)
 
     auto entity = mEntities.at(index);
     entity->setId(NullId.Value);
-    mIDManager.deallocate(ident);
+    mIDManager->deallocate(ident);
     mNumEntities--;
 }
 
