@@ -25,7 +25,7 @@ FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput
 
 void FreeCameraController::update(double dt)
 {
-    double x, y, z, yaw, pitch, roll;
+    MFMath::Vec3 pos, rot;
     double distance = dt * mSpeed;
     MFMath::Vec3 direction = MFMath::Vec3(0,0,0);
 
@@ -43,8 +43,8 @@ void FreeCameraController::update(double dt)
 
     direction = direction * ((float) distance);
 
-    mRenderer->getCameraPositionRotation(x,y,z,yaw,pitch,roll);
-    mRenderer->setCameraPositionRotation(x + direction.x,y + direction.y,z,yaw,pitch,roll);
+    mRenderer->getCameraPositionRotation(pos,rot);
+    mRenderer->setCameraPositionRotation(pos + direction,rot);
 }
 
 }

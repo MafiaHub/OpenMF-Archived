@@ -20,7 +20,15 @@
 std::string getCameraString(MFRender::Renderer *renderer)
 {
     double cam[6];
-    renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+    MFMath::Vec3 pos,rot;
+    renderer->getCameraPositionRotation(pos,rot);
+
+    cam[0] = pos.x;
+    cam[1] = pos.y;
+    cam[2] = pos.z;
+    cam[3] = rot.x;
+    cam[4] = rot.y;
+    cam[5] = rot.z;
 
     std::string camStr;
 
@@ -44,10 +52,9 @@ std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysic
 {
     std::string result = "collision: ";
 
-    double cam[6];
-    renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+    MFMath::Vec3 pos = renderer->getCameraPosition();
 
-    int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
+    int entityID = world->pointCollision(pos);
 
     if (entityID >= 0)
         result += entityManager->getEntityById(entityID)->toString();
@@ -198,7 +205,7 @@ int main(int argc, char** argv)
     {
         double cam[6];
         parseCameraString(arguments["p"].as<std::string>(),cam);
-        renderer.setCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
+        renderer.setCameraPositionRotation(MFMath::Vec3(cam[0],cam[1],cam[2]),MFMath::Vec3(cam[3],cam[4],cam[5]));
     }
 
     int lastSelectedEntity = -1;

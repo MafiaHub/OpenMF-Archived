@@ -20,7 +20,7 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-    virtual int pointCollision(double x, double y, double z) override;
+    virtual int pointCollision(MFMath::Vec3 position) override;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
@@ -89,12 +89,12 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mPairCache;
 }
 
-int BulletPhysicsWorld::pointCollision(double x, double y, double z)
+int BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
 {
     btCollisionShape* sphere = new btSphereShape(0.01);  // can't make a point, so make a small sphere
     btRigidBody::btRigidBodyConstructionInfo ci(0,0,sphere,btVector3(0,0,0));
     btRigidBody* pointRigidBody = new btRigidBody(ci);
-    pointRigidBody->translate(btVector3(x,y,z));
+    pointRigidBody->translate(btVector3(position.x,position.y,position.z));
 
     ContactSensorCallback cb(pointRigidBody);
 

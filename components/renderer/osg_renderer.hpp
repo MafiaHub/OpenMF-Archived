@@ -105,8 +105,8 @@ public:
     virtual bool loadSingleModel(std::string model) override;
     virtual void frame(double dt) override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
-    virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
-    virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
+    virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
+    virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
     virtual int  getSelectedEntityId() override;
@@ -152,7 +152,7 @@ bool OSGRenderer::exportScene(std::string fileName)
     return result.success();
 }
 
-void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
+void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix = mViewer->getCamera()->getViewMatrix();
 
@@ -163,11 +163,16 @@ void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, dou
 
     viewMatrix.decompose(translation,rotation,scale,scaleOrient);
 
-    x = translation.x();
-    y = translation.y();
-    z = translation.z();
+    position.x = translation.x();
+    position.y = translation.y();
+    position.z = translation.z();
 
-    MFUtil::quatToEuler(rotation,yaw,pitch,roll);
+    double y,p,r;
+
+    MFUtil::quatToEuler(rotation,y,p,r);
+    rotYawPitchRoll.x = y;
+    rotYawPitchRoll.y = p;
+    rotYawPitchRoll.z = r;
 }
 
 void OSGRenderer::setUpInCustomWindow(unsigned int width, unsigned int height)
@@ -189,13 +194,13 @@ void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
         mViewer->realize();
 }
 
-void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll)
+void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix;
 
-    viewMatrix.setTrans(osg::Vec3(x,y,z));
+    viewMatrix.setTrans(osg::Vec3(position.x,position.y,position.z));
 
-    viewMatrix.setRotate(MFUtil::eulerToQuat(yaw,pitch,roll));
+    viewMatrix.setRotate(MFUtil::eulerToQuat(rotYawPitchRoll.x,rotYawPitchRoll.y,rotYawPitchRoll.z));
     mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
 }
 
