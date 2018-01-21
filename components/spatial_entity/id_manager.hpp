@@ -6,7 +6,7 @@
 #include <vector>
 #include <loggers/console.hpp>
 
-#define IDMANAGER_MODULE_STR "id manager"
+#define ID_MANAGER_MODULE_STR "id manager"
 
 namespace MFGame
 {
