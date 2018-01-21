@@ -194,7 +194,7 @@ int main(int argc, char** argv)
 
     int lastSelectedEntity = -1;
 
-#define TEST_PHYSICS 1
+#define TEST_PHYSICS 0
 
 // TMP test:
 #if TEST_PHYSICS
