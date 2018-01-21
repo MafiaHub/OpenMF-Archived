@@ -17,6 +17,16 @@
 
 #define UPDATE_TIME 1.0/60.0f
 
+class RightButtonCallback: public MFInput::ButtonInputCallback
+{
+public:
+    virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y) override
+    {
+        // TODO
+        std::cout << "sasas" << std::endl;
+    }
+};
+
 std::string getCameraString(MFRender::Renderer *renderer)
 {
     double cam[6];
@@ -176,6 +186,9 @@ int main(int argc, char** argv)
     MFInput::InputManagerImplementation inputManager;
     inputManager.initWindow(800,600,100,100);
     renderer.setUpInWindow(inputManager.getWindow());
+
+    std::shared_ptr<RightButtonCallback> cb = std::make_shared<RightButtonCallback>();
+    inputManager.addButtonCallback(cb);
 
     MFGame::FreeCameraController cameraController(&renderer,&inputManager);
     cameraController.setSpeed(cameraSpeed);

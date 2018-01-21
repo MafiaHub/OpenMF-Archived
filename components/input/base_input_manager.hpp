@@ -4,6 +4,18 @@
 namespace MFInput
 {
 
+class KeyInputCallback
+{
+public:
+    virtual void call(bool down, unsigned int keyCode)=0;
+};
+
+class ButtonInputCallback
+{
+public:
+    virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y)=0;
+};
+
 /**
   Manages the input handling and the game window.
 */
@@ -21,6 +33,13 @@ public:
     virtual void setMouseVisible(bool visible)=0;
     virtual bool mouseButtonPressed(unsigned int button)=0;
     virtual void processEvents()=0;
+
+    void addKeyCallback(std::shared_ptr<KeyInputCallback> callback)        { mKeyCallbacks.push_back(callback);    };
+    void addButtonCallback(std::shared_ptr<ButtonInputCallback> callback)  { mButtonCallbacks.push_back(callback); };
+
+protected:
+    std::vector<std::shared_ptr<KeyInputCallback>>      mKeyCallbacks;
+    std::vector<std::shared_ptr<ButtonInputCallback>>   mButtonCallbacks;
 };
 
 }

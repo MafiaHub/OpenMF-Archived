@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <sdl_graphics_window.hpp>
+#include <vector>
 
 #define INPUT_MANAGER_MODULE_STRING "input manager"
 #define NUMBER_OF_KEYS 1024
@@ -29,7 +30,7 @@ public:
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
 
-    SDLUtil::GraphicsWindowSDL2 *getWindow() { return mOSGWindow.get(); };
+    SDLUtil::GraphicsWindowSDL2 *getWindow()              { return mOSGWindow.get();              };
 
 protected:
     SDL_Window *mWindow;
@@ -169,6 +170,13 @@ void InputManagerImplementation::processEvents()
                 if (button < NUMBER_OF_MOUSE_BUTTONS)
                     mMouseState[button] = true;
 
+                for (int i = 0; i < (int) mButtonCallbacks.size(); ++i)
+                {
+                    unsigned int x, y;
+                    getMousePosition(x,y);
+                    mButtonCallbacks[i]->call(true,button,x,y);
+                }
+
                 break;
             }
 
@@ -178,6 +186,13 @@ void InputManagerImplementation::processEvents()
 
                 if (button < NUMBER_OF_MOUSE_BUTTONS)
                     mMouseState[button] = false;
+
+                for (int i = 0; i < (int) mButtonCallbacks.size(); ++i)
+                {
+                    unsigned int x, y;
+                    getMousePosition(x,y);
+                    mButtonCallbacks[i]->call(false,button,x,y);
+                }
 
                 break;
             }
