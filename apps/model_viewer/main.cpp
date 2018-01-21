@@ -198,11 +198,19 @@ int main(int argc, char** argv)
 
 // TMP test:
 #if TEST_PHYSICS
-MFGame::SpatialEntity::Id testEnts[3][3];
+static MFGame::Id testEnts[3][3];
 
 for (int i = 0; i < 3; ++i)
     for (int j = 0; j < 3; ++j)
+    {
+        if (entityManager.isValid(testEnts[i][j]))
+        {
+            entityManager.removeEntity(testEnts[i][j]);
+        }
+
         testEnts[i][j] = (i % 2) == (j % 2) ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
+    }
+
 
 int entCounter = 0;
 #endif
