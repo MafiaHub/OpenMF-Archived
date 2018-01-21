@@ -95,7 +95,12 @@ Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
 
     auto id = mIDManager.allocate();
     entity->setId(id.Value);
-    mEntities.push_back(entity);
+
+    if (id.Index < mEntities.size())
+        mEntities.at(id.Index) = entity;
+    else
+        mEntities.push_back(entity);
+
     mNumEntities++;
     return id;
 }
