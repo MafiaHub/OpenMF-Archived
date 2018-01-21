@@ -48,7 +48,7 @@ typedef union _Id
     }
 } Id;
 
-static Id NullId(INT_MAX, INT_MAX);
+static Id NullId;
 
 class IDManager 
 {
