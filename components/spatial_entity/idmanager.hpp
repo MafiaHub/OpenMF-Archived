@@ -13,10 +13,20 @@ namespace MFGame
 
 typedef union _Id
 {
-    _Id(uint32_t Index, uint32_t Generation)
+    _Id() 
     {
-        this->Index = Index;
-        this->Generation = Generation;
+        this->Value = (INT_MAX << 32) | INT_MAX;
+    }
+
+    _Id(uint32_t index, uint32_t generation)
+    {
+        this->Index = index;
+        this->Generation = generation;
+    }
+
+    _Id(uint64_t value)
+    {
+        this->Value = value;
     }
 
     struct
@@ -43,40 +53,44 @@ static Id NullId(INT_MAX, INT_MAX);
 class IDManager 
 {
 public:
-    virtual uint32_t GetSlot(Id ident)=0;
-    virtual Id Allocate()=0;
-    virtual void Deallocate(Id ident)=0;
+    virtual uint32_t getSlot(Id ident)=0;
+    virtual bool isValid(Id ident)=0;
+    virtual Id allocate()=0;
+    virtual void deallocate(Id ident)=0;
 
 protected:
-    virtual Id *GetHandle(Id ident)=0;
+    virtual Id *getHandle(Id ident, bool warn=true)=0;
 };
 
 class BackingIDManager: public IDManager
 {
 public:
-    virtual uint32_t GetSlot(Id ident) override;
+    virtual uint32_t getSlot(Id ident) override;
+    virtual bool isValid(Id ident) override;
     
-    virtual Id Allocate() override;
-    virtual void Deallocate(Id ident) override;
+    virtual Id allocate() override;
+    virtual void deallocate(Id ident) override;
 
 protected:
-    virtual Id *GetHandle(Id ident) override;
+    virtual Id *getHandle(Id ident, bool warn=true) override;
 
 private:
     std::vector<Id> mIndices;
     std::vector<Id> mFreeIndices;
 };
 
-Id *BackingIDManager::GetHandle(Id ident)
+Id *BackingIDManager::getHandle(Id ident, bool warn)
 {
     if (ident.Index < 0 || ident.Index > mIndices.size())
     {
-        MFLogger::ConsoleLogger::warn("ID is outside of the bounds.", IDMANAGER_MODULE_STR);
+        if (warn)
+            MFLogger::ConsoleLogger::warn("ID is outside of the bounds.", IDMANAGER_MODULE_STR);
         return nullptr;
     }
     else if (mIndices.at(ident.Index) != ident)
     {
-        MFLogger::ConsoleLogger::warn("Invalid ID.", IDMANAGER_MODULE_STR);
+        if (warn)
+            MFLogger::ConsoleLogger::warn("Invalid ID.", IDMANAGER_MODULE_STR);
         return nullptr;
     }
 
@@ -84,9 +98,9 @@ Id *BackingIDManager::GetHandle(Id ident)
     return id;
 }
 
-uint32_t BackingIDManager::GetSlot(Id ident)
+uint32_t BackingIDManager::getSlot(Id ident)
 {
-    auto id = GetHandle(ident);
+    auto id = getHandle(ident);
 
     if (id == nullptr)
     {
@@ -96,7 +110,14 @@ uint32_t BackingIDManager::GetSlot(Id ident)
     return id->Index;
 }
 
-Id BackingIDManager::Allocate()
+bool BackingIDManager::isValid(Id ident)
+{
+    auto id = getHandle(ident, false);
+
+    return (id != nullptr);
+}
+
+Id BackingIDManager::allocate()
 {
     if (mFreeIndices.size() > 0)
     {
@@ -113,9 +134,9 @@ Id BackingIDManager::Allocate()
     return id;
 }
 
-void BackingIDManager::Deallocate(Id ident)
+void BackingIDManager::deallocate(Id ident)
 {
-    auto id = GetHandle(ident);
+    auto id = getHandle(ident);
     id->Generation++;
     mFreeIndices.push_back(*id);
 }
