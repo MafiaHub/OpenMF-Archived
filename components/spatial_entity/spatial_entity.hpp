@@ -4,6 +4,8 @@
 #include <math.hpp>
 #include <string>
 
+#include <idmanager.hpp>
+
 namespace MFGame
 {
 
