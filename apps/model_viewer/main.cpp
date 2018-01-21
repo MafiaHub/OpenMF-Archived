@@ -10,10 +10,27 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 
+#define ZPL_IMPLEMENTATION
+#include <zpl.h>
+
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
-#define UPDATE_TIME 1.0/60.0f
+// TODO: Introduce Platform class and store it there?
+static bool sIsRunning = true;
+
+// TODO: Replace with configurable value
+#define MS_PER_UPDATE 1 / 60.0f
+
+// TODO move this to Platform class
+#include <chrono>
+#include <time.h>
+double timeGet()
+{
+    static auto epoch = std::chrono::high_resolution_clock::now();
+
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
+}
 
 std::string getCameraString(MFRender::MFRenderer *renderer)
 {
@@ -223,63 +240,89 @@ int entCounter = 0;
         if (!renderer.exportScene(exportFileName))
             return 1;
     }
+
+    // TODO Simplify this code
     else
     {
-        while (!renderer.done())    // main loop
+        double lastTime = timeGet();
+        double extraTime = 0.0f;
+
+        while (sIsRunning)
         {
-            double dt = 1 / 60.0; // 0.005;
+            bool render = false;
 
-            int selectedId = renderer.getSelectedEntityId();
+            double startTime = timeGet();
+            double passedTime = startTime - lastTime;
+            lastTime = startTime;
+            extraTime += passedTime;
 
-            if (selectedId >= 0 && selectedId != lastSelectedEntity)
+            while (extraTime > MS_PER_UPDATE)
             {
-                std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
-                lastSelectedEntity = selectedId;
-            }
+                int selectedId = renderer.getSelectedEntityId();
+
+                if (selectedId >= 0 && selectedId != lastSelectedEntity)
+                {
+                    std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
+                    lastSelectedEntity = selectedId;
+                }
 
 // TMP test:
 #if TEST_PHYSICS
-if (entCounter % 1500 == 0)
-{
-for (int i = 0; i < 3; ++i)
-    for (int j = 0; j < 3; ++j)
-    {
-        MFGame::SpatialEntity *e = entityManager.getEntityById(testEnts[i][j]);
-        e->setPosition(renderer.getCameraPosition() - MFMath::Vec3( (i - 1) * 2, (j - 1) * 2 ,5));
-        e->setVelocity(MFMath::Vec3(0,0,0));
-        e->setAngularVelocity(MFMath::Vec3(0,0,0));
-    }
-}
-
-entCounter++;
-#endif
-// --------
-
-            if (cameraInfo || collisionInfo)
-            {
-                if (infoCounter <= 0)
+                if (entCounter % 1500 == 0)
                 {
-                    if (cameraInfo)
-                        std::cout << "camera: " + getCameraString(&renderer) << std::endl;
-
-                    if (collisionInfo)
-                        std::cout << getCollisionString(&renderer,&physicsWorld,&entityManager) << std::endl;
-
-                    infoCounter = 30;
+                    for (int i = 0; i < 3; ++i)
+                        for (int j = 0; j < 3; ++j)
+                        {
+                            MFGame::SpatialEntity *e = entityManager.getEntityById(testEnts[i][j]);
+                            e->setPosition(renderer.getCameraPosition() - MFMath::Vec3((i - 1) * 2, (j - 1) * 2, 5));
+                            e->setVelocity(MFMath::Vec3(0, 0, 0));
+                            e->setAngularVelocity(MFMath::Vec3(0, 0, 0));
+                        }
                 }
 
-                infoCounter--;
-            }
+                entCounter++;
+#endif
+                // --------
 
-            // TODO use UPDATE_TIME to make fixed-time-delta loop
+                if (cameraInfo || collisionInfo)
+                {
+                    if (infoCounter <= 0)
+                    {
+                        if (cameraInfo)
+                            std::cout << "camera: " + getCameraString(&renderer) << std::endl;
 
-            entityManager.update(dt);
+                        if (collisionInfo)
+                            std::cout << getCollisionString(&renderer, &physicsWorld, &entityManager) << std::endl;
+
+                        infoCounter = 30;
+                    }
+
+                    infoCounter--;
+                }
+
+                // TODO use UPDATE_TIME to make fixed-time-delta loop
+
+                entityManager.update(MS_PER_UPDATE);
 
 #if TEST_PHYSICS
-            physicsWorld.frame(dt);
+                physicsWorld.frame(MS_PER_UPDATE);
 #endif
 
-            renderer.frame(dt);
+                render = true;
+                extraTime -= MS_PER_UPDATE;
+            }
+
+            if (render)
+            {
+                renderer.frame(MS_PER_UPDATE); // TODO: Use actual delta time
+                if (renderer.done())
+                    sIsRunning = false;
+            }
+            else
+            {
+                // Let OS do background work while we wait.
+                zpl_sleep_ms(1);
+            }
         }
     }
 
