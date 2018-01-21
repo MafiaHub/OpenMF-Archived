@@ -147,6 +147,9 @@ void InputManagerImplementation::processEvents()
 
                 unsigned int code = event.key.keysym.scancode;
 
+                for (int i = 0; i < (int) mKeyCallbacks.size(); ++i)
+                    mKeyCallbacks[i]->call(true,code);
+
                 if (code < NUMBER_OF_KEYS)
                     mKeyboardState[code] = true;
 
@@ -156,6 +159,9 @@ void InputManagerImplementation::processEvents()
             case SDL_KEYUP:
             {
                 unsigned int code = event.key.keysym.scancode;
+
+                for (int i = 0; i < (int) mKeyCallbacks.size(); ++i)
+                    mKeyCallbacks[i]->call(false,code);
 
                 if (code < NUMBER_OF_KEYS)
                     mKeyboardState[code] = false;

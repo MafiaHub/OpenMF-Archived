@@ -41,6 +41,42 @@ protected:
     MFInput::InputManager *mInputManager;
 };
 
+class SpaceKeyCallback: public MFInput::KeyInputCallback
+{
+public:
+    SpaceKeyCallback(MFGame::SpatialEntityFactory *entityFactory, MFGame::SpatialEntityManager *entityManager, MFRender::Renderer *renderer): MFInput::KeyInputCallback()
+    {
+        mEntityFactory = entityFactory;
+        mEntityManager = entityManager;
+        mRenderer = renderer;
+    }
+
+    virtual void call(bool down, unsigned int keyCode) override
+    {
+        if (keyCode == 44 && down)
+        {
+            MFGame::SpatialEntity::Id id = mEntityFactory->createTestBallEntity();
+            MFGame::SpatialEntity *e = mEntityManager->getEntityById(id);
+            e->setPosition(mRenderer->getCameraPosition());
+
+            MFMath::Vec3 f,r,u;
+            mRenderer->getCameraVectors(f,r,u);
+            MFMath::Vec3 dir = u;
+
+            const double speed = -10.0;
+
+            dir = MFMath::Vec3(dir.x * speed, dir.y * speed, dir.z * speed);
+
+            e->setVelocity(dir);
+        }
+    }
+
+protected:
+    MFGame::SpatialEntityFactory *mEntityFactory;
+    MFGame::SpatialEntityManager *mEntityManager;
+    MFRender::Renderer *mRenderer;
+};
+
 std::string getCameraString(MFRender::Renderer *renderer)
 {
     double cam[6];
@@ -201,8 +237,11 @@ int main(int argc, char** argv)
     inputManager.initWindow(800,600,100,100);
     renderer.setUpInWindow(inputManager.getWindow());
 
-    std::shared_ptr<RightButtonCallback> cb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
-    inputManager.addButtonCallback(cb);
+    std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
+    inputManager.addButtonCallback(rbcb);
+
+    std::shared_ptr<SpaceKeyCallback> skcb = std::make_shared<SpaceKeyCallback>(&entityFactory,&entityManager,&renderer);
+    inputManager.addKeyCallback(skcb);
 
     MFGame::FreeCameraController cameraController(&renderer,&inputManager);
     cameraController.setSpeed(cameraSpeed);
@@ -236,21 +275,6 @@ int main(int argc, char** argv)
     }
 
     int lastSelectedEntity = -1;
-
-#define TEST_PHYSICS 0
-
-// TMP test:
-#if TEST_PHYSICS
-MFGame::SpatialEntity::Id testEnts[3][3];
-
-for (int i = 0; i < 3; ++i)
-    for (int j = 0; j < 3; ++j)
-        testEnts[i][j] = (i % 2) == (j % 2) ? entityFactory.createTestBoxEntity() : entityFactory.createTestBallEntity();
-
-int entCounter = 0;
-#endif
-// --------
-
     int infoCounter = 0;
 
     if (exportFileName.length() > 0)
@@ -272,24 +296,6 @@ int entCounter = 0;
                 lastSelectedEntity = selectedId;
             }
 
-// TMP test:
-#if TEST_PHYSICS
-if (entCounter % 1500 == 0)
-{
-for (int i = 0; i < 3; ++i)
-    for (int j = 0; j < 3; ++j)
-    {
-        MFGame::SpatialEntity *e = entityManager.getEntityById(testEnts[i][j]);
-        e->setPosition(renderer.getCameraPosition() - MFMath::Vec3( (i - 1) * 2, (j - 1) * 2 ,5));
-        e->setVelocity(MFMath::Vec3(0,0,0));
-        e->setAngularVelocity(MFMath::Vec3(0,0,0));
-    }
-}
-
-entCounter++;
-#endif
-// --------
-
             if (cameraInfo || collisionInfo)
             {
                 if (infoCounter <= 0)
@@ -310,10 +316,7 @@ entCounter++;
 
             entityManager.update(dt);
 
-#if TEST_PHYSICS
             physicsWorld.frame(dt);
-#endif
-
             renderer.frame(dt);
 
             inputManager.processEvents();
