@@ -17,7 +17,7 @@ IF (BUILD_UTILS)
 ENDIF ()
 
 IF (BUILD_TESTS)
-	# TODO unit tests
+	ADD_SUBDIRECTORY(tests)
 ENDIF ()
 
 #
