@@ -17,6 +17,7 @@ public:
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)=0;
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)=0;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)=0;
+    virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)=0;
     virtual void setFreeCameraSpeed(double newSpeed)=0;
     bool done() { return mDone; };
     virtual bool exportScene(std::string fileName)=0;

@@ -29,11 +29,16 @@ void FreeCameraController::update(double dt)
     double distance = dt * mSpeed;
     MFMath::Vec3 direction = MFMath::Vec3(0,0,0);
 
+    // TODO: un-hardcode keys
+
+    if (mInputManager->keyPressed(225))
+        distance *= 5.0;
+
     if (mInputManager->keyPressed(26))
-        direction.y += 1.0;
+        direction.y -= 1.0;
 
     if (mInputManager->keyPressed(22))
-        direction.y -= 1.0;
+        direction.y += 1.0;
 
     if (mInputManager->keyPressed(4))
         direction.x -= 1.0;
@@ -41,10 +46,23 @@ void FreeCameraController::update(double dt)
     if (mInputManager->keyPressed(7))
         direction.x += 1.0;
 
+    if (mInputManager->keyPressed(8))
+        direction.z += 1.0;
+
+    if (mInputManager->keyPressed(20))
+        direction.z -= 1.0;
+
     direction = direction * ((float) distance);
 
+    MFMath::Vec3 f,r,u;
+    mRenderer->getCameraVectors(f,r,u);
+
+    MFMath::Vec3 offset;
+
+    offset = direction.x * r + direction.z * f + direction.y * u;
+
     mRenderer->getCameraPositionRotation(pos,rot);
-    mRenderer->setCameraPositionRotation(pos + direction,rot);
+    mRenderer->setCameraPositionRotation(pos + offset,rot);
 }
 
 }

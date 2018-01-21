@@ -19,6 +19,19 @@ void traverse(osg::NodeVisitor *v,osg::Node &n)
             n.asGroup()->getChild(i)->accept(*v);
 }
 
+void rotationToVectors(osg::Quat rotation, osg::Vec3f &forw, osg::Vec3f &right, osg::Vec3f &up)
+{
+    forw  = osg::Vec3f(0,1,0);
+    right = osg::Vec3f(1,0,0);
+    up    = osg::Vec3f(0,0,1);
+
+    osg::Matrixd m = osg::Matrixd::rotate(rotation);
+
+    forw  = m.preMult(forw);
+    right = m.preMult(right);
+    up    = m.preMult(up);
+}
+
 /** Convert quaternion rotation to yaw, pitch, roll (Euler angles), in radians. */
 
 void quatToEuler(osg::Quat q, double &yaw, double &pitch, double &roll)

@@ -43,6 +43,9 @@ InputManagerImplementation::InputManagerImplementation(): InputManager()
     mClosed = false;
     mWindowWidth = 0;
     mWindowHeight = 0;
+
+    for (int i = 0; i < NUMBER_OF_KEYS; ++i)
+        mKeyboardState[i] = false;
 }
 
 void InputManagerImplementation::getWindowSize(unsigned int &width, unsigned int &height)

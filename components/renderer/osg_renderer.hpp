@@ -107,6 +107,7 @@ public:
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
+    virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
     virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
     virtual int  getSelectedEntityId() override;
@@ -173,6 +174,17 @@ void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3
     rotYawPitchRoll.x = y;
     rotYawPitchRoll.y = p;
     rotYawPitchRoll.z = r;
+}
+
+void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)
+{
+    osg::Vec3f f,r,u;
+
+    MFUtil::rotationToVectors(mViewer->getCamera()->getInverseViewMatrix().getRotate(),f,r,u);
+
+    forw  = MFMath::Vec3(f.x(),f.y(),f.z());
+    right = MFMath::Vec3(r.x(),r.y(),r.z());
+    up    = MFMath::Vec3(u.x(),u.y(),u.z());
 }
 
 void OSGRenderer::setUpInCustomWindow(unsigned int width, unsigned int height)
