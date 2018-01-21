@@ -4,6 +4,23 @@
 namespace MFGame
 {
 
+class BackingIDManager : public IDManager
+{
+  public:
+    virtual uint32_t getSlot(Id ident) override;
+    virtual bool isValid(Id ident) override;
+
+    virtual Id allocate() override;
+    virtual void deallocate(Id ident) override;
+
+  protected:
+    virtual Id *getHandle(Id ident, bool warn = true) override;
+
+  private:
+    std::vector<Id> mIndices;
+    std::vector<Id> mFreeIndices;
+};
+
 Id *BackingIDManager::getHandle(Id ident, bool warn)
 {
     if (ident.Index < 0 || ident.Index > mIndices.size())
@@ -71,7 +88,7 @@ void BackingIDManager::deallocate(Id ident)
         MFLogger::ConsoleLogger::warn("Can't deallocate invalid ID.", ID_MANAGER_MODULE_STR);
         return;
     }
-    
+
     id->Generation++;
     mFreeIndices.push_back(*id);
 }

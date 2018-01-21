@@ -62,23 +62,6 @@ protected:
     virtual Id *getHandle(Id ident, bool warn=true)=0;
 };
 
-class BackingIDManager: public IDManager
-{
-public:
-    virtual uint32_t getSlot(Id ident) override;
-    virtual bool isValid(Id ident) override;
-    
-    virtual Id allocate() override;
-    virtual void deallocate(Id ident) override;
-
-protected:
-    virtual Id *getHandle(Id ident, bool warn=true) override;
-
-private:
-    std::vector<Id> mIndices;
-    std::vector<Id> mFreeIndices;
-};
-
 }
 
 #include <spatial_entity/backing_id_manager.hpp>
