@@ -18,7 +18,13 @@ We're using the standard CMake build:
 
 1. Download/clone the repository.
 2. Create a `build` subfolder in it (`mkdir build`).
-3. Enter the folder (`cd build`) and run `cmake ..`.
+3. Enter the folder (`cd build`) and run `cmake .. -DBUILD_<NAME>`.
+    - There are currently 4 build targets available:
+       - `GAME`
+       - `VIEWER`
+       - `UTILS`
+       - `TESTS`
+    - Use them by defining such specific variable. (e.g. `cmake .. -DBUILD_GAME=1 -DBUILD_UTILS=1`)
 4. Run `make`.
 
 ## Compilation (Windows)
