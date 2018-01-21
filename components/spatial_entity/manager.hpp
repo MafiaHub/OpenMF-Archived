@@ -16,7 +16,14 @@ class SpatialEntityManager
 {
 public:
     SpatialEntity *getEntityById(MFGame::Id id);
+
+    /**
+     * \brief Returns valid entity by a raw index,
+     * if entity is invalid (e.g. removed) or index points outside the bounds of the pool
+     * it returns nullptr.
+     */
     SpatialEntity *getEntityByIndex(unsigned int index);
+
     Id addEntity(std::shared_ptr<SpatialEntity> entity);
     void removeEntity(Id ident);
     bool isValid(Id ident);
@@ -25,7 +32,16 @@ public:
       Update all managed entities.
     */
     void update(double dt);
+
+    /**
+     * \brief Returns the number of active entities
+     **/
     unsigned int getNumEntities();
+
+    /**
+     * \brief Returns the number of entity slots
+     **/
+    unsigned int getNumEntitySlots();
 
 protected:
     std::vector<std::shared_ptr<SpatialEntity>> mEntities;
@@ -35,7 +51,19 @@ protected:
 
 SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
 {
-    return mEntities[index].get();
+    if (index < 0 || index > mEntities.size())
+    {
+        return nullptr;
+    }
+
+    auto e = mEntities[index].get();
+
+    if (MFGame::Id(e->getId()) == NullId)
+    {
+        return nullptr;
+    }
+
+    return e;
 }
 
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
@@ -97,6 +125,11 @@ void SpatialEntityManager::update(double dt)
 unsigned int SpatialEntityManager::getNumEntities()
 {
     return mNumEntities;
+}
+
+unsigned int SpatialEntityManager::getNumEntitySlots()
+{
+    return mEntities.size();
 }
 
 }
