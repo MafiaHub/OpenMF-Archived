@@ -70,6 +70,7 @@ The folder structure is inspired by OpenMW:
   - `model_viewer`: interactive model and mission/world viewer
   - `format_utils`: sources of command line utilities for each Mafia format, mostly used for dumping/extracting the content
   - `game`: will contain the final game engine
+  - `tests`: unit tests for components
 - `extern`: third party libraries we decided to include in our repository (so that we can edit them etc.)
 - `tests`: automated tests
 - `resources`: our own resources (e.g. icons, shaders, screenshots, ...)
