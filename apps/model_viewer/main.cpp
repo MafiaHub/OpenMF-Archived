@@ -178,6 +178,7 @@ int main(int argc, char** argv)
     renderer.setUpInWindow(inputManager.getWindow());
 
     MFGame::FreeCameraController cameraController(&renderer,&inputManager);
+    cameraController.setSpeed(cameraSpeed);
 
     if (model)
     {
@@ -194,7 +195,6 @@ int main(int argc, char** argv)
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
-    renderer.setFreeCameraSpeed(cameraSpeed);
 
     if (arguments.count("m") > 0)
     {

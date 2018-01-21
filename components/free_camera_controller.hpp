@@ -13,6 +13,8 @@ public:
     FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual void update(double dt) override;
 
+    void setSpeed(double speed) { mSpeed = speed; };
+
 protected:
     double mSpeed;
     double mRotationSpeed;

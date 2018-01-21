@@ -108,7 +108,6 @@ public:
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
     virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
-    virtual void setFreeCameraSpeed(double newSpeed) override;
     virtual bool exportScene(std::string fileName) override;
     virtual int  getSelectedEntityId() override;
 
@@ -126,7 +125,6 @@ protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
-    MFUtil::WalkManipulator *mCameraManipulator;
     MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
 
     void optimize();
@@ -211,9 +209,10 @@ void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 
     osg::Matrixd viewMatrix;
 
     viewMatrix.setTrans(osg::Vec3(position.x,position.y,position.z));
-
     viewMatrix.setRotate(MFUtil::eulerToQuat(rotYawPitchRoll.x,rotYawPitchRoll.y,rotYawPitchRoll.z));
-    mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
+    viewMatrix.invert(viewMatrix);
+
+    mViewer->getCamera()->setViewMatrix(viewMatrix);
 }
 
 int OSGRenderer::getSelectedEntityId()
@@ -260,13 +259,6 @@ OSGRenderer::OSGRenderer(): Renderer()
 
     mViewer->setSceneData(mRootNode);
 
-    osg::ref_ptr<MFUtil::WalkManipulator> cameraManipulator = new MFUtil::WalkManipulator();
-
-    mCameraManipulator = cameraManipulator.get();
-
-    if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
-        mViewer->setCameraManipulator(cameraManipulator);
-
     mViewer->getCamera()->setCullingMode(
         osg::CullSettings::VIEW_FRUSTUM_CULLING |
         osg::CullSettings::NEAR_PLANE_CULLING |
@@ -277,11 +269,6 @@ OSGRenderer::OSGRenderer(): Renderer()
 
     mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
     setRenderMask(MASK_GAME);
-}
-
-void OSGRenderer::setFreeCameraSpeed(double newSpeed)
-{
-    mCameraManipulator->setMaxVelocity(newSpeed);
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
