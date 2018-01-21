@@ -2,7 +2,7 @@
 #define SPATIAL_ENTITY_MANAGER_H
 
 #include <spatial_entity/spatial_entity.hpp>
-#include <spatial_entity/idmanager.hpp>
+#include <spatial_entity/id_manager.hpp>
 #include <loggers/console.hpp>
 
 #include <vector>

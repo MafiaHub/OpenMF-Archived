@@ -1,5 +1,5 @@
-#ifndef IDMANAGER_H
-#define IDMANAGER_H
+#ifndef ID_MANAGER_H
+#define ID_MANAGER_H
 
 #include <cstdint>
 #include <limits.h>
@@ -147,4 +147,4 @@ void BackingIDManager::deallocate(Id ident)
 
 }
 
-#endif // IDMANAGER_H
+#endif // ID_MANAGER_H
