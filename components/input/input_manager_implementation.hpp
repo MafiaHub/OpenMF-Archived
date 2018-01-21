@@ -25,6 +25,7 @@ public:
     virtual bool keyPressed(unsigned int keyCode) override;
     virtual void setMousePosition(unsigned int x, unsigned int y) override;
     virtual void getMousePosition(unsigned int &x, unsigned int &y) override;
+    virtual void setMouseVisible(bool visible) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
 
@@ -52,6 +53,11 @@ void InputManagerImplementation::getMousePosition(unsigned int &x, unsigned int 
     SDL_GetMouseState(&mx,&my);
     x = mx;
     y = my;
+}
+
+void InputManagerImplementation::setMouseVisible(bool visible)
+{
+    SDL_ShowCursor(visible ? SDL_ENABLE : SDL_DISABLE);
 }
 
 InputManagerImplementation::InputManagerImplementation(): InputManager()

@@ -17,6 +17,11 @@ protected:
     double mSpeed;
     double mRotationSpeed;
     double mPreviousMouseButton;
+
+    bool mInitTransform;
+
+    MFMath::Vec3 mPosition;
+    MFMath::Vec3 mRotation;    // Euler angles
 };
 
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
@@ -25,10 +30,24 @@ FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput
     mSpeed = 1.0;
     mRotationSpeed = 0.005;
     mPreviousMouseButton = false;
+
+    mPosition = MFMath::Vec3(0,0,0);
+    mRotation = MFMath::Vec3(0,0,0);
+
+    mInitTransform = true;
 }
 
 void FreeCameraController::update(double dt)
 {
+    if (mInitTransform)
+    {
+        MFMath::Vec3 pos,rot;
+        mRenderer->getCameraPositionRotation(pos,rot);
+        mPosition = pos;
+        mRotation = rot;
+        mInitTransform = false;
+    }
+
     MFMath::Vec3 pos, rot;
     double distance = dt * mSpeed;
     MFMath::Vec3 direction = MFMath::Vec3(0,0,0);
@@ -82,15 +101,28 @@ void FreeCameraController::update(double dt)
 
             rotOffset = MFMath::Vec3(-1 * mRotationSpeed * dx, -1 * mRotationSpeed * dy, 0);
         }
+        else
+        {
+            mInputManager->setMouseVisible(false);
+        }
 
         mPreviousMouseButton = true;
         mInputManager->setMousePosition(windowW / 2, windowH / 2);   // center the mouse
     }
     else
-        mPreviousMouseButton = false;
+    {
+        if (mPreviousMouseButton)
+            mInputManager->setMouseVisible(true);
 
-    mRenderer->getCameraPositionRotation(pos,rot);
-    mRenderer->setCameraPositionRotation(pos + offset,rot + rotOffset);
+        mPreviousMouseButton = false;
+    }
+
+    mPosition += offset;
+    mRotation += rotOffset;
+
+    mRotation.y = std::max(0.0f,std::min(MFMath::PI - 0.001f,mRotation.y));
+
+    mRenderer->setCameraPositionRotation(mPosition,mRotation);
 }
 
 }
