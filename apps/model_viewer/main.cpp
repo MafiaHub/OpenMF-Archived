@@ -20,11 +20,25 @@
 class RightButtonCallback: public MFInput::ButtonInputCallback
 {
 public:
+    RightButtonCallback(MFRender::Renderer *renderer, MFInput::InputManager *inputManager): MFInput::ButtonInputCallback()
+    {
+        mRenderer = renderer;
+        mInputManager = inputManager;
+    }
+
     virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y) override
     {
-        // TODO
-        std::cout << "sasas" << std::endl;
+        if (buttonNumber == 3 && down)
+        {
+            unsigned int w,h;
+            mInputManager->getWindowSize(w,h);
+            mRenderer->debugClick(x,h - y);
+        }
     }
+
+protected:
+    MFRender::Renderer *mRenderer;
+    MFInput::InputManager *mInputManager;
 };
 
 std::string getCameraString(MFRender::Renderer *renderer)
@@ -187,7 +201,7 @@ int main(int argc, char** argv)
     inputManager.initWindow(800,600,100,100);
     renderer.setUpInWindow(inputManager.getWindow());
 
-    std::shared_ptr<RightButtonCallback> cb = std::make_shared<RightButtonCallback>();
+    std::shared_ptr<RightButtonCallback> cb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
     inputManager.addButtonCallback(cb);
 
     MFGame::FreeCameraController cameraController(&renderer,&inputManager);

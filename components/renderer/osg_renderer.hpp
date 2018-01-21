@@ -23,79 +23,7 @@
 #define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
-
 {
-
-class PickHandler: public osgGA::GUIEventHandler  // FIXME: this is event handling and should be done outside renderer
-{
-public:
-    PickHandler()
-    {
-        mHighlightMaterial = new osg::Material;
-        mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mMaterialBackup = 0;
-        mSelected = 0;
-    }
-
-    virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa) override
-    {
-        if (ea.getButton() != osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ||
-            ea.getEventType()!=osgGA::GUIEventAdapter::PUSH)
-            return false;
-
-        osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
-
-        if (!viewer)
-            return true;
-
-        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
-            new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
-
-        MFUtil::RobustIntersectionVisitor iv(intersector.get());
-        viewer->getCamera()->accept(iv);
-
-        if (intersector->containsIntersections())
-        {
-            const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
-
-            if (mSelected)
-            {
-                if (mMaterialBackup)
-                    mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
-                else
-                    mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
-            }
-
-            if (mSelected == result.drawable)  // clicking the same node twice will deselect it
-            {
-                mSelected = 0;
-            }
-            else
-            {
-                mSelected = result.drawable;
-                mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-                mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
-
-                MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
-
-                for (int i = 0; i < (int) result.nodePath.size(); ++i)
-                    MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
-
-                MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
-            }
-        }
-
-        return true;
-    }
-
-    osg::ref_ptr<osg::Drawable> mSelected;
-
-protected:
-    osg::ref_ptr<osg::Material> mHighlightMaterial;
-    osg::ref_ptr<osg::Material> mMaterialBackup;
-};
 
 class OSGRenderer: public Renderer
 {
@@ -109,6 +37,7 @@ public:
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
     virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
     virtual bool exportScene(std::string fileName) override;
+    virtual void debugClick(unsigned int x, unsigned int y) override;
     virtual int  getSelectedEntityId() override;
 
     /**
@@ -136,7 +65,9 @@ protected:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 
-    osg::ref_ptr<PickHandler> mPickHandler;
+    osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
+    osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection
+    osg::ref_ptr<osg::Material> mMaterialBackup;
 };
 
 void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
@@ -149,6 +80,47 @@ bool OSGRenderer::exportScene(std::string fileName)
     const osg::Node *n = mRootNode.get();
     auto result = osgDB::Registry::instance()->writeNode(*n,fileName,NULL);
     return result.success();
+}
+
+void OSGRenderer::debugClick(unsigned int x, unsigned int y)
+{
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+        new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y);
+
+    MFUtil::RobustIntersectionVisitor iv(intersector.get());
+    iv.setTraversalMask(mViewer->getCamera()->getCullMask());
+    mViewer->getCamera()->accept(iv);
+
+    if (intersector->containsIntersections())
+    {
+        const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
+
+        if (mSelected)
+        {
+            if (mMaterialBackup)
+                mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
+            else
+                mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+        }
+
+        if (mSelected == result.drawable)  // clicking the same node twice will deselect it
+        {
+            mSelected = 0;
+        }
+        else
+        {
+            mSelected = result.drawable;
+            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+
+            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+
+            for (int i = 0; i < (int) result.nodePath.size(); ++i)
+                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+
+            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+        }
+    }
 }
 
 void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
@@ -217,9 +189,9 @@ void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 
 
 int OSGRenderer::getSelectedEntityId()
 {
-    if (mPickHandler->mSelected)
+    if (mSelected)
     {
-        osg::UserDataContainer *cont = mPickHandler->mSelected->getOrCreateUserDataContainer();
+        osg::UserDataContainer *cont = mSelected->getOrCreateUserDataContainer();
 
         if (cont->getNumUserObjects() > 0)
         {
@@ -246,9 +218,6 @@ OSGRenderer::OSGRenderer(): Renderer()
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    mPickHandler = new PickHandler;
-    mViewer->addEventHandler(mPickHandler);
-
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
     statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
     statshandler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F4);
@@ -269,6 +238,13 @@ OSGRenderer::OSGRenderer(): Renderer()
 
     mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
     setRenderMask(MASK_GAME);
+
+    mHighlightMaterial = new osg::Material;
+    mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mMaterialBackup = 0;
+    mSelected = 0;
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
