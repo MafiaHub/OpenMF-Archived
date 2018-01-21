@@ -10,9 +10,6 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 
-#define ZPL_IMPLEMENTATION
-#include <zpl.h>
-
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
@@ -24,7 +21,7 @@ static bool sIsRunning = true;
 
 // TODO move this to Platform class
 #include <chrono>
-#include <time.h>
+#include <thread>
 double timeGet()
 {
     static auto epoch = std::chrono::high_resolution_clock::now();
@@ -321,7 +318,7 @@ int entCounter = 0;
             else
             {
                 // Let OS do background work while we wait.
-                zpl_sleep_ms(1);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
     }
