@@ -39,8 +39,6 @@ public:
         return &sFileSystem;
     }
 
-    void initDTA();
-
     bool open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode = std::ios::binary);
     std::string getFileLocation(std::string fileName);
 
@@ -95,11 +93,6 @@ void FileSystem::addPath(std::string path, size_t index)
 	mSearchPaths.insert(mSearchPaths.begin() + index, path);
 }
 
-void FileSystem::initDTA()
-{
-
-}
-
 std::string FileSystem::getFileLocation(std::string fileName)
 {
     for (auto path : mSearchPaths)     // TODO: what's the fastest way to check a file existence?
@@ -133,8 +126,6 @@ bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::
 
     file.open(fileLocation, std::ios::binary);
     return file.good();
-
-    // TODO(zaklaus): Otherwise, search inside DTA archives...
 }
 
 }
