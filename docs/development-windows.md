@@ -46,11 +46,7 @@ Once we get all our dependencies compiled, we're finally ready to compile OpenMF
    * `OSG_THIRD_PARTY_DIR`: points to our `W:\3rdparty` directory.
    * `OSG_DIR`: points to our `W:\osg` directory.
    * `BULLET_ROOT`: points to our `W:\bullet3` directory.
-   * You also need to specify your build targets (use any/none/all of them):
-        - `GAME`
-        - `VIEWER`
-        - `UTILS`
-        - `TESTS`
+   * You also need to specify your build targets, see `build targets` in [development](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md):
         - Use them by defining such specific variable. (e.g. `cmake .. -DBUILD_GAME=1 -DBUILD_UTILS=1`)
         - On CMake GUI, use `Add Entry` button to define a variable, call it `BUILD_<NAME>` (e.g. `BUILD_GAME`) and set its boolean value to True.
 4. Having done that, we can finally build our project!
