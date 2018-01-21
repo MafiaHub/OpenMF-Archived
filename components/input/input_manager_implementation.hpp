@@ -9,6 +9,7 @@
 
 #define INPUT_MANAGER_MODULE_STRING "input manager"
 #define NUMBER_OF_KEYS 1024
+#define NUMBER_OF_MOUSE_BUTTONS 4
 
 namespace MFInput
 {
@@ -22,6 +23,8 @@ public:
     virtual bool windowClosed() override;
     virtual void getWindowSize(unsigned int &width, unsigned int &height) override;
     virtual bool keyPressed(unsigned int keyCode) override;
+    virtual void setMousePosition(unsigned int x, unsigned int y) override;
+    virtual void getMousePosition(unsigned int &x, unsigned int &y) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
 
@@ -35,7 +38,21 @@ protected:
 
     bool mClosed;
     bool mKeyboardState[NUMBER_OF_KEYS];
+    bool mMouseState[NUMBER_OF_MOUSE_BUTTONS];
 };
+
+void InputManagerImplementation::setMousePosition(unsigned int x, unsigned int y)
+{
+    SDL_WarpMouseInWindow(mWindow,x,y);
+}
+
+void InputManagerImplementation::getMousePosition(unsigned int &x, unsigned int &y)
+{
+    int mx, my;
+    SDL_GetMouseState(&mx,&my);
+    x = mx;
+    y = my;
+}
 
 InputManagerImplementation::InputManagerImplementation(): InputManager()
 {
@@ -46,6 +63,9 @@ InputManagerImplementation::InputManagerImplementation(): InputManager()
 
     for (int i = 0; i < NUMBER_OF_KEYS; ++i)
         mKeyboardState[i] = false;
+
+    for (int i = 0; i < NUMBER_OF_MOUSE_BUTTONS; ++i)
+        mMouseState[i] = false;
 }
 
 void InputManagerImplementation::getWindowSize(unsigned int &width, unsigned int &height)
@@ -136,6 +156,26 @@ void InputManagerImplementation::processEvents()
                 break;
             }
 
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                unsigned int button = event.button.button;
+
+                if (button < NUMBER_OF_MOUSE_BUTTONS)
+                    mMouseState[button] = true;
+
+                break;
+            }
+
+            case SDL_MOUSEBUTTONUP:
+            {
+                unsigned int button = event.button.button;
+
+                if (button < NUMBER_OF_MOUSE_BUTTONS)
+                    mMouseState[button] = false;
+
+                break;
+            }
+
             case SDL_WINDOWEVENT:
                 switch (event.window.event)
                 {
@@ -169,7 +209,7 @@ bool InputManagerImplementation::keyPressed(unsigned int keyCode)
 
 bool InputManagerImplementation::mouseButtonPressed(unsigned int button)
 {
-    return false;
+    return mMouseState[button];
 }
 
 }

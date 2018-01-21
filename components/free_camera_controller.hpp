@@ -15,12 +15,16 @@ public:
 
 protected:
     double mSpeed;
+    double mRotationSpeed;
+    double mPreviousMouseButton;
 };
 
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
     CameraController(renderer,inputManager)
 {
     mSpeed = 1.0;
+    mRotationSpeed = 0.005;
+    mPreviousMouseButton = false;
 }
 
 void FreeCameraController::update(double dt)
@@ -57,12 +61,36 @@ void FreeCameraController::update(double dt)
     MFMath::Vec3 f,r,u;
     mRenderer->getCameraVectors(f,r,u);
 
-    MFMath::Vec3 offset;
+    MFMath::Vec3 offset, rotOffset;
 
     offset = direction.x * r + direction.z * f + direction.y * u;
+    rotOffset = MFMath::Vec3(0,0,0);
+
+    if (mInputManager->mouseButtonPressed(1))   // rotation
+    {
+        unsigned int windowW, windowH;
+        mInputManager->getWindowSize(windowW,windowH);
+
+        if (mPreviousMouseButton)      // don't rotate if mouse wasn't centered previously
+        {
+            int dx, dy;
+            unsigned int x, y;
+            mInputManager->getMousePosition(x,y);
+ 
+            dx = x - windowW / 2;
+            dy = y - windowH / 2;
+
+            rotOffset = MFMath::Vec3(-1 * mRotationSpeed * dx, -1 * mRotationSpeed * dy, 0);
+        }
+
+        mPreviousMouseButton = true;
+        mInputManager->setMousePosition(windowW / 2, windowH / 2);   // center the mouse
+    }
+    else
+        mPreviousMouseButton = false;
 
     mRenderer->getCameraPositionRotation(pos,rot);
-    mRenderer->setCameraPositionRotation(pos + offset,rot);
+    mRenderer->setCameraPositionRotation(pos + offset,rot + rotOffset);
 }
 
 }
