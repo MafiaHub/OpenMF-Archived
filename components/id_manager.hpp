@@ -64,6 +64,6 @@ protected:
 
 }
 
-#include <spatial_entity/backing_id_manager.hpp>
+#include <id_managers/backing_id_manager.hpp>
 
 #endif // ID_MANAGER_H
