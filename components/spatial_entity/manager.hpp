@@ -105,8 +105,8 @@ void SpatialEntityManager::removeEntity(Id ident)
         MFLogger::ConsoleLogger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return;
     }
-
     mEntities[ident.mValue].reset();
+    mEntities.erase(ident.mValue);
     mNumEntities--;
 }
 
