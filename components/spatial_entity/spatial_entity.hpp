@@ -2,6 +2,7 @@
 #define SPATIAL_ENTITY_H
 
 #include <math.hpp>
+#include <id_manager.hpp>
 #include <string>
 
 namespace MFGame
@@ -15,9 +16,8 @@ namespace MFGame
 class SpatialEntity
 {
 public:
-    typedef uint64_t Id;
-
     SpatialEntity();
+    virtual ~SpatialEntity();
 
     virtual void update(double dt)=0;
 
@@ -43,14 +43,22 @@ public:
     std::string getName()                               { return mName;         };
     bool isRead()                                       { return mReady;        };
     Id getId()                                          { return mId;           };
-    void setId(Id ident)                                { mId = ident;          };
-
+    
     /**
     Moves the entity from current to dest position, checking for collisions.
     */
     virtual void move(MFMath::Vec3 destPosition)=0;
 
-protected:
+    static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
+    static IDManager *getIDManager() 
+    { 
+        if (sIDManager.get() == nullptr)
+            sIDManager = std::make_shared<BackingIDManager>();
+
+        return sIDManager.get(); 
+    }
+
+  protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
@@ -58,15 +66,23 @@ protected:
     std::string mName;
     bool mReady;
     Id mId;
+    static std::shared_ptr<IDManager> sIDManager;
 };
 
 SpatialEntity::SpatialEntity()
 {
-    mId = ((uint64_t)INT32_MAX << 32) | INT32_MAX;
+    mId = getIDManager()->allocate();
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
 }
+
+SpatialEntity::~SpatialEntity()
+{
+    getIDManager()->deallocate(mId);
+}
+
+std::shared_ptr<IDManager> SpatialEntity::sIDManager;
 
 }
 #endif
