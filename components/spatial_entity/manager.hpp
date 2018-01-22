@@ -64,7 +64,7 @@ SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
 
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
 {
-    auto entity = mEntities[id.Value];
+    auto entity = mEntities[id.mValue];
     if (!entity.get())
     {
         MFLogger::ConsoleLogger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
@@ -76,22 +76,22 @@ SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
 
 bool SpatialEntityManager::isValid(Id ident)
 {
-    auto entity = mEntities[ident.Value];
+    auto entity = mEntities[ident.mValue];
     return entity.get() != nullptr;
 }
 
 Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
 {
     auto id = entity->getId();
-    auto ourEntity = mEntities[id.Value];
+    auto ourEntity = mEntities[id.mValue];
     if (ourEntity.get())
     {
-        MFLogger::ConsoleLogger::warn("Entity with existing ID (" + std::to_string(id.Index) +
+        MFLogger::ConsoleLogger::warn("Entity with existing ID (" + std::to_string(id.mIndex) +
             ") being added - ignoring.",SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return NullId;
     }
 
-    mEntities[id.Value] = entity;
+    mEntities[id.mValue] = entity;
 
     mNumEntities++;
     return id;
@@ -99,14 +99,14 @@ Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
 
 void SpatialEntityManager::removeEntity(Id ident)
 {
-    auto entity = mEntities[ident.Value];
+    auto entity = mEntities[ident.mValue];
     if (!entity.get())
     {
         MFLogger::ConsoleLogger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return;
     }
 
-    mEntities[ident.Value].reset();
+    mEntities[ident.mValue].reset();
     mNumEntities--;
 }
 

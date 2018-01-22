@@ -20,8 +20,8 @@ inline void setRigidBodyEntityId(btRigidBody *body, MFGame::Id ident)
     if (body == nullptr) 
         return;
 
-    body->setUserIndex(ident.Index);
-    body->setUserIndex2(ident.Generation);
+    body->setUserIndex(ident.mIndex);
+    body->setUserIndex2(ident.mGeneration);
 }
 
 inline MFGame::Id getCollisionObjectEntityId(const btCollisionObject *body)
@@ -30,8 +30,8 @@ inline MFGame::Id getCollisionObjectEntityId(const btCollisionObject *body)
         return MFGame::NullId;
 
     MFGame::Id ident;
-    ident.Index = body->getUserIndex();
-    ident.Generation = body->getUserIndex2();
+    ident.mIndex = body->getUserIndex();
+    ident.mGeneration = body->getUserIndex2();
     return ident;
 }
 

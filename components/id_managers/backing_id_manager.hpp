@@ -23,20 +23,20 @@ class BackingIDManager : public IDManager
 
 Id *BackingIDManager::getHandle(Id ident, bool warn)
 {
-    if (ident.Index < 0 || ident.Index > mIndices.size())
+    if (ident.mIndex < 0 || ident.mIndex > mIndices.size())
     {
         if (warn)
             MFLogger::ConsoleLogger::warn("ID is outside of the bounds.", ID_MANAGER_MODULE_STR);
         return nullptr;
     }
-    else if (mIndices.at(ident.Index) != ident)
+    else if (mIndices.at(ident.mIndex) != ident)
     {
         if (warn)
             MFLogger::ConsoleLogger::warn("Invalid ID.", ID_MANAGER_MODULE_STR);
         return nullptr;
     }
 
-    auto id = &mIndices.at(ident.Index);
+    auto id = &mIndices.at(ident.mIndex);
     return id;
 }
 
@@ -46,10 +46,10 @@ uint32_t BackingIDManager::getSlot(Id ident)
 
     if (id == nullptr)
     {
-        return NullId.Index;
+        return NullId.mIndex;
     }
 
-    return id->Index;
+    return id->mIndex;
 }
 
 bool BackingIDManager::isValid(Id ident)
@@ -71,7 +71,7 @@ Id BackingIDManager::allocate()
     Id id(mIndices.size(), 0);
     mIndices.push_back(id);
 
-    if (id.Index == INT32_MAX)
+    if (id.mIndex == INT32_MAX)
     {
         MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
         return NullId;
@@ -89,7 +89,7 @@ void BackingIDManager::deallocate(Id ident)
         return;
     }
 
-    id->Generation++;
+    id->mGeneration++;
     mFreeIndices.push_back(*id);
 }
 

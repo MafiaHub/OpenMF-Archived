@@ -15,32 +15,32 @@ typedef union _Id
 {
     _Id() 
     {
-        Index      = INT32_MAX;
-        Generation = INT32_MAX;
+        mIndex      = INT32_MAX;
+        mGeneration = INT32_MAX;
     }
 
     _Id(uint32_t index, uint32_t generation)
     {
-        this->Index = index;
-        this->Generation = generation;
+        mIndex = index;
+        mGeneration = generation;
     }
 
     _Id(uint64_t value)
     {
-        this->Value = value;
+        mValue = value;
     }
 
     struct
     {
-        uint32_t Index;
-        uint32_t Generation;
+        uint32_t mIndex;
+        uint32_t mGeneration;
     };
 
-    uint64_t Value;
+    uint64_t mValue;
 
     bool operator==(const _Id rhs)
     {
-        return (this->Index == rhs.Index && this->Generation == rhs.Generation);
+        return (mIndex == rhs.mIndex && mGeneration == rhs.mGeneration);
     }
 
     bool operator!=(const _Id rhs)
