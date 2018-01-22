@@ -94,7 +94,7 @@ bool SpatialEntityManager::isValid(Id ident)
 
 Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
 {
-    if (getEntityById(entity->getId()) != 0)
+    if (isValid(entity->getId()) == true)
     {
         MFLogger::ConsoleLogger::warn("Entity with existing ID (" + std::to_string(entity->getId()) +
             ") being added - ignoring.",SPATIAL_ENTITY_MANAGER_MODULE_STR);
