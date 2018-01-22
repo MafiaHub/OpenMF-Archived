@@ -49,15 +49,17 @@ public:
         mEntityFactory = entityFactory;
         mEntityManager = entityManager;
         mRenderer = renderer;
+        mCounter = 0;
     }
 
     virtual void call(bool down, unsigned int keyCode) override
     {
         if (keyCode == 44 && down)
         {
-            MFGame::SpatialEntity::Id id = mEntityFactory->createTestBallEntity();
+            MFGame::SpatialEntity::Id id = mCounter % 2 == 0 ?
+                mEntityFactory->createTestBallEntity() :
+                mEntityFactory->createTestBoxEntity();
             MFGame::SpatialEntity *e = mEntityManager->getEntityById(id);
-            e->setPosition(mRenderer->getCameraPosition());
 
             MFMath::Vec3 f,r,u;
             mRenderer->getCameraVectors(f,r,u);
@@ -65,9 +67,9 @@ public:
 
             const float speed = 10.0;
 
-            dir *= speed;
-
-            e->setVelocity(dir);
+            e->setPosition(mRenderer->getCameraPosition() + dir * 2.0f);
+            e->setVelocity(dir * speed);
+            mCounter++;
         }
     }
 
@@ -75,6 +77,7 @@ protected:
     MFGame::SpatialEntityFactory *mEntityFactory;
     MFGame::SpatialEntityManager *mEntityManager;
     MFRender::Renderer *mRenderer;
+    unsigned int mCounter;
 };
 
 class WindowResizeCallback: public MFInput::WindowResizeCallback

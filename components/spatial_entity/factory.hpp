@@ -32,6 +32,9 @@ protected:
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFRender::OSGRenderer *mRenderer;
 
+    osg::ref_ptr<osg::StateSet> mTestStateSet;
+    osg::ref_ptr<osg::Material> mTestMaterial;
+
     osg::ref_ptr<osg::Shape> mTestVisualSphereShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestSphereNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalSphereShape;
@@ -50,12 +53,20 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     const double r = 0.7;
     const double l = 1.0;
 
+    mTestMaterial = new osg::Material();
+    mTestMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4(0,0,0,0));
+
+    mTestStateSet = new osg::StateSet();
+    mTestStateSet->setAttributeAndModes(mTestMaterial);
+
     mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),r);
     mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
+    mTestSphereNode->setStateSet(mTestStateSet);
     mTestPhysicalSphereShape = std::make_shared<btSphereShape>(r);
 
     mTestVisualBoxShape = new osg::Box(osg::Vec3f(0,0,0),l);
     mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
+    mTestBoxNode->setStateSet(mTestStateSet);
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 }
 
