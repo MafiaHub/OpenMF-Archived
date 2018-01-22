@@ -213,6 +213,10 @@ void InputManagerImplementation::processEvents()
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                         mWindowWidth = event.window.data1;
                         mWindowHeight = event.window.data2;
+
+                        for (int i = 0; i < (int) mWindowResizeCallbacks.size(); ++i)
+                            mWindowResizeCallbacks[i]->call(mWindowWidth,mWindowHeight);
+
                         break;
 
                     default: break;

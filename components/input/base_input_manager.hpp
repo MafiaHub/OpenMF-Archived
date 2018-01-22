@@ -16,6 +16,12 @@ public:
     virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y)=0;
 };
 
+class WindowResizeCallback
+{
+public:
+    virtual void call(unsigned int width, unsigned int height)=0;
+};
+
 /**
   Manages the input handling and the game window.
 */
@@ -34,12 +40,14 @@ public:
     virtual bool mouseButtonPressed(unsigned int button)=0;
     virtual void processEvents()=0;
 
-    void addKeyCallback(std::shared_ptr<KeyInputCallback> callback)        { mKeyCallbacks.push_back(callback);    };
-    void addButtonCallback(std::shared_ptr<ButtonInputCallback> callback)  { mButtonCallbacks.push_back(callback); };
+    void addKeyCallback(std::shared_ptr<KeyInputCallback> callback)               { mKeyCallbacks.push_back(callback);          };
+    void addButtonCallback(std::shared_ptr<ButtonInputCallback> callback)         { mButtonCallbacks.push_back(callback);       };
+    void addWindowResizeCallback(std::shared_ptr<WindowResizeCallback> callback)  { mWindowResizeCallbacks.push_back(callback); };
 
 protected:
     std::vector<std::shared_ptr<KeyInputCallback>>      mKeyCallbacks;
     std::vector<std::shared_ptr<ButtonInputCallback>>   mButtonCallbacks;
+    std::vector<std::shared_ptr<WindowResizeCallback>>  mWindowResizeCallbacks;
 };
 
 }

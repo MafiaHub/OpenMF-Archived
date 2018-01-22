@@ -77,6 +77,23 @@ protected:
     MFRender::Renderer *mRenderer;
 };
 
+class WindowResizeCallback: public MFInput::WindowResizeCallback
+{
+public:
+    WindowResizeCallback(MFRender::Renderer *renderer)
+    {
+        mRenderer = renderer;
+    }
+
+    virtual void call(unsigned int width, unsigned int height) override
+    {
+        mRenderer->setWindowSize(width,height);
+    }
+
+protected:
+    MFRender::Renderer *mRenderer;
+};
+
 std::string getCameraString(MFRender::Renderer *renderer)
 {
     double cam[6];
@@ -241,6 +258,9 @@ int main(int argc, char** argv)
 
     std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
     inputManager.addButtonCallback(rbcb);
+
+    std::shared_ptr<WindowResizeCallback> wrcb = std::make_shared<WindowResizeCallback>(&renderer);
+    inputManager.addWindowResizeCallback(wrcb);
 
     if (simulatePhysics)
     {

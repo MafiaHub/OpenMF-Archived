@@ -36,6 +36,7 @@ public:
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
     virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
+    virtual void setWindowSize(unsigned int width, unsigned int height) override;
     virtual bool exportScene(std::string fileName) override;
     virtual void debugClick(unsigned int x, unsigned int y) override;
     virtual int  getSelectedEntityId() override;
@@ -80,6 +81,16 @@ bool OSGRenderer::exportScene(std::string fileName)
     const osg::Node *n = mRootNode.get();
     auto result = osgDB::Registry::instance()->writeNode(*n,fileName,NULL);
     return result.success();
+}
+
+void OSGRenderer::setWindowSize(unsigned int width, unsigned int height)
+{
+    mViewer->getCamera()->setViewport(0,0,width,height);
+
+    double fovy, aspect, zNear, zFar;
+
+    mViewer->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+    mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, width / ((double) height), zNear, zFar);
 }
 
 void OSGRenderer::debugClick(unsigned int x, unsigned int y)
