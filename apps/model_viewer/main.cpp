@@ -157,7 +157,14 @@ std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysic
     int entityID = world->pointCollision(pos);
 
     if (entityID >= 0)
-        result += entityManager->getEntityById(entityID)->toString();
+    {
+        MFGame::SpatialEntity *e = entityManager->getEntityById(entityID);
+
+        if (e)
+            result += e->toString();
+        else
+            result += "none";
+    }
     else
         result += "none";
 
@@ -354,8 +361,13 @@ int main(int argc, char** argv)
 
                 if (selectedId >= 0 && selectedId != lastSelectedEntity)
                 {
-                    std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
-                    lastSelectedEntity = selectedId;
+                    MFGame::SpatialEntity *e = entityManager.getEntityById(selectedId);
+
+                    if (e)
+                    {
+                        std::cout << "selected entity: " << e->toString() << std::endl;
+                        lastSelectedEntity = selectedId;
+                    }
                 }
 
                 if (cameraInfo || collisionInfo)
