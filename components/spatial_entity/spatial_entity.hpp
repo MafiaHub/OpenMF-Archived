@@ -51,10 +51,7 @@ public:
 
     static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
     static IDManager *getIDManager() 
-    { 
-        if (sIDManager.get() == nullptr)
-            sIDManager = std::make_shared<BackingIDManager>();
-
+    {
         return sIDManager.get(); 
     }
 
@@ -66,14 +63,12 @@ protected:
     std::string mName;
     bool mReady;
     Id mId;
-
-private:
     static std::shared_ptr<IDManager> sIDManager;
 };
 
 SpatialEntity::SpatialEntity()
 {
-    mId = getIDManager()->allocate();
+    mId = sIDManager->allocate();
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
@@ -81,10 +76,10 @@ SpatialEntity::SpatialEntity()
 
 SpatialEntity::~SpatialEntity()
 {
-    getIDManager()->deallocate(mId);
+    sIDManager->deallocate(mId);
 }
 
-std::shared_ptr<IDManager> SpatialEntity::sIDManager;
+std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<BackingIDManager>();
 
 }
 #endif
