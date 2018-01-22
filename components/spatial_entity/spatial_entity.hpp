@@ -58,7 +58,7 @@ public:
         return sIDManager.get(); 
     }
 
-  protected:
+protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
@@ -66,6 +66,8 @@ public:
     std::string mName;
     bool mReady;
     Id mId;
+
+private:
     static std::shared_ptr<IDManager> sIDManager;
 };
 
