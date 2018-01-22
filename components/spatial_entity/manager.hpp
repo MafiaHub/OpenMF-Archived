@@ -107,6 +107,7 @@ void SpatialEntityManager::removeEntity(Id ident)
     }
 
     mEntities[ident.Value].reset();
+    mEntities.erase(ident.Value);
     mNumEntities--;
 }
 
