@@ -36,8 +36,8 @@ public:
         }
 
         virtual btScalar addSingleResult(btManifoldPoint& cp,
-            const btCollisionObjectWrapper* colObj0,int partId0,int index0,
-            const btCollisionObjectWrapper* colObj1,int partId1,int index1) override
+            const btCollisionObjectWrapper* colObj0,int /* partId0 */,int /* index0 */,
+            const btCollisionObjectWrapper* colObj1,int /* partId1 */,int /* index1 */) override
         {
             const btCollisionObjectWrapper *colObj = colObj0->getCollisionObject() == mBody ? colObj1 : colObj0;
             mResult = colObj->getCollisionObject();

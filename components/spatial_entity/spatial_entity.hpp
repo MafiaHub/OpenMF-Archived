@@ -62,7 +62,7 @@ protected:
 
 SpatialEntity::SpatialEntity()
 {
-    mId = (INT_MAX << 32) | INT_MAX;
+    mId = ((uint64_t)INT32_MAX << 32) | INT32_MAX;
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;

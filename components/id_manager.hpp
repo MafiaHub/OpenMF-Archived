@@ -15,7 +15,8 @@ typedef union _Id
 {
     _Id() 
     {
-        this->Value = (INT_MAX << 32) | INT_MAX;
+        this->Index      = INT32_MAX;
+        this->Generation = INT32_MAX;
     }
 
     _Id(uint32_t index, uint32_t generation)

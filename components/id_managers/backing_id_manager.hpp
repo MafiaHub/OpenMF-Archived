@@ -71,7 +71,7 @@ Id BackingIDManager::allocate()
     Id id(mIndices.size(), 0);
     mIndices.push_back(id);
 
-    if (id.Index == INT_MAX)
+    if (id.Index == INT32_MAX)
     {
         MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
         return NullId;
