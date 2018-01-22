@@ -7,6 +7,7 @@
 #include <4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
+#include <bullet_utils.hpp>
 
 #define BULLET_PHYSICS_WORLD_MODULE_STR "physics world"
 
@@ -20,7 +21,7 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-    virtual int pointCollision(double x, double y, double z) override;
+    virtual MFGame::Id pointCollision(double x, double y, double z) override;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
@@ -89,7 +90,7 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mPairCache;
 }
 
-int BulletPhysicsWorld::pointCollision(double x, double y, double z)
+MFGame::Id BulletPhysicsWorld::pointCollision(double x, double y, double z)
 {
     btCollisionShape* sphere = new btSphereShape(0.01);  // can't make a point, so make a small sphere
     btRigidBody::btRigidBodyConstructionInfo ci(0,0,sphere,btVector3(0,0,0));
@@ -104,14 +105,14 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
     delete sphere;
 
     if (cb.mResult)
-        return cb.mResult->getUserIndex();
+        return MFUtil::getCollisionObjectEntityId(cb.mResult);
 
-    return -1;
+    return MFGame::NullId;
 }
 
 void BulletPhysicsWorld::frame(double dt)
 {
-    mWorld->stepSimulation(dt,1);     // TODO: number of steps?
+    mWorld->stepSimulation(dt,1);
 }
 
 void BulletPhysicsWorld::getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max)

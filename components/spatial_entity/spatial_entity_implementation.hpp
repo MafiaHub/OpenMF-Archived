@@ -231,7 +231,7 @@ void SpatialEntityImplementation::ready()
 
     if (mBulletBody)
     {
-        mBulletBody->setUserIndex(mId.Value);
+        MFUtil::setRigidBodyEntityId(mBulletBody.get(), mId);
         mBulletInitialTransform = mBulletBody->getWorldTransform();
         makePhysicsDebugOSGNode();
     }

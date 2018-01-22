@@ -59,9 +59,9 @@ std::string getCollisionString(MFRender::MFRenderer *renderer, MFPhysics::MFPhys
     double cam[6];
     renderer->getCameraPositionRotation(cam[0],cam[1],cam[2],cam[3],cam[4],cam[5]);
 
-    int entityID = world->pointCollision(cam[0],cam[1],cam[2]);
+    MFGame::Id entityID = world->pointCollision(cam[0],cam[1],cam[2]);
 
-    if (entityID >= 0)
+    if (entityID != MFGame::NullId)
         result += entityManager->getEntityById(entityID)->toString();
     else
         result += "none";
