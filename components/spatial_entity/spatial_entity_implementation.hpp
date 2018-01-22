@@ -16,6 +16,7 @@ class SpatialEntityImplementation: public SpatialEntity
 {
 public:
     SpatialEntityImplementation();
+    ~SpatialEntityImplementation();
     virtual void update(double dt) override;
     virtual void ready() override;
     virtual void move(MFMath::Vec3 destPosition) override;
@@ -189,6 +190,11 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
     mOSGNode = 0;
     mBulletBody = 0;
     mBulletMotionState = 0;
+}
+
+SpatialEntityImplementation::~SpatialEntityImplementation()
+{
+    
 }
 
 void SpatialEntityImplementation::update(double dt)

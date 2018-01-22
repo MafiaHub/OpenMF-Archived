@@ -17,7 +17,7 @@ class SpatialEntity
 {
 public:
     SpatialEntity();
-    virtual ~SpatialEntity();
+    ~SpatialEntity();
 
     virtual void update(double dt)=0;
 
