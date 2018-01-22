@@ -153,18 +153,10 @@ std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysic
     std::string result = "collision: ";
 
     MFMath::Vec3 pos = renderer->getCameraPosition();
+    MFGame::Id entityID = world->pointCollision(pos);
 
-    int entityID = world->pointCollision(pos);
-
-    if (entityID >= 0)
-    {
-        MFGame::SpatialEntity *e = entityManager->getEntityById(entityID);
-
-        if (e)
-            result += e->toString();
-        else
-            result += "none";
-    }
+    if (entityID != MFGame::NullId)
+        result += entityManager->getEntityById(entityID)->toString();
     else
         result += "none";
 

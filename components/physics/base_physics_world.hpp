@@ -21,7 +21,7 @@ public:
     /**
       Perform collision query on given point in the world, return colliding entity ID or -1.
     */
-    virtual int pointCollision(MFMath::Vec3 position)=0;
+    virtual MFGame::Id pointCollision(MFMath::Vec3 position)=0;
 };
 
 }

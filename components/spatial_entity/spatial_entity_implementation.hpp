@@ -16,6 +16,7 @@ class SpatialEntityImplementation: public SpatialEntity
 {
 public:
     SpatialEntityImplementation();
+    ~SpatialEntityImplementation();
     virtual void update(double dt) override;
     virtual void ready() override;
     virtual void move(MFMath::Vec3 destPosition) override;
@@ -191,6 +192,11 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
     mBulletMotionState = 0;
 }
 
+SpatialEntityImplementation::~SpatialEntityImplementation()
+{
+    
+}
+
 void SpatialEntityImplementation::update(double dt)
 {
     // TODO: make use of MotionState to see if the transform has to be updated
@@ -207,7 +213,7 @@ std::string SpatialEntityImplementation::toString()
     int hasOSG = mOSGNode != 0;
     int hasBullet = mBulletBody != 0;
 
-    return "\"" + mName + "\", ID: " + std::to_string(mId) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
+    return "\"" + mName + "\", ID: " + std::to_string(mId.Value) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
 void SpatialEntityImplementation::ready()
@@ -218,14 +224,15 @@ void SpatialEntityImplementation::ready()
     {
         mOSGInitialTransform = mOSGNode->getMatrix();
 
-        osg::ref_ptr<MFUtil::UserIntData> intData = new MFUtil::UserIntData(mId);
+        osg::ref_ptr<MFUtil::UserIntData> intData = new MFUtil::UserIntData(mId.Value);
         MFUtil::AssignUserDataVisitor v(intData.get());
         mOSGNode->accept(v);
     }
 
     if (mBulletBody)
     {
-        mBulletBody->setUserIndex(mId);
+        MFUtil::setRigidBodyEntityId(mBulletBody.get(), mId);
+
         mBulletInitialTransform = mBulletBody->getWorldTransform();
         makePhysicsDebugOSGNode();
     }

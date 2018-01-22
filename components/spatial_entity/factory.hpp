@@ -86,8 +86,8 @@ MFGame::Id SpatialEntityFactory::createEntity(
     newEntity->setPhysicsBody(physicsBody);
     newEntity->setPhysicsMotionState(physicsMotionsState);
     newEntity->ready();
-    auto newId = mEntityManager->addEntity(newEntity);
-    return newId;
+    mEntityManager->addEntity(newEntity);
+    return newEntity->getId();
 }
 
 MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
