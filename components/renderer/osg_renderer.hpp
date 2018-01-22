@@ -275,6 +275,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     else
     {
         // TODO: implement this
+        orthoSize;
     }
 }
 
@@ -439,7 +440,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame(double dt)
+void OSGRenderer::frame(double /* dt */)
 {
     if (mViewer->done() || mDone)
     {

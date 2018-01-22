@@ -153,7 +153,7 @@ public:
         osgUtil::IntersectionVisitor::apply(transform);
     }
 
-    virtual void apply(osg::Transform& transform) override
+    virtual void apply(osg::Transform& /* transform */) override
     {
         return;
     }

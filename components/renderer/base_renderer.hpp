@@ -30,7 +30,7 @@ public:
 
     MFMath::Vec3 getCameraPosition() { MFMath::Vec3 p,r; getCameraPositionRotation(p,r); return p; };
 
-protected:
+  protected:
     bool mDone;
 };
 
