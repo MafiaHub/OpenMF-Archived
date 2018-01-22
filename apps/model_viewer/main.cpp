@@ -15,7 +15,21 @@
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
-#define UPDATE_TIME 1.0/60.0f
+// TODO: Introduce Platform class and store it there?
+static bool sIsRunning = true;
+
+// TODO: Replace with configurable value
+#define MS_PER_UPDATE 1 / 60.0f
+
+// TODO move this to Platform class
+#include <chrono>
+#include <thread>
+double timeGet()
+{
+    static auto epoch = std::chrono::high_resolution_clock::now();
+
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
+}
 
 class RightButtonCallback: public MFInput::ButtonInputCallback
 {
@@ -309,47 +323,76 @@ int main(int argc, char** argv)
         if (!renderer.exportScene(exportFileName))
             return 1;
     }
+
+    // TODO Simplify this code
     else
     {
-        while (!inputManager.windowClosed())    // main loop
+        double lastTime = timeGet();
+        double extraTime = 0.0f;
+
+        while (sIsRunning)
         {
-            double dt = 1 / 60.0;
+            if (inputManager.windowClosed())
+                sIsRunning = false;
+          
+            bool render = false;
+            double startTime = timeGet();
+            double passedTime = startTime - lastTime;
+            lastTime = startTime;
+            extraTime += passedTime;
 
-            int selectedId = renderer.getSelectedEntityId();
-
-            if (selectedId >= 0 && selectedId != lastSelectedEntity)
+            while (extraTime > MS_PER_UPDATE)
             {
-                std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
-                lastSelectedEntity = selectedId;
-            }
+                int selectedId = renderer.getSelectedEntityId();
 
-            if (cameraInfo || collisionInfo)
-            {
-                if (infoCounter <= 0)
+                if (selectedId >= 0 && selectedId != lastSelectedEntity)
                 {
-                    if (cameraInfo)
-                        std::cout << "camera: " + getCameraString(&renderer) << std::endl;
-
-                    if (collisionInfo)
-                        std::cout << getCollisionString(&renderer,&physicsWorld,&entityManager) << std::endl;
-
-                    infoCounter = 30;
+                    std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
+                    lastSelectedEntity = selectedId;
                 }
 
-                infoCounter--;
+                if (cameraInfo || collisionInfo)
+                {
+                    if (infoCounter <= 0)
+                    {
+                        if (cameraInfo)
+                            std::cout << "camera: " + getCameraString(&renderer) << std::endl;
+
+                        if (collisionInfo)
+                            std::cout << getCollisionString(&renderer, &physicsWorld, &entityManager) << std::endl;
+
+                        infoCounter = 30;
+                    }
+
+                    infoCounter--;
+                }
+
+                // TODO use UPDATE_TIME to make fixed-time-delta loop
+
+                entityManager.update(MS_PER_UPDATE);
+
+                if (simulatePhysics)
+                    physicsWorld.frame(MS_PER_UPDATE);
+              
+                render = true;
+                extraTime -= MS_PER_UPDATE;
             }
 
-            // TODO use UPDATE_TIME to make fixed-time-delta loop
-
-            entityManager.update(dt);
-
-            if (simulatePhysics)
-                physicsWorld.frame(dt);
-
-            renderer.frame(dt);
-
             inputManager.processEvents();
-            cameraController.update(dt);
+              
+            if (render)
+            {
+                renderer.frame(MS_PER_UPDATE); // TODO: Use actual delta time
+                cameraController.update(MS_PER_UPDATE);
+              
+                if (renderer.done())
+                    sIsRunning = false;
+            }
+            else
+            {
+                // Let OS do background work while we wait.
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
         }
     }
 

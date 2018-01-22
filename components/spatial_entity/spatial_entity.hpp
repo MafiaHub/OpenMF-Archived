@@ -15,7 +15,7 @@ namespace MFGame
 class SpatialEntity
 {
 public:
-    typedef unsigned int Id;
+    typedef uint64_t Id;
 
     SpatialEntity();
 
@@ -43,13 +43,12 @@ public:
     std::string getName()                               { return mName;         };
     bool isRead()                                       { return mReady;        };
     Id getId()                                          { return mId;           };
+    void setId(Id ident)                                { mId = ident;          };
 
     /**
     Moves the entity from current to dest position, checking for collisions.
     */
     virtual void move(MFMath::Vec3 destPosition)=0;
-
-    static Id sNextId;
 
 protected:
     MFMath::Vec3 mPosition;
@@ -61,12 +60,9 @@ protected:
     Id mId;
 };
 
-SpatialEntity::Id SpatialEntity::sNextId = 0;
-
 SpatialEntity::SpatialEntity()
 {
-    mId = sNextId;
-    sNextId++;
+    mId = (INT_MAX << 32) | INT_MAX;
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;

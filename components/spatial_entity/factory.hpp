@@ -16,17 +16,17 @@ public:
     SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
     void createMissionEntities();
 
-    SpatialEntity::Id createEntity(
+    MFGame::Id createEntity(
         osg::MatrixTransform *graphicNode,
         std::shared_ptr<btRigidBody> physicsBody=0,
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="");
 
-    SpatialEntity::Id createTestBallEntity();
-    SpatialEntity::Id createTestBoxEntity();
+    MFGame::Id createTestBallEntity();
+    MFGame::Id createTestBoxEntity();
 
 protected:
-    SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+    MFGame::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
 
     MFGame::SpatialEntityManager *mEntityManager;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
@@ -70,7 +70,7 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 }
 
-SpatialEntity::Id SpatialEntityFactory::createEntity(
+MFGame::Id SpatialEntityFactory::createEntity(
     osg::MatrixTransform *graphicNode,
     std::shared_ptr<btRigidBody> physicsBody,
     std::shared_ptr<btDefaultMotionState> physicsMotionsState, 
@@ -86,11 +86,11 @@ SpatialEntity::Id SpatialEntityFactory::createEntity(
     newEntity->setPhysicsBody(physicsBody);
     newEntity->setPhysicsMotionState(physicsMotionsState);
     newEntity->ready();
-    mEntityManager->addEntity(newEntity);
-    return newEntity->getId();
+    auto newId = mEntityManager->addEntity(newEntity);
+    return newId;
 }
 
-SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
+MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
 {
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     visualTransform->addChild(visualNode);
@@ -110,12 +110,12 @@ SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
 }
 
-SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
+MFGame::Id SpatialEntityFactory::createTestBallEntity()
 {
     return createTestShapeEntity(mTestPhysicalSphereShape.get(),mTestSphereNode.get());
 }
 
-SpatialEntity::Id SpatialEntityFactory::createTestBoxEntity()
+MFGame::Id SpatialEntityFactory::createTestBoxEntity()
 {
     return createTestShapeEntity(mTestPhysicalBoxShape.get(),mTestBoxNode.get());
 }
