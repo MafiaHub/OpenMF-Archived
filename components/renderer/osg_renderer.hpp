@@ -286,7 +286,6 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     else
     {
         // TODO: implement this
-        orthoSize;
     }
 }
 
