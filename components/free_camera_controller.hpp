@@ -13,7 +13,8 @@ public:
     FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual void update(double dt) override;
 
-    void setSpeed(double speed) { mSpeed = speed; };
+    void setSpeed(double speed)         { mSpeed = speed;         };
+    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
 
 protected:
     double mSpeed;
@@ -24,6 +25,14 @@ protected:
 
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mRotation;    // Euler angles
+
+    unsigned int mKeyForward;
+    unsigned int mKeyBackward;
+    unsigned int mKeyRight;
+    unsigned int mKeyLeft;
+    unsigned int mKeyUp;
+    unsigned int mKeyDown;
+    unsigned int mKeySpeedup;
 };
 
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
@@ -37,6 +46,16 @@ FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput
     mRotation = MFMath::Vec3(0,0,0);
 
     mInitTransform = true;
+
+    // default key binding:
+
+    mKeyForward  = SDL_SCANCODE_W;
+    mKeyBackward = SDL_SCANCODE_S;
+    mKeyRight    = SDL_SCANCODE_D; 
+    mKeyLeft     = SDL_SCANCODE_A;
+    mKeyUp       = SDL_SCANCODE_E;
+    mKeyDown     = SDL_SCANCODE_Q;
+    mKeySpeedup  = SDL_SCANCODE_LSHIFT;
 }
 
 void FreeCameraController::update(double dt)
@@ -54,27 +73,25 @@ void FreeCameraController::update(double dt)
     double distance = dt * mSpeed;
     MFMath::Vec3 direction = MFMath::Vec3(0,0,0);
 
-    // TODO: un-hardcode keys
-
-    if (mInputManager->keyPressed(225))
+    if (mInputManager->keyPressed(mKeySpeedup))
         distance *= 5.0;
 
-    if (mInputManager->keyPressed(26))
-        direction.y -= 1.0;
-
-    if (mInputManager->keyPressed(22))
+    if (mInputManager->keyPressed(mKeyForward))
         direction.y += 1.0;
 
-    if (mInputManager->keyPressed(4))
-        direction.x -= 1.0;
+    if (mInputManager->keyPressed(mKeyBackward))
+        direction.y -= 1.0;
 
-    if (mInputManager->keyPressed(7))
+    if (mInputManager->keyPressed(mKeyRight))
         direction.x += 1.0;
 
-    if (mInputManager->keyPressed(8))
+    if (mInputManager->keyPressed(mKeyLeft))
+        direction.x -= 1.0;
+
+    if (mInputManager->keyPressed(mKeyUp))
         direction.z += 1.0;
 
-    if (mInputManager->keyPressed(20))
+    if (mInputManager->keyPressed(mKeyDown))
         direction.z -= 1.0;
 
     direction = direction * ((float) distance);
@@ -84,10 +101,10 @@ void FreeCameraController::update(double dt)
 
     MFMath::Vec3 offset, rotOffset;
 
-    offset = direction.x * r + direction.z * f + direction.y * u;
+    offset = direction.x * r + direction.y * f + direction.z * u;
     rotOffset = MFMath::Vec3(0,0,0);
 
-    if (mInputManager->mouseButtonPressed(1))   // rotation
+    if (mInputManager->mouseButtonPressed(1))  // rotation
     {
         unsigned int windowW, windowH;
         mInputManager->getWindowSize(windowW,windowH);

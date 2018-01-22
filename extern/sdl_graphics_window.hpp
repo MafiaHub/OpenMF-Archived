@@ -285,4 +285,4 @@ void GraphicsWindowSDL2::raiseWindow()
 
 }
 
-#endif /* OSGGRAPHICSWINDOW_H */
+#endif

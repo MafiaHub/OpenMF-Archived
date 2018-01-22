@@ -150,7 +150,9 @@ void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMa
 {
     osg::Vec3f f,r,u;
 
-    MFUtil::rotationToVectors(mViewer->getCamera()->getInverseViewMatrix().getRotate(),f,r,u);
+    osg::Matrixd cameraMat = mViewer->getCamera()->getInverseViewMatrix();
+    cameraMat.preMultRotate(osg::Quat(-osg::PI / 2.0,osg::Vec3f(1,0,0)));   // camera is looking down by default, fix that
+    MFUtil::rotationToVectors(cameraMat.getRotate(),f,r,u);
 
     forw  = MFMath::Vec3(f.x(),f.y(),f.z());
     right = MFMath::Vec3(r.x(),r.y(),r.z());

@@ -61,11 +61,11 @@ public:
 
             MFMath::Vec3 f,r,u;
             mRenderer->getCameraVectors(f,r,u);
-            MFMath::Vec3 dir = u;
+            MFMath::Vec3 dir = f;
 
-            const double speed = -10.0;
+            const float speed = 10.0;
 
-            dir = MFMath::Vec3(dir.x * speed, dir.y * speed, dir.z * speed);
+            dir *= speed;
 
             e->setVelocity(dir);
         }
