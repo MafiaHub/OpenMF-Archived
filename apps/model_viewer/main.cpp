@@ -55,10 +55,10 @@ protected:
     MFInput::InputManager *mInputManager;
 };
 
-class SpaceKeyCallback: public MFInput::KeyInputCallback
+class KeyCallback: public MFInput::KeyInputCallback
 {
 public:
-    SpaceKeyCallback(MFGame::SpatialEntityFactory *entityFactory, MFGame::SpatialEntityManager *entityManager, MFRender::Renderer *renderer): MFInput::KeyInputCallback()
+    KeyCallback(MFGame::SpatialEntityFactory *entityFactory, MFGame::SpatialEntityManager *entityManager, MFRender::Renderer *renderer): MFInput::KeyInputCallback()
     {
         mEntityFactory = entityFactory;
         mEntityManager = entityManager;
@@ -68,7 +68,10 @@ public:
 
     virtual void call(bool down, unsigned int keyCode) override
     {
-        if (keyCode == 44 && down)
+        if (!down)
+            return;
+
+        if (keyCode == 44)      // SPACE
         {
             MFGame::SpatialEntity *e = mEntityManager->getEntityById(
                 mCounter % 2 == 0 ?
@@ -83,6 +86,10 @@ public:
             e->setPosition(mRenderer->getCameraPosition() + f * 2.0f);
             e->setVelocity(f * speed);
             mCounter++;
+        }
+        else if (keyCode == 60)  // F3
+        {
+            mRenderer->showProfiler();
         }
     }
 
@@ -150,7 +157,14 @@ std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysic
     int entityID = world->pointCollision(pos);
 
     if (entityID >= 0)
-        result += entityManager->getEntityById(entityID)->toString();
+    {
+        MFGame::SpatialEntity *e = entityManager->getEntityById(entityID);
+
+        if (e)
+            result += e->toString();
+        else
+            result += "none";
+    }
     else
         result += "none";
 
@@ -280,7 +294,7 @@ int main(int argc, char** argv)
 
     if (simulatePhysics)
     {
-        std::shared_ptr<SpaceKeyCallback> skcb = std::make_shared<SpaceKeyCallback>(&entityFactory,&entityManager,&renderer);
+        std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
         inputManager.addKeyCallback(skcb);
     }
 
@@ -347,8 +361,13 @@ int main(int argc, char** argv)
 
                 if (selectedId >= 0 && selectedId != lastSelectedEntity)
                 {
-                    std::cout << "selected entity: " << entityManager.getEntityById(selectedId)->toString() << std::endl;
-                    lastSelectedEntity = selectedId;
+                    MFGame::SpatialEntity *e = entityManager.getEntityById(selectedId);
+
+                    if (e)
+                    {
+                        std::cout << "selected entity: " << e->toString() << std::endl;
+                        lastSelectedEntity = selectedId;
+                    }
                 }
 
                 if (cameraInfo || collisionInfo)
