@@ -41,7 +41,7 @@ public:
     virtual bool hasCollision()=0;
     void setName(std::string name)                      { mName = name;         };
     std::string getName()                               { return mName;         };
-    bool isRead()                                       { return mReady;        };
+    bool isReady()                                      { return mReady;        };
     Id getId()                                          { return mId;           };
     
     /**
