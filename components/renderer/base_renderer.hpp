@@ -27,6 +27,7 @@ public:
     */
     virtual void debugClick(unsigned int x, unsigned int y)=0;
     virtual int  getSelectedEntityId()=0;
+    virtual void showProfiler()=0;
 
     MFMath::Vec3 getCameraPosition() { MFMath::Vec3 p,r; getCameraPositionRotation(p,r); return p; };
 

@@ -40,6 +40,7 @@ public:
     virtual bool exportScene(std::string fileName) override;
     virtual void debugClick(unsigned int x, unsigned int y) override;
     virtual int  getSelectedEntityId() override;
+    virtual void showProfiler() override;
 
     /**
       Sets a custom viewer window to display the rendering. Do not use this if setUpInWindow is called.
@@ -69,7 +70,18 @@ protected:
     osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
     osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection
     osg::ref_ptr<osg::Material> mMaterialBackup;
+
+    osg::ref_ptr<osgViewer::StatsHandler> mStatsHandler;
 };
+
+void OSGRenderer::showProfiler()
+{
+    // hack: simulate the key press
+    osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter;
+    event->setEventType(osgGA::GUIEventAdapter::KEYDOWN);
+    event->setKey(osgGA::GUIEventAdapter::KEY_F3);
+    mStatsHandler->handle(*(event.get()),*(mViewer.get()));
+}
 
 void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
 {
@@ -231,10 +243,9 @@ OSGRenderer::OSGRenderer(): Renderer()
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
-    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
-    statshandler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F4);
-    mViewer->addEventHandler(statshandler);
+    mStatsHandler = new osgViewer::StatsHandler;
+    mStatsHandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
+    mViewer->addEventHandler(mStatsHandler);
 
     mRootNode = new osg::Group();
     mRootNode->setName("root");
