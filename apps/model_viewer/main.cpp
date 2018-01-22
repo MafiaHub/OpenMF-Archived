@@ -56,19 +56,18 @@ public:
     {
         if (keyCode == 44 && down)
         {
-            MFGame::SpatialEntity::Id id = mCounter % 2 == 0 ?
-                mEntityFactory->createTestBallEntity() :
-                mEntityFactory->createTestBoxEntity();
-            MFGame::SpatialEntity *e = mEntityManager->getEntityById(id);
+            MFGame::SpatialEntity *e = mEntityManager->getEntityById(
+                mCounter % 2 == 0 ?
+                    mEntityFactory->createTestBallEntity() :
+                    mEntityFactory->createTestBoxEntity());
 
             MFMath::Vec3 f,r,u;
             mRenderer->getCameraVectors(f,r,u);
-            MFMath::Vec3 dir = f;
 
             const float speed = 10.0;
 
-            e->setPosition(mRenderer->getCameraPosition() + dir * 2.0f);
-            e->setVelocity(dir * speed);
+            e->setPosition(mRenderer->getCameraPosition() + f * 2.0f);
+            e->setVelocity(f * speed);
             mCounter++;
         }
     }
