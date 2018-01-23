@@ -301,6 +301,30 @@ int main(int argc, char** argv)
 
     std::unique_ptr<MFGame::CameraController> cameraController;
 
+
+    if (model)
+    {
+        renderer.loadSingleModel(inputFile);
+    }
+    else
+    {
+        renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+
+        if (loadTreeKlz)
+            physicsWorld.loadMission(inputFile);
+
+        entityFactory.createMissionEntities();
+    }
+
+    renderer.setCameraParameters(true,fov,0,0.25,2000);
+    
+    if (cameraPlace)
+    {
+        double cam[6];
+        parseCameraString(arguments["p"].as<std::string>(),cam);
+        renderer.setCameraPositionRotation(MFMath::Vec3(cam[0],cam[1],cam[2]),MFMath::Vec3(cam[3],cam[4],cam[5]));
+    }
+
     if (cameraRigid)
     {
         auto cameraEntity = entityFactory.createCameraEntity(renderer.getViewer()->getCamera());
@@ -320,29 +344,6 @@ int main(int argc, char** argv)
     }
     
     cameraController->setSpeed(cameraSpeed);
-
-    if (model)
-    {
-        renderer.loadSingleModel(inputFile);
-    }
-    else
-    {
-        renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
-
-        if (loadTreeKlz)
-            physicsWorld.loadMission(inputFile);
-
-        entityFactory.createMissionEntities();
-    }
-
-    renderer.setCameraParameters(true,fov,0,0.25,2000);
-
-    if (cameraPlace)
-    {
-        double cam[6];
-        parseCameraString(arguments["p"].as<std::string>(),cam);
-        renderer.setCameraPositionRotation(MFMath::Vec3(cam[0],cam[1],cam[2]),MFMath::Vec3(cam[3],cam[4],cam[5]));
-    }
 
     int lastSelectedEntity = -1;
     int infoCounter = 0;

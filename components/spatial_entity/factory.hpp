@@ -45,6 +45,7 @@ protected:
     osg::ref_ptr<osg::Shape> mTestVisualBoxShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
+    std::shared_ptr<btCollisionShape> mCameraShape;
 
     bool mDebugMode;
 };
@@ -75,6 +76,8 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
     mTestBoxNode->setStateSet(mTestStateSet);
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
+
+    mCameraShape = std::make_shared<btSphereShape>(1.0f);
 }
 
 MFGame::Id SpatialEntityFactory::createEntity(
@@ -101,7 +104,6 @@ MFGame::Id SpatialEntityFactory::createEntity(
 MFGame::Id SpatialEntityFactory::createCameraEntity(osg::Camera *camera)
 {
     MFUtil::FullRigidBody body;
-    body.mShape = std::make_shared<btSphereShape>(1.0f);
 
     btScalar mass = 1.0f;
     body.mMotionState = std::make_shared<btDefaultMotionState>(
@@ -109,17 +111,17 @@ MFGame::Id SpatialEntityFactory::createCameraEntity(osg::Camera *camera)
         btVector3(0,0,0)));
 
     btVector3 inertia;
-    body.mShape->calculateLocalInertia(mass, inertia);
-    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), body.mShape.get(), inertia);
+    mCameraShape->calculateLocalInertia(mass, inertia);
+    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mCameraShape.get(), inertia);
     body.mBody->setActivationState(DISABLE_DEACTIVATION);
     body.mBody->setAngularFactor(0);
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
     body.mBody->setGravity(btVector3(0, 0, 0));
 
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
-    visualTransform->addChild(camera);
+    mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform, body.mBody, body.mMotionState);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera");
 }
 
 MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)

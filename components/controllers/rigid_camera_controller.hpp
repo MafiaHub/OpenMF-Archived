@@ -146,7 +146,7 @@ void RigidCameraController::update(double dt)
 
     mRotation.y = std::max(0.0f,std::min(MFMath::PI - 0.001f,mRotation.y));
 
-    //mRenderer->setCameraPositionRotation(mCameraE,mRotation);
+    mRenderer->setCameraPositionRotation(mCameraEntity->getPosition(),mRotation);
 }
 
 }
