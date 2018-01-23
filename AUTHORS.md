@@ -9,6 +9,7 @@
 # contributors
 
 - Pavel V. (RoadTrain)
+- Vladyslav Hrytsenko (inlife)
 
 # special thanks
 
