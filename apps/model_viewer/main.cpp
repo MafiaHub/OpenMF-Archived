@@ -18,6 +18,9 @@
 // TODO: Introduce Platform class and store it there?
 static bool sIsRunning = true;
 
+// HACK: Deal with this differently
+static bool sSimulatePhysics = false;
+
 // TODO: Replace with configurable value
 #define MS_PER_UPDATE 1 / 60.0f
 
@@ -71,7 +74,7 @@ public:
         if (!down)
             return;
 
-        if (keyCode == 44)      // SPACE
+        if (sSimulatePhysics && keyCode == SDL_SCANCODE_SPACE)      // SPACE
         {
             MFGame::SpatialEntity *e = mEntityManager->getEntityById(
                 mCounter % 2 == 0 ?
@@ -87,7 +90,7 @@ public:
             e->setVelocity(f * speed);
             mCounter++;
         }
-        else if (keyCode == 60)  // F3
+        else if (keyCode == SDL_SCANCODE_F3) // F3
         {
             mRenderer->showProfiler();
         }
@@ -211,7 +214,7 @@ int main(int argc, char** argv)
     bool collisionInfo = arguments.count("C") > 0;
     bool cameraPlace = arguments.count("p") > 0;
     bool model = arguments.count("4") > 0;
-    bool simulatePhysics = arguments.count("P") > 0;
+    sSimulatePhysics = arguments.count("P") > 0;
     std::string exportFileName;
 
     if (arguments.count("e") > 0)
@@ -284,11 +287,8 @@ int main(int argc, char** argv)
     std::shared_ptr<WindowResizeCallback> wrcb = std::make_shared<WindowResizeCallback>(&renderer);
     inputManager.addWindowResizeCallback(wrcb);
 
-    if (simulatePhysics)
-    {
-        std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
-        inputManager.addKeyCallback(skcb);
-    }
+    std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
+    inputManager.addKeyCallback(skcb);
 
     MFGame::FreeCameraController cameraController(&renderer,&inputManager);
     cameraController.setSpeed(cameraSpeed);
@@ -384,7 +384,7 @@ int main(int argc, char** argv)
                 entityManager.update(MS_PER_UPDATE);
                 cameraController.update(MS_PER_UPDATE);
 
-                if (simulatePhysics)
+                if (sSimulatePhysics)
                     physicsWorld.frame(MS_PER_UPDATE);
               
                 render = true;

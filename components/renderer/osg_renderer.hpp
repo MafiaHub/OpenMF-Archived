@@ -450,7 +450,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame(double /* dt */)
+void OSGRenderer::frame(double dt)
 {
     if (mViewer->done() || mDone)
     {
@@ -458,7 +458,7 @@ void OSGRenderer::frame(double /* dt */)
     }
     else
     {
-        mViewer->advance(0.1);
+        mViewer->advance(dt);
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
