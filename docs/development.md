@@ -13,7 +13,7 @@ required libraries:
 | ------------------------------------------------ | ------- |
 | [OpenSceneGraph](http://www.openscenegraph.org/) | 3.4.1   |
 | [Bullet3](http://bulletphysics.org/wordpress/)   | 2.88    |
-| [SDL2](https://www.libsdl.org/)                  | 2.0.7   |
+| [SDL2](https://www.libsdl.org/)                  | 2.0.0   |
 
 build targets: (`GAME`, `VIEWER`, `UTILS`, `TESTS`)
 
