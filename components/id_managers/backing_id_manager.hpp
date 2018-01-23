@@ -7,7 +7,7 @@ namespace MFGame
 class BackingIDManager : public IDManager
 {
   public:
-    virtual uint32_t getSlot(Id ident) override;
+    virtual uint16_t getSlot(Id ident) override;
     virtual bool isValid(Id ident) override;
 
     virtual Id allocate() override;
@@ -40,7 +40,7 @@ Id *BackingIDManager::getHandle(Id ident, bool warn)
     return id;
 }
 
-uint32_t BackingIDManager::getSlot(Id ident)
+uint16_t BackingIDManager::getSlot(Id ident)
 {
     auto id = getHandle(ident);
 
@@ -71,7 +71,7 @@ Id BackingIDManager::allocate()
     Id id(mIndices.size(), 0);
     mIndices.push_back(id);
 
-    if (id.mIndex == INT32_MAX)
+    if (id.mIndex == INT16_MAX)
     {
         MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
         return NullId;

@@ -11,6 +11,7 @@ required libraries:
 
 - OpenSceneGraph, at least 3.4.1
 - Bullet Physics, at least 2.88
+- SDL2          , at least 2.0.0
 
 build targets: (`GAME`, `VIEWER`, `UTILS`, `TESTS`)
 

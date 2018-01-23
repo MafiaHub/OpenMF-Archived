@@ -15,26 +15,6 @@ inline btVector3 mafiaVec3ToBullet(double x, double y, double z)
     return btVector3(x,z,y); 
 }
 
-inline void setRigidBodyEntityId(btRigidBody *body, MFGame::Id ident)
-{
-    if (body == nullptr) 
-        return;
-
-    body->setUserIndex(ident.mIndex);
-    body->setUserIndex2(ident.mGeneration);
-}
-
-inline MFGame::Id getCollisionObjectEntityId(const btCollisionObject *body)
-{
-    if (body == nullptr)
-        return MFGame::NullId;
-
-    MFGame::Id ident;
-    ident.mIndex = body->getUserIndex();
-    ident.mGeneration = body->getUserIndex2();
-    return ident;
-}
-
 btTransform mafiaMat4ToBullet(MFMath::Mat4 m)
 {
     MFMath::Vec3 trans = m.getTranslation();

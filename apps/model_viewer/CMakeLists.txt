@@ -10,5 +10,4 @@ TARGET_LINK_LIBRARIES(viewer
     ${OSGGA_LIBRARIES}
     ${CMAKE_DL_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}
-    ${SDL2_LIBRARY}
-    /usr/lib/x86_64-linux-gnu/libSDL2.so)
+    ${SDL2_LIBRARIES})

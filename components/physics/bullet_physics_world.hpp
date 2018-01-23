@@ -105,7 +105,7 @@ MFGame::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
     delete sphere;
 
     if (cb.mResult)
-        return MFUtil::getCollisionObjectEntityId(cb.mResult);
+        return cb.mResult->getUserIndex();
 
     return MFGame::NullId;
 }
