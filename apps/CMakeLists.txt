@@ -1,6 +1,28 @@
-ADD_SUBDIRECTORY(game)
-ADD_SUBDIRECTORY(model_viewer)
-ADD_SUBDIRECTORY(format_utils)
+
+
+#
+# Build target options
+#
+
+IF (BUILD_GAME)
+	ADD_SUBDIRECTORY(game)
+ENDIF ()
+
+IF (BUILD_VIEWER)
+	ADD_SUBDIRECTORY(model_viewer)
+ENDIF ()
+
+IF (BUILD_UTILS)
+	ADD_SUBDIRECTORY(format_utils)
+ENDIF ()
+
+IF (BUILD_TESTS)
+	ADD_SUBDIRECTORY(tests)
+ENDIF ()
+
+#
+# Windows-related chunk
+#
 
 IF(WIN32)
     IF(MSVC)

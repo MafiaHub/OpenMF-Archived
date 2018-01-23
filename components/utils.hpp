@@ -7,6 +7,7 @@
 #include <iterator>
 #include <vector>
 #include <iomanip>
+#include <cstring>
 
 namespace MFUtil
 {

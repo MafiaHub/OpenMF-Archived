@@ -70,6 +70,10 @@
 
 */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wno-unused-variable"
+#pragma GCC diagnostic ignored "-Wno-unused-function"
+#pragma GCC diagnostic ignored "-Wno-variadic-macro"
 
 #ifndef ZPL_INCLUDE_ZPL_H
 #define ZPL_INCLUDE_ZPL_H
@@ -7735,5 +7739,7 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
+
+#pragma GCC diagnostic pop
 
 #endif // ZPL_IMPLEMENTATION

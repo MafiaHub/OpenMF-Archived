@@ -76,12 +76,18 @@ public:
         unsigned char mUnknown;    // different values for different collision types of objects
     } Properties;
 
+    typedef struct
+    {
+        uint16_t mIndex;
+        uint16_t mLink;            // index to link table, this will be the same for all three indices of one face
+    } FaceVertexIndex;
+
     #pragma pack(push, 1)
     typedef struct 
     {    
-        Properties mProperties; // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
-        uint32_t mIndices[3];   // NOTE(ASM): (Link (index into LinkNameOffsetTable) (16bit) | Index of vertex in mesh's vertex buffer (16 bit))					// plane the triangle lies in
-        Vec3 mNormal;           // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
+        Properties mProperties;        // NOTE(ASM): Material (8 bit) | Flags (8 bit) | SortInfo (8 bit) | 0 (8 bit)
+        FaceVertexIndex mIndices[3];   
+        MFMath::Vec3 mNormal;                  // NOTE(ASM): needs to point in opposite direction compared to the mesh face normal (IIRC!), i.e. if the mesh face normal is (1 0 0), the col face normal needs to be (-1 0 0)
         float mDistance;
     } FaceCol;
 
@@ -89,27 +95,26 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x81 (8 bit)
         uint32_t mLink;         // NOTE(ASM): index into LinkNameOffsetTable
-        Vec3 mMin;              // first point that defines the box in space
-        Vec3 mMax;              // second point that defines the box in space
+        MFMath::Vec3 mMin;              // first point that defines the box in space
+        MFMath::Vec3 mMax;              // second point that defines the box in space
     } AABBCol;                  // axis-aligned bounding box
 
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x80 (8 bit)
         uint32_t mLink;
-        // NOTE(ASM): AABB
-        Vec3 mMin;
-        Vec3 mMax;
-        Vec3 mExtends[2];
-        Mat4 mTransform;
-        Mat4 mInverseTransform;
-    } XTOBBCol;                 // oriented bounding box, more general version
+        MFMath::Vec3 mMin;              // precomputed AABB
+        MFMath::Vec3 mMax;
+        MFMath::Vec3 mExtends[2];       // BB corners to be transformed
+        MFMath::Mat4 mTransform;
+        MFMath::Mat4 mInverseTransform;
+    } XTOBBCol;                 // oriented bounding box, in addition to OBB has an additional precomputed AABB
 
     typedef struct 
     {    
         int32_t mProperties;    // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x84 (8 bit)
         uint32_t mLink;
-        Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
+        MFMath::Vec2 mPosition;         // NOTE(ASM): cylinders only have a 2d position!
         float mRadius;
     } CylinderCol;              // cylindrical collision object
   
@@ -117,16 +122,16 @@ public:
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x83 (8 bit)
         uint32_t mLink;
-        Vec3 mExtends[2];
-        Mat4 mTransform;
-        Mat4 mInverseTransform;
+        MFMath::Vec3 mExtends[2];       // two box corners, however the box seems to be symmetrical around [0,0,0], so one is redundant
+        MFMath::Mat4 mTransform;
+        MFMath::Mat4 mInverseTransform;
     } OBBCol;                   // oriented bounding box
 
     typedef struct 
     {    
         uint32_t mProperties;   // NOTE(ASM): Material(8 bit) | Flags (8 bit) | 0 (8 bit) | 0x82 (8 bit)
         uint32_t mLink;
-        Vec3 mPosition;
+        MFMath::Vec3 mPosition;
         float mRadius;
     } SphereCol;                // spherical collision object
 
@@ -155,6 +160,8 @@ public:
     unsigned int getGridWidth()                          { return mDataHeader.mGridWidth; }
     unsigned int getGridHeight()                         { return mDataHeader.mGridHeight; }
 
+    ~DataFormatTreeKLZ();
+
 protected:
     Header mHeader;
     uint32_t* mLinkNameOffsetTable;
@@ -173,6 +180,27 @@ protected:
     Cell* mGridCellsMemory;
 };
 
+DataFormatTreeKLZ::~DataFormatTreeKLZ()
+{
+    for (unsigned int i = 0; i < mDataHeader.mGridWidth * mDataHeader.mGridWidth; ++i)
+    {
+        if (mGridCellsMemory[i].mNumObjects)
+        {
+            free(mGridCellsMemory[i].mReferences);
+            free(mGridCellsMemory[i].mFlags);
+        }
+    }
+
+    free(mGridCellsMemory);
+
+    for (unsigned int i = 0; i < mLinkTables.size(); ++i)
+        free(mLinkTables[i].mName);
+
+    free(mLinkNameOffsetTable);
+    free(mCellBoundariesX); 
+    free(mCellBoundariesY); 
+}
+
 bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
 {
     read(srcFile, &mHeader);
@@ -180,7 +208,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
     mLinkNameOffsetTable = reinterpret_cast<uint32_t*>(malloc(sizeof(uint32_t)*mHeader.mNumLinks));
     read(srcFile, mLinkNameOffsetTable, sizeof(uint32_t)*mHeader.mNumLinks);
 
-    for(unsigned int i = 0; i < mHeader.mNumLinks; i++) 
+    for (unsigned int i = 0; i < mHeader.mNumLinks; i++) 
     {
         Link newLink = {};
         srcFile.seekg(mLinkNameOffsetTable[i], srcFile.beg);
@@ -254,7 +282,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
         read(srcFile, mGridCellsMemory[i].mReserved, sizeof(uint32_t)*2);
         read(srcFile, &mGridCellsMemory[i].mHeight);
 
-        if(mGridCellsMemory[i].mNumObjects)
+        if (mGridCellsMemory[i].mNumObjects)
         {
             mGridCellsMemory[i].mReferences = reinterpret_cast<uint32_t*>(malloc(sizeof(uint32_t) * mGridCellsMemory[i].mNumObjects));
             read(srcFile, mGridCellsMemory[i].mReferences, sizeof(uint32_t) * mGridCellsMemory[i].mNumObjects);
@@ -264,6 +292,7 @@ bool DataFormatTreeKLZ::load(std::ifstream &srcFile)
             read(srcFile, mGridCellsMemory[i].mFlags, (mGridCellsMemory[i].mNumObjects + 3) /4 * sizeof(uint32_t));
         }
     }
+
     return true;
 }
 

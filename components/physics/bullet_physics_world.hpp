@@ -4,10 +4,12 @@
 #include <physics/base_physics_world.hpp>
 #include <loggers/console.hpp>
 #include <klz/bullet.hpp>
+#include <4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
+#include <bullet_utils.hpp>
 
-#define BULLET_PHYSICS_WORLD_MODULE_STR "bullet world"
+#define BULLET_PHYSICS_WORLD_MODULE_STR "physics world"
 
 namespace MFPhysics
 {
@@ -19,7 +21,8 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-    virtual int pointCollision(double x, double y, double z) override;
+    virtual MFGame::Id pointCollision(MFMath::Vec3 position) override;
+    virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
     std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
@@ -34,8 +37,8 @@ public:
         }
 
         virtual btScalar addSingleResult(btManifoldPoint& cp,
-            const btCollisionObjectWrapper* colObj0,int partId0,int index0,
-            const btCollisionObjectWrapper* colObj1,int partId1,int index1) override
+            const btCollisionObjectWrapper* colObj0,int /* partId0 */,int /* index0 */,
+            const btCollisionObjectWrapper* colObj1,int /* partId1 */,int /* index1 */) override
         {
             const btCollisionObjectWrapper *colObj = colObj0->getCollisionObject() == mBody ? colObj1 : colObj0;
             mResult = colObj->getCollisionObject();
@@ -55,21 +58,24 @@ protected:
     btDefaultCollisionConfiguration     *mConfiguration;
     btCollisionDispatcher               *mCollisionDispatcher;
     btSequentialImpulseConstraintSolver *mSolver;
-
+    btOverlappingPairCache *mPairCache;
     std::vector<MFUtil::NamedRigidBody> mTreeKlzBodies;
-
     MFFile::FileSystem *mFileSystem;
 };
 
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
-    mBroadphaseInterface = new btDbvtBroadphase();
+    MFLogger::ConsoleLogger::info("Initializing physics world.",BULLET_PHYSICS_WORLD_MODULE_STR);
+    mPairCache           = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
+
+    // TODO: How to determine the world AABB for Axis Sweep when the bodies aren't loaded yet? Maybe from tree.klz grid?
+    mBroadphaseInterface = new bt32BitAxisSweep3(btVector3(-500,-500,-500),btVector3(500,500,500),16384,mPairCache); 
     mConfiguration       = new btDefaultCollisionConfiguration();
     mCollisionDispatcher = new btCollisionDispatcher(mConfiguration);
     mSolver              = new btSequentialImpulseConstraintSolver;
-    mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher, mBroadphaseInterface, mSolver, mConfiguration);
+    mWorld               = new btDiscreteDynamicsWorld(mCollisionDispatcher,mBroadphaseInterface,mSolver,mConfiguration);
 
-    mWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+    mWorld->setGravity(btVector3(0.0f, 0.0f, -9.81f));
 
     mFileSystem = MFFile::FileSystem::getInstance();
 }
@@ -81,14 +87,15 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mCollisionDispatcher;
     delete mConfiguration;
     delete mBroadphaseInterface;
+    delete mPairCache;
 }
 
-int BulletPhysicsWorld::pointCollision(double x, double y, double z)
+MFGame::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
 {
     btCollisionShape* sphere = new btSphereShape(0.01);  // can't make a point, so make a small sphere
     btRigidBody::btRigidBodyConstructionInfo ci(0,0,sphere,btVector3(0,0,0));
     btRigidBody* pointRigidBody = new btRigidBody(ci);
-    pointRigidBody->translate(btVector3(x,y,z));
+    pointRigidBody->translate(btVector3(position.x,position.y,position.z));
 
     ContactSensorCallback cb(pointRigidBody);
 
@@ -100,12 +107,44 @@ int BulletPhysicsWorld::pointCollision(double x, double y, double z)
     if (cb.mResult)
         return cb.mResult->getUserIndex();
 
-    return -1;
+    return MFGame::NullId;
 }
 
 void BulletPhysicsWorld::frame(double dt)
 {
-    mWorld->stepSimulation(dt, 1);
+    mWorld->stepSimulation(dt,1);
+}
+
+void BulletPhysicsWorld::getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max)
+{
+    // FIXME: find/implement a way to get a list of all rigid bodies in a world
+
+    if (mTreeKlzBodies.size() > 0)
+    {
+        min = MFMath::Vec3(0,0,0);
+        max = MFMath::Vec3(0,0,0);
+
+        for (int i = 0; i < (int) mTreeKlzBodies.size(); ++i)
+        {
+            btVector3 p1,p2;
+
+            mTreeKlzBodies[i].mRigidBody.mBody->getAabb(p1,p2);
+
+            min.x = std::min(min.x,std::min(p1.x(),p2.x()));
+            min.y = std::min(min.y,std::min(p1.y(),p2.y()));
+            min.z = std::min(min.z,std::min(p1.z(),p2.z()));
+
+            max.x = std::max(max.x,std::max(p1.x(),p2.x()));
+            max.y = std::max(max.y,std::max(p1.y(),p2.y()));
+            max.z = std::max(max.z,std::max(p1.z(),p2.z()));
+        }
+    }
+    else
+    {
+        // TMP: assign some default values here, the above FIXME should get rid of this
+        min = MFMath::Vec3(-100,-100,-100);
+        max = MFMath::Vec3(100,100,100);
+    }
 }
 
 std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
@@ -119,17 +158,28 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     std::string missionDir = "missions/" + mission;
     std::string treeKlzPath = missionDir + "/tree.klz";
+    std::string scene4dsPath = missionDir + "/scene.4ds";
 
     std::ifstream fileTreeKlz;
+    std::ifstream fileScene4ds;
 
     BulletTreeKlzLoader treeKlzLoader;
+    MFFormat::DataFormat4DS loader4DS;
+
+    if (!mFileSystem->open(fileScene4ds,scene4dsPath))    // FIXME: parsed files should be retrieved from LoaderCache to avoid parsing the same file twice
+    {
+        MFLogger::ConsoleLogger::warn("Couldn't open scene.4ds file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+        return false;
+    }
 
     if (mFileSystem->open(fileTreeKlz,treeKlzPath))
     {
-        mTreeKlzBodies = treeKlzLoader.load(fileTreeKlz);
+        loader4DS.load(fileScene4ds);
+        treeKlzLoader.load(fileTreeKlz,loader4DS);
+        mTreeKlzBodies = treeKlzLoader.mRigidBodies; 
         fileTreeKlz.close();
 
-        for (int i = 0; i < mTreeKlzBodies.size(); ++i)
+        for (int i = 0; i < (int) mTreeKlzBodies.size(); ++i)
         {
             mTreeKlzBodies[i].mRigidBody.mBody->setActivationState(0);
             mWorld->addRigidBody(mTreeKlzBodies[i].mRigidBody.mBody.get()); 
@@ -137,6 +187,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     }
     else
     {
+        fileScene4ds.close();
         MFLogger::ConsoleLogger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
         return false;
     }
@@ -144,6 +195,6 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     return true;
 }
 
-};
+}
 
 #endif
