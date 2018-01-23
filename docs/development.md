@@ -35,11 +35,12 @@ We're using the standard CMake build:
 
 Compilation on macOS, is not very different from linux one.
 
-However, you will need to have an OpenSceneGraph and Bullet Physics installed, you can do it by manually compiling them separately, or installing them from homebrew:
+However, you will need to have an OpenSceneGraph, SDL2 and Bullet Physics installed, you can do it by manually compiling them separately, or installing them from homebrew:
 
 ```sh
 $ brew install openscenegraph
 $ brew install bullet
+$ brew install sdl2
 ```
 
 1. Download/clone the repository.
