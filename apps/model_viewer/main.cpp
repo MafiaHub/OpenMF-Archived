@@ -11,6 +11,7 @@
 #include <spatial_entity/factory.hpp>
 #include <input/input_manager_implementation.hpp>
 #include <controllers/free_camera_controller.hpp>
+#include <controllers/rigid_camera_controller.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -194,6 +195,7 @@ int main(int argc, char** argv)
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
+        ("r,camera-rigid", "Camera will collide with the world.")
         ("C,collision-info","Write camera collisions in console.")
         ("v,verbosity","Print verbose output.")
         ("P,physics","Simulate physics and allow space-key controlled spawning of test entities.")
@@ -213,6 +215,7 @@ int main(int argc, char** argv)
     bool cameraInfo = arguments.count("c") > 0;
     bool collisionInfo = arguments.count("C") > 0;
     bool cameraPlace = arguments.count("p") > 0;
+    bool cameraRigid = arguments.count("r") > 0;
     bool model = arguments.count("4") > 0;
     sSimulatePhysics = arguments.count("P") > 0;
     std::string exportFileName;
@@ -296,8 +299,18 @@ int main(int argc, char** argv)
     std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
     inputManager.addKeyCallback(skcb);
 
-    MFGame::FreeCameraController cameraController(&renderer,&inputManager);
-    cameraController.setSpeed(cameraSpeed);
+    std::unique_ptr<MFGame::CameraController> cameraController;
+
+    if (cameraRigid)
+    {
+        cameraController = std::make_unique<MFGame::RigidCameraController>(&renderer, &inputManager, &physicsWorld);
+    }
+    else
+    {
+        cameraController = std::make_unique<MFGame::FreeCameraController>(&renderer, &inputManager);
+    }
+    
+    cameraController->setSpeed(cameraSpeed);
 
     if (model)
     {
@@ -383,7 +396,7 @@ int main(int argc, char** argv)
                 
                 inputManager.processEvents();
                 entityManager.update(MS_PER_UPDATE);
-                cameraController.update(MS_PER_UPDATE);
+                cameraController->update(MS_PER_UPDATE);
 
                 if (sSimulatePhysics)
                     physicsWorld.frame(MS_PER_UPDATE);
