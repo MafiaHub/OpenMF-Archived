@@ -281,6 +281,12 @@ int main(int argc, char** argv)
     inputManager.initWindow(800,600,100,100);
     renderer.setUpInWindow(inputManager.getWindow());
 
+    if (arguments.count("m") > 0)
+    {
+        renderer.setRenderMask(arguments["m"].as<unsigned int>());
+        entityFactory.setDebugMode(true);
+    }
+
     std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
     inputManager.addButtonCallback(rbcb);
 
@@ -308,11 +314,6 @@ int main(int argc, char** argv)
     }
 
     renderer.setCameraParameters(true,fov,0,0.25,2000);
-
-    if (arguments.count("m") > 0)
-    {
-        renderer.setRenderMask(arguments["m"].as<unsigned int>());
-    }
 
     if (cameraPlace)
     {

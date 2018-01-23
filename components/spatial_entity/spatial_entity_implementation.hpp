@@ -35,6 +35,7 @@ public:
     void setOSGRootNode(osg::Group *root)                                          { mOSGRoot = root;                  };
     void setPhysicsMotionState(std::shared_ptr<btDefaultMotionState> motionState)  { mBulletMotionState = motionState; };
     std::shared_ptr<btDefaultMotionState> getPhysicsMotionState()                  { return mBulletMotionState;        };
+    void setDebugMode(bool enable)                                                 { mCreateDebugGeometry = enable;    };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
 
@@ -58,6 +59,8 @@ protected:
     osg::ref_ptr<osg::MatrixTransform> mOSGPhysicsDebugNode;
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
+
+    bool mCreateDebugGeometry;
 };
 
 osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
@@ -190,11 +193,11 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
     mOSGNode = 0;
     mBulletBody = 0;
     mBulletMotionState = 0;
+    mCreateDebugGeometry = false;
 }
 
 SpatialEntityImplementation::~SpatialEntityImplementation()
-{
-    
+{ 
 }
 
 void SpatialEntityImplementation::update(double dt)
@@ -248,7 +251,7 @@ void SpatialEntityImplementation::ready()
 
 void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
 {
-    if (!mBulletBody)
+    if (!mBulletBody || !mCreateDebugGeometry)
         return;
 
     if (!mOSGRoot)
@@ -355,7 +358,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
 void SpatialEntityImplementation::syncDebugPhysicsNode()
 {
-    if (!mBulletBody)
+    if (!mOSGPhysicsDebugNode)
         return;
 
     btTransform transform = mBulletBody->getWorldTransform();

@@ -15,6 +15,7 @@ class SpatialEntityFactory
 public:
     SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
     void createMissionEntities();
+    void setDebugMode(bool enable)    { mDebugMode = enable; };
 
     MFGame::Id createEntity(
         osg::MatrixTransform *graphicNode,
@@ -42,10 +43,14 @@ protected:
     osg::ref_ptr<osg::Shape> mTestVisualBoxShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
+
+    bool mDebugMode;
 };
 
 SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager)
 {
+    mDebugMode = false;
+
     mRenderer = renderer;
     mPhysicsWorld = physicsWorld;
     mEntityManager = entityManager;
@@ -81,6 +86,7 @@ MFGame::Id SpatialEntityFactory::createEntity(
 
     std::shared_ptr<MFGame::SpatialEntityImplementation> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
     newEntity->setName(name);
+    newEntity->setDebugMode(mDebugMode);
     newEntity->setOSGRootNode(mRenderer->getRootNode());
     newEntity->setVisualNode(graphicNode);
     newEntity->setPhysicsBody(physicsBody);
