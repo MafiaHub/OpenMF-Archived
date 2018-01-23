@@ -5,6 +5,8 @@
 #include <id_manager.hpp>
 #include <string>
 
+#define DEFAULT_ID_MANAGER BackingIDManager
+
 namespace MFGame
 {
 
@@ -49,7 +51,8 @@ public:
     */
     virtual void move(MFMath::Vec3 destPosition)=0;
 
-    static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
+    // TODO deal with ID sync between old and a new manager at some point.
+    //static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
     static IDManager *getIDManager() 
     {
         return sIDManager.get(); 
@@ -79,7 +82,6 @@ SpatialEntity::~SpatialEntity()
     sIDManager->deallocate(mId);
 }
 
-std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<BackingIDManager>();
-
+std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<DEFAULT_ID_MANAGER>();
 }
 #endif
