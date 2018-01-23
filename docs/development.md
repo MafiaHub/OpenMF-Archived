@@ -9,9 +9,11 @@ This file should help potentially new developers to get familiar with the code a
 
 required libraries:
 
-- OpenSceneGraph, at least 3.4.1
-- Bullet Physics, at least 2.88
-- SDL2          , at least 2.0.0
+| Name                                             | Version |
+| ------------------------------------------------ | ------- |
+| [OpenSceneGraph](http://www.openscenegraph.org/) | 3.4.1   |
+| [Bullet3](http://bulletphysics.org/wordpress/)   | 2.88    |
+| [SDL2](https://www.libsdl.org/)                  | 2.0.7   |
 
 build targets: (`GAME`, `VIEWER`, `UTILS`, `TESTS`)
 
