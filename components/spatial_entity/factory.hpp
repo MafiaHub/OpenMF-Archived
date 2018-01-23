@@ -23,6 +23,8 @@ public:
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="");
 
+    MFGame::Id createCameraEntity(osg::Camera *camera);
+
     MFGame::Id createTestBallEntity();
     MFGame::Id createTestBoxEntity();
 
@@ -94,6 +96,30 @@ MFGame::Id SpatialEntityFactory::createEntity(
     newEntity->ready();
     mEntityManager->addEntity(newEntity);
     return newEntity->getId();
+}
+
+MFGame::Id SpatialEntityFactory::createCameraEntity(osg::Camera *camera)
+{
+    MFUtil::FullRigidBody body;
+    body.mShape = std::make_shared<btSphereShape>(1.0f);
+
+    btScalar mass = 1.0f;
+    body.mMotionState = std::make_shared<btDefaultMotionState>(
+        btTransform(btQuaternion(0, 0, 0, mass), 
+        btVector3(0,0,0)));
+
+    btVector3 inertia;
+    body.mShape->calculateLocalInertia(mass, inertia);
+    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), body.mShape.get(), inertia);
+    body.mBody->setActivationState(DISABLE_DEACTIVATION);
+    body.mBody->setAngularFactor(0);
+    mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
+    body.mBody->setGravity(btVector3(0, 0, 0));
+
+    osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+    visualTransform->addChild(camera);
+
+    return createEntity(visualTransform, body.mBody, body.mMotionState);
 }
 
 MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)

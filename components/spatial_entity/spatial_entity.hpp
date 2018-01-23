@@ -33,6 +33,10 @@ public:
     virtual void setPosition(MFMath::Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
     virtual void setVelocity(MFMath::Vec3 velocity)=0;
     virtual void setAngularVelocity(MFMath::Vec3 velocity)=0;
+    virtual void setDamping(float lin, float ang) = 0;
+    virtual MFMath::Vec3 getVelocity() = 0;
+    virtual MFMath::Vec3 getAngularVelocity() = 0;
+    virtual MFMath::Vec2 getDamping() = 0;
     MFMath::Quat getRotation()                          { return mRotation;     };
     virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
     virtual bool hasVisual()=0;
@@ -45,11 +49,6 @@ public:
     std::string getName()                               { return mName;         };
     bool isReady()                                      { return mReady;        };
     Id getId()                                          { return mId;           };
-    
-    /**
-    Moves the entity from current to dest position, checking for collisions.
-    */
-    virtual void move(MFMath::Vec3 destPosition)=0;
 
     // TODO deal with ID sync between old and a new manager at some point.
     //static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }

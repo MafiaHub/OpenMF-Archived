@@ -303,7 +303,16 @@ int main(int argc, char** argv)
 
     if (cameraRigid)
     {
-        cameraController = std::make_unique<MFGame::RigidCameraController>(&renderer, &inputManager, &physicsWorld);
+        auto cameraEntity = entityFactory.createCameraEntity(renderer.getViewer()->getCamera());
+        auto cameraPtr = entityManager.getEntityById(cameraEntity);
+        auto pos = renderer.getCameraPosition();
+        if (cameraPtr == nullptr)
+        {
+            MFLogger::ConsoleLogger::fatal("Camera was not initialized!");
+            return 0;
+        }
+        cameraPtr->setPosition(pos);
+        cameraController = std::make_unique<MFGame::RigidCameraController>(&renderer, &inputManager, cameraPtr);
     }
     else
     {

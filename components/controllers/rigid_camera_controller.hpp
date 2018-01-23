@@ -11,8 +11,8 @@ namespace MFGame
 class RigidCameraController: public CameraController
 {
 public:
-    RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::BulletPhysicsWorld *physics);
-    virtual void update(double dt) override;
+  RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+  virtual void update(double dt) override;
 protected:
     double mPreviousMouseButton;
 
@@ -31,16 +31,15 @@ protected:
 
 private:
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
-    MFUtil::FullRigidBody mBulletBody;
+    SpatialEntity *mCameraEntity;
 };
 
-RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::BulletPhysicsWorld *physics) : CameraController(renderer, inputManager)
+RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity): CameraController(renderer, inputManager)
 {
     mSpeed = 100.0;
     mRotationSpeed = 0.005;
     mPreviousMouseButton = false;
 
-    mPosition = MFMath::Vec3(0,0,0);
     mRotation = MFMath::Vec3(0,0,0);
 
     mInitTransform = true;
@@ -54,8 +53,7 @@ RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInp
     mKeyUp       = SDL_SCANCODE_E;
     mKeyDown     = SDL_SCANCODE_Q;
     mKeySpeedup  = SDL_SCANCODE_LSHIFT;
-
-    mPhysicsWorld = physics;
+    mCameraEntity = entity;
 }
 
 void RigidCameraController::update(double dt)
@@ -64,25 +62,8 @@ void RigidCameraController::update(double dt)
     {
         MFMath::Vec3 pos,rot;
         mRenderer->getCameraPositionRotation(pos,rot);
-        mPosition = pos;
         mRotation = rot;
         mInitTransform = false;
-
-        mBulletBody.mShape = std::make_shared<btSphereShape>(1.0f);
-
-        btScalar mass = 1.0f;
-        mBulletBody.mMotionState = std::make_shared<btDefaultMotionState>(
-            btTransform(btQuaternion(0, 0, 0, mass), 
-            MFUtil::mafiaVec3ToBullet(pos.x, pos.z, pos.y)));
-
-        btVector3 inertia;
-        mBulletBody.mShape->calculateLocalInertia(mass, inertia);
-        mBulletBody.mBody = std::make_shared<btRigidBody>(mass, mBulletBody.mMotionState.get(), mBulletBody.mShape.get(), inertia);
-        //mBulletBody.mBody->setSleepingThresholds(0, 0);
-        mBulletBody.mBody->setActivationState(DISABLE_DEACTIVATION);
-        mBulletBody.mBody->setAngularFactor(0);
-        mPhysicsWorld->getWorld()->addRigidBody(mBulletBody.mBody.get());
-        mBulletBody.mBody->setGravity(btVector3(0, 0, 0));
     }
 
     MFMath::Vec3 pos, rot;
@@ -152,17 +133,20 @@ void RigidCameraController::update(double dt)
         mPreviousMouseButton = false;
     }
 
-    mBulletBody.mBody->setDamping(0.15f, 0);
-    mBulletBody.mBody->setLinearVelocity(0.4f*mBulletBody.mBody->getLinearVelocity()+0.6*65*btVector3(offset.x, offset.y, offset.z));
-    btTransform t = mBulletBody.mBody->getWorldTransform();
-    btVector3 bPos = t.getOrigin();
-    mPosition = MFMath::Vec3(bPos.x(), bPos.y(), bPos.z());
+    if (mCameraEntity)
+    {
+        mCameraEntity->setDamping(0.15f, 0);
+
+        MFMath::Vec3 prevVel = mCameraEntity->getVelocity();
+        MFMath::Vec3 vel = (0.4f * prevVel + 0.6f * 65.f * offset);
+        mCameraEntity->setVelocity(vel);
+    }
 
     mRotation += rotOffset;
 
     mRotation.y = std::max(0.0f,std::min(MFMath::PI - 0.001f,mRotation.y));
 
-    mRenderer->setCameraPositionRotation(mPosition,mRotation);
+    //mRenderer->setCameraPositionRotation(mCameraE,mRotation);
 }
 
 }
