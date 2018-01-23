@@ -19,6 +19,19 @@ void traverse(osg::NodeVisitor *v,osg::Node &n)
             n.asGroup()->getChild(i)->accept(*v);
 }
 
+void rotationToVectors(osg::Quat rotation, osg::Vec3f &forw, osg::Vec3f &right, osg::Vec3f &up)
+{
+    forw  = osg::Vec3f(0,1,0);
+    right = osg::Vec3f(1,0,0);
+    up    = osg::Vec3f(0,0,1);
+
+    osg::Matrixd m = osg::Matrixd::rotate(rotation);
+
+    forw  = m.preMult(forw);
+    right = m.preMult(right);
+    up    = m.preMult(up);
+}
+
 /** Convert quaternion rotation to yaw, pitch, roll (Euler angles), in radians. */
 
 void quatToEuler(osg::Quat q, double &yaw, double &pitch, double &roll)
@@ -86,86 +99,6 @@ public:
         return true; 
     } 
 };
-
-class WalkManipulator: public osgGA::FirstPersonManipulator
-{
-public:
-    WalkManipulator();
-    virtual bool handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
-    virtual bool handleKeyUp(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
-    virtual bool handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us) override;
-
-protected:
-    double mLastFrameTime;
-
-    int mForw;
-    int mRight;
-    int mUp;
-    bool mShift;
-};
-
-WalkManipulator::WalkManipulator(): osgGA::FirstPersonManipulator()
-{
-    setAllowThrow(false);
-    mForw = 0;
-    mRight = 0;
-    mUp = 0; 
-}
-
-bool WalkManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
-{
-    FirstPersonManipulator::handleKeyDown(ea,us);
-
-    switch (std::tolower(ea.getKey()))
-    {
-        case 'w': mForw = 1; break;
-        case 's': mForw = -1; break;
-        case 'd': mRight = 1; break;
-        case 'a': mRight = -1; break;
-        case 'e': mUp = 1; break;
-        case 'q': mUp = -1; break;
-        case 65505: mShift = true; break; 
-        default: break;
-    }
-
-    return true;
-}
-
-bool WalkManipulator::handleKeyUp(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
-{
-    FirstPersonManipulator::handleKeyUp(ea,us);
-
-    switch (std::tolower(ea.getKey()))
-    {
-        case 'w': mForw = 0; break;
-        case 's': mForw = 0; break;
-        case 'd': mRight = 0; break;
-        case 'a': mRight = 0; break;
-        case 'e': mUp = 0; break;
-        case 'q': mUp = 0; break;
-        case 65505: mShift = false; break; 
-        default: break;
-    }
-
-    return true;
-}
-
-bool WalkManipulator::handleFrame(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
-{
-    FirstPersonManipulator::handleFrame(ea,us);
-
-    double timeNow = ea.getTime();
-    double dt = timeNow - mLastFrameTime;
-    double dist = _maxVelocity * dt * (mShift ? 5.0 : 1.0);
-
-    moveForward(mForw * dist);
-    moveRight(mRight * dist);
-    moveUp(mUp * dist);
-
-    mLastFrameTime = timeNow;
-
-	return true;
-}
 
 osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg)
 {

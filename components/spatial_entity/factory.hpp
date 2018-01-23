@@ -15,6 +15,7 @@ class SpatialEntityFactory
 public:
     SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
     void createMissionEntities();
+    void setDebugMode(bool enable)    { mDebugMode = enable; };
 
     MFGame::Id createEntity(
         osg::MatrixTransform *graphicNode,
@@ -32,6 +33,9 @@ protected:
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFRender::OSGRenderer *mRenderer;
 
+    osg::ref_ptr<osg::StateSet> mTestStateSet;
+    osg::ref_ptr<osg::Material> mTestMaterial;
+
     osg::ref_ptr<osg::Shape> mTestVisualSphereShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestSphereNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalSphereShape;
@@ -39,10 +43,14 @@ protected:
     osg::ref_ptr<osg::Shape> mTestVisualBoxShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
+
+    bool mDebugMode;
 };
 
 SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager)
 {
+    mDebugMode = false;
+
     mRenderer = renderer;
     mPhysicsWorld = physicsWorld;
     mEntityManager = entityManager;
@@ -50,12 +58,20 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     const double r = 0.7;
     const double l = 1.0;
 
+    mTestMaterial = new osg::Material();
+    mTestMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4(0,0,0,0));
+
+    mTestStateSet = new osg::StateSet();
+    mTestStateSet->setAttributeAndModes(mTestMaterial);
+
     mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),r);
     mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
+    mTestSphereNode->setStateSet(mTestStateSet);
     mTestPhysicalSphereShape = std::make_shared<btSphereShape>(r);
 
     mTestVisualBoxShape = new osg::Box(osg::Vec3f(0,0,0),l);
     mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
+    mTestBoxNode->setStateSet(mTestStateSet);
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 }
 
@@ -70,6 +86,7 @@ MFGame::Id SpatialEntityFactory::createEntity(
 
     std::shared_ptr<MFGame::SpatialEntityImplementation> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
     newEntity->setName(name);
+    newEntity->setDebugMode(mDebugMode);
     newEntity->setOSGRootNode(mRenderer->getRootNode());
     newEntity->setVisualNode(graphicNode);
     newEntity->setPhysicsBody(physicsBody);

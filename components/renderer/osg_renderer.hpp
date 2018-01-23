@@ -23,81 +23,9 @@
 #define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
-
 {
 
-class PickHandler: public osgGA::GUIEventHandler  // FIXME: this is event handling and should be done outside renderer
-{
-public:
-    PickHandler()
-    {
-        mHighlightMaterial = new osg::Material;
-        mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-        mMaterialBackup = 0;
-        mSelected = 0;
-    }
-
-    virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa) override
-    {
-        if (ea.getButton() != osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON ||
-            ea.getEventType()!=osgGA::GUIEventAdapter::PUSH)
-            return false;
-
-        osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
-
-        if (!viewer)
-            return true;
-
-        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
-            new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, ea.getX(), ea.getY());
-
-        MFUtil::RobustIntersectionVisitor iv(intersector.get());
-        viewer->getCamera()->accept(iv);
-
-        if (intersector->containsIntersections())
-        {
-            const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
-
-            if (mSelected)
-            {
-                if (mMaterialBackup)
-                    mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
-                else
-                    mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
-            }
-
-            if (mSelected == result.drawable)  // clicking the same node twice will deselect it
-            {
-                mSelected = 0;
-            }
-            else
-            {
-                mSelected = result.drawable;
-                mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-                mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
-
-                MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
-
-                for (int i = 0; i < (int) result.nodePath.size(); ++i)
-                    MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
-
-                MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
-            }
-        }
-
-        return true;
-    }
-
-    osg::ref_ptr<osg::Drawable> mSelected;
-
-protected:
-    osg::ref_ptr<osg::Material> mHighlightMaterial;
-    osg::ref_ptr<osg::Material> mMaterialBackup;
-};
-
-class OSGRenderer: public MFRenderer
+class OSGRenderer: public Renderer
 {
 public:
     OSGRenderer();
@@ -105,20 +33,29 @@ public:
     virtual bool loadSingleModel(std::string model) override;
     virtual void frame(double dt) override;
     virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
-    virtual void getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll) override;
-    virtual void setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll) override;
-    virtual void setFreeCameraSpeed(double newSpeed) override;
+    virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
+    virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
+    virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
+    virtual void setWindowSize(unsigned int width, unsigned int height) override;
     virtual bool exportScene(std::string fileName) override;
-    virtual int getSelectedEntityId() override;
+    virtual void debugClick(unsigned int x, unsigned int y) override;
+    virtual int  getSelectedEntityId() override;
+    virtual void showProfiler() override;
+
+    /**
+      Sets a custom viewer window to display the rendering. Do not use this if setUpInWindow is called.
+    */
+    void setUpInCustomWindow(unsigned int width, unsigned int height);
+    void setUpInWindow(osgViewer::GraphicsWindow *window);
 
     void setRenderMask(osg::Node::NodeMask mask);
-    osg::Group *getRootNode() { return mRootNode.get(); };
+    osg::Group *getRootNode()                      { return mRootNode.get(); };
+    osgViewer::Viewer *getViewer()                 { return mViewer.get();   };
 
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;          ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
-    MFUtil::WalkManipulator *mCameraManipulator;
     MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
 
     void optimize();
@@ -130,8 +67,21 @@ protected:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 
-    osg::ref_ptr<PickHandler> mPickHandler;
+    osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
+    osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection
+    osg::ref_ptr<osg::Material> mMaterialBackup;
+
+    osg::ref_ptr<osgViewer::StatsHandler> mStatsHandler;
 };
+
+void OSGRenderer::showProfiler()
+{
+    // hack: simulate the key press
+    osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter;
+    event->setEventType(osgGA::GUIEventAdapter::KEYDOWN);
+    event->setKey(osgGA::GUIEventAdapter::KEY_F3);
+    mStatsHandler->handle(*(event.get()),*(mViewer.get()));
+}
 
 void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
 {
@@ -145,7 +95,58 @@ bool OSGRenderer::exportScene(std::string fileName)
     return result.success();
 }
 
-void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, double &yaw, double &pitch, double &roll)
+void OSGRenderer::setWindowSize(unsigned int width, unsigned int height)
+{
+    mViewer->getCamera()->setViewport(0,0,width,height);
+
+    double fovy, aspect, zNear, zFar;
+
+    mViewer->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+    mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, width / ((double) height), zNear, zFar);
+}
+
+void OSGRenderer::debugClick(unsigned int x, unsigned int y)
+{
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
+        new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y);
+
+    MFUtil::RobustIntersectionVisitor iv(intersector.get());
+    iv.setTraversalMask(mViewer->getCamera()->getCullMask());
+    mViewer->getCamera()->accept(iv);
+
+    if (intersector->containsIntersections())
+    {
+        const osgUtil::LineSegmentIntersector::Intersection result = intersector->getFirstIntersection();
+
+        if (mSelected)
+        {
+            if (mMaterialBackup)
+                mSelected->getOrCreateStateSet()->setAttributeAndModes(mMaterialBackup);
+            else
+                mSelected->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+        }
+
+        if (mSelected == result.drawable)  // clicking the same node twice will deselect it
+        {
+            mSelected = 0;
+        }
+        else
+        {
+            mSelected = result.drawable;
+            mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
+
+            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+
+            for (int i = 0; i < (int) result.nodePath.size(); ++i)
+                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+
+            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+        }
+    }
+}
+
+void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix = mViewer->getCamera()->getViewMatrix();
 
@@ -156,28 +157,66 @@ void OSGRenderer::getCameraPositionRotation(double &x, double &y, double &z, dou
 
     viewMatrix.decompose(translation,rotation,scale,scaleOrient);
 
-    x = translation.x();
-    y = translation.y();
-    z = translation.z();
+    position.x = translation.x();
+    position.y = translation.y();
+    position.z = translation.z();
 
-    MFUtil::quatToEuler(rotation,yaw,pitch,roll);
+    double y,p,r;
+
+    MFUtil::quatToEuler(rotation,y,p,r);
+    rotYawPitchRoll.x = y;
+    rotYawPitchRoll.y = p;
+    rotYawPitchRoll.z = r;
 }
 
-void OSGRenderer::setCameraPositionRotation(double x, double y, double z, double yaw, double pitch, double roll)
+void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)
+{
+    osg::Vec3f f,r,u;
+
+    osg::Matrixd cameraMat = mViewer->getCamera()->getInverseViewMatrix();
+    cameraMat.preMultRotate(osg::Quat(-osg::PI / 2.0,osg::Vec3f(1,0,0)));   // camera is looking down by default, fix that
+    MFUtil::rotationToVectors(cameraMat.getRotate(),f,r,u);
+
+    forw  = MFMath::Vec3(f.x(),f.y(),f.z());
+    right = MFMath::Vec3(r.x(),r.y(),r.z());
+    up    = MFMath::Vec3(u.x(),u.y(),u.z());
+}
+
+void OSGRenderer::setUpInCustomWindow(unsigned int width, unsigned int height)
+{
+    mViewer->setUpViewInWindow(40,40,width,height); 
+
+    if (!mViewer->isRealized())
+        mViewer->realize();
+}
+
+void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
+{
+    int x,y,w,h;
+    window->getWindowRectangle(x,y,w,h);
+    mViewer->getCamera()->setGraphicsContext(window);
+    mViewer->getCamera()->setViewport(0,0,w,h);
+
+    if (!mViewer->isRealized())
+        mViewer->realize();
+}
+
+void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix;
 
-    viewMatrix.setTrans(osg::Vec3(x,y,z));
+    viewMatrix.setTrans(osg::Vec3(position.x,position.y,position.z));
+    viewMatrix.setRotate(MFUtil::eulerToQuat(rotYawPitchRoll.x,rotYawPitchRoll.y,rotYawPitchRoll.z));
+    viewMatrix.invert(viewMatrix);
 
-    viewMatrix.setRotate( MFUtil::eulerToQuat(yaw,pitch,roll) );
-    mViewer->getCameraManipulator()->setByMatrix(viewMatrix);
+    mViewer->getCamera()->setViewMatrix(viewMatrix);
 }
 
 int OSGRenderer::getSelectedEntityId()
 {
-    if (mPickHandler->mSelected)
+    if (mSelected)
     {
-        osg::UserDataContainer *cont = mPickHandler->mSelected->getOrCreateUserDataContainer();
+        osg::UserDataContainer *cont = mSelected->getOrCreateUserDataContainer();
 
         if (cont->getNumUserObjects() > 0)
         {
@@ -193,7 +232,7 @@ int OSGRenderer::getSelectedEntityId()
     return -1; 
 }
 
-OSGRenderer::OSGRenderer(): MFRenderer()
+OSGRenderer::OSGRenderer(): Renderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();
@@ -204,30 +243,14 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    mPickHandler = new PickHandler;
-    mViewer->addEventHandler(mPickHandler);
-
-    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
-    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
-    statshandler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F4);
-    mViewer->addEventHandler(statshandler);
+    mStatsHandler = new osgViewer::StatsHandler;
+    mStatsHandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
+    mViewer->addEventHandler(mStatsHandler);
 
     mRootNode = new osg::Group();
     mRootNode->setName("root");
 
     mViewer->setSceneData(mRootNode);
-
-    mViewer->setUpViewInWindow(40,40,1024,768); 
-
-    if (!mViewer->isRealized())
-        mViewer->realize();
-
-    osg::ref_ptr<MFUtil::WalkManipulator> cameraManipulator = new MFUtil::WalkManipulator();
-
-    mCameraManipulator = cameraManipulator.get();
-
-    if (!mViewer->getCameraManipulator() && mViewer->getCamera()->getAllowEventFocus())
-        mViewer->setCameraManipulator(cameraManipulator);
 
     mViewer->getCamera()->setCullingMode(
         osg::CullSettings::VIEW_FRUSTUM_CULLING |
@@ -239,11 +262,13 @@ OSGRenderer::OSGRenderer(): MFRenderer()
 
     mViewer->getCamera()->setSmallFeatureCullingPixelSize(15);
     setRenderMask(MASK_GAME);
-}
 
-void OSGRenderer::setFreeCameraSpeed(double newSpeed)
-{
-    mCameraManipulator->setMaxVelocity(newSpeed);
+    mHighlightMaterial = new osg::Material;
+    mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
+    mMaterialBackup = 0;
+    mSelected = 0;
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
@@ -261,7 +286,6 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     else
     {
         // TODO: implement this
-        orthoSize;
     }
 }
 
@@ -426,7 +450,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame(double /* dt */)
+void OSGRenderer::frame(double dt)
 {
     if (mViewer->done() || mDone)
     {
@@ -434,7 +458,7 @@ void OSGRenderer::frame(double /* dt */)
     }
     else
     {
-        mViewer->advance(0.1);
+        mViewer->advance(dt);
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();

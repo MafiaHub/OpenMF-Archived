@@ -11,60 +11,25 @@
 namespace MFGame
 {
 
-typedef union _Id
-{
-    _Id() 
-    {
-        this->Index      = INT32_MAX;
-        this->Generation = INT32_MAX;
-    }
-
-    _Id(uint32_t index, uint32_t generation)
-    {
-        this->Index = index;
-        this->Generation = generation;
-    }
-
-    _Id(uint64_t value)
-    {
-        this->Value = value;
-    }
-
-    struct
-    {
-        uint32_t Index;
-        uint32_t Generation;
-    };
-
-    uint64_t Value;
-
-    bool operator==(const _Id rhs)
-    {
-        return (this->Index == rhs.Index && this->Generation == rhs.Generation);
-    }
-
-    bool operator!=(const _Id rhs)
-    {
-        return !(*this == rhs);
-    }
-} Id;
+typedef uint32_t Id;
 
 static Id NullId;
 
 class IDManager 
 {
 public:
-    virtual uint32_t getSlot(Id ident)=0;
-    virtual bool isValid(Id ident)=0;
+    virtual uint32_t getSlot(Id ident) { return ident; };
+    virtual bool isValid(Id ident) { return true; };
     virtual Id allocate()=0;
-    virtual void deallocate(Id ident)=0;
+    virtual void deallocate(Id ident) {};
 
 protected:
-    virtual Id *getHandle(Id ident, bool warn=true)=0;
+    virtual Id *getHandle(Id ident, bool warn=true) { return nullptr; };
 };
 
 }
 
 #include <id_managers/backing_id_manager.hpp>
+#include <id_managers/incrementing_id_manager.hpp>
 
 #endif // ID_MANAGER_H

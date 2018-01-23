@@ -35,6 +35,15 @@ It's quite straightforward to build our bullet3 dependency.
 3. Use CMake to generate projects.
 4. Open the solution inside Visual Studio and compile the project.
 
+### SDL2
+
+It is enough to download development libraries for Visual Studio from the official website.
+
+1. Download [Development Libraries for Visual C++ 32/64-bit](https://www.libsdl.org/download-2.0.php) from the official website.
+2. Extract it to a convenient location (e.g. `W:\sdl2`).
+
+You can also follow the instructions from previous dependencies to build your own libraries in a similar fashion.
+
 
 ## Compiling
 
@@ -45,7 +54,8 @@ Once we get all our dependencies compiled, we're finally ready to compile OpenMF
 3. To successfully generate project files, we need to provide the paths to our dependencies (If using command-line CMake, to define a variable, use `-D<NAME>=<VALUE>` format, otherwise rely on GUI prompts.):
    * `OSG_THIRD_PARTY_DIR`: points to our `W:\3rdparty` directory.
    * `OSG_DIR`: points to our `W:\osg` directory.
-   * `BULLET_ROOT`: points to our `W:\bullet3` directory.
+   * `BULLET_ROOT`: points to our `W:\bullet3\build` directory.
+   * `SDL2_ROOT`: points to our `W:\sdl2` directory.
    * You also need to specify your build targets, see `build targets` in [development](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md):
         - Use them by defining such specific variable. (e.g. `cmake .. -DBUILD_GAME=1 -DBUILD_UTILS=1`)
         - On CMake GUI, use `Add Entry` button to define a variable, call it `BUILD_<NAME>` (e.g. `BUILD_GAME`) and set its boolean value to True.

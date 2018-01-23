@@ -61,6 +61,9 @@
 
 namespace MFMath
 {
+    const float PI = 3.1415926535897932384626;
+    const float PI_HALF = PI / 2.0f;
+
     // Small, fixed-length vector type, consisting of exactly M elements of type T, and presumed to be a column-vector unless otherwise noted
     template<class T, int M> struct vec;
     template<class T> struct vec<T,2>

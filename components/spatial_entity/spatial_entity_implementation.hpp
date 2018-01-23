@@ -35,6 +35,7 @@ public:
     void setOSGRootNode(osg::Group *root)                                          { mOSGRoot = root;                  };
     void setPhysicsMotionState(std::shared_ptr<btDefaultMotionState> motionState)  { mBulletMotionState = motionState; };
     std::shared_ptr<btDefaultMotionState> getPhysicsMotionState()                  { return mBulletMotionState;        };
+    void setDebugMode(bool enable)                                                 { mCreateDebugGeometry = enable;    };
 
     static osg::ref_ptr<osg::StateSet> sDebugStateSet;
 
@@ -58,6 +59,8 @@ protected:
     osg::ref_ptr<osg::MatrixTransform> mOSGPhysicsDebugNode;
     osg::Matrixd mOSGInitialTransform;     ///< Captures the OSG node transform when ready() is called.
     btTransform mBulletInitialTransform;   ///< Captures the Bullet body transform when ready() is called.
+
+    bool mCreateDebugGeometry;
 };
 
 osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
@@ -190,11 +193,11 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
     mOSGNode = 0;
     mBulletBody = 0;
     mBulletMotionState = 0;
+    mCreateDebugGeometry = false;
 }
 
 SpatialEntityImplementation::~SpatialEntityImplementation()
-{
-    
+{ 
 }
 
 void SpatialEntityImplementation::update(double dt)
@@ -213,7 +216,7 @@ std::string SpatialEntityImplementation::toString()
     int hasOSG = mOSGNode != 0;
     int hasBullet = mBulletBody != 0;
 
-    return "\"" + mName + "\", ID: " + std::to_string(mId.Value) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
+    return "\"" + mName + "\", ID: " + std::to_string(mId) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
 void SpatialEntityImplementation::ready()
@@ -224,14 +227,15 @@ void SpatialEntityImplementation::ready()
     {
         mOSGInitialTransform = mOSGNode->getMatrix();
 
-        osg::ref_ptr<MFUtil::UserIntData> intData = new MFUtil::UserIntData(mId.Value);
+        osg::ref_ptr<MFUtil::UserIntData> intData = new MFUtil::UserIntData(mId);
         MFUtil::AssignUserDataVisitor v(intData.get());
         mOSGNode->accept(v);
     }
 
     if (mBulletBody)
     {
-        MFUtil::setRigidBodyEntityId(mBulletBody.get(), mId);
+        mBulletBody->setUserIndex(mId);
+
         mBulletInitialTransform = mBulletBody->getWorldTransform();
         makePhysicsDebugOSGNode();
     }
@@ -247,7 +251,7 @@ void SpatialEntityImplementation::ready()
 
 void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
 {
-    if (!mBulletBody)
+    if (!mBulletBody || !mCreateDebugGeometry)
         return;
 
     if (!mOSGRoot)
@@ -354,7 +358,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
 void SpatialEntityImplementation::syncDebugPhysicsNode()
 {
-    if (!mBulletBody)
+    if (!mOSGPhysicsDebugNode)
         return;
 
     btTransform transform = mBulletBody->getWorldTransform();
