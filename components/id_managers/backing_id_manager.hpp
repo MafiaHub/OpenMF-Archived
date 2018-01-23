@@ -26,7 +26,7 @@ class BackingIDManager : public IDManager
 
 Id *BackingIDManager::getHandle(Id ident, bool warn)
 {
-    if (extractSlot(ident) < 0 || extractSlot(ident) > mIndices.size())
+    if (extractSlot(ident) > mIndices.size())
     {
         if (warn)
             MFLogger::ConsoleLogger::warn("ID is outside of the bounds.", ID_MANAGER_MODULE_STR);
