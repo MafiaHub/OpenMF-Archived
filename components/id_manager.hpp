@@ -18,17 +18,18 @@ static Id NullId;
 class IDManager 
 {
 public:
-    virtual uint16_t getSlot(Id ident)=0;
-    virtual bool isValid(Id ident)=0;
+    virtual uint32_t getSlot(Id ident) { return ident; };
+    virtual bool isValid(Id ident) { return true; };
     virtual Id allocate()=0;
-    virtual void deallocate(Id ident)=0;
+    virtual void deallocate(Id ident) {};
 
 protected:
-    virtual Id *getHandle(Id ident, bool warn=true)=0;
+    virtual Id *getHandle(Id ident, bool warn=true) { return nullptr; };
 };
 
 }
 
 #include <id_managers/backing_id_manager.hpp>
+#include <id_managers/incrementing_id_manager.hpp>
 
 #endif // ID_MANAGER_H

@@ -7,7 +7,7 @@ namespace MFGame
 class BackingIDManager : public IDManager
 {
   public:
-    virtual uint16_t getSlot(Id ident) override;
+    virtual uint32_t getSlot(Id ident) override;
     virtual bool isValid(Id ident) override;
 
     virtual Id allocate() override;
@@ -43,16 +43,16 @@ Id *BackingIDManager::getHandle(Id ident, bool warn)
     return id;
 }
 
-uint16_t BackingIDManager::getSlot(Id ident)
+uint32_t BackingIDManager::getSlot(Id ident)
 {
     auto id = getHandle(ident);
 
     if (id == nullptr)
     {
-        return extractSlot(NullId);
+        return NullId;
     }
 
-    return extractSlot(*id);
+    return *id;
 }
 
 bool BackingIDManager::isValid(Id ident)
