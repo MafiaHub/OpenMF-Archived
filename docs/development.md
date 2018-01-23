@@ -30,7 +30,7 @@ We're using the standard CMake build:
 
 ## Compilation (macOS)
 
-Compilation on macOS, is not very differnt from linux one.
+Compilation on macOS, is not very different from linux one.
 
 However, you will need to have an OpenSceneGraph and Bullet Physics installed, you can do it by manually compiling them separately, or installing them from homebrew:
 
