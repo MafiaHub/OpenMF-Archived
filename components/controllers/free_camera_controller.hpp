@@ -1,7 +1,7 @@
 #ifndef FREE_CAMERA_CONTROLLER
 #define FREE_CAMERA_CONTROLLER
 
-#include <camera_controller.hpp>
+#include <controllers/camera_controller.hpp>
 #include <math.hpp>
 
 namespace MFGame

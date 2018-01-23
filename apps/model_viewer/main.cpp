@@ -10,7 +10,7 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 #include <input/input_manager_implementation.hpp>
-#include <free_camera_controller.hpp>
+#include <controllers/free_camera_controller.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
