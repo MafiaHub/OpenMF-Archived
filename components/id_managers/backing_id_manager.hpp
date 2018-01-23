@@ -15,6 +15,9 @@ class BackingIDManager : public IDManager
 
   protected:
     virtual Id *getHandle(Id ident, bool warn = true) override;
+    uint16_t extractSlot(Id ident)       { return (uint16_t)(ident >> 16); }
+    uint16_t extractGeneration(Id ident) { return (uint16_t) ident; }
+    uint32_t constructId(uint16_t slot, uint16_t generation) { return (uint32_t)slot << 16 | generation; }
 
   private:
     std::vector<Id> mIndices;
@@ -23,20 +26,20 @@ class BackingIDManager : public IDManager
 
 Id *BackingIDManager::getHandle(Id ident, bool warn)
 {
-    if (ident.mIndex < 0 || ident.mIndex > mIndices.size())
+    if (extractSlot(ident) < 0 || extractSlot(ident) > mIndices.size())
     {
         if (warn)
             MFLogger::ConsoleLogger::warn("ID is outside of the bounds.", ID_MANAGER_MODULE_STR);
         return nullptr;
     }
-    else if (mIndices.at(ident.mIndex) != ident)
+    else if (mIndices.at(extractSlot(ident)) != ident)
     {
         if (warn)
             MFLogger::ConsoleLogger::warn("Invalid ID.", ID_MANAGER_MODULE_STR);
         return nullptr;
     }
 
-    auto id = &mIndices.at(ident.mIndex);
+    auto id = &mIndices.at(extractSlot(ident));
     return id;
 }
 
@@ -46,10 +49,10 @@ uint16_t BackingIDManager::getSlot(Id ident)
 
     if (id == nullptr)
     {
-        return NullId.mIndex;
+        return extractSlot(NullId);
     }
 
-    return id->mIndex;
+    return extractSlot(*id);
 }
 
 bool BackingIDManager::isValid(Id ident)
@@ -68,10 +71,10 @@ Id BackingIDManager::allocate()
         return id;
     }
 
-    Id id(mIndices.size(), 0);
+    Id id = constructId(mIndices.size(), 0);
     mIndices.push_back(id);
 
-    if (id.mIndex == INT16_MAX)
+    if (extractSlot(id) == INT16_MAX)
     {
         MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
         return NullId;
@@ -89,7 +92,10 @@ void BackingIDManager::deallocate(Id ident)
         return;
     }
 
-    id->mGeneration++;
+    *id = constructId(
+        extractSlot(*id),
+        extractGeneration(*id) + 1
+    );
     mFreeIndices.push_back(*id);
 }
 

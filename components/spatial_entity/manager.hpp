@@ -86,7 +86,7 @@ Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
     auto ourEntity = mEntities[id];
     if (ourEntity.get())
     {
-        MFLogger::ConsoleLogger::warn("Entity with existing ID (" + std::to_string(id.mIndex) +
+        MFLogger::ConsoleLogger::warn("Entity with existing ID (" + std::to_string(id) +
             ") being added - ignoring.",SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return NullId;
     }

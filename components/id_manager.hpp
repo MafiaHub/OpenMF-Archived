@@ -11,45 +11,7 @@
 namespace MFGame
 {
 
-typedef union _Id
-{
-    _Id() 
-    {
-        mIndex      = INT16_MAX;
-        mGeneration = INT16_MAX;
-    }
-
-    _Id(uint16_t index, uint16_t generation)
-    {
-        mIndex = index;
-        mGeneration = generation;
-    }
-
-    _Id(uint32_t value)
-    {
-        mValue = value;
-    }
-
-    struct
-    {
-        uint16_t mIndex;
-        uint16_t mGeneration;
-    };
-
-    uint32_t mValue;
-
-    bool operator==(const _Id rhs)
-    {
-        return (mIndex == rhs.mIndex && mGeneration == rhs.mGeneration);
-    }
-
-    bool operator!=(const _Id rhs)
-    {
-        return !(*this == rhs);
-    }
-
-    operator int(){ return static_cast<int>(mValue); }
-} Id;
+typedef uint32_t Id;
 
 static Id NullId;
 
