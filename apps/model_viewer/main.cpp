@@ -379,8 +379,10 @@ int main(int argc, char** argv)
                 }
 
                 // TODO use UPDATE_TIME to make fixed-time-delta loop
-
+                
+                inputManager.processEvents();
                 entityManager.update(MS_PER_UPDATE);
+                cameraController.update(MS_PER_UPDATE);
 
                 if (simulatePhysics)
                     physicsWorld.frame(MS_PER_UPDATE);
@@ -388,13 +390,10 @@ int main(int argc, char** argv)
                 render = true;
                 extraTime -= MS_PER_UPDATE;
             }
-
-            inputManager.processEvents();
               
             if (render)
             {
                 renderer.frame(MS_PER_UPDATE); // TODO: Use actual delta time
-                cameraController.update(MS_PER_UPDATE);
               
                 if (renderer.done())
                     sIsRunning = false;
