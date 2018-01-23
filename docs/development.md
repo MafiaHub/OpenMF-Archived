@@ -10,7 +10,7 @@ This file should help potentially new developers to get familiar with the code a
 required libraries:
 
 - OpenSceneGraph, at least 3.4.1
-- Bullet Physics, at least 2.88
+- Bullet Physics, at least 2.87
 
 build targets: (`GAME`, `VIEWER`, `UTILS`, `TESTS`)
 
@@ -27,6 +27,25 @@ We're using the standard CMake build:
 
 ## Compilation (Windows)
   See [development-windows](https://github.com/OpenMafia/OpenMF/tree/master/docs/development-windows.md) for information on how to build the project on Windows.
+
+## Compilation (macOS)
+
+Compilation on macOS, is not very differnt from linux one.
+
+However, you will need to have an OpenSceneGraph and Bullet Physics installed, you can do it by manually compiling them separately, or installing them from homebrew:
+
+```sh
+$ brew install openscenegraph
+$ brew install bullet
+```
+
+1. Download/clone the repository.
+2. Create a `build` subfolder in it (`mkdir build`).
+3. Enter the folder (`cd build`) and run `cmake .. -DBUILD_<NAME>`.
+    - There are currently 4 build targets available, see `build targets`
+    - Use them by defining such specific variable. (e.g. `cmake .. -DBUILD_GAME=1 -DBUILD_UTILS=1`)
+4. Run `make`.
+
 
 ## Running
 
