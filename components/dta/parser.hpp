@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_DTA_H
 
 #include <base_parser.hpp>
+#include <utils/scoped_buffer.hpp>
 #include <string.h>
 #include <vector>
 
@@ -96,7 +97,7 @@ public:
     unsigned int getNumFiles();                         ///< Get the number of files inside the DTA.
     unsigned int getFileSize(unsigned int index);
     std::string getFileName(unsigned int index);
-    void getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length);   ///< Get the concrete file from within the DST file into a buffer.
+    ScopedBuffer getFile(std::ifstream &srcFile, unsigned int index);   ///< Get the concrete file from within the DST file into a buffer.
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);
@@ -127,7 +128,7 @@ public:
 
     typedef struct
     {
-        uint16_t mFileNameChecksum;        // checksum of upper file name 
+        uint16_t mFileNameChecksum;        // checksum of upper file name
         uint16_t mFileNameLength;
         uint32_t mHeaderOffset;            // where DataFileHeader starts
         uint32_t mDataOffset;              // where the data start
@@ -189,7 +190,7 @@ protected:
     uint32_t mKey2;
     bool mWavHeaderRead;
     WavHeader mWavHeader;
-}; 
+};
 
 uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
 uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e };
@@ -220,7 +221,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     decrypt((char *) &mFileHeader,sizeof(mFileHeader));
 
     // read the content headers:
-        
+
     srcFile.seekg(mFileHeader.mFileTableOffset);
 
     if (!srcFile.good())
@@ -229,7 +230,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     mFileTableRecords.clear();
 
     unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(FileTableRecord);
-    FileTableRecord *headerArray = (FileTableRecord *) malloc(headerArraySize);
+    ScopedBuffer headerArray(headerArraySize);
     srcFile.read((char *) headerArray,headerArraySize);
 
     if (!srcFile.good())
@@ -238,9 +239,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     decrypt((char *) headerArray,headerArraySize);
 
     for (size_t i = 0; i < mFileHeader.mFileCount; ++i)
-        mFileTableRecords.push_back(headerArray[i]);
-
-    free(headerArray);
+        mFileTableRecords.push_back(headerArray.as<FileTableRecord>()[i]);
 
     // read the data headers:
 
@@ -272,10 +271,10 @@ int DataFormatDTA::getFileIndex(std::string fileName)
     return -1;
 }
 
-void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **dstBuffer, unsigned int &length)
+ScopedBuffer DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index)
 {
-    length = getFileSize(index);
-    *dstBuffer = (char *) malloc(length);
+    unsigned length = getFileSize(index);
+    ScopedBuffer dstBuffer(length);
 
     unsigned int fileOffset = mFileTableRecords[index].mDataOffset;
 
@@ -296,7 +295,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         srcFile.read((char *) &blockSize,sizeof(blockSize));
         blockSize = blockSize & 0xffff;
 
-        char *block = (char *) malloc(blockSize);
+        ScopedBuffer block(blockSize);
 
         srcFile.read(block,blockSize);
 
@@ -305,7 +304,7 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
 
         unsigned char blockType = block[0];
 
-        memcpy(*dstBuffer + bufferPos,block + 1,blockSize - 1);        // 1 - don't include the type byte
+        dstBuffer.copy_from(bufferPos, block + 1, blockSize - 1);      // 1 - don't include the type byte
 
         std::vector<unsigned char> decompressed;
 
@@ -323,8 +322,8 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
                 break;
 
             case BLOCK_DPCM0: dpcmType = 0; break;
-            case BLOCK_DPCM1: dpcmType = 1; break; 
-            case BLOCK_DPCM2: dpcmType = 2; break; 
+            case BLOCK_DPCM1: dpcmType = 1; break;
+            case BLOCK_DPCM2: dpcmType = 2; break;
             case BLOCK_DPCM3: dpcmType = 3; break;
             case BLOCK_DPCM4: dpcmType = 4; break;
             case BLOCK_DPCM5: dpcmType = 5; break;
@@ -335,11 +334,11 @@ void DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index, char **d
         if (dpcmType >= 0)
             decompressed = decompressDPCM(&WAV_DELTAS[128 * dpcmType],(unsigned char *) (*dstBuffer + bufferPos),blockSize - 1);
 
-        memcpy(*dstBuffer + bufferPos,decompressed.data(),decompressed.size());
+        dstBuffer.copy_from(bufferPos,decompressed.data(),decompressed.size());
         bufferPos += (uint32_t) decompressed.size();
-
-        free(block);
     }
+
+    return dstBuffer;
 }
 
 unsigned int DataFormatDTA::getFileSize(unsigned int index)
@@ -368,7 +367,7 @@ std::string DataFormatDTA::getFileName(unsigned int index)
 {
     return std::string(reinterpret_cast<char *>(mDataFileHeaders[index].mName));
 }
-    
+
 void DataFormatDTA::decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift)
 {
     uint32_t key1 = mKey1;
@@ -398,15 +397,15 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
     {
         memcpy((char *) &mWavHeader,buffer,sizeof(mWavHeader));
         position += sizeof(mWavHeader);
-        decrypt((char *) &mWavHeader,sizeof(mWavHeader)); 
+        decrypt((char *) &mWavHeader,sizeof(mWavHeader));
         decompressed.insert(decompressed.end(),(char *) &mWavHeader, ((char *) &mWavHeader) + sizeof(mWavHeader));
         mWavHeaderRead = true;
     }
 
     if (mWavHeader.mChannels == 1)
     {
-        decompressed.push_back(buffer[position]);        
-        decompressed.push_back(buffer[position + 1]);        
+        decompressed.push_back(buffer[position]);
+        decompressed.push_back(buffer[position + 1]);
 
         uint16_t value = *((uint16_t *) &(buffer[position]));
 
@@ -425,7 +424,7 @@ std::vector<unsigned char> DataFormatDTA::decompressDPCM(uint16_t *delta, unsign
     {
         // TODO: find a stereo WAV and implement this or prove there are no stereo WAVs
     }
- 
+
     return decompressed;
 }
 
@@ -442,7 +441,7 @@ std::vector<unsigned char> DataFormatDTA::decompressLZSS(unsigned char *buffer, 
         position += 2;
 
         if (value == 0)  // 0 means just copy the next (at most) 16 bytes
-        { 
+        {
             unsigned int n = std::min(bufferLen - position,(unsigned int) 16);
 
             for (unsigned int j = 0; j < n; ++j)
@@ -464,7 +463,7 @@ std::vector<unsigned char> DataFormatDTA::decompressLZSS(unsigned char *buffer, 
 
                     if (offset == 0)
                     {
-                        n = ((n << 8) | (buffer[position + 2])) + 16;   
+                        n = ((n << 8) | (buffer[position + 2])) + 16;
                         decompressed.insert(decompressed.end(),n,buffer[position + 3]);
                         position += 4;
                     }

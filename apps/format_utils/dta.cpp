@@ -37,7 +37,7 @@ void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
             std::cout << "  " << ftr[i].mFileNameChecksum << " " << ftr[i].mFileNameLength << " " << ftr[i].mHeaderOffset <<
             " " << ftr[i].mDataOffset << " " << dfh[i].mUnknown << " " << dfh[i].mUnknown2 << " " << dfh[i].mTimeStamp << " "
             << " " << dfh[i].mCompressedBlockCount << std::endl;
-        } 
+        }
     }
 }
 
@@ -52,7 +52,7 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
     #ifdef OMF_SYSTEM_WINDOWS
         char const *baseName = zpl_path_base_name(outFile.c_str());
         system(std::string("mkdir \"" + std::string(baseName) + "\" && copy /y nul \"" + outFile + "\"").c_str());
-    #else 
+    #else
         outFile = "./" + outFile;
         std::replace(outFile.begin(), outFile.end(), '\\', '/');
         system(std::string("mkdir -p \"$(dirname \"" + outFile + "\")\" && touch \"" + outFile + "\"").c_str());
@@ -77,13 +77,10 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
         return false;
     }
 
-    char *buffer;
-    unsigned int fileSize;        
 
-    dta.getFile(DTAStream,fileIndex,&buffer,fileSize);
+    auto buffer = dta.getFile(DTAStream,fileIndex);
 
-    f.write(buffer,fileSize);
-    free(buffer);
+    f.write(buffer,buffer.size());
     f.close();
     return true;
 }
@@ -208,9 +205,8 @@ int main(int argc, char** argv)
             f.close();
             return 1;
         }
-           
-        char *buffer = (char *) malloc(fileSize);
-        
+
+        ScopedBuffer buffer(fileSize);
         f.read(buffer,fileSize);
         f.close();
 
@@ -218,9 +214,8 @@ int main(int argc, char** argv)
 
         f2.write(buffer,fileSize);
 
-        free(buffer);
         f2.close();
-        return 0;    
+        return 0;
     }
 
     bool success = dta.load(f);
@@ -240,7 +235,7 @@ int main(int argc, char** argv)
         if (!extract(dta,f,extractFile,outputFile,""))
         {
             f.close();
-            return 1; 
+            return 1;
         }
     }
     else if (extractAllMode)
@@ -251,7 +246,7 @@ int main(int argc, char** argv)
             extract(dta,f,dta.getFileName(i),MFUtil::strToLower(dta.getFileName(i)),output);
     }
     else
-    {    
+    {
         dump(dta,displaySize,verbose);
     }
 
