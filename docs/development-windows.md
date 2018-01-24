@@ -61,3 +61,4 @@ Once we get all our dependencies compiled, we're finally ready to compile OpenMF
         - On CMake GUI, use `Add Entry` button to define a variable, call it `BUILD_<NAME>` (e.g. `BUILD_GAME`) and set its boolean value to True.
 4. Having done that, we can finally build our project!
 5. Refer back to our [development](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md) for more instructions on how to make use of our newly compiled binaries.
+6. We recommend setting up environment variables that point to built binaries of the dependencies, this way, you don't need to copy DLLs each time you set up the workspace.
