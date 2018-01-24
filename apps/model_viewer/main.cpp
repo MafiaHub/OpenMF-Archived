@@ -12,6 +12,7 @@
 #include <input/input_manager_implementation.hpp>
 #include <controllers/free_camera_controller.hpp>
 #include <controllers/rigid_camera_controller.hpp>
+#include <controllers/character_entity_controller.hpp>
 
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
@@ -21,6 +22,12 @@ static bool sIsRunning = true;
 
 // HACK: Deal with this differently
 static bool sSimulatePhysics = false;
+
+#define TEST_CONTROLLER 0
+
+#if TEST_CONTROLLER
+    static std::vector<MFGame::CharacterEntityController> sTestControllers;
+#endif
 
 // TODO: Replace with configurable value
 #define MS_PER_UPDATE 1 / 60.0f
@@ -82,6 +89,12 @@ public:
                 mCounter % 2 == 0 ?
                     mEntityFactory->createTestBallEntity() :
                     mEntityFactory->createTestBoxEntity());
+
+#if TEST_CONTROLLER
+            e->setPhysicsBehavior(MFGame::SpatialEntity::ENTITY_RIGID);
+            MFGame::CharacterEntityController ctrl(e);
+            sTestControllers.push_back(ctrl);
+#endif
 
             MFMath::Vec3 f,r,u;
             mRenderer->getCameraVectors(f,r,u);
@@ -410,6 +423,13 @@ int main(int argc, char** argv)
                 inputManager.processEvents();
                 entityManager.update(MS_PER_UPDATE);
                 cameraController->update(MS_PER_UPDATE);
+
+#if TEST_CONTROLLER
+                for (auto ctrl : sTestControllers)
+                {
+                    ctrl.moveLeft();
+                }
+#endif
 
                 if (sSimulatePhysics)
                     physicsWorld.frame(MS_PER_UPDATE);
