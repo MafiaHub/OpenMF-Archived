@@ -188,31 +188,19 @@ public:
                 }
                 else if (descriptions[0].compare("4ds mesh") == 0)
                 {
-                    // find the corresponding collision:
-    
-                    MFUtil::NamedRigidBody *matchedBody = 0;
-
-                    auto findResult = mNameToBody.find(n.getName());
-
-                    if (findResult != mNameToBody.end())
-                    {
-                        matchedBody = findResult->second;
-                    }
-                    else
-                    {
-                        findResult = mNameToBody.find(mModelName + "." + n.getName());
-
-                        if (findResult != mNameToBody.end())
-                            matchedBody = findResult->second;
-                    }
+                    MFUtil::NamedRigidBody *matchedBody = findCollision(n.getName());
 
                     if (!matchedBody)
-                        MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\".",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                        MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                    else
+                    {
+                        mEntityFactory->createEntity(&n,
+                            matchedBody ? matchedBody->mRigidBody.mBody : 0,
+                            matchedBody ? matchedBody->mRigidBody.mMotionState : 0,
+                            mModelName.length() > 0 ? mModelName + "." + n.getName() : n.getName());
 
-                    mEntityFactory->createEntity(&n,
-                        matchedBody ? matchedBody->mRigidBody.mBody : 0,
-                        matchedBody ? matchedBody->mRigidBody.mMotionState : 0,
-                        n.getName());
+                        mMatchedBodies.insert(matchedBody->mName);
+                    }
                 }
             }
         }
@@ -231,21 +219,22 @@ public:
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
     MFGame::SpatialEntityFactory *mEntityFactory;
-    std::string mModelName;                  // when traversin into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
+    std::string mModelName;                  // when traversing into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
     std::map<std::string,MFUtil::NamedRigidBody *> mNameToBody;
 
-    bool namesMatch(std::string nameVisual, std::string nameCol, std::string nameModel)
-    {
-        if (nameVisual.compare(nameCol) == 0)
-            return true;
+    MFUtil::NamedRigidBody *findCollision(std::string visualName)
+    { 
+        auto findResult = mNameToBody.find(visualName);
 
-        if (nameVisual.compare(nameModel + "." + nameCol) == 0)
-            return true;
+        if (findResult != mNameToBody.end())
+            return findResult->second;
+        
+        findResult = mNameToBody.find(mModelName + "." + visualName);
 
-        if (nameCol.compare(nameModel + "." + nameVisual) == 0)
-            return true;
+        if (findResult != mNameToBody.end())
+            return findResult->second;
 
-        return false;
+        return 0;
     }
 };
 
