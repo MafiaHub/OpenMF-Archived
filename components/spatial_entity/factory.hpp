@@ -23,13 +23,13 @@ public:
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="");
 
-    MFGame::Id createCameraEntity(osg::Camera *camera);
-
     MFGame::Id createTestBallEntity();
     MFGame::Id createTestBoxEntity();
+    MFGame::Id createCapsuleEntity();
+    MFGame::Id createCameraEntity();
 
-protected:
     MFGame::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+protected: 
 
     MFGame::SpatialEntityManager *mEntityManager;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
@@ -46,6 +46,7 @@ protected:
     osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
     std::shared_ptr<btCollisionShape> mCameraShape;
+    std::shared_ptr<btCollisionShape> mCapsuleShape;
 
     bool mDebugMode;
 };
@@ -78,6 +79,7 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 
     mCameraShape = std::make_shared<btSphereShape>(1.0f);
+    mCapsuleShape = std::make_shared<btCapsuleShape>(1.0f, 3.0f);
 }
 
 MFGame::Id SpatialEntityFactory::createEntity(
@@ -101,7 +103,29 @@ MFGame::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::Id SpatialEntityFactory::createCameraEntity(osg::Camera *camera)
+MFGame::Id SpatialEntityFactory::createCapsuleEntity()
+{
+    MFUtil::FullRigidBody body;
+
+    btScalar mass = 1.0f;
+    body.mMotionState = std::make_shared<btDefaultMotionState>(
+        btTransform(btQuaternion(0, 0, 0, mass),
+                    btVector3(0, 0, 0)));
+
+    btVector3 inertia;
+    mCapsuleShape->calculateLocalInertia(mass, inertia);
+    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mCapsuleShape.get(), inertia);
+    body.mBody->setActivationState(DISABLE_DEACTIVATION);
+    body.mBody->setAngularFactor(0);
+    mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
+
+    osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+    mRenderer->getRootNode()->addChild(visualTransform);
+
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule");
+}
+
+MFGame::Id SpatialEntityFactory::createCameraEntity()
 {
     MFUtil::FullRigidBody body;
 

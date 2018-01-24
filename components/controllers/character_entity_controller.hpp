@@ -41,12 +41,40 @@ public:
 
     void jump();
     void setCrouch(bool state);
+    virtual void moveLeft() override;
+    virtual void moveRight() override;
+    virtual void moveForward() override;
+    virtual void moveBackward() override;
 
   protected:
     bool mIsCrouching;
     int mMoveBehavior;
     float mSpeed[3];
 };
+
+void CharacterEntityController::moveLeft()
+{
+    // TODO check if we can move (if we're not standing at ground, don't move)
+    EntityController::moveLeft();
+}
+
+void CharacterEntityController::moveRight()
+{
+    // TODO check if we can move (if we're not standing at ground, don't move)
+    EntityController::moveRight();
+}
+
+void CharacterEntityController::moveForward()
+{
+    // TODO check if we can move (if we're not standing at ground, don't move)
+    EntityController::moveForward();
+}
+
+void CharacterEntityController::moveBackward()
+{
+    // TODO check if we can move (if we're not standing at ground, don't move)
+    EntityController::moveBackward();
+}
 
 void CharacterEntityController::move(MFMath::Vec3 offset)
 {

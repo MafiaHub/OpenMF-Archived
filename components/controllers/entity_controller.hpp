@@ -15,11 +15,12 @@ public:
 
 
     virtual void move(MFMath::Vec3 offset);
-    void moveLeft();
-    void moveRight();
-    void moveForward();
-    void moveBackward();
-protected:
+    virtual void moveLeft();
+    virtual void moveRight();
+    virtual void moveForward();
+    virtual void moveBackward();
+
+  protected:
     SpatialEntity *mEntity;
 };
 

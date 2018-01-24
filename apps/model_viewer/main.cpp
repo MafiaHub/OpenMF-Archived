@@ -341,7 +341,7 @@ int main(int argc, char** argv)
 
     if (cameraRigid)
     {
-        auto cameraEntity = entityFactory.createCameraEntity(renderer.getViewer()->getCamera());
+        auto cameraEntity = entityFactory.createCameraEntity();
         auto cameraPtr = entityManager.getEntityById(cameraEntity);
         auto pos = renderer.getCameraPosition();
 
