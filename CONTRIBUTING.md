@@ -48,4 +48,4 @@ We'll also need automated tests later, so if you're interested in making some, w
 
 ## Discussing With the Community
 
-Come talk to us on discord (see README.md for the link) about anything, make suggestions, ask questions etc. **Note that we're not publicly promoting the project yet** - so please respect that. We're planning on going full public once the overall architecture is up and ready for larger number of devs.
+Come talk to us on discord (see README.md for the link) about anything, make suggestions, ask questions etc.
