@@ -299,7 +299,7 @@ int main(int argc, char** argv)
     std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
     inputManager.addKeyCallback(skcb);
 
-    std::unique_ptr<MFGame::CameraController> cameraController;
+    std::unique_ptr<MFGame::FreeCameraController> cameraController;
 
 
     if (model)

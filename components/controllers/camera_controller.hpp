@@ -13,14 +13,9 @@ public:
     CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual void update(double dt)=0;
 
-    void setSpeed(double speed)         { mSpeed = speed;         };
-    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
-
 protected:
     MFRender::Renderer *mRenderer;
     MFInput::InputManager *mInputManager;
-    double mSpeed;
-    double mRotationSpeed;
 };
 
 CameraController::CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager)

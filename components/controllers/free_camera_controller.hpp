@@ -13,7 +13,10 @@ public:
     FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual void update(double dt) override;
 
-protected:
+    void setSpeed(double speed) { mSpeed = speed; };
+    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
+
+  protected:
     virtual void handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset);
 
     double mPreviousMouseButton;
@@ -30,6 +33,9 @@ protected:
     unsigned int mKeyUp;
     unsigned int mKeyDown;
     unsigned int mKeySpeedup;
+
+    double mSpeed;
+    double mRotationSpeed;
 };
 
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
