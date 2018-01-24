@@ -19,11 +19,14 @@ public:
     ~SpatialEntityImplementation();
     virtual void update(double dt) override;
     virtual void ready() override;
-    virtual void move(MFMath::Vec3 destPosition) override;
     virtual std::string toString() override;
     virtual void setPosition(MFMath::Vec3 position) override;
     virtual void setVelocity(MFMath::Vec3 velocity) override;
     virtual void setAngularVelocity(MFMath::Vec3 velocity) override;
+    virtual void setDamping(float lin, float ang) override;
+    virtual MFMath::Vec3 getVelocity() override;
+    virtual MFMath::Vec3 getAngularVelocity() override;
+    virtual MFMath::Vec2 getDamping() override;
     virtual bool hasVisual() override;
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
@@ -99,6 +102,40 @@ void SpatialEntityImplementation::setAngularVelocity(MFMath::Vec3 velocity)
         return;
 
     mBulletBody->setAngularVelocity(btVector3(velocity.x,velocity.y,velocity.z));
+}
+
+void SpatialEntityImplementation::setDamping(float lin, float ang)
+{
+    if (!mBulletBody)
+        return;
+
+    mBulletBody->setDamping(lin, ang);
+}
+
+MFMath::Vec3 SpatialEntityImplementation::getVelocity()
+{
+    if (!mBulletBody)
+        return MFMath::Vec3(0,0,0);
+
+    auto vel = mBulletBody->getLinearVelocity();
+    return MFMath::Vec3(vel.x(), vel.y(), vel.z());
+}
+
+MFMath::Vec3 SpatialEntityImplementation::getAngularVelocity()
+{
+    if (!mBulletBody)
+        return MFMath::Vec3(0, 0, 0);
+
+    auto vel = mBulletBody->getAngularVelocity();
+    return MFMath::Vec3(vel.x(), vel.y(), vel.z());
+}
+
+MFMath::Vec2 SpatialEntityImplementation::getDamping()
+{
+    if (!mBulletBody)
+        return MFMath::Vec2(0,0);
+
+    return MFMath::Vec2(mBulletBody->getLinearDamping(), mBulletBody->getAngularDamping());
 }
 
 void SpatialEntityImplementation::computeCurrentTransform()
@@ -377,10 +414,6 @@ void SpatialEntityImplementation::syncDebugPhysicsNode()
     }
 
     mOSGPhysicsDebugNode->setMatrix(transformMat);
-}
-
-void SpatialEntityImplementation::move(MFMath::Vec3 destPosition)
-{
 }
 
 }
