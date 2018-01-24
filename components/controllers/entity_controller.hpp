@@ -121,6 +121,11 @@ void EntityController::jump()
     }
 }
 
+void EntityController::setCrouch(bool state)
+{
+    // TODO deal with this
+}
+
 }
 
 #endif // ENTITY_CONTROLLER_H
