@@ -14,6 +14,8 @@ public:
     virtual void update(double dt) override;
 
 protected:
+    virtual void handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset);
+
     double mPreviousMouseButton;
 
     bool mInitTransform;
@@ -131,12 +133,17 @@ void FreeCameraController::update(double dt)
         mPreviousMouseButton = false;
     }
 
+    handleMovement(offset, rotOffset);
+}
+
+void FreeCameraController::handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset)
+{
     mPosition += offset;
-    mRotation += rotOffset;
+    mRotation += angOffset;
 
-    mRotation.y = std::max(0.0f,std::min(MFMath::PI - 0.001f,mRotation.y));
+    mRotation.y = std::max(0.0f, std::min(MFMath::PI - 0.001f, mRotation.y));
 
-    mRenderer->setCameraPositionRotation(mPosition,mRotation);
+    mRenderer->setCameraPositionRotation(mPosition, mRotation);
 }
 
 }
