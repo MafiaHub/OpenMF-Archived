@@ -46,5 +46,6 @@ If you'd like to join us and contribute, see [development.md](https://github.com
 
 ## Demonstration
 <a href="https://www.youtube.com/watch?v=gneJTc8AixI" target="_blank">![OpenMF Physics fun](https://cdn.discordapp.com/attachments/232829242541473793/405718157005946882/Artboard.png)</a>
-    
+
+## Screenshots    
 ![](https://github.com/OpenMafia/openmf/blob/master/resources/screens.jpg?raw=true)
