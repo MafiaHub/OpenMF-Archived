@@ -57,6 +57,14 @@ std::vector<std::string> strSplit(const std::string &s, char delim)
     return elems;
 }
 
+std::string strReverse(std::string s)
+{
+    std::string reversed = std::string();
+    reversed.resize(s.length());
+    std::reverse_copy(s.begin(), s.end(), reversed.begin());
+    return reversed;
+}
+
 template<typename T>
 std::string vecToString(const std::vector<T> &vec, std::string delim)
 {
