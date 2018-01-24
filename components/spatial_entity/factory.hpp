@@ -237,6 +237,11 @@ protected:
         for (auto it = found.first; it != found.second; ++it)
             result.push_back(it->second);
 
+        found = mNameToBody.equal_range(mModelName);
+
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
+
         found = mNameToBody.equal_range(mModelName + "." + visualName);
 
         for (auto it = found.first; it != found.second; ++it)
