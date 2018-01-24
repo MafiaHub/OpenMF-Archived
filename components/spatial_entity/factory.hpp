@@ -164,7 +164,10 @@ public:
         mModelName = "";
 
         for (int i = 0; i < (int) treeKlzBodies->size(); ++i)
-            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>((*treeKlzBodies)[i].mName,&((*treeKlzBodies)[i])));
+        {
+            std::string name = (*treeKlzBodies)[i].mName;
+            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>(name,&((*treeKlzBodies)[i])));
+        }
     }
 
     virtual void apply(osg::Node &n) override
@@ -188,31 +191,22 @@ public:
                 }
                 else if (descriptions[0].compare("4ds mesh") == 0)
                 {
-                    // find the corresponding collision:
-    
-                    MFUtil::NamedRigidBody *matchedBody = 0;
+                    std::vector<MFUtil::NamedRigidBody *> matches = findCollisions(n.getName());
+                    std::string fullName = mModelName.length() > 0 ? mModelName + "." + n.getName() : n.getName();
 
-                    auto findResult = mNameToBody.find(n.getName());
-
-                    if (findResult != mNameToBody.end())
+                    if (matches.size() == 0)
                     {
-                        matchedBody = findResult->second;
+                        MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                        mEntityFactory->createEntity(&n,0,0,fullName);
                     }
                     else
                     {
-                        findResult = mNameToBody.find(mModelName + "." + n.getName());
-
-                        if (findResult != mNameToBody.end())
-                            matchedBody = findResult->second;
+                        for (int i = 0; i < (int) matches.size(); ++i)
+                        {
+                            mEntityFactory->createEntity(&n, matches[i]->mRigidBody.mBody,matches[i]->mRigidBody.mMotionState,fullName);
+                            mMatchedBodies.insert(matches[i]->mName);
+                        }
                     }
-
-                    if (!matchedBody)
-                        MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\".",SPATIAL_ENTITY_FACTORY_MODULE_STR);
-
-                    mEntityFactory->createEntity(&n,
-                        matchedBody ? matchedBody->mRigidBody.mBody : 0,
-                        matchedBody ? matchedBody->mRigidBody.mMotionState : 0,
-                        n.getName());
                 }
             }
         }
@@ -231,21 +225,29 @@ public:
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
     MFGame::SpatialEntityFactory *mEntityFactory;
-    std::string mModelName;                  // when traversin into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
-    std::map<std::string,MFUtil::NamedRigidBody *> mNameToBody;
+    std::string mModelName;                  // when traversing into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
+    std::multimap<std::string,MFUtil::NamedRigidBody *> mNameToBody;
 
-    bool namesMatch(std::string nameVisual, std::string nameCol, std::string nameModel)
+    std::vector<MFUtil::NamedRigidBody *> findCollisions(std::string visualName)
     {
-        if (nameVisual.compare(nameCol) == 0)
-            return true;
+        std::vector<MFUtil::NamedRigidBody *> result;
 
-        if (nameVisual.compare(nameModel + "." + nameCol) == 0)
-            return true;
+        auto found = mNameToBody.equal_range(visualName);
 
-        if (nameCol.compare(nameModel + "." + nameVisual) == 0)
-            return true;
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
 
-        return false;
+        found = mNameToBody.equal_range(mModelName);
+
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
+
+        found = mNameToBody.equal_range(mModelName + "." + visualName);
+
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
+
+        return result;
     }
 };
 

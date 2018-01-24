@@ -64,7 +64,11 @@ SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
 
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::Id id)
 {
+    if (id == MFGame::NullId)
+        return 0;
+
     auto entity = mEntities[id];
+
     if (!entity.get())
     {
         MFLogger::ConsoleLogger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
