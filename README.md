@@ -45,7 +45,6 @@ The project is in very early stage and at the moment can offer libraries for loa
 If you'd like to join us and contribute, see [development.md](https://github.com/OpenMafia/OpenMF/tree/master/docs/development.md).
 
 ## Demonstration
-<div align="center">
-    [![OpenMF Physics fun](https://share.madaraszd.net/b7MVNVZgRtznnI_1516800229.jpg)](https://www.youtube.com/watch?v=gneJTc8AixI)
-    ![](https://github.com/OpenMafia/openmf/blob/master/resources/screens.jpg?raw=true)
-</div>
+[![OpenMF Physics fun](https://share.madaraszd.net/b7MVNVZgRtznnI_1516800229.jpg)](https://www.youtube.com/watch?v=gneJTc8AixI)
+    
+![](https://github.com/OpenMafia/openmf/blob/master/resources/screens.jpg?raw=true)
