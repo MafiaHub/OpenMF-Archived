@@ -50,6 +50,9 @@ public:
     bool isReady()                                      { return mReady;        };
     Id getId()                                          { return mId;           };
 
+    void setPhysicsBehavior(int behavior) { mPhysicsBehavior = behavior; }
+    int  getPhysicsBehavior()             { return mPhysicsBehavior; }
+
     // TODO deal with ID sync between old and a new manager at some point.
     //static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
     static IDManager *getIDManager() 
@@ -57,7 +60,13 @@ public:
         return sIDManager.get(); 
     }
 
-protected:
+    typedef enum {
+        ENTITY_STATIC,
+        ENTITY_MOVABLE,
+        ENTITY_RIGID,
+    } PhysicsBehavior;
+
+  protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
@@ -66,6 +75,9 @@ protected:
     bool mReady;
     Id mId;
     static std::shared_ptr<IDManager> sIDManager;
+
+private:
+    int mPhysicsBehavior;
 };
 
 SpatialEntity::SpatialEntity()
@@ -74,6 +86,7 @@ SpatialEntity::SpatialEntity()
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
+    mPhysicsBehavior = ENTITY_MOVABLE;
 }
 
 SpatialEntity::~SpatialEntity()

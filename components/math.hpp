@@ -169,6 +169,13 @@ namespace MFMath
                                                                           x.x /= s.x;     x.y /= s.x;    x.z /= s.x;
                                                                           y.x /= s.y;     y.y /= s.y;    y.z /= s.y;
                                                                           z.x /= s.z;     z.y /= s.z;    z.z /= s.z; }
+
+        vec<T,3>                    preMult(vec<T,3> v)                 {
+                                                                          float d=1.0f/(x[3]    * v.x + y[3] * v.y + z[3]  * v.z + w[3]);
+                                                                          return vec<T,3>((x[0] * v.x + y[0] * v.y + z[0]  * v.z + w[0]) * d,
+                                                                             (x[1] * v.x + y[1] * v.y + z[1] * v.z + w[1]) * d,
+                                                                             (x[2] * v.x + y[2] * v.y + z[2] * v.z + w[2]) * d);
+                                                                        }
     };
 
     // Type traits for a binary operation involving linear algebra types, used for SFINAE on templated functions and operator overloads
