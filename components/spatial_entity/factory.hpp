@@ -164,7 +164,10 @@ public:
         mModelName = "";
 
         for (int i = 0; i < (int) treeKlzBodies->size(); ++i)
-            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>((*treeKlzBodies)[i].mName,&((*treeKlzBodies)[i])));
+        {
+            std::string name = (*treeKlzBodies)[i].mName;
+            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>(name,&((*treeKlzBodies)[i])));
+        }
     }
 
     virtual void apply(osg::Node &n) override
@@ -188,18 +191,21 @@ public:
                 }
                 else if (descriptions[0].compare("4ds mesh") == 0)
                 {
-                    MFUtil::NamedRigidBody *matchedBody = findCollision(n.getName());
+                    std::vector<MFUtil::NamedRigidBody *> matches = findCollisions(n.getName());
+                    std::string fullName = mModelName.length() > 0 ? mModelName + "." + n.getName() : n.getName();
 
-                    if (!matchedBody)
+                    if (matches.size() == 0)
+                    {
                         MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                        mEntityFactory->createEntity(&n,0,0,fullName);
+                    }
                     else
                     {
-                        mEntityFactory->createEntity(&n,
-                            matchedBody ? matchedBody->mRigidBody.mBody : 0,
-                            matchedBody ? matchedBody->mRigidBody.mMotionState : 0,
-                            mModelName.length() > 0 ? mModelName + "." + n.getName() : n.getName());
-
-                        mMatchedBodies.insert(matchedBody->mName);
+                        for (int i = 0; i < (int) matches.size(); ++i)
+                        {
+                            mEntityFactory->createEntity(&n, matches[i]->mRigidBody.mBody,matches[i]->mRigidBody.mMotionState,fullName);
+                            mMatchedBodies.insert(matches[i]->mName);
+                        }
                     }
                 }
             }
@@ -220,21 +226,23 @@ protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
     MFGame::SpatialEntityFactory *mEntityFactory;
     std::string mModelName;                  // when traversing into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
-    std::map<std::string,MFUtil::NamedRigidBody *> mNameToBody;
+    std::multimap<std::string,MFUtil::NamedRigidBody *> mNameToBody;
 
-    MFUtil::NamedRigidBody *findCollision(std::string visualName)
-    { 
-        auto findResult = mNameToBody.find(visualName);
+    std::vector<MFUtil::NamedRigidBody *> findCollisions(std::string visualName)
+    {
+        std::vector<MFUtil::NamedRigidBody *> result;
 
-        if (findResult != mNameToBody.end())
-            return findResult->second;
-        
-        findResult = mNameToBody.find(mModelName + "." + visualName);
+        auto found = mNameToBody.equal_range(visualName);
 
-        if (findResult != mNameToBody.end())
-            return findResult->second;
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
 
-        return 0;
+        found = mNameToBody.equal_range(mModelName + "." + visualName);
+
+        for (auto it = found.first; it != found.second; ++it)
+            result.push_back(it->second);
+
+        return result;
     }
 };
 

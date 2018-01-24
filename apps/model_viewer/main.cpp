@@ -28,6 +28,7 @@ static bool sSimulatePhysics = false;
 // TODO move this to Platform class
 #include <chrono>
 #include <thread>
+
 double timeGet()
 {
     static auto epoch = std::chrono::high_resolution_clock::now();
@@ -302,7 +303,6 @@ int main(int argc, char** argv)
 
     std::unique_ptr<MFGame::FreeCameraController> cameraController;
 
-
     if (model)
     {
         renderer.loadSingleModel(inputFile);
@@ -331,11 +331,13 @@ int main(int argc, char** argv)
         auto cameraEntity = entityFactory.createCameraEntity(renderer.getViewer()->getCamera());
         auto cameraPtr = entityManager.getEntityById(cameraEntity);
         auto pos = renderer.getCameraPosition();
+
         if (cameraPtr == nullptr)
         {
             MFLogger::ConsoleLogger::fatal("Camera was not initialized!");
             return 0;
         }
+
         cameraPtr->setPosition(pos);
         cameraController = std::make_unique<MFGame::RigidCameraController>(&renderer, &inputManager, cameraPtr);
     }
