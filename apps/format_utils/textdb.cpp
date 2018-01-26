@@ -16,7 +16,7 @@ void dump(MFFormat::DataFormatTextdbDEF textDb)
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("road_bin", "CLI utility for Mafia textdb_xx.def format.");
+    cxxopts::Options options("textdb", "CLI utility for Mafia textdb_xx.def format.");
 
     options.add_options()
         ("h,help", "Display help and exit.")
