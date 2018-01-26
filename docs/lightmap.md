@@ -38,11 +38,13 @@ struct {
 
 2. `Section_Header`
 
-    Consist of only one number: the count of levels, stored in block.
+    Consist of only one number: the bitmap where each bit states the presence of lightmap for specified Level of Details level.
+For example, bit at possition 1 specifies if lightmap for LOD no. 1 is presented.
+
     In original Mafia, the number has to match the count of LOD of visual object (frame).
 ~~~~c
 struct {
-	uint8_t numberOfLevelOfDetails; 
+	uint8_t bitmapOfLevelOfDetails; 
 } Section_Header;
 ~~~~
 
@@ -58,7 +60,7 @@ enum typeOfLightmap = { BITMAP = 0x0,   // lightmap stored as RGBA texels
                         };
 struct {
     uint8_t lightmapVersion;    // only 0x21 is supported by Mafia 
-    uint8_t unk;                // usually 0x6 /5 
+    uint8_t typeOfLightmap;     // usually 0x6 (BMP) / 0x5 (vertex) 
     uint32_t currentLOD;        // the level of currently parsed block ?
     float unkA;                 // somehow related to LOD of visual object
                                 // maybe these 2 float relates to distance / blending 

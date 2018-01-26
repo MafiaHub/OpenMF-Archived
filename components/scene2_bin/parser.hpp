@@ -100,6 +100,22 @@ public:
         char mLightSectors[5000];
     } Object;
 
+    typedef enum {
+        LIGHTMAP_VERTEX = 0x5,
+        LIGHTMAP_MAP = 0x6
+    } LightmapType;
+
+    #pragma pack(push, 1)
+    typedef struct {
+        uint8_t mLightmapVersion;   
+        uint8_t mTypeOfLightmap;              
+        uint32_t mNuberOfParts;     
+        float mUnkA;             
+        float mUnkB;             
+        uint8_t mLevelId;        
+    } LightmapGeneralData;
+    #pragma pack(pop)
+
     virtual bool load(std::ifstream &srcFile);
     
     inline size_t getNumObjects()                               { return mObjects.size(); }
@@ -305,30 +321,118 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
         break;
         case OBJECT_LIGHT_MAP:
         {
-            uint8_t numberOfLightmapLevels;
-            read(srcFile, &numberOfLightmapLevels);
-            // According to docs, unk word should be 2015/2016
-            uint16_t unknownWord;
-            read(srcFile, &unknownWord);
-            // 01 00 00 00
-            uint32_t unknownDword;
-            read(srcFile, &unknownDword);
+            uint8_t bitmapOfLevelOfDetails;
+            read(srcFile, &bitmapOfLevelOfDetails);
 
-            float unkFloatA;
-            read(srcFile, &unkFloatA);
+            // if no lightmap is present for this object
+            if(bitmapOfLevelOfDetails == 0)
+                break;
 
-            float unkFloatB;
-            read(srcFile, &unkFloatB);
+            unsigned char countOfLightmaps = 0;
+            // count the number of lightmap levels
+            uint8_t temporaryBitmap = bitmapOfLevelOfDetails;
+            std::cout << "Bitmap: ";
+            while(temporaryBitmap!= 0)
+            {
+                std::cout << (int) (temporaryBitmap & 1);
+                if((temporaryBitmap & 1) == 1)
+                    countOfLightmaps++;
+                temporaryBitmap >>=1;
+            }
+            std::cout << "\n";
 
-            std::cout << "Obj. lightmap starting offset: " <<  srcFile.tellg() << "\n";
-            std::cout << "\tSection1:" << "\n";
-            std::cout << "\tLightmap levels:\t" << (int) numberOfLightmapLevels << "\n";
-            std::cout << "\tFloat A:\t" << unkFloatA<< "\n";
-            std::cout << "\tFloat B:\t" << unkFloatB<< "\n";
+            std::cout << "Count of ligtmaps: " << (int) countOfLightmaps << "\n";
+            for(unsigned char i = 0; i < countOfLightmaps; i++)
+            {
+                // read general data which are common for both BMP / vertex lightmaps
+                LightmapGeneralData generalHeader;
+                read(srcFile, &generalHeader);
+                
+                std::cout << "Obj. lightmap starting offset: " <<  srcFile.tellg() << "\n";
+                std::cout << "\tGeneral Section:" << "\n";
+                std::cout << "\tLightmap type:\t" << (int) generalHeader.mTypeOfLightmap<< "\n";
+                std::cout << "\tLightmap no. parts:\t" << (int) generalHeader.mNuberOfParts<< "\n";
+                std::cout << "\tLightmap level ID:\t" << (int) generalHeader.mLevelId << "\n";
+                std::cout << "\tFloat A:\t" << generalHeader.mUnkA<< "\n";
+                std::cout << "\tFloat B:\t" << generalHeader.mUnkB<< "\n";
 
-            uint8_t numberOfLevels;
-            read(srcFile, &numberOfLevels);
-            std::cout << "\t" <<  (int) numberOfLevels << " levels" << "\n";
+
+
+                for(unsigned part = 0; part < generalHeader.mNuberOfParts; part++)
+                {
+                    uint16_t unkShit;
+                    read(srcFile, &unkShit);
+
+                    switch(generalHeader.mTypeOfLightmap)
+                    {
+
+
+                        case LIGHTMAP_VERTEX:
+                        {
+                                std::cout << "Obj. lightmap starting offset: " <<  srcFile.tellg() << "\n";
+                                uint32_t numberOfVertices;
+                                read(srcFile, &numberOfVertices);
+                                std::cout << "\tVertices: \t" << numberOfVertices << "\n";
+                                
+
+                                
+                                uint32_t* arrayofRGBA = new uint32_t[numberOfVertices];
+                                read(srcFile, arrayofRGBA, sizeof(uint32_t)*numberOfVertices);
+                                //srcFile.read((char*)arrayofRGBA, (sizeof(uint32_t)*numberOfVertices));
+                                
+                        }
+                        break;
+                        case LIGHTMAP_MAP:
+                        {
+                            uint16_t numberOfVertices;
+                            read(srcFile, &numberOfVertices);
+                            uint16_t numberOfFacets;
+                            read(srcFile, &numberOfFacets);
+
+                            std::cout << "\tVerties: \t" << numberOfVertices << "\n";
+                            std::cout << "\tFacets: \t" << numberOfFacets<< "\n";
+
+                            uint8_t flagIsDwordPresent;
+                            read(srcFile, &flagIsDwordPresent);
+
+                            std::cout << "\tFlag: \t" << (int) flagIsDwordPresent << "\n";
+
+                            uint32_t unkDword;
+                            if(flagIsDwordPresent)
+                                read(srcFile, &unkDword);
+
+
+                            uint32_t countOfSomething;
+                            read(srcFile, &countOfSomething);
+
+                            std::cout << "\tCount: \t" << (int) countOfSomething<< "\n";
+
+
+                            for(unsigned s = 0; s < countOfSomething; s++)
+                            {
+                                std::cout << "Float pos>>: " <<  srcFile.tellg() << "\n";
+                                uint32_t sizeA;
+                                read(srcFile, &sizeA);
+                                uint32_t sizeB;
+                                read(srcFile, &sizeB);
+                                std::cout << "\tSize: [" << (int) sizeA << "," << sizeB << "]\n";
+
+                                uint32_t sizeOfArray = sizeA*sizeB*3;
+                                uint8_t* arrayofRGB = new uint8_t[sizeOfArray];
+                                read(srcFile, arrayofRGB, sizeOfArray);
+
+                            }
+    
+
+                            
+                        }
+                        break;
+                    }
+                }
+                return;
+
+            }
+            return;
         
             uint16_t numberOfVertices;
             read(srcFile, &numberOfVertices);
