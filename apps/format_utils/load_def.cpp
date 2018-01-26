@@ -1,22 +1,22 @@
 #include <iostream>
-#include <textdb/parser.hpp>
+#include <load_def/parser.hpp>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
 #include <utils.hpp>
 #include <cxxopts.hpp>
 
-void dump(MFFormat::DataFormatTextdbDEF textDb)
+void dump(MFFormat::DataFormatLoadDEF loadDef)
 {
-    MFLogger::ConsoleLogger::raw("number of text entries: " + std::to_string(textDb.getNumTextEntries()), "dump");
-    for (auto textEntry : textDb.getTextEntries())
+    MFLogger::ConsoleLogger::raw("number of loading screens: " + std::to_string(loadDef.getNumLoadingScreens()), "dump");
+    for (auto loadingScreen : loadDef.getLoadingScreens())
     {
-        MFLogger::ConsoleLogger::raw("[" + std::to_string(textEntry.first) + "] " + textEntry.second, "dump");
+        MFLogger::ConsoleLogger::raw("\t" + std::string(loadingScreen.mMissionName) + "\t" + std::string(loadingScreen.mFileName) + "\t" + std::to_string(loadingScreen.mTextId), "dump");
     }
 }
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("textdb", "CLI utility for Mafia textdb_xx.def format.");
+    cxxopts::Options options("load_def", "CLI utility for Mafia load.def format.");
 
     options.add_options()
         ("h,help", "Display help and exit.")
@@ -51,9 +51,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    MFFormat::DataFormatTextdbDEF textDb;
+    MFFormat::DataFormatLoadDEF loadDef;
 
-    bool success = textDb.load(f);
+    bool success = loadDef.load(f);
 
     if (!success)
     {
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    dump(textDb);
+    dump(loadDef);
 
     return 0;
 }
