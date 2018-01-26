@@ -5,10 +5,10 @@
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
-#include <4ds/osg.hpp>
-#include <scene2_bin/osg.hpp>
-#include <cache_bin/osg.hpp>
-#include <check_bin/osg.hpp>
+#include <parsers/4ds/osg.hpp>
+#include <parsers/scene2_bin/osg.hpp>
+#include <parsers/cache_bin/osg.hpp>
+#include <parsers/check_bin/osg.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>

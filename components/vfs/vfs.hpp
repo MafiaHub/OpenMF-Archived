@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <osdefines.hpp>
-#include <dta/parser.hpp>
+#include <parsers/dta/parser.hpp>
 #include <vfs/encoding.hpp>
 
 #include <loggers/console.hpp>

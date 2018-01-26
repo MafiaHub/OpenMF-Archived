@@ -3,8 +3,8 @@
 
 #include <physics/base_physics_world.hpp>
 #include <loggers/console.hpp>
-#include <klz/bullet.hpp>
-#include <4ds/parser.hpp>
+#include <parsers/klz/bullet.hpp>
+#include <parsers/4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
 #include <bullet_utils.hpp>

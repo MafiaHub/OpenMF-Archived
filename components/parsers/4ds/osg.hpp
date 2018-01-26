@@ -10,7 +10,7 @@
 #include <vfs/vfs.hpp>
 #include <fstream>
 #include <algorithm>
-#include <4ds/parser.hpp>
+#include <parsers/4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils.hpp>
 #include <osg_masks.hpp>

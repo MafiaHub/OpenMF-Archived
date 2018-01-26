@@ -1,7 +1,7 @@
 #ifndef FORMAT_PARSERS_MNU_H
 #define FORMAT_PARSERS_MNU_H
 
-#include <base_parser.hpp>
+#include <parsers/base_parser.hpp>
 
 namespace MFFormat
 {

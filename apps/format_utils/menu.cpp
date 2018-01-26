@@ -1,6 +1,6 @@
 #include <iostream>
-#include <menu/menu_def_parser.hpp>
-#include <menu/mnu_parser.hpp>
+#include <parsers/menu/menu_def_parser.hpp>
+#include <parsers/menu/mnu_parser.hpp>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
 #include <utils.hpp>

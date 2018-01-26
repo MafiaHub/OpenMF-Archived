@@ -1,7 +1,7 @@
 #ifndef OSG_CACHE_BIN_LOADER_H
 #define OSG_CACHE_BIN_LOADER_H
 
-#include <cache_bin/parser.hpp>
+#include <parsers/cache_bin/parser.hpp>
 
 #define OSGCACHEBIN_MODULE_STR "loader cache.bin"
 
