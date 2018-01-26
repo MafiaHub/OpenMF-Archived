@@ -422,7 +422,14 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
                                 read(srcFile, arrayofRGB, sizeOfArray);
 
                             }
-    
+
+                            uint32_t countOfUVCoordinates; 
+                            read(srcFile, &countOfUVCoordinates);
+                            std::cout << "\tCount of UV coordinates: \t" << (int) countOfUVCoordinates<< "\n";
+
+                            
+
+                            
 
                             
                         }
