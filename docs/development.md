@@ -61,7 +61,7 @@ on the game files.
 1. Get the original game (for example [here](http://store.steampowered.com/app/40990/Mafia/)).
 2. Install the game (on Linux this can be done using Wine).
 3. Extract the data files into a folder (e.g. `/home/myname/mafia/`) using one of these methods:
-   - At this moment, it's probably best to use [Mafia DTA extractor](http://www.moddb.com/games/mafia/downloads/mafia-data-xtractor-v11).
+   - At this moment, it's probably best to use [Mafia DTA extractor](http://www.moddb.com/games/mafia/downloads/mafia-data-xtractor-v11). The extracted files additionally have to be converted to lowercase filenames - you can use for example [this](https://stackoverflow.com/a/25590300/1517689) method.
    - We have our own extractor (`format_utils/dta`), but it's not very well tested yet. You can try though.
 4. Set the `MAFIA_INSTALL_DIR` environment variable to point to the folder with extracted files, e.g. `MAFIA_INSTALL_DIR="/home/myname/mafia/"`.
 5. Now you should be able to run the world viewer. Test it for example with `./bin/viewer 00menu`.
