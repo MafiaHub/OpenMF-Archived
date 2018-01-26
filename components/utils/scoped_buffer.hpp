@@ -11,8 +11,8 @@
 class ScopedBuffer
 {
 public:
-    ScopedBuffer(size_t size) : mData(0x0), mSize(size);
-    ScopedBuffer(ScopedBuffer &&src) : mData(src.mData), mSize(src.mSize);
+    ScopedBuffer(size_t size): mData(0x0), mSize(size) {};
+    ScopedBuffer(ScopedBuffer &&src): mData(src.mData), mSize(src.mSize) {};
     ~ScopedBuffer();
     char *operator*();
     const char *operator*() const;

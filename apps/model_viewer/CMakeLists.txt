@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(viewer main.cpp)
+ADD_EXECUTABLE(viewer main.cpp ${COMPONENT_FILES})
 
 IF(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
