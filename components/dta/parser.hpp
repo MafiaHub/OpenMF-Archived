@@ -104,20 +104,6 @@ public:
     std::vector<unsigned char> decompressLZSS(unsigned char *buffer, unsigned int bufferLen);
     std::vector<unsigned char> decompressDPCM(uint16_t *delta, unsigned char *buffer, unsigned int bufferLen);
 
-    static uint32_t A0_KEYS[2];   // decrypting keys
-    static uint32_t A1_KEYS[2];
-    static uint32_t A2_KEYS[2];
-    static uint32_t A3_KEYS[2];
-    static uint32_t A4_KEYS[2];
-    static uint32_t A5_KEYS[2];
-    static uint32_t A6_KEYS[2];
-    static uint32_t A7_KEYS[2];
-    static uint32_t A8_KEYS[2];
-    static uint32_t A9_KEYS[2];
-    static uint32_t AA_KEYS[2];
-    static uint32_t AB_KEYS[2];
-    static uint32_t AC_KEYS[2];
-
     typedef struct
     {
         uint32_t mFileCount;
@@ -191,20 +177,6 @@ protected:
     bool mWavHeaderRead;
     WavHeader mWavHeader;
 };
-
-uint32_t DataFormatDTA::A0_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
-uint32_t DataFormatDTA::A1_KEYS[2] = {0xe7375f59, 0x900210e };
-uint32_t DataFormatDTA::A2_KEYS[2] = {0x1417d340, 0xb6399e19};
-uint32_t DataFormatDTA::A3_KEYS[2] = {0xa94b8d3c, 0x771f3888};
-uint32_t DataFormatDTA::A4_KEYS[2] = {0xa94b8d3c, 0x771f3888};
-uint32_t DataFormatDTA::A5_KEYS[2] = {0x4f4bb0c6, 0xea340420};
-uint32_t DataFormatDTA::A6_KEYS[2] = {0x728e2db9, 0x5055da68};
-uint32_t DataFormatDTA::A7_KEYS[2] = {0xf4f03a72, 0xe266fe62};
-uint32_t DataFormatDTA::A8_KEYS[2] = {0xd8dd8fac, 0x5324ace5};  // not working?
-uint32_t DataFormatDTA::A9_KEYS[2] = {0x959d1117, 0x5b763446};
-uint32_t DataFormatDTA::AA_KEYS[2] = {0xd4ad90c6, 0x67da216e};
-uint32_t DataFormatDTA::AB_KEYS[2] = {0x7f3d9b74, 0xec48fe17};
-uint32_t DataFormatDTA::AC_KEYS[2] = {0xa94b8d3c, 0x771f3888};
 
 bool DataFormatDTA::load(std::ifstream &srcFile)
 {

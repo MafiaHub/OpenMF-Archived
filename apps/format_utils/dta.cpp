@@ -1,18 +1,17 @@
 #include <iostream>
 #include <iomanip>
 #include <dta/parser.hpp>
+#include <dta/key_extractor.hpp>
 #include <utils.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <algorithm>
-
 #include <osdefines.hpp>
 
 #define ZPL_IMPLEMENTATION
 #include <zpl.h>
 
 #define ALIGN 50
-
 #define DTA_MODULE_STR "DTA util"
 
 void dump(MFFormat::DataFormatDTA &dta, bool displaySize, bool verbose)
@@ -92,6 +91,7 @@ int main(int argc, char** argv)
     cxxopts::Options options(DTA_MODULE_STR,"CLI utility for Mafia DTA format.");
 
     options.add_options()
+        ("g,game-exe", "Specify game executable file name")
         ("s,size","Display file sizes.")
         ("v,verbose","Display extensive info about each file.")
         ("h,help","Display help and exit.")
@@ -136,14 +136,27 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    std::string executableFile = "game.exe";
+    if(arguments.count("g") >= 1) 
+    {
+        executableFile = arguments["g"].as<std::string>();
+    }    
+
     std::string inputFile = arguments["i"].as<std::string>();
 
-    std::ifstream f;
+    std::ifstream f, gameExe;
 
-    if (decryptMode)
+    if (decryptMode) 
+    {
         f.open(inputFile, std::ios::ate | std::ios::binary);
+        gameExe.open(executableFile, std::ios::binary);
+    }
     else
+    {
+        gameExe.open(executableFile, std::ios::binary);
         f.open(inputFile, std::ios::binary);
+    }
+        
 
     if (!f.is_open())
     {
@@ -151,38 +164,26 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    MFFormat::DataFormatDTA dta;
+    if(!gameExe.is_open())
+    {
+        MFLogger::ConsoleLogger::fatal("Could not open file " + executableFile + ".", DTA_MODULE_STR);
+        return 1;
+    }
 
+    MFFormat::DataFormatDTA dta;
+    MFFormat::DataFormatDTAKeyExtrator dtaKeyExtractor;
     std::vector<std::string> filePath = MFUtil::strSplit(inputFile, ZPL_PATH_SEPARATOR);
     std::string fileName = MFUtil::strToLower(filePath.back());
 
-    if (fileName.compare("a0.dta") == 0)
-        dta.setDecryptKeys(dta.A0_KEYS);
-    else if (fileName.compare("a1.dta") == 0)
-        dta.setDecryptKeys(dta.A1_KEYS);
-    else if (fileName.compare("a2.dta") == 0)
-        dta.setDecryptKeys(dta.A2_KEYS);
-    else if (fileName.compare("a3.dta") == 0)
-        dta.setDecryptKeys(dta.A3_KEYS);
-    else if (fileName.compare("a4.dta") == 0)
-        dta.setDecryptKeys(dta.A4_KEYS);
-    else if (fileName.compare("a5.dta") == 0)
-        dta.setDecryptKeys(dta.A5_KEYS);
-    else if (fileName.compare("a6.dta") == 0)
-        dta.setDecryptKeys(dta.A6_KEYS);
-    else if (fileName.compare("a7.dta") == 0)
-        dta.setDecryptKeys(dta.A7_KEYS);
-    else if (fileName.compare("a8.dta") == 0)
-        dta.setDecryptKeys(dta.A8_KEYS);
-    else if (fileName.compare("a9.dta") == 0)
-        dta.setDecryptKeys(dta.A9_KEYS);
-    else if (fileName.compare("aa.dta") == 0)
-        dta.setDecryptKeys(dta.AA_KEYS);
-    else if (fileName.compare("ab.dta") == 0)
-        dta.setDecryptKeys(dta.AB_KEYS);
-    else if (fileName.compare("ac.dta") == 0)
-        dta.setDecryptKeys(dta.AC_KEYS);
-
+    for(auto dtaFile : dtaKeyExtractor.getFiles())
+    {
+        if(fileName.compare(dtaFile.mFileName) == 0) 
+        {
+            uint32_t keysToSet[] = { dtaFile.mFileKey1, dtaFile.mFileKey2 };
+            dta.setDecryptKeys(keysToSet);
+        }
+    }
+  
     if (decryptMode)   // decrypt whole file
     {
         std::streamsize fileSize = f.tellg();
