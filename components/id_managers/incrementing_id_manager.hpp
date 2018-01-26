@@ -12,17 +12,6 @@ private:
     Id mNextId;
 };
 
-Id IncrementingIDManager::allocate()
-{
-    if (mNextId == MFGame::NullId)
-    {
-        MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
-        return NullId;
-    }
-
-    return mNextId++;
-}
-
 }
 
 #endif // INCREMENTING_ID_MANAGER

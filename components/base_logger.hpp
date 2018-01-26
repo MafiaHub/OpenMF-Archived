@@ -25,28 +25,10 @@ public:
     virtual void print_warn (std::string str, std::string id = "") = 0;
     virtual void print_fatal(std::string str, std::string id = "") = 0;
 
-    void setVerbosityFlags(uint32_t flags)
-    {
-        mVerbosityFlags = flags;
-    }
-
-    bool canPrint(std::string id, uint32_t flags)
-    {
-        if (!(flags & mVerbosityFlags))
-            return false;
-
-        return (std::find(mFilteredIDs.begin(), mFilteredIDs.end(), id) == mFilteredIDs.end()) == mFilterExclusive;
-    }
-
-    void addFilter(std::string id)
-    {
-        mFilteredIDs.push_back(id);
-    }
-
-    void removeFilter(std::string id)
-    {
-        mFilteredIDs.erase(std::remove(mFilteredIDs.begin(), mFilteredIDs.end(), id), mFilteredIDs.end());
-    }
+    bool canPrint(std::string id, uint32_t flags);
+    void setVerbosityFlags(uint32_t flags)    { mVerbosityFlags = flags;    }
+    void addFilter(std::string id)            { mFilteredIDs.push_back(id); }
+    void removeFilter(std::string id);
 
     /**
     Sets how the logger filter behaves.
@@ -55,10 +37,7 @@ public:
                        revert the behavior, i.e. only callers added to the filter will be included.
     */
 
-    void setFilterMode(bool excludeByID)
-    {
-        mFilterExclusive = excludeByID;
-    }
+    void setFilterMode(bool excludeByID)      { mFilterExclusive = excludeByID; }
 
 protected:
     uint32_t mVerbosityFlags;
