@@ -7,7 +7,6 @@
 
 #include <osdefines.hpp>
 #include <dta/parser.hpp>
-#include <vfs/encoding.hpp>
 
 #include <loggers/console.hpp>
 
@@ -22,6 +21,8 @@
 
 namespace MFFile
 {
+
+std::string convertPathToCanonical(std::string path);
 
 /**
     Meyers Singleton class that encapsulating working with files. Hides platform-dependant

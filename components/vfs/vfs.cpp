@@ -1,8 +1,14 @@
 #include <vfs/vfs.hpp>
+#include <utils.hpp>
 
 namespace MFFile
 {
     
+std::string convertPathToCanonical(std::string path)
+{
+    return MFUtil::strToLower(path);
+}
+
 FileSystem::FileSystem()
 {
     mSearchPaths.push_back("resources");
