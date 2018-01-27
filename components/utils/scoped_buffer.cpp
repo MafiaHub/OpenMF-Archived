@@ -53,18 +53,6 @@ size_t ScopedBuffer::size() const
     return mSize;
 }
 
-template<typename TypeT>
-TypeT *ScopedBuffer::as()
-{
-    return reinterpret_cast<TypeT*>(mData);
-}
-
-template<typename TypeT>
-const TypeT *ScopedBuffer::as() const
-{
-    return reinterpret_cast<TypeT*>(mData);
-}
-
 void ScopedBuffer::copy_from(size_t offset, const void *sptr, size_t ssize)
 {
     if (offset + ssize > mSize)

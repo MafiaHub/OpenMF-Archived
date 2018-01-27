@@ -23,10 +23,16 @@ public:
     size_t size() const;
 
     template<typename TypeT>
-    TypeT *as();
+    TypeT *as()
+    {
+        return reinterpret_cast<TypeT*>(mData);
+    }
 
     template<typename TypeT>
-    const TypeT *as() const;
+    const TypeT *as() const
+    {
+        return reinterpret_cast<TypeT*>(mData);
+    }
 
     // copies specified data to this instance, starting write at given offset
     void copy_from(size_t offset, const void *sptr, size_t ssize);
