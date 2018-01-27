@@ -7,7 +7,7 @@
 #include <4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
-#include <bullet_utils.hpp>
+#include <utils/bullet.hpp>
 
 #define BULLET_PHYSICS_WORLD_MODULE_STR "physics world"
 

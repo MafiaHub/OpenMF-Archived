@@ -14,8 +14,8 @@
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <osg/Material>
-#include <utils.hpp>
-#include <osg_utils.hpp>
+#include <utils/openmf.hpp>
+#include <utils/osg.hpp>
 #include <base_loader.hpp>
 #include <osgText/Text3D>
 #include <osgText/Font3D>

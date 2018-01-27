@@ -6,7 +6,7 @@
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 #include <osg/ShapeDrawable>
-#include <utils.hpp>
+#include <utils/openmf.hpp>
 #include <base_loader.hpp>
 #include <osg_masks.hpp>
 

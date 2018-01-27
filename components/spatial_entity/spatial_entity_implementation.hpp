@@ -9,7 +9,7 @@
 #include <osg/MatrixTransform>
 #include <btBulletDynamicsCommon.h>
 #include <osg/Material>
-#include <osg_utils.hpp>
+#include <utils/osg.hpp>
 #include <osg/ShapeDrawable>
 #include <osg/Geometry>
 #include <osg/Geode>

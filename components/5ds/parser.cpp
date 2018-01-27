@@ -188,6 +188,8 @@ bool DataFormat5DS::load(std::ifstream &srcFile)
     
         srcFile.seekg(nextBlock);
     }
+
+    return true;
 }
 
 const DataFormat5DS::AnimationSequence& DataFormat5DS::getSequence(unsigned int id) const

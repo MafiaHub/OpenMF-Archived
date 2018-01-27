@@ -12,9 +12,9 @@
 #include <algorithm>
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
-#include <utils.hpp>
+#include <utils/openmf.hpp>
 #include <osg_masks.hpp>
-#include <osg_utils.hpp>
+#include <utils/osg.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
 #include <osg/BlendFunc>

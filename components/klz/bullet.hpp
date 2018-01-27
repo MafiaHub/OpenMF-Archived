@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <fstream>
-#include <bullet_utils.hpp>
+#include <utils/bullet.hpp>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>

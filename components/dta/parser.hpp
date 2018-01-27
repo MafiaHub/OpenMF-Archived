@@ -2,7 +2,7 @@
 #define FORMAT_PARSERS_DTA_H
 
 #include <base_parser.hpp>
-#include <utils/scoped_buffer.hpp>
+#include <utils/openmf.hpp>
 #include <string.h>
 #include <vector>
 
@@ -18,7 +18,7 @@ public:
     unsigned int getNumFiles();                         ///< Get the number of files inside the DTA.
     unsigned int getFileSize(unsigned int index);
     std::string getFileName(unsigned int index);
-    ScopedBuffer getFile(std::ifstream &srcFile, unsigned int index);   ///< Get the concrete file from within the DST file into a buffer.
+    MFUtil::ScopedBuffer getFile(std::ifstream &srcFile, unsigned int index);   ///< Get the concrete file from within the DST file into a buffer.
     int getFileIndex(std::string fileName);
 
     void decrypt(char *buffer, unsigned int bufferLen, unsigned int relativeShift=0);

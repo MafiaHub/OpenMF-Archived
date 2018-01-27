@@ -2,7 +2,7 @@
 #include <scene2_bin/parser.hpp>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
-#include <utils.hpp>
+#include <utils/openmf.hpp>
 #include <cxxopts.hpp>
 
 using namespace MFLogger;

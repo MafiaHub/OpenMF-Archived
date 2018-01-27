@@ -106,7 +106,7 @@ bool DataFormatDTA::load(std::ifstream &srcFile)
     mFileTableRecords.clear();
 
     unsigned int headerArraySize = mFileHeader.mFileCount * sizeof(FileTableRecord);
-    ScopedBuffer headerArray(headerArraySize);
+    MFUtil::ScopedBuffer headerArray(headerArraySize);
     srcFile.read((char *) headerArray,headerArraySize);
 
     if (!srcFile.good())
@@ -147,10 +147,10 @@ int DataFormatDTA::getFileIndex(std::string fileName)
     return -1;
 }
 
-ScopedBuffer DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index)
+MFUtil::ScopedBuffer DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index)
 {
     unsigned length = getFileSize(index);
-    ScopedBuffer dstBuffer(length);
+    MFUtil::ScopedBuffer dstBuffer(length);
 
     unsigned int fileOffset = mFileTableRecords[index].mDataOffset;
 
@@ -171,7 +171,7 @@ ScopedBuffer DataFormatDTA::getFile(std::ifstream &srcFile, unsigned int index)
         srcFile.read((char *) &blockSize,sizeof(blockSize));
         blockSize = blockSize & 0xffff;
 
-        ScopedBuffer block(blockSize);
+        MFUtil::ScopedBuffer block(blockSize);
 
         srcFile.read(block,blockSize);
 
