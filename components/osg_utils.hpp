@@ -3,6 +3,8 @@
 
 #include <fstream>
 #include <osg/Transform>
+#include <osg/MatrixTransform>
+#include <osgUtil/IntersectionVisitor>
 #include <osgGA/FirstPersonManipulator>
 #include <math.h>
 #include <utils.hpp>
@@ -39,8 +41,8 @@ class RobustIntersectionVisitor: public osgUtil::IntersectionVisitor
 public:
     RobustIntersectionVisitor(osgUtil::Intersector* intersector=0);
 
-    virtual void apply(osg::MatrixTransform& transform) override;
-    virtual void apply(osg::Transform& transform) override;
+    virtual void apply(osg::MatrixTransform &transform) override       { osgUtil::IntersectionVisitor::apply(transform); };
+    virtual void apply(osg::Transform &transform) override             { return;                                         };
 };
 
 std::string toString(osg::Vec3f v);

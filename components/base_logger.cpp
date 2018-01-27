@@ -17,5 +17,3 @@ void Logger::removeFilter(std::string id)
 }
 
 }
-
-#endif // LOGGER_H

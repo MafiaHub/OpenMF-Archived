@@ -6,6 +6,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 #include <btBulletDynamicsCommon.h>
+#include <math.hpp>
+#include <memory>
 
 namespace MFUtil
 {

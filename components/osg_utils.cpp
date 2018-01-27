@@ -123,19 +123,9 @@ osg::ref_ptr<osg::Image> applyColorKey(osg::Image *img, osg::Vec3f color, float 
     return dstImg;
 }
 
-RobustIntersectionVisitor::RobustIntersectionVisitor(osgUtil::Intersector* intersector=0):
+RobustIntersectionVisitor::RobustIntersectionVisitor(osgUtil::Intersector* intersector):
     osgUtil::IntersectionVisitor(intersector)
 {
-}
-
-void RobustIntersectionVisitor::apply(osg::MatrixTransform& transform)
-{
-    osgUtil::IntersectionVisitor::apply(transform);
-}
-
-void RobustIntersectionVisitor::apply(osg::Transform& transform)
-{
-    return;
 }
 
 std::string toString(osg::Vec3f v)
@@ -160,7 +150,7 @@ std::string rotationToStr(osg::Quat q)
     return "{" + doubleToStr(y) + ", " + doubleToStr(p) + ", " + doubleToStr(r) + "}";
 }
 
-std::string matrixTransformToString(osg::Matrixd m, bool rotationInEuler=false)
+std::string matrixTransformToString(osg::Matrixd m, bool rotationInEuler)
 {
     osg::Vec3f trans, scale;
     osg::Quat rot, so;
@@ -211,7 +201,7 @@ std::string makeInfoString(osg::Node *n)
     return v.mInfo;
 }
 
-virtual void AssignUserDataVisitor::apply(osg::Node &n)
+void AssignUserDataVisitor::apply(osg::Node &n)
 {
     n.getOrCreateUserDataContainer()->addUserObject(mData);
     MFUtil::traverse(this,n);

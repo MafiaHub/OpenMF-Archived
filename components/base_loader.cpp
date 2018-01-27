@@ -3,9 +3,6 @@
 namespace MFFormat
 {
 
-class OSGLoader
-{
-
 void OSGLoader::setNodeMap(NodeMap *nodeMap)
 {
     mNodeMap = nodeMap;
