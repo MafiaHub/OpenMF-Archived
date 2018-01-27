@@ -41,7 +41,7 @@ if(WIN32)
     #    message(FATAL_ERROR "Error: OpenSceneGraph 3rd Party Directory not found.")
         set(WIN32_DEP_not_FOUND "ON")
     endif(not OSG_THIRD_PARTY_DIR)
-    
+
     set(BULLET_ROOT cache path "Path where to find Bullet3")
 
     if(not BULLET_ROOT)
@@ -51,7 +51,7 @@ if(WIN32)
         set(BULLET_ROOT "${BULLET_ROOT}")
         set(BULLET_INCLUDE_DIR "${BULLET_ROOT}/../src;")
     endif(not BULLET_ROOT)
-    
+
     set(SDL2_ROOT cache path "Path where to find SDL2")
 
     if(not SDL2_ROOT)
@@ -63,7 +63,7 @@ if(WIN32)
         if(${CMAKE_SIZEOF_VOID_P} matches 8)
             set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x64/SDL2.lib;${SDL2_ROOT}/lib/x64/SDL2main.lib;")
         else(${CMAKE_SIZEOF_VOID_P} matches 8)
-            set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x86/SDL2.lib;${SDL2_ROOT}/lib/x86/SDL2main.lib;") 
+            set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x86/SDL2.lib;${SDL2_ROOT}/lib/x86/SDL2main.lib;")
         endif(${CMAKE_SIZEOF_VOID_P} matches 8)
     endif(not SDL2_ROOT)
 
@@ -85,13 +85,13 @@ set(LIBRARY_OUTPUT_PATH    ${PROJECT_BINARY_DIR}/lib)
 if(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"WIN32_LEAN_AND_MEAN\"")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"NOMINMAX\"")
-    
+
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
-    
+
     if(MSVC80)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wp64")
     endif(MSVC80)
-    
+
     option(MULTI_PROCESSOR_COMPILATION "Use multiple processors when compiling" ON)
 
     if(MULTI_PROCESSOR_COMPILATION)
@@ -150,36 +150,38 @@ set(THIRD_PARTY_LIBS
     ${CMAKE_THREAD_LIBS_INIT}
     ${SDL2_LIBRARIES})
 
+add_library(components OBJECT ${COMPONENT_SOURCES})
+
 if(BUILD_GAME)
-    add_executable        ( viewer     apps/viewer/main.cpp              ${COMPONENT_SOURCES} )
+    add_executable        ( viewer     apps/viewer/main.cpp              $<TARGET_OBJECTS:components> )
     target_link_libraries ( viewer                                       ${THIRD_PARTY_LIBS}  )
 endif(BUILD_GAME)
 
 if(BUILD_UTILS)
-    add_executable        ( dta        apps/format_utils/dta.cpp         ${COMPONENT_SOURCES} )
+    add_executable        ( dta        apps/format_utils/dta.cpp         $<TARGET_OBJECTS:components> )
     target_link_libraries ( dta                                          ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( cache_bin  apps/format_utils/cache_bin.cpp   ${COMPONENT_SOURCES} )
+    add_executable        ( cache_bin  apps/format_utils/cache_bin.cpp   $<TARGET_OBJECTS:components> )
     target_link_libraries ( cache_bin                                    ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( check_bin  apps/format_utils/check_bin.cpp   ${COMPONENT_SOURCES} )
+    add_executable        ( check_bin  apps/format_utils/check_bin.cpp   $<TARGET_OBJECTS:components> )
     target_link_libraries ( check_bin                                    ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( load_def   apps/format_utils/load_def.cpp    ${COMPONENT_SOURCES} )
+    add_executable        ( load_def   apps/format_utils/load_def.cpp    $<TARGET_OBJECTS:components> )
     target_link_libraries ( load_def                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( mnu        apps/format_utils/mnu.cpp         ${COMPONENT_SOURCES} )
+    add_executable        ( mnu        apps/format_utils/mnu.cpp         $<TARGET_OBJECTS:components> )
     target_link_libraries ( mnu                                          ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( tree_klz   apps/format_utils/tree_klz.cpp    ${COMPONENT_SOURCES} )
+    add_executable        ( tree_klz   apps/format_utils/tree_klz.cpp    $<TARGET_OBJECTS:components> )
     target_link_libraries ( tree_klz                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( textdb     apps/format_utils/textdb.cpp      ${COMPONENT_SOURCES} )
+    add_executable        ( textdb     apps/format_utils/textdb.cpp      $<TARGET_OBJECTS:components> )
     target_link_libraries ( textdb                                       ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( road_bin   apps/format_utils/road_bin.cpp    ${COMPONENT_SOURCES} )
+    add_executable        ( road_bin   apps/format_utils/road_bin.cpp    $<TARGET_OBJECTS:components> )
     target_link_libraries ( road_bin                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  ${COMPONENT_SOURCES} )
+    add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  $<TARGET_OBJECTS:components> )
     target_link_libraries ( scene2_bin                                   ${THIRD_PARTY_LIBS}  )
 endif(BUILD_UTILS)
