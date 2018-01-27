@@ -34,11 +34,10 @@ extern "C" {
 extern "C" {
 #endif
 
-    zpl_array_t(omf_logger_callback *) omf_logger_callbacks = NULL;
+    static zpl_array_t(omf_logger_callback *) omf_logger_callbacks = NULL;
 
     usize omf_logger_add(omf_logger_callback *callback) {
         if (!omf_logger_callbacks) {
-            zpl_printf("initializing the shit\n");
             zpl_array_init(omf_logger_callbacks, zpl_heap_allocator());
         }
 
