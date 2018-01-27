@@ -73,8 +73,6 @@ protected:
     bool mCreateDebugGeometry;
 };
 
-osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
-
 }
 
 #endif

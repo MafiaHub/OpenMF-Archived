@@ -3,6 +3,8 @@
 namespace MFGame
 {
 
+osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
+
 bool SpatialEntityImplementation::canBeMoved()
 {
     if (!mBulletBody)    // no physical representation => nothing stops the entity from moving

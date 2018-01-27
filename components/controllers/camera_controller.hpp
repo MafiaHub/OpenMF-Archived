@@ -10,19 +10,13 @@ namespace MFGame
 class CameraController
 {
 public:
-    CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
+    CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager) { mRenderer = renderer; mInputManager = inputManager; };
     virtual void update(double dt)=0;
 
 protected:
     MFRender::Renderer *mRenderer;
     MFInput::InputManager *mInputManager;
 };
-
-CameraController::CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager)
-{
-    mRenderer = renderer;
-    mInputManager = inputManager;
-}
 
 }
 

@@ -31,8 +31,8 @@ public:
     MFGame::Id createCameraEntity();
 
     MFGame::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
-protected: 
 
+protected: 
     MFGame::SpatialEntityManager *mEntityManager;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFRender::OSGRenderer *mRenderer;

@@ -3,6 +3,11 @@
 namespace MFInput
 {
 
+osgViewer::GraphicsWindow *InputManagerImplementation::getWindow()
+{
+    return mOSGWindow.get();
+}
+
 void InputManagerImplementation::setMousePosition(unsigned int x, unsigned int y)
 {
     SDL_WarpMouseInWindow(mWindow,x,y);

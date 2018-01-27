@@ -129,7 +129,7 @@ SET(USED_OSG_PLUGINS
 INCLUDE_DIRECTORIES(components)
 INCLUDE_DIRECTORIES(extern)
 
-FILE(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp")
+FILE(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "extern/sdl_graphics_window.cpp")
 
 ADD_EXECUTABLE(viewer apps/model_viewer/main.cpp ${COMPONENT_SOURCES})
 

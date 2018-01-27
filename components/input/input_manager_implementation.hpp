@@ -5,8 +5,8 @@
 #include <loggers/console.hpp>
 #include <SDL2/SDL.h>
 #include <string>
-#include <sdl_graphics_window.hpp>
 #include <vector>
+#include <sdl_graphics_window.hpp>
 
 #define INPUT_MANAGER_MODULE_STRING "input manager"
 #define NUMBER_OF_KEYS 1024
@@ -29,8 +29,7 @@ public:
     virtual void setMouseVisible(bool visible) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
-
-    SDLUtil::GraphicsWindowSDL2 *getWindow()     { return mOSGWindow.get(); };
+    virtual osgViewer::GraphicsWindow *getWindow();
 
 protected:
     SDL_Window *mWindow;
