@@ -15,13 +15,14 @@ extern "C" {
         OMF_LOGGER_FATAL = 4,
     };
 
-    typedef void (omf_logger_callback)(u8, const char *str, usize size);
+    typedef void (omf_logger_callback)(const char *details, u8, const char *str, usize size);
 
-    usize omf_logger_add(omf_logger_callback *callback);
-    usize omf_logger_remove(usize id);
+    ZPL_DEF usize omf_logger_add(omf_logger_callback *callback);
+    ZPL_DEF usize omf_logger_remove(usize id);
 
-    isize omf_logger(u8 verbosity_flag, const char *fmt, ...);
-    isize omf_logger_raw(const char *fmt, ...);
+    ZPL_DEF isize omf_logger_raw(const char *fmt, ...);
+    ZPL_DEF isize omf_logger(u8 verbosity_flag, const char *fmt, ...);
+    ZPL_DEF isize omf_logger_ext(const char *details, u8 verbosity_flag, const char *fmt, ...);
 
 #ifdef __cplusplus
 }
@@ -51,7 +52,7 @@ extern "C" {
         return id;
     }
 
-    inline isize omf__logger_va(u8 verb_flag, const char *fmt, va_list va) {
+    inline isize omf__logger_va(const char *detail, u8 verb_flag, const char *fmt, va_list va) {
         if (!omf_logger_callbacks) return 0;
 
         zpl_local_persist char buf[OMF_LOGGER_BUFFER_SIZE];
@@ -62,26 +63,41 @@ extern "C" {
         buf[len] = '\0';
 
         for (usize i = 0; i < zpl_array_count(omf_logger_callbacks); ++i) {
-            if (omf_logger_callbacks[i]) omf_logger_callbacks[i](verb_flag, buf, len);
+            if (omf_logger_callbacks[i]) omf_logger_callbacks[i](detail, verb_flag, buf, len);
         }
 
         return len;
     }
 
-    isize omf_logger_raw(const char *fmt, ...) {
+    inline isize omf_logger_raw(const char *fmt, ...) {
+        if (!omf_logger_callbacks) return 0;
+
         isize res;
         va_list va;
         va_start(va, fmt);
-        res = omf__logger_va(0, fmt, va);
+        res = omf__logger_va(NULL, 0, fmt, va);
         va_end(va);
         return res;
     }
 
-    isize omf_logger(u8 verb_flag, const char *fmt, ...) {
+    inline isize omf_logger(u8 verb_flag, const char *fmt, ...) {
+        if (!omf_logger_callbacks) return 0;
+
         isize res;
         va_list va;
         va_start(va, fmt);
-        res = omf__logger_va(verb_flag, fmt, va);
+        res = omf__logger_va(NULL, verb_flag, fmt, va);
+        va_end(va);
+        return res;
+    }
+
+    inline isize omf_logger_ext(const char *details, u8 verb_flag, const char *fmt, ...) {
+        if (!omf_logger_callbacks) return 0;
+
+        isize res;
+        va_list va;
+        va_start(va, fmt);
+        res = omf__logger_va(details, verb_flag, fmt, va);
         va_end(va);
         return res;
     }
