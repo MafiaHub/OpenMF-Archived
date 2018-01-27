@@ -85,13 +85,13 @@ set(LIBRARY_OUTPUT_PATH    ${PROJECT_BINARY_DIR}/lib)
 if(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"WIN32_LEAN_AND_MEAN\"")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"NOMINMAX\"")
-    
+
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
-    
+
     if(MSVC80)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wp64")
     endif(MSVC80)
-    
+
     option(MULTI_PROCESSOR_COMPILATION "Use multiple processors when compiling" ON)
 
     if(MULTI_PROCESSOR_COMPILATION)
@@ -139,8 +139,6 @@ endif(NOT WIN32)
 
 file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "components/*.hpp" "extern/*.cpp" "extern/*.hpp")
 
-add_library(components ${COMPONENT_SOURCES})
-
 set(THIRD_PARTY_LIBS
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
@@ -154,51 +152,46 @@ set(THIRD_PARTY_LIBS
     ${CMAKE_THREAD_LIBS_INIT}
     ${SDL2_LIBRARIES})
 
-target_link_libraries(components ${THIRD_PARTY_LIBS})
-
-if(BUILD_VIEWER)
-    add_executable        ( viewer     apps/viewer/main.cpp              )
-    target_link_libraries ( viewer     components                        )
-endif(BUILD_VIEWER)
+add_library(components OBJECT ${COMPONENT_SOURCES})
 
 if(BUILD_GAME)
-    add_executable        ( game       apps/game/main.cpp                )
-    target_link_libraries ( game       components                        )
+    add_executable        ( viewer     apps/viewer/main.cpp              $<TARGET_OBJECTS:components> )
+    target_link_libraries ( viewer                                       ${THIRD_PARTY_LIBS}  )
 endif(BUILD_GAME)
 
 if(BUILD_UTILS)
-    add_executable        ( dta        apps/format_utils/dta.cpp         )
-    target_link_libraries ( dta        components                        )
+    add_executable        ( dta        apps/format_utils/dta.cpp         $<TARGET_OBJECTS:components> )
+    target_link_libraries ( dta                                          ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( cache_bin  apps/format_utils/cache_bin.cpp   )
-    target_link_libraries ( cache_bin  components                        )
+    add_executable        ( cache_bin  apps/format_utils/cache_bin.cpp   $<TARGET_OBJECTS:components> )
+    target_link_libraries ( cache_bin                                    ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( check_bin  apps/format_utils/check_bin.cpp   )
-    target_link_libraries ( check_bin  components                        )
+    add_executable        ( check_bin  apps/format_utils/check_bin.cpp   $<TARGET_OBJECTS:components> )
+    target_link_libraries ( check_bin                                    ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( load_def   apps/format_utils/load_def.cpp    )
-    target_link_libraries ( load_def   components                        )
+    add_executable        ( load_def   apps/format_utils/load_def.cpp    $<TARGET_OBJECTS:components> )
+    target_link_libraries ( load_def                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( mnu        apps/format_utils/mnu.cpp         )
-    target_link_libraries ( mnu        components                        )
+    add_executable        ( mnu        apps/format_utils/mnu.cpp         $<TARGET_OBJECTS:components> )
+    target_link_libraries ( mnu                                          ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( tree_klz   apps/format_utils/tree_klz.cpp    )
-    target_link_libraries ( tree_klz   components                        )
+    add_executable        ( tree_klz   apps/format_utils/tree_klz.cpp    $<TARGET_OBJECTS:components> )
+    target_link_libraries ( tree_klz                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( textdb     apps/format_utils/textdb.cpp      )
-    target_link_libraries ( textdb     components                        )
+    add_executable        ( textdb     apps/format_utils/textdb.cpp      $<TARGET_OBJECTS:components> )
+    target_link_libraries ( textdb                                       ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( road_bin   apps/format_utils/road_bin.cpp    )
-    target_link_libraries ( road_bin   components                        )
+    add_executable        ( road_bin   apps/format_utils/road_bin.cpp    $<TARGET_OBJECTS:components> )
+    target_link_libraries ( road_bin                                     ${THIRD_PARTY_LIBS}  )
 
-    add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  )
-    target_link_libraries ( scene2_bin components                        )
+    add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  $<TARGET_OBJECTS:components> )
+    target_link_libraries ( scene2_bin                                   ${THIRD_PARTY_LIBS}  )
 endif(BUILD_UTILS)
 
 if(BUILD_TESTS)
-    add_executable        ( test_suite tests/test_suite.cpp              )
-    target_link_libraries ( test_suite components                        )
+    add_executable        ( test_suite tests/test_suite.cpp              $<TARGET_OBJECTS:components>)
+    target_link_libraries ( test_suite                                   ${THIRD_PARTY_LIBS})
 
-    add_executable        ( test_suite_local tests/test_suite.cpp        )
-    target_link_libraries ( test_suite_local components                  )
+    add_executable        ( test_suite_local tests/test_suite.cpp        $<TARGET_OBJECTS:components>)
+    target_link_libraries ( test_suite_local                             ${THIRD_PARTY_LIBS})
 endif(BUILD_TESTS)
