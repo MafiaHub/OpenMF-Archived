@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
-#include <dta/parser.hpp>
-#include <dta/key_extractor.hpp>
+#include <formats/dta/parser.hpp>
+#include <formats/dta/key_extractor.hpp>
 #include <utils/openmf.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>

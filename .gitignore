@@ -44,3 +44,5 @@ build/
 .vs/
 mafia/
 mafia
+
+.DS_store

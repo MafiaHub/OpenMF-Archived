@@ -1,5 +1,5 @@
 #include <iostream>
-#include <mnu/parser.hpp>
+#include <formats/mnu/parser.hpp>
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
