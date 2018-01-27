@@ -4,6 +4,7 @@
 #include <math.hpp>
 #include <id_manager.hpp>
 #include <string>
+#include <memory>
 
 #define DEFAULT_ID_MANAGER BackingIDManager
 

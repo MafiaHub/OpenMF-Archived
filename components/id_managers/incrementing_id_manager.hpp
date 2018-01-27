@@ -1,6 +1,8 @@
 #ifndef INCREMENTING_ID_MANAGER
 #define INCREMENTING_ID_MANAGER
 
+#include <id_manager.hpp>
+
 namespace MFGame
 {
 

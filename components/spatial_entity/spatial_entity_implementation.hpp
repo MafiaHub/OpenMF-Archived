@@ -6,6 +6,13 @@
 #include <osg/PolygonMode>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <osg_masks.hpp>
+#include <osg/MatrixTransform>
+#include <btBulletDynamicsCommon.h>
+#include <osg/Material>
+#include <osg_utils.hpp>
+#include <osg/ShapeDrawable>
+#include <osg/Geometry>
+#include <osg/Geode>
 
 #define SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR "spatial entity"
 

@@ -1,4 +1,4 @@
-#include <scoped_buffer.hpp>
+#include <utils/scoped_buffer.hpp>
 
 ScopedBuffer::ScopedBuffer(size_t size) : mData(0x0), mSize(size)
 {
@@ -38,12 +38,12 @@ const char &ScopedBuffer::operator[](size_t idx) const
     return mData[idx];
 }
 
-operator char *ScopedBuffer::()
+ScopedBuffer::operator char *()
 {
     return mData;
 }
 
-operator const char *ScopedBuffer::() const
+ScopedBuffer::operator const char *() const
 {
     return mData;
 }

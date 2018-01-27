@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_5DS_H
 
 #include <base_parser.hpp>
+#include <math.hpp>
 
 namespace MFFormat
 {
@@ -52,24 +53,24 @@ public:
         void setType(uint16_t type);
         void setName(const std::string& str);
         void addTimestamp(uint32_t time);
-        void addMovement(Vec3& data);
-        void addRotation(Vec3& data);
-        void addScale(Vec3& data);
+        void addMovement(MFMath::Vec3& data);
+        void addRotation(MFMath::Vec3& data);
+        void addScale(MFMath::Vec3& data);
         const std::string getName();
         uint16_t getCount() const;
         const uint32_t& getTimestamp(uint16_t id) const;
-        const Vec3& getMovement(uint16_t id) const;
-        const Vec3& getRotation(uint16_t id) const;
-        const Vec3& getScale(uint16_t id) const;
+        const MFMath::Vec3& getMovement(uint16_t id) const;
+        const MFMath::Vec3& getRotation(uint16_t id) const;
+        const MFMath::Vec3& getScale(uint16_t id) const;
         bool hasMovement() const;
         bool hasRotation() const;
         bool hasScale() const;
     private:
         std::string mObjectName;
         std::vector<uint32_t> mTimestamps;
-        std::vector<Vec3> mMovements;
-        std::vector<Vec3> mRotations;
-        std::vector<Vec3> mScale;
+        std::vector<MFMath::Vec3> mMovements;
+        std::vector<MFMath::Vec3> mRotations;
+        std::vector<MFMath::Vec3> mScale;
         uint16_t mNumberOfSequences;
         TypeOfSequence mType;
     };

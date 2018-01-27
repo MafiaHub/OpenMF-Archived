@@ -23,17 +23,17 @@ void DataFormat5DS::AnimationSequence::addTimestamp(uint32_t time)
     mTimestamps.push_back(time);
 }
 
-void DataFormat5DS::AnimationSequence::addMovement(DataFormat5DS::Vec3& data)
+void DataFormat5DS::AnimationSequence::addMovement(MFMath::Vec3& data)
 {
     mMovements.push_back(data);
 }
 
-void DataFormat5DS::AnimationSequence::addRotation(DataFormat5DS::Vec3& data)
+void DataFormat5DS::AnimationSequence::addRotation(MFMath::Vec3& data)
 {
     mRotations.push_back(data);
 }
 
-void DataFormat5DS::AnimationSequence::addScale(DataFormat5DS::Vec3& data)
+void DataFormat5DS::AnimationSequence::addScale(MFMath::Vec3& data)
 {
     mScale.push_back(data);
 }
@@ -53,17 +53,17 @@ const uint32_t& DataFormat5DS::AnimationSequence::getTimestamp(uint16_t id) cons
     return mTimestamps[id];
 }
 
-const DataFormat5DS::Vec3& DataFormat5DS::AnimationSequence::getMovement(uint16_t id) const
+const MFMath::Vec3& DataFormat5DS::AnimationSequence::getMovement(uint16_t id) const
 { 
     return mMovements[id];
 }
 
-const DataFormat5DS::Vec3& DataFormat5DS::AnimationSequence::getRotation(uint16_t id) const
+const MFMath::Vec3& DataFormat5DS::AnimationSequence::getRotation(uint16_t id) const
 { 
     return mRotations[id];
 }
 
-const DataFormat5DS::Vec3& DataFormat5DS::AnimationSequence::getScale(uint16_t id) const 
+const MFMath::Vec3& DataFormat5DS::AnimationSequence::getScale(uint16_t id) const 
 { 
     return mScale[id];
 }
@@ -118,7 +118,7 @@ bool DataFormat5DS::parseAnimationSequence(std::ifstream& inputFile, uint32_t po
         if(typeOfBlock & SEQUENCE_MOVEMENT)
         {
             // read movement
-            Vec3 movementData;
+            MFMath::Vec3 movementData;
             read(inputFile, &movementData);
             result.addMovement(movementData);
 
@@ -126,7 +126,7 @@ bool DataFormat5DS::parseAnimationSequence(std::ifstream& inputFile, uint32_t po
         if(typeOfBlock & SEQUENCE_ROTATION)
         {
             // read movement
-            Vec3 rotationData;
+            MFMath::Vec3 rotationData;
             read(inputFile, &rotationData);
             result.addRotation(rotationData);
 
@@ -134,7 +134,7 @@ bool DataFormat5DS::parseAnimationSequence(std::ifstream& inputFile, uint32_t po
         if(typeOfBlock & SEQUENCE_SCALE)
         {
             // read movement
-            Vec3 scaleData;
+            MFMath::Vec3 scaleData;
             read(inputFile, &scaleData);
             result.addScale(scaleData);
         }
@@ -146,6 +146,7 @@ bool DataFormat5DS::parseAnimationSequence(std::ifstream& inputFile, uint32_t po
     std::string objectName;
     char objectNameChar;
     inputFile.get(objectNameChar);
+
     while(objectNameChar)
     {
         objectName.push_back(objectNameChar);
@@ -178,8 +179,8 @@ bool DataFormat5DS::load(std::ifstream &srcFile)
         read(srcFile, &new_pointer_table);
         auto nextBlock = srcFile.tellg();
 
-        uint32_t pointerToName = static_cast<uint32_t>(begginingOfData + new_pointer_table.mPointerToString);
-        uint32_t pointerToData = static_cast<uint32_t>(begginingOfData + new_pointer_table.mPointerToData);
+        uint32_t pointerToName = static_cast<uint32_t>(((uint32_t) begginingOfData) + new_pointer_table.mPointerToString);
+        uint32_t pointerToData = static_cast<uint32_t>(((uint32_t) begginingOfData) + new_pointer_table.mPointerToData);
 
         AnimationSequence new_sequence = {};
         parseAnimationSequence(srcFile, pointerToData, pointerToName, new_sequence);

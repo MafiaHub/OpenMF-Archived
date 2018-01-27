@@ -4,6 +4,8 @@
 #include <osg/Group>
 #include <physics/bullet_physics_world.hpp>
 #include <spatial_entity/spatial_entity_implementation.hpp>
+#include <renderer/osg_renderer.hpp>
+#include <spatial_entity/manager.hpp>
 
 #define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 

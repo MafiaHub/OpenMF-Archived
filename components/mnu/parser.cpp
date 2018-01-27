@@ -1,4 +1,4 @@
-#include <menu/parser.hpp>
+#include <mnu/parser.hpp>
 
 namespace MFFormat
 {

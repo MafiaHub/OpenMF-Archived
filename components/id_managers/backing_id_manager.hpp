@@ -1,6 +1,8 @@
 #ifndef BACKING_ID_MANAGER_H
 #define BACKING_ID_MANAGER_H
 
+#include <id_manager.hpp>
+
 namespace MFGame
 {
 

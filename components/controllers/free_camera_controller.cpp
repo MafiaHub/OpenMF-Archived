@@ -1,5 +1,7 @@
 #include <controllers/free_camera_controller.hpp>
 
+#include <SDL2/SDL.h> // temporary!!!
+
 namespace MFGame
 {
 

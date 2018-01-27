@@ -24,6 +24,9 @@
 #include <osg/TexGen>
 #include <osg/TexEnv>
 #include <osg/CullFace>
+#include <osgDB/ReadFile>
+#include <osg/Billboard>
+#include <osg/LOD>
 
 #define OSG4DS_MODULE_STR "loader 4ds"
 

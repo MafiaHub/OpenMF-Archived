@@ -1,6 +1,3 @@
-#ifndef LOGGER_FILE_H
-#define LOGGER_FILE_H
-
 #include <loggers/file.hpp>
 
 namespace MFLogger
