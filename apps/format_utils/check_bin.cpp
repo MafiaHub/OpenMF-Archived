@@ -1,114 +1,113 @@
-#include <iostream>
-#include <formats/check_bin/parser.hpp>
-#include <loggers/console.hpp>
-#include <vfs/vfs.hpp>
-#include <utils/openmf.hpp>
+#define ZPL_IMPLEMENTATION
+#define OMF_LOGGER_IMPLEMENTATION
+
+#include <zpl.h>
+#include <logger.h>
 #include <cxxopts.hpp>
 
-using namespace MFLogger;
+#define omf_logger_fatal(fmt, ...) \
+        omf_logger_ext(NULL, OMF_LOGGER_FATAL, fmt, #__VA_ARGS__)
 
-std::string getStringPointType(uint32_t pointType)
-{
-    std::string returnString = "Unknown";
-    switch(pointType) 
-    {
+#include <formats/check_bin/parser.hpp>
+#include <utils/openmf.hpp>
+#include <vfs/vfs.hpp>
+
+const char *getStringPointType(uint32_t pointType) {
+    switch(pointType) {
         case MFFormat::DataFormatCheckBIN::POINTTYPE_PEDESTRIAN:
-        {
-            returnString = "PED";
-        } break;
+            return "PED";
 
         case MFFormat::DataFormatCheckBIN::POINTTYPE_AI:
-        {
-            returnString = "AI";
-        } break;
+            return "AI";
 
         case MFFormat::DataFormatCheckBIN::POINTTYPE_VEHICLE:
-        {
-            returnString = "SALINA|TRAIN";
-        } break;
+            return "SALINA|TRAIN";
 
         case MFFormat::DataFormatCheckBIN::POINTTYPE_TRAM_STATION:
-        {
-            returnString = "SALINA STOP";
-        } break;
+            return "SALINA STOP";
 
         case MFFormat::DataFormatCheckBIN::POINTTYPE_SPECIAL:
-        {
-            returnString = "AI SPECIAL";
-        } break;
+            return "AI SPECIAL";
     }
-    return returnString;
+
+    return "Unknown";
 }
 
-void dump(MFFormat::DataFormatCheckBIN checkBin)
-{
-    uint32_t linkIter = 0;
-    for (std::size_t i = 0; i != checkBin.getNumPoints(); ++i)
-    {
+inline void debug_dump(MFFormat::DataFormatCheckBIN checkBin) {
+    u32 linkIter = 0;
+
+    for (usize i = 0; i != checkBin.getNumPoints(); ++i) {
         auto point = checkBin.getPoints()[i];
-        ConsoleLogger::raw("[P" + std::to_string(i) + "][" + getStringPointType(point.mType) + "] " + std::to_string(point.mPos.x) + " " + std::to_string(point.mPos.y) + " " + std::to_string(point.mPos.z), "dump");
-        for (uint32_t j = 0; j < point.mEnterLinks; j++)
-        {
+
+        omf_logger_raw("[P%d][%s] %f %f %f", i, getStringPointType(point.mType),
+            point.mPos.x, point.mPos.y, point.mPos.z);
+
+        for (u32 j = 0; j < point.mEnterLinks; j++) {
             auto link = checkBin.getLinks()[linkIter+j];
             auto targetPoint = checkBin.getPoints()[link.mTargetPoint];
-            ConsoleLogger::raw("[P" + std::to_string(i) + "] Link to [P" + std::to_string(link.mTargetPoint) + "][" + getStringPointType(targetPoint.mType) + "] " + std::to_string(targetPoint.mPos.x) + " " + std::to_string(targetPoint.mPos.y) + " " + std::to_string(point.mPos.z), "dump");
+
+            omf_logger_raw("[P%d] Link to [P%d][%s] %f %f %f %f",
+                i, link.mTargetPoint, getStringPointType(targetPoint.mType),
+                targetPoint.mPos.x, targetPoint.mPos.y, targetPoint.mPos.z, point.mPos.z);
         }
+
         linkIter += point.mEnterLinks;
     }
-    ConsoleLogger::raw("number of points: " + std::to_string(checkBin.getNumPoints()), "dump");
-    ConsoleLogger::raw("number of links: " + std::to_string(checkBin.getNumLinks()), "dump");
+
+    omf_logger_raw("number of points: %d", checkBin.getNumPoints());
+    omf_logger_raw("number of links: %d", checkBin.getNumLinks());
+}
+
+void console_logger(const char *src, u8 vb, const char *str, usize size) {
+    if (vb == OMF_LOGGER_FATAL) {
+        zpl_printf("[FATAL ERROR]: %s", str);
+    } else {
+        zpl_printf("%s", str);
+    }
 }
 
 int main(int argc, char** argv)
 {
-    ConsoleLogger::info("text");
+    omf_logger_add(console_logger);
 
-    cxxopts::Options options("check_bin","CLI utility for Mafia check.bin format.");
-
+    cxxopts::Options options("check_bin", "CLI utility for Mafia check.bin format.");
     options.add_options()
-        ("h,help","Display help and exit.")
-        ("i,input","Specify input file name.",cxxopts::value<std::string>());
+        ("h,help", "Display help and exit.")
+        ("i,input", "Specify input file name.", cxxopts::value<std::string>());
 
-    options.parse_positional({"i","f"});
+    options.parse_positional({"i", "f"});
     options.positional_help("file internal_file");
+
     auto arguments = options.parse(argc,argv);
 
-    if (arguments.count("h") > 0)
-    {
-        std::cout << options.help() << std::endl;
+    if (arguments.count("h") > 0) {
+        omf_logger_raw(options.help().c_str());
         return 0;
     }
 
-    if (arguments.count("i") < 1)
-    {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
-        std::cout << options.help() << std::endl;
+    if (arguments.count("i") < 1) {
+        omf_logger_raw(options.help().c_str());
+        omf_logger_fatal("expected file");
         return 1;
     }
 
     std::string inputFile = arguments["i"].as<std::string>();
-
     std::ifstream f;
-
     auto fs = MFFile::FileSystem::getInstance();
 
-    if (!fs->open(f, inputFile, std::ifstream::binary))
-    {
-        ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
+    if (!fs->open(f, inputFile, std::ifstream::binary)) {
+        omf_logger_fatal("could not open file %f", inputFile.c_str());
         return 1;
     }
 
     MFFormat::DataFormatCheckBIN checkBin;
-
     bool success = checkBin.load(f);
 
-    if (!success)
-    {
-        ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+    if (!success) {
+        omf_logger_fatal("could not parse file %f", inputFile.c_str());
         return 1;
     }
 
-    dump(checkBin);
-
+    debug_dump(checkBin);
     return 0;
 }
