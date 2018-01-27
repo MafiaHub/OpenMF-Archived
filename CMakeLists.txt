@@ -2,10 +2,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 PROJECT(OpenMF)
 MESSAGE(STATUS "Configuring OpenMF...")
 
-OPTION(BUILD_GAME "build game" ON)
+OPTION(BUILD_GAME   "build game"                 ON)
 OPTION(BUILD_VIEWER "build model/mission viewer" ON)
-OPTION(BUILD_UTILS "build format utils" ON)
-OPTION(BUILD_TESTS "build tests" ON)
+OPTION(BUILD_UTILS  "build format utils"         ON)
+OPTION(BUILD_TESTS  "build tests"                ON)
 
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -129,15 +129,12 @@ SET(USED_OSG_PLUGINS
 INCLUDE_DIRECTORIES(components)
 INCLUDE_DIRECTORIES(extern)
 
-FILE(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "extern/sdl_graphics_window.cpp")
-
-ADD_EXECUTABLE(viewer apps/model_viewer/main.cpp ${COMPONENT_SOURCES})
-
 IF(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 ENDIF(NOT WIN32)
 
-TARGET_LINK_LIBRARIES(viewer
+FILE(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "extern/sdl_graphics_window.cpp")
+SET(THIRD_PARTY_LIBS
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
@@ -149,3 +146,33 @@ TARGET_LINK_LIBRARIES(viewer
     ${CMAKE_DL_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}
     ${SDL2_LIBRARIES})
+
+ADD_EXECUTABLE        ( viewer     apps/viewer/main.cpp              ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( viewer                                       ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( dta        apps/format_utils/dta.cpp         ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( dta                                          ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( cache_bin  apps/format_utils/cache_bin.cpp   ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( cache_bin                                    ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( check_bin  apps/format_utils/check_bin.cpp   ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( check_bin                                    ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( load_def   apps/format_utils/load_def.cpp    ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( load_def                                     ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( mnu        apps/format_utils/mnu.cpp         ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( mnu                                          ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( tree_klz   apps/format_utils/tree_klz.cpp    ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( tree_klz                                     ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( textdb     apps/format_utils/textdb.cpp      ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( textdb                                       ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( road_bin   apps/format_utils/road_bin.cpp    ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( road_bin                                     ${THIRD_PARTY_LIBS}  )
+
+ADD_EXECUTABLE        ( scene2_bin apps/format_utils/scene2_bin.cpp  ${COMPONENT_SOURCES} )
+TARGET_LINK_LIBRARIES ( scene2_bin                                   ${THIRD_PARTY_LIBS}  )

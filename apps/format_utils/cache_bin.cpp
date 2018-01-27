@@ -4,6 +4,7 @@
 #include <vfs/vfs.hpp>
 #include <utils.hpp>
 #include <cxxopts.hpp>
+#include <string>
 
 using namespace MFLogger;
 

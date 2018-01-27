@@ -30,18 +30,6 @@ bool strStartsWith(std::string str, std::string prefix)
     return str.compare(0,prefix.size(),prefix) == 0;
 }
 
-template<typename Out>
-void _split(const std::string &s, char delim, Out result)
-{
-    std::stringstream ss(s);
-    std::string item;
-
-    while (std::getline(ss, item, delim))
-    {
-        *(result++) = item;
-    }
-}
-
 std::vector<std::string> strSplit(const std::string &s, char delim)
 {
     std::vector<std::string> elems;
@@ -55,36 +43,6 @@ std::string strReverse(std::string s)
     reversed.resize(s.length());
     std::reverse_copy(s.begin(), s.end(), reversed.begin());
     return reversed;
-}
-
-template<typename T>
-std::string vecToString(const std::vector<T> &vec, std::string delim)
-{
-    std::stringstream sstream;
-
-    for (auto value : vec)
-    {
-        sstream << std::to_string(value) << delim;
-    }
-    
-    // TODO(zaklaus): erase last occurence of delimiter!
-
-    return sstream.str();
-}
-
-template<typename T>
-std::string arrayToString(T *array, size_t len, std::string delim)
-{
-    std::stringstream sstream;
-
-    for (int i = 0; i < (int) len; i++)
-    {
-        sstream << std::to_string(array[i]) << delim;
-    }
-    
-    // TODO(zaklaus): erase last occurence of delimiter!
-
-    return sstream.str();
 }
 
 size_t peekLength(std::ifstream &file)
