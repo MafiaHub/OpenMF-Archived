@@ -24,6 +24,13 @@
 
 
   Version History:
+  4.5.0 - Added zpl_array_append_at
+  4.4.0 - Added zpl_array_back, zpl_array_front
+  4.3.0 - Added zpl_list_t
+  4.2.0 - Added zpl_system_command_str
+  4.1.2 - GG, fixed small compilation error
+  4.1.1 - Fixed possible security issue in zpl_system_command
+  4.1.0 - Added zpl_string_make_reserve and small fixes
   4.0.2 - Warning fix for _LARGEFILE64_SOURCE
   4.0.1 - include stdlib.h for getenv (temp)
   4.0.0 - ARM support, coding style changes and various improvements
@@ -70,10 +77,6 @@
 
 */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wno-unused-variable"
-#pragma GCC diagnostic ignored "-Wno-unused-function"
-#pragma GCC diagnostic ignored "-Wno-variadic-macro"
 
 #ifndef ZPL_INCLUDE_ZPL_H
 #define ZPL_INCLUDE_ZPL_H
@@ -1431,6 +1434,7 @@
 
 #define ZPL_STRING_HEADER(str) (cast(zpl_string_header_t *)(str) - 1)
 
+    ZPL_DEF zpl_string_t zpl_string_make_reserve   (zpl_allocator_t a, isize capacity);
     ZPL_DEF zpl_string_t zpl_string_make           (zpl_allocator_t a, char const *str);
     ZPL_DEF zpl_string_t zpl_string_make_length    (zpl_allocator_t a, void const *str, isize num_bytes);
     ZPL_DEF void     zpl_string_free           (zpl_string_t str);
@@ -1508,7 +1512,52 @@
 #define zpl_buffer_pop(x)   do { ZPL_ASSERT(zpl_buffer_count(x) > 0); zpl_buffer_count(x)--; } while (0)
 #define zpl_buffer_clear(x) do { zpl_buffer_count(x) = 0; } while (0)
 
+    ////////////////////////////////////////////////////////////////
+    //
+    // Linked List
+    //
+    // zpl_list_t encapsulates pointer to data and points to the next and the previous element in the list.
+    //
+    // Available Procedures for zpl_list_t 
+    // zpl_list_init
+    // zpl_list_add
+    // zpl_list_remove
 
+#if 0
+int foo(void)
+{
+    zpl_list_t s, *head, *cursor;
+    zpl_list_init(&s, "it is optional to call init: ");
+    head = cursor = &s;
+
+    // since we can construct an element implicitly this way
+    // the second field gets overwritten once we add it to a list.
+    zpl_list_t a = {"hello"};
+    cursor = zpl_list_add(cursor, &a);
+
+    zpl_list_t b = {"world"};
+    cursor = zpl_list_add(cursor, &b);
+
+    zpl_list_t c = {"!!! OK"};
+    cursor = zpl_list_add(cursor, &c);
+
+    for (zpl_list_t *l=head; l; l=l->next) {
+        zpl_printf("%s ", cast(char *)l->ptr);
+    }
+    zpl_printf("\n");
+
+    return 0;
+}
+#endif
+
+    typedef struct zpl__list_t {
+        void *ptr;
+        struct zpl__list_t *next, *prev;
+    } zpl_list_t;
+
+    ZPL_DEF void        zpl_list_init  (zpl_list_t *list, void *ptr);
+    ZPL_DEF zpl_list_t *zpl_list_add   (zpl_list_t *list, zpl_list_t *item);
+    ZPL_DEF zpl_list_t *zpl_list_remove(zpl_list_t *list);
 
     ////////////////////////////////////////////////////////////////
     //
@@ -1526,6 +1575,8 @@
     // zpl_array_appendv
     // zpl_array_pop
     // zpl_array_clear
+    // zpl_array_back
+    // zpl_array_front
     // zpl_array_resize
     // zpl_array_reserve
     //
@@ -1633,6 +1684,13 @@
         (x)[zpl_array_count(x)++] = (item);               \
     } while (0)
 
+#define zpl_array_append_at(x, item, ind) do { \
+        zpl_array_header_t *zpl__ah = ZPL_ARRAY_HEADER(x); \
+        zpl_array_grow(x, zpl__ah->count + 1); \
+        zpl_memcopy(x+ind+1, x+ind, zpl_size_of(x[0])*(zpl__ah->count - ind)); \
+        x[ind] = item; \
+    } while (0)
+
 #define zpl_array_appendv(x, items, item_count) do {                    \
         zpl_array_header_t *zpl__ah = ZPL_ARRAY_HEADER(x);              \
         ZPL_ASSERT(zpl_size_of((items)[0]) == zpl_size_of((x)[0]));     \
@@ -1659,6 +1717,8 @@
 
 
 #define zpl_array_pop(x)   do { ZPL_ASSERT(ZPL_ARRAY_HEADER(x)->count > 0); ZPL_ARRAY_HEADER(x)->count--; } while (0)
+#define zpl_array_back(x)  x[ZPL_ARRAY_HEADER(x)->count - 1]
+#define zpl_array_front(x) x[0]
 #define zpl_array_clear(x) do { ZPL_ARRAY_HEADER(x)->count = 0; } while (0)
 
 #define zpl_array_resize(x, new_count) do {               \
@@ -2005,7 +2065,7 @@
     ZPL_DEF void           zpl_file_free_contents(zpl_file_contents_t *fc);
 
 
-    // TODO: Should these have different na,es as they do not take in a zpl_file_t * ???
+    // TODO: Should these have different names as they do not take in a zpl_file_t * ???
     ZPL_DEF b32        zpl_file_exists         (char const *filepath);
     ZPL_DEF zpl_file_time_t zpl_file_last_write_time(char const *filepath);
     ZPL_DEF b32        zpl_file_copy           (char const *existing_filename, char const *new_filename, b32 fail_if_exists);
@@ -2134,7 +2194,8 @@
 
     ZPL_DEF isize zpl_count_set_bits(u64 mask);
 
-    ZPL_DEF u32 zpl_system_command(char const *command, char *buffer);
+    ZPL_DEF u32 zpl_system_command(char const *command, usize buffer_len, char *buffer);
+    ZPL_DEF u32 zpl_system_command_str(char const *command, zpl_array_t(u8) *str);
 
 #if defined(__cplusplus)
 }
@@ -4342,13 +4403,13 @@ extern "C" {
     }
 
 
-    ZPL__COMPARE_PROC(i16)
-    ZPL__COMPARE_PROC(i32)
-    ZPL__COMPARE_PROC(i64)
-    ZPL__COMPARE_PROC(isize)
-    ZPL__COMPARE_PROC(f32)
-    ZPL__COMPARE_PROC(f64)
-    ZPL__COMPARE_PROC(char)
+    ZPL__COMPARE_PROC(i16);
+    ZPL__COMPARE_PROC(i32);
+    ZPL__COMPARE_PROC(i64);
+    ZPL__COMPARE_PROC(isize);
+    ZPL__COMPARE_PROC(f32);
+    ZPL__COMPARE_PROC(f64);
+    ZPL__COMPARE_PROC(char);
 
     // NOTE: str_cmp is special as it requires a funny type and funny comparison
     zpl_global isize zpl__str_cmp_offset; ZPL_COMPARE_PROC(zpl__str_cmp) {
@@ -4472,10 +4533,10 @@ extern "C" {
         }                                                               \
     }
 
-    ZPL_RADIX_SORT_PROC_GEN(u8)
-    ZPL_RADIX_SORT_PROC_GEN(u16)
-    ZPL_RADIX_SORT_PROC_GEN(u32)
-    ZPL_RADIX_SORT_PROC_GEN(u64)
+    ZPL_RADIX_SORT_PROC_GEN(u8);
+    ZPL_RADIX_SORT_PROC_GEN(u16);
+    ZPL_RADIX_SORT_PROC_GEN(u32);
+    ZPL_RADIX_SORT_PROC_GEN(u64);
 
     zpl_inline isize zpl_binary_search(void const *base, isize count, isize size, void const *key, zpl_compare_proc_t compare_proc) {
         isize start = 0;
@@ -5033,6 +5094,26 @@ extern "C" {
     zpl_inline void zpl__set_string_length  (zpl_string_t str, isize len) { ZPL_STRING_HEADER(str)->length = len; }
     zpl_inline void zpl__set_string_capacity(zpl_string_t str, isize cap) { ZPL_STRING_HEADER(str)->capacity = cap; }
 
+    zpl_inline zpl_string_t zpl_string_make_reserve(zpl_allocator_t a, isize capacity)
+    {
+        isize header_size = zpl_size_of(zpl_string_header_t);
+        void *ptr = zpl_alloc(a, header_size + capacity + 1);
+
+        zpl_string_t str;
+        zpl_string_header_t *header;
+
+        if (ptr == NULL) return NULL;
+        zpl_zero_size(ptr, header_size + capacity + 1);
+
+        str = cast(char *)ptr + header_size;
+        header = ZPL_STRING_HEADER(str);
+        header->allocator = a;
+        header->length     = 0;
+        header->capacity   = capacity;
+        str[capacity]      = '\0';
+
+        return str;
+    }
 
     zpl_inline zpl_string_t zpl_string_make(zpl_allocator_t a, char const *str) {
         isize len = str ? zpl_strlen(str) : 0;
@@ -5046,8 +5127,8 @@ extern "C" {
         zpl_string_t str;
         zpl_string_header_t *header;
 
-        if (!init_str) zpl_zero_size(ptr, header_size + num_bytes + 1);
         if (ptr == NULL) return NULL;
+        if (!init_str) zpl_zero_size(ptr, header_size + num_bytes + 1);
 
         str = cast(char *)ptr + header_size;
         header = ZPL_STRING_HEADER(str);
@@ -5215,7 +5296,7 @@ extern "C" {
         char buf[4096] = {0};
         va_list va;
         va_start(va, fmt);
-        res = zpl_snprintf_va(str, zpl_count_of(buf)-1, fmt, va);
+        res = zpl_snprintf_va(buf, zpl_count_of(buf)-1, fmt, va)-1;
         va_end(va);
         return zpl_string_append_length(str, buf, res);
     }
@@ -5489,6 +5570,33 @@ extern "C" {
         return 4;
     }
 
+
+    ////////////////////////////////////////////////////////////////
+    //
+    // zpl_list_t
+    //
+
+
+    zpl_inline void zpl_list_init(zpl_list_t *list, void *ptr) {
+        zpl_list_t list_ = {0};
+        *list = list_;
+        list->ptr = ptr;
+    }
+
+    zpl_inline zpl_list_t *zpl_list_add(zpl_list_t *list, zpl_list_t *item) {
+        list->next = item;
+        item->next = NULL;
+        item->prev = list;
+        return item;
+    }
+
+    zpl_inline zpl_list_t *zpl_list_remove(zpl_list_t *list) {
+        if (list->prev) {
+            list->prev->next = list->next;
+        }
+
+        return list->next;
+    }
 
 
 
@@ -6255,9 +6363,20 @@ extern "C" {
         f->ops.seek(f->fd, 0, ZPL_SEEK_WHENCE_CURRENT, &new_offset);
         return new_offset;
     }
-    zpl_inline b32 zpl_file_read       (zpl_file_t *f, void *buffer, isize size)       { return zpl_file_read_at(f, buffer, size, zpl_file_tell(f)); }
-    zpl_inline b32 zpl_file_write      (zpl_file_t *f, void const *buffer, isize size) { return zpl_file_write_at(f, buffer, size, zpl_file_tell(f)); }
 
+    zpl_inline b32 zpl_file_read(zpl_file_t *f, void *buffer, isize size) {
+        i64 cur_offset = zpl_file_tell(f);
+        b32 result = zpl_file_read_at(f, buffer, size, zpl_file_tell(f));
+        zpl_file_seek(f, cur_offset + size);
+        return result;
+    }
+
+    zpl_inline b32 zpl_file_write(zpl_file_t *f, void const *buffer, isize size) {
+        i64 cur_offset = zpl_file_tell(f);
+        b32 result = zpl_file_write_at(f, buffer, size, zpl_file_tell(f));
+        zpl_file_seek(f, cur_offset + size);
+        return result;
+    }
 
     zplFileError zpl_file_create(zpl_file_t *f, char const *filename) {
         return zpl_file_open_mode(f, ZPL_FILE_MODE_WRITE|ZPL_FILE_MODE_RW, filename);
@@ -7700,7 +7819,7 @@ extern "C" {
     extern char **environ;
 #endif
 
-    zpl_inline u32 zpl_system_command(char const *command, char *buffer) {
+    zpl_inline u32 zpl_system_command(char const *command, usize buffer_len, char *buffer) {
 #if defined(ZPL_SYSTEM_EMSCRIPTEN)
         ZPL_PANIC("zpl_system_command not supported");
 #else
@@ -7714,8 +7833,37 @@ extern "C" {
         if(!handle) return 0;
 
         char c;
-        while ((c = getc(handle)) != EOF) {
+        usize i=0;
+        while ((c = getc(handle)) != EOF && i++ < buffer_len) {
             *buffer++ = c;
+        }
+#if defined(ZPL_SYSTEM_WINDOWS)
+        _pclose(handle);
+#else
+        pclose(handle);
+#endif
+
+#endif
+        return 1;
+    }
+
+    zpl_inline u32 zpl_system_command_str(char const *command, zpl_array_t(u8) *str) {
+#if defined(ZPL_SYSTEM_EMSCRIPTEN)
+        ZPL_PANIC("zpl_system_command not supported");
+#else
+
+#if defined(ZPL_SYSTEM_WINDOWS)
+        FILE *handle = _popen(command, "r");
+#else
+        FILE *handle =  popen(command, "r");
+#endif
+
+        if(!handle) return 0;
+
+        char c;
+        usize i=0;
+        while ((c = getc(handle)) != EOF) {
+            zpl_array_append(*str, c);
         }
 #if defined(ZPL_SYSTEM_WINDOWS)
         _pclose(handle);
@@ -7739,7 +7887,5 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
-
-#pragma GCC diagnostic pop
 
 #endif // ZPL_IMPLEMENTATION

@@ -1,6 +1,8 @@
 #ifndef INCREMENTING_ID_MANAGER
 #define INCREMENTING_ID_MANAGER
 
+#include <id_manager.hpp>
+
 namespace MFGame
 {
 
@@ -11,17 +13,6 @@ public:
 private:
     Id mNextId;
 };
-
-Id IncrementingIDManager::allocate()
-{
-    if (mNextId == MFGame::NullId)
-    {
-        MFLogger::ConsoleLogger::fatal("Maximum number of IDs has been reached!", ID_MANAGER_MODULE_STR);
-        return NullId;
-    }
-
-    return mNextId++;
-}
 
 }
 

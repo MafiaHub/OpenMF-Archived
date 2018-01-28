@@ -4,6 +4,7 @@
 #include <math.hpp>
 #include <id_manager.hpp>
 #include <string>
+#include <memory>
 
 #define DEFAULT_ID_MANAGER BackingIDManager
 
@@ -80,20 +81,6 @@ private:
     int mPhysicsBehavior;
 };
 
-SpatialEntity::SpatialEntity()
-{
-    mId = sIDManager->allocate();
-    mPosition = MFMath::Vec3();
-    mScale = MFMath::Vec3(1,1,1);
-    mReady = true;
-    mPhysicsBehavior = ENTITY_MOVABLE;
 }
 
-SpatialEntity::~SpatialEntity()
-{
-    sIDManager->deallocate(mId);
-}
-
-std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<DEFAULT_ID_MANAGER>();
-}
 #endif

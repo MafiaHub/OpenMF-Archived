@@ -1,14 +1,11 @@
-#include <iostream>
 #include <iomanip>
-#include <dta/parser.hpp>
-#include <dta/key_extractor.hpp>
-#include <utils.hpp>
+#include <formats/dta/parser.hpp>
+#include <formats/dta/key_extractor.hpp>
+#include <utils/openmf.hpp>
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <algorithm>
 #include <osdefines.hpp>
-
-#define ZPL_IMPLEMENTATION
 #include <zpl.h>
 
 #define ALIGN 50
@@ -207,7 +204,7 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        ScopedBuffer buffer(fileSize);
+        MFUtil::ScopedBuffer buffer(fileSize);
         f.read(buffer,fileSize);
         f.close();
 

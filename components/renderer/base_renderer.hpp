@@ -10,7 +10,7 @@ namespace MFRender
 class Renderer
 {
 public:
-    Renderer();
+    Renderer() { mDone = false; };
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true)=0;
     virtual bool loadSingleModel(std::string model)=0;
     virtual void frame(double dt)=0;
@@ -34,11 +34,6 @@ public:
   protected:
     bool mDone;
 };
-
-Renderer::Renderer():
-    mDone(false)
-{
-}
 
 }
 

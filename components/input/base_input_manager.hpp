@@ -1,6 +1,9 @@
 #ifndef INPUT_MANAGER_BASE_H
 #define INPUT_MANAGER_BASE_H
 
+#include <memory>
+#include <vector>
+
 namespace MFInput
 {
 
