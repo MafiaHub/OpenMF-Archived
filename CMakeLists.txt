@@ -6,9 +6,17 @@ option(BUILD_GAME   "build game"                 ON)
 option(BUILD_VIEWER "build model/mission viewer" ON)
 option(BUILD_UTILS  "build format utils"         ON)
 option(BUILD_TESTS  "build tests"                ON)
+option(LTO_BUILD    "build with LTO"             OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(LTO_BUILD)
+  cmake_policy(SET CMP0069 NEW)
+  include(CheckIPOSupported)
+  check_ipo_supported()
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 set(OpenMF_CMAKE_DIR "${OpenMF_SOURCE_DIR}/cmake")
 
