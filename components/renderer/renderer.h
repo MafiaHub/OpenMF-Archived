@@ -1,7 +1,7 @@
 #ifndef OMF_RENDERER_H
 #define OMF_RENDERER_H
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -9,7 +9,7 @@ extern "C" {
 
 
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

@@ -8,8 +8,8 @@ extern "C" {
     /* forward decl */
     struct omf_checkbin_t;
 
-    ZPL_DEF b32 omf_checkbin_parse(struct omf_checkbin_t *resource, zpl_file_t *file);
-    ZPL_DEF b32 omf_checkbin_free(struct omf_checkbin_t *resource);
+    OMF_DEF b32 omf_checkbin_parse(struct omf_checkbin_t *resource, zpl_file_t *file);
+    OMF_DEF b32 omf_checkbin_free(struct omf_checkbin_t *resource);
 
     enum {
         OMF_CHECKBIN_POINTTYPE_PEDESTRIAN = 0x1,

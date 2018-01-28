@@ -1,8 +1,8 @@
 #include <zpl.h>
 #include <zpl_math.h>
 #include <common.h>
-#include <logger.h>
 #include <vfs.h>
+#include <logger.h>
 #include <utils/osg_utils.hpp>
 #include <formats/check_bin/check_bin.h>
 #include <formats/check_bin/osg.hpp>
@@ -19,6 +19,9 @@
 
 #define omf_logger_fatal(fmt, ...) \
         omf_logger_ext(NULL, OMF_LOGGER_FATAL, fmt, #__VA_ARGS__)
+
+namespace MFFormat
+{
 
 typedef struct {
     osg::Vec3f mStart;
@@ -79,8 +82,6 @@ u8 omf_checkbin__color_from_type(u16 type) {
     }
 }
 
-namespace MFFormat
-{
 
 osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::string fileName)
 {

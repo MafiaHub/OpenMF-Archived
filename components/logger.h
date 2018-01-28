@@ -52,7 +52,7 @@ extern "C" {
         return id;
     }
 
-    inline isize omf__logger_va(const char *detail, u8 verb_flag, const char *fmt, va_list va) {
+    isize omf__logger_va(const char *detail, u8 verb_flag, const char *fmt, va_list va) {
         if (!omf_logger_callbacks) return 0;
 
         zpl_local_persist char buf[OMF_LOGGER_BUFFER_SIZE];
@@ -69,7 +69,7 @@ extern "C" {
         return len;
     }
 
-    inline isize omf_logger_raw(const char *fmt, ...) {
+    isize omf_logger_raw(const char *fmt, ...) {
         if (!omf_logger_callbacks) return 0;
 
         isize res;
@@ -80,7 +80,7 @@ extern "C" {
         return res;
     }
 
-    inline isize omf_logger(u8 verb_flag, const char *fmt, ...) {
+    isize omf_logger(u8 verb_flag, const char *fmt, ...) {
         if (!omf_logger_callbacks) return 0;
 
         isize res;
@@ -91,7 +91,7 @@ extern "C" {
         return res;
     }
 
-    inline isize omf_logger_ext(const char *details, u8 verb_flag, const char *fmt, ...) {
+    isize omf_logger_ext(const char *details, u8 verb_flag, const char *fmt, ...) {
         if (!omf_logger_callbacks) return 0;
 
         isize res;

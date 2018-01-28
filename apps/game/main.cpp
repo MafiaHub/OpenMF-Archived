@@ -1,6 +1,3 @@
-#define ZPL_IMPLEMENTATION
-#define OMF_LOGGER_IMPLEMENTATION
-
 #include <zpl.h>
 #include <logger.h>
 

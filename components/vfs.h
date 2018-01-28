@@ -3,7 +3,7 @@
 
 #define MAFIA_INSTALL_DIR "MAFIA_INSTALL_DIR"
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -18,7 +18,7 @@ extern "C" {
 
     #define omf_vfs_open(file, filename) omf_vfs_open_mode(file, filename, ZPL_FILE_MODE_READ)
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 
@@ -31,13 +31,13 @@ extern "C" {
 //
 //
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
     #define omf_add_path(x) zpl_array_append(omf_vfs_paths, zpl_string_make(zpl_heap_allocator(), x))
 
-    zpl_inline void omf_vfs_init() {
+    void omf_vfs_init() {
         zpl_array_init(omf_vfs_paths, zpl_heap_allocator());
 
         omf_add_path("resources");
@@ -53,7 +53,7 @@ extern "C" {
 
     #undef omf_add_path
 
-    zpl_inline zpl_string_t omf_vfs__make_path(char const *path) {
+    zpl_string_t omf_vfs__make_path(char const *path) {
         zpl_string_t str = zpl_string_make(zpl_heap_allocator(), path);
         zpl_str_to_lower(str);
 
@@ -64,19 +64,19 @@ extern "C" {
         return str;
     }
 
-    zpl_inline void omf_vfs_prepend_path(char const *path) {
+    void omf_vfs_prepend_path(char const *path) {
         zpl_array_append_at(omf_vfs_paths, omf_vfs__make_path(path), 0);
     }
 
-    zpl_inline void omf_vfs_add_path_at(char const *path, usize index) {
+    void omf_vfs_add_path_at(char const *path, usize index) {
         zpl_array_append_at(omf_vfs_paths, omf_vfs__make_path(path), index);
     }
 
-    zpl_inline void omf_vfs_add_path(char const *path) {
+    void omf_vfs_add_path(char const *path) {
         zpl_array_append(omf_vfs_paths, omf_vfs__make_path(path));
     }
 
-    zpl_inline b32 omf_vfs_open_mode(zpl_file_t *file, char const *file_name, zpl_file_mode_t mode) {
+    b32 omf_vfs_open_mode(zpl_file_t *file, char const *file_name, zpl_file_mode_t mode) {
         omf_assert_msg(omf_vfs_paths, "omf_vfs_open_mode: you should call omf_vfs_init first");
 
         for (usize i=0; i<zpl_array_count(omf_vfs_paths); i++) {
@@ -99,12 +99,12 @@ extern "C" {
         return false;
     }
 
-    zpl_inline b32 omf_vfs_close(zpl_file_t *file) {
+    b32 omf_vfs_close(zpl_file_t *file) {
         ZPL_ASSERT(file);
         return (zpl_file_close(file) == ZPL_FILE_ERROR_NONE);
     }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

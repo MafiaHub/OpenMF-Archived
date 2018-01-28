@@ -144,7 +144,7 @@ if(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 endif(NOT WIN32)
 
-file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "extern/sdl_graphics_window.cpp")
+file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp")
 set(THIRD_PARTY_LIBS
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}

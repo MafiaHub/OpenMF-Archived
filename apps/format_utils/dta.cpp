@@ -1,4 +1,3 @@
-#include <iostream>
 #include <iomanip>
 #include <formats/dta/parser.hpp>
 #include <formats/dta/key_extractor.hpp>
@@ -7,8 +6,6 @@
 #include <cxxopts.hpp>
 #include <algorithm>
 #include <osdefines.hpp>
-
-#define ZPL_IMPLEMENTATION
 #include <zpl.h>
 
 #define ALIGN 50
