@@ -1,20 +1,21 @@
 #ifndef OMF_VFS_H
 #define OMF_VFS_H
 
+#include <zpl.h>
+#include <general/defines.h>
+
 #define MAFIA_INSTALL_DIR "MAFIA_INSTALL_DIR"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    zpl_global zpl_array_t(zpl_string_t) omf_vfs_paths;
-
-    ZPL_DEF void omf_vfs_init        ();
-    ZPL_DEF b32  omf_vfs_open_mode   (zpl_file_t *file, char const *file_name, zpl_file_mode_t mode);
-    ZPL_DEF b32  omf_vfs_close       (zpl_file_t *file);
-    ZPL_DEF void omf_vfs_add_path_at (char const *path, usize index);
-    ZPL_DEF void omf_vfs_add_path    (char const *path);
-    ZPL_DEF void omf_vfs_prepend_path(char const *path);
+    OMF_DEF void omf_vfs_init        ();
+    OMF_DEF b32  omf_vfs_open_mode   (zpl_file_t *file, char const *file_name, zpl_file_mode_t mode);
+    OMF_DEF b32  omf_vfs_close       (zpl_file_t *file);
+    OMF_DEF void omf_vfs_add_path_at (char const *path, usize index);
+    OMF_DEF void omf_vfs_add_path    (char const *path);
+    OMF_DEF void omf_vfs_prepend_path(char const *path);
 
     #define omf_vfs_open(file, filename) omf_vfs_open_mode(file, filename, ZPL_FILE_MODE_READ)
 
@@ -34,6 +35,8 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    zpl_array_t(zpl_string_t) omf_vfs_paths = NULL;
 
     #define omf_add_path(x) zpl_array_append(omf_vfs_paths, zpl_string_make(zpl_heap_allocator(), x))
 
@@ -100,7 +103,7 @@ extern "C" {
     }
 
     b32 omf_vfs_close(zpl_file_t *file) {
-        ZPL_ASSERT(file);
+        omf_assert(file);
         return (zpl_file_close(file) == ZPL_FILE_ERROR_NONE);
     }
 

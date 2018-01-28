@@ -1,6 +1,9 @@
 #ifndef OMF_LOGGER_H
 #define OMF_LOGGER_H
 
+#include <zpl.h>
+#include <general/defines.h>
+
 #ifndef OMF_LOGGER_BUFFER_SIZE
 #define OMF_LOGGER_BUFFER_SIZE 4096
 #endif
@@ -17,12 +20,12 @@ extern "C" {
 
     typedef void (omf_logger_callback)(const char *details, u8, const char *str, usize size);
 
-    ZPL_DEF usize omf_logger_add(omf_logger_callback *callback);
-    ZPL_DEF usize omf_logger_remove(usize id);
+    OMF_DEF usize omf_logger_add(omf_logger_callback *callback);
+    OMF_DEF usize omf_logger_remove(usize id);
 
-    ZPL_DEF isize omf_logger_raw(const char *fmt, ...);
-    ZPL_DEF isize omf_logger(u8 verbosity_flag, const char *fmt, ...);
-    ZPL_DEF isize omf_logger_ext(const char *details, u8 verbosity_flag, const char *fmt, ...);
+    OMF_DEF isize omf_logger_raw(const char *fmt, ...);
+    OMF_DEF isize omf_logger(u8 verbosity_flag, const char *fmt, ...);
+    OMF_DEF isize omf_logger_ext(const char *details, u8 verbosity_flag, const char *fmt, ...);
 
 #ifdef __cplusplus
 }
@@ -47,7 +50,7 @@ extern "C" {
     }
 
     usize omf_logger_remove(usize id) {
-        ZPL_ASSERT(id < zpl_array_count(omf_logger_callbacks));
+        omf_assert(id < zpl_array_count(omf_logger_callbacks));
         omf_logger_callbacks[id] = NULL;
         return id;
     }

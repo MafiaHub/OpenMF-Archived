@@ -1,6 +1,6 @@
 #include <zpl.h>
 #include <zpl_math.h>
-#include <common.h>
+#include <general/defines.h>
 
 #include <osg/Vec3f>
 #include <osg/Quat>

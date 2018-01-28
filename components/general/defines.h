@@ -6,3 +6,6 @@
 #if defined(ZPL_MATH_INCLUDE_ZPL_MATH_H)
 #   define vec3 zplm_vec3_t
 #endif
+
+#define omf_logger_warn(fmt, ...) \
+        omf_logger_ext(NULL, OMF_LOGGER_WARN, fmt, #__VA_ARGS__)

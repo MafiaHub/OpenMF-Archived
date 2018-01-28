@@ -5,9 +5,7 @@
 extern "C" {
 #endif
 
-
-
-
+    typedef void omf_render_node;
 
 #ifdef __cplusplus
 }

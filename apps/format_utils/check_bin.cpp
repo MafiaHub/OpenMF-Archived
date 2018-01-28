@@ -1,15 +1,12 @@
 #include <zpl.h>
-#include <zpl_math.h>
-#include <common.h>
-#include <vfs.h>
-#include <logger.h>
-#include <cxxopts.hpp>
-
+#include <general/vfs.h>
+#include <general/logger.h>
 #include <formats/check_bin/check_bin.h>
+
+#include <cxxopts.hpp>
 
 #define omf_logger_fatal(fmt, ...) \
         omf_logger_ext(NULL, OMF_LOGGER_FATAL, fmt, #__VA_ARGS__)
-
 
 const char *dump_type(u32 pointType) {
     switch(pointType) {
@@ -80,6 +77,10 @@ int main(int argc, char** argv)
     options.positional_help("file internal_file");
 
     auto arguments = options.parse(argc, argv);
+
+    char foo[55];
+    char bar[55];
+    zpl_memcopy(foo, bar, 55);
 
     if (arguments.count("h") > 0) {
         omf_logger_raw(options.help().c_str());

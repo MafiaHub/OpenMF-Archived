@@ -5,7 +5,6 @@
 #include <formats/4ds/osg.hpp>
 #include <formats/scene2_bin/osg.hpp>
 #include <formats/cache_bin/osg.hpp>
-#include <formats/check_bin/osg.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <loggers/console.hpp>
@@ -16,6 +15,10 @@
 #include <osg/Fog>
 #include <osgUtil/PrintVisitor>
 #include <vfs/vfs.hpp>
+
+#include <general/vfs.h>
+#include <general/logger.h>
+#include <formats/check_bin/check_bin.h>
 
 namespace MFRender
 {
@@ -286,16 +289,17 @@ void OSGRenderer::Impl::setCameraParameters(bool perspective, float fov, float o
 
 bool OSGRenderer::Impl::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
 {
-    std::string missionDir = "missions/" + mission;
-    std::string scene4dsPath = missionDir + "/scene.4ds";
-    std::string scene2BinPath = missionDir + "/scene2.bin";
-    std::string cacheBinPath = missionDir + "/cache.bin";
-    std::string checkBinPath = missionDir + "/check.bin";
+    std::string missionDir      = "missions/" + mission;
+    std::string scene4dsPath    = missionDir + "/scene.4ds";
+    std::string scene2BinPath   = missionDir + "/scene2.bin";
+    std::string cacheBinPath    = missionDir + "/cache.bin";
+    std::string checkBinPath    = missionDir + "/check.bin";
 
     MFFormat::OSG4DSLoader l4ds;
     MFFormat::OSGScene2BinLoader lScene2;
     MFFormat::OSGCacheBinLoader lCache;
-    MFFormat::OSGCheckBinLoader lCheck;
+    // MFFormat::OSGCheckBinLoader lCheck;
+    omf_checkbin_t checkbin = {0};
 
     l4ds.setLoaderCache(&mLoaderCache);
     lScene2.setLoaderCache(&mLoaderCache);
@@ -304,7 +308,7 @@ bool OSGRenderer::Impl::loadMission(std::string mission, bool load4ds, bool load
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
-    std::ifstream fileCheckBin;
+    // std::ifstream fileCheckBin;
 
     MFFormat::OSGLoader::NodeMap nodeMap;
     l4ds.setNodeMap(&nodeMap);
@@ -359,15 +363,16 @@ bool OSGRenderer::Impl::loadMission(std::string mission, bool load4ds, bool load
     }
 
     //NOTE(DavoSK): Only for debug
-    if(mFileSystem->open(fileCheckBin,checkBinPath))
-    {
-        osg::ref_ptr<osg::Node> n = lCheck.load(fileCheckBin);
-        if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse check.bin file: " + checkBinPath + ".", OSGRENDERER_MODULE_STR);
-        else
-            mRootNode->addChild(n);
+    zpl_file_t checkbin_file = {0};
+    if (omf_vfs_open(&checkbin_file, checkBinPath.c_str())) {
+        if (!omf_checkbin_parse(&checkbin, &checkbin_file)) {
+            omf_logger_warn("checkbin: couldn't parse the file: %s", checkBinPath.c_str());
+        } else {
+            osg::ref_ptr<osg::Node> node = (osg::Node *)omf_checkbin_get_node(&checkbin);
+            mRootNode->addChild(node);
+        }
 
-        fileCheckBin.close();
+        omf_vfs_close(&checkbin_file);
     }
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;

@@ -1,27 +1,28 @@
 #include <zpl.h>
 #include <zpl_math.h>
-#include <common.h>
-#include <vfs.h>
-#include <logger.h>
-#include <utils/osg_utils.hpp>
+
+#include <general/defines.h>
+#include <general/logger.h>
+#include <general/render.h>
+#include <general/vfs.h>
+
 #include <formats/check_bin/check_bin.h>
-#include <formats/check_bin/osg.hpp>
+#include <utils/osg_utils.hpp>
 
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 #include <osg/ShapeDrawable>
-#include <utils/openmf.hpp>
 #include <osg_masks.hpp>
+
+// #include <utils/openmf.hpp>
+
 
 #define omf_logger_info(fmt, ...) \
         omf_logger_ext(NULL, OMF_LOGGER_INFO, fmt, #__VA_ARGS__)
 
 #define omf_logger_fatal(fmt, ...) \
         omf_logger_ext(NULL, OMF_LOGGER_FATAL, fmt, #__VA_ARGS__)
-
-namespace MFFormat
-{
 
 typedef struct {
     osg::Vec3f mStart;
@@ -83,29 +84,13 @@ u8 omf_checkbin__color_from_type(u16 type) {
 }
 
 
-osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::string fileName)
-{
-    osg::ref_ptr<osg::Group> group = new osg::Group();
+extern "C" omf_render_node *omf_checkbin_get_node(omf_checkbin_t *format) {
+    osg::Group *group = new osg::Group();
 
     group->setNodeMask(MFRender::MASK_DEBUG);
     group->setName("check.bin");
 
-    omf_logger_info("loading check.bin: %s", fileName.c_str());
-
-    // TODO: remove file opening from there
-    // TODO: change singnature from ifstream to zpl_file_t
-
-    zpl_file_t file = {0};
-    if (!omf_vfs_open(&file, fileName.c_str())) {
-        omf_logger_fatal("could not open file %s", input.c_str());
-        return nullptr;
-    }
-
-    omf_checkbin_t format = {0};
-    if (!omf_checkbin_parse(&format, &file)) {
-        omf_logger_fatal("could not parse file %f", fileName.c_str());
-        return nullptr;
-    }
+    omf_logger_info("creating node check.bin: %s", fileName.c_str());
 
     osg::ref_ptr<osg::ShapeDrawable> debugNodes[5];
     std::vector<osg::Vec4f> debugNodesColors = {
@@ -116,13 +101,13 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
         osg::Vec4f(0,0,0,0)
     };
 
-    for (size_t i = 0; i < debugNodesColors.size(); i++) {
+    for (usize i = 0; i < debugNodesColors.size(); i++) {
         debugNodes[i] = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),0.1));
         debugNodes[i]->setColor(debugNodesColors.at(i));
         debugNodes[i]->setUseDisplayList(false);
     }
 
-    for (auto line : omf_checkbin__resolve_links(&format)) {
+    for (auto line : omf_checkbin__resolve_links(format)) {
         osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
         osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
@@ -138,8 +123,8 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
 
     } //for links
 
-    for (usize i = 0; i < zpl_array_count(format.points); ++i) {
-        auto point = format.points[i];
+    for (usize i = 0; i < zpl_array_count(format->points); ++i) {
+        auto point = format->points[i];
         osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
         osg::Matrixd m; m.preMultTranslate(omf_osg_utils_v3(point.mPos));
         objectTransform->setMatrix(m);
@@ -148,9 +133,5 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
 
     } //for points
 
-    omf_checkbin_free(&format);
-    omf_vfs_close(&file); // TODO: remove
-    return group;
-}
-
+    return (omf_render_node *)group;
 }

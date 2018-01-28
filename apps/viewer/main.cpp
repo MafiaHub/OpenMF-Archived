@@ -14,6 +14,8 @@
 #include <controllers/rigid_camera_controller.hpp>
 #include <controllers/character_entity_controller.hpp>
 
+#include <general/vfs.h>
+
 #define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
@@ -201,6 +203,8 @@ void parseCameraString(std::string str, double params[6])
 
 int main(int argc, char** argv)
 {
+    omf_vfs_init();
+
     cxxopts::Options options(VIEWER_MODULE_STR,"3D viewer for Mafia 4DS files.");
 
     options.add_options()
