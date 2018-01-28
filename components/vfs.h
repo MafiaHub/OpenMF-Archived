@@ -77,6 +77,8 @@ extern "C" {
     }
 
     zpl_inline b32 omf_vfs_open_mode(zpl_file_t *file, char const *file_name, zpl_file_mode_t mode) {
+        omf_assert_msg(omf_vfs_paths, "omf_vfs_open_mode: you should call omf_vfs_init first");
+
         for (usize i=0; i<zpl_array_count(omf_vfs_paths); i++) {
             zpl_string_t real_path = zpl_string_duplicate(zpl_heap_allocator(), omf_vfs_paths[i]);
             real_path = zpl_string_append_fmt(real_path, "%c%s", ZPL_PATH_SEPARATOR, file_name);

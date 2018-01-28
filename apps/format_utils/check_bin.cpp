@@ -16,7 +16,7 @@
         omf_logger_ext(NULL, OMF_LOGGER_FATAL, fmt, #__VA_ARGS__)
 
 
-const char *getStringPointType(u32 pointType) {
+const char *dump_type(u32 pointType) {
     switch(pointType) {
         case OMF_CHECKBIN_POINTTYPE_PEDESTRIAN:
             return "PED";
@@ -43,7 +43,7 @@ inline void debug_dump(omf_checkbin_t *checkBin) {
     for (usize i = 0; i != zpl_array_count(checkBin->points); ++i) {
         auto point = checkBin->points[i];
 
-        omf_logger_raw("[P%d][%s] %f %f %f", i, getStringPointType(point.mType),
+        omf_logger_raw("[P%d][%s] %f %f %f", i, dump_type(point.mType),
             point.mPos.x, point.mPos.y, point.mPos.z);
 
         for (u32 j = 0; j < point.mEnterLinks; j++) {
@@ -51,7 +51,7 @@ inline void debug_dump(omf_checkbin_t *checkBin) {
             auto targetPoint = checkBin->points[link.mTargetPoint];
 
             omf_logger_raw("[P%d] Link to [P%d][%s] %f %f %f %f",
-                i, link.mTargetPoint, getStringPointType(targetPoint.mType),
+                i, link.mTargetPoint, dump_type(targetPoint.mType),
                 targetPoint.mPos.x, targetPoint.mPos.y, targetPoint.mPos.z, point.mPos.z);
         }
 

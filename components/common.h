@@ -1,3 +1,5 @@
+#define OMF_DEF ZPL_DEF
+#define omf_inline zpl_inline
 #define omf_assert ZPL_ASSERT
 #define omf_assert_msg ZPL_ASSERT_MSG
 
