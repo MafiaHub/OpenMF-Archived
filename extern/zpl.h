@@ -24,6 +24,9 @@
 
 
   Version History:
+  4.5.0 - Added zpl_array_append_at
+  4.4.0 - Added zpl_array_back, zpl_array_front
+  4.3.0 - Added zpl_list_t
   4.2.0 - Added zpl_system_command_str
   4.1.2 - GG, fixed small compilation error
   4.1.1 - Fixed possible security issue in zpl_system_command
@@ -1509,7 +1512,52 @@
 #define zpl_buffer_pop(x)   do { ZPL_ASSERT(zpl_buffer_count(x) > 0); zpl_buffer_count(x)--; } while (0)
 #define zpl_buffer_clear(x) do { zpl_buffer_count(x) = 0; } while (0)
 
+    ////////////////////////////////////////////////////////////////
+    //
+    // Linked List
+    //
+    // zpl_list_t encapsulates pointer to data and points to the next and the previous element in the list.
+    //
+    // Available Procedures for zpl_list_t 
+    // zpl_list_init
+    // zpl_list_add
+    // zpl_list_remove
 
+#if 0
+int foo(void)
+{
+    zpl_list_t s, *head, *cursor;
+    zpl_list_init(&s, "it is optional to call init: ");
+    head = cursor = &s;
+
+    // since we can construct an element implicitly this way
+    // the second field gets overwritten once we add it to a list.
+    zpl_list_t a = {"hello"};
+    cursor = zpl_list_add(cursor, &a);
+
+    zpl_list_t b = {"world"};
+    cursor = zpl_list_add(cursor, &b);
+
+    zpl_list_t c = {"!!! OK"};
+    cursor = zpl_list_add(cursor, &c);
+
+    for (zpl_list_t *l=head; l; l=l->next) {
+        zpl_printf("%s ", cast(char *)l->ptr);
+    }
+    zpl_printf("\n");
+
+    return 0;
+}
+#endif
+
+    typedef struct zpl__list_t {
+        void *ptr;
+        struct zpl__list_t *next, *prev;
+    } zpl_list_t;
+
+    ZPL_DEF void        zpl_list_init  (zpl_list_t *list, void *ptr);
+    ZPL_DEF zpl_list_t *zpl_list_add   (zpl_list_t *list, zpl_list_t *item);
+    ZPL_DEF zpl_list_t *zpl_list_remove(zpl_list_t *list);
 
     ////////////////////////////////////////////////////////////////
     //
@@ -1527,6 +1575,8 @@
     // zpl_array_appendv
     // zpl_array_pop
     // zpl_array_clear
+    // zpl_array_back
+    // zpl_array_front
     // zpl_array_resize
     // zpl_array_reserve
     //
@@ -1634,6 +1684,13 @@
         (x)[zpl_array_count(x)++] = (item);               \
     } while (0)
 
+#define zpl_array_append_at(x, item, ind) do { \
+        zpl_array_header_t *zpl__ah = ZPL_ARRAY_HEADER(x); \
+        zpl_array_grow(x, zpl__ah->count + 1); \
+        zpl_memcopy(x+ind+1, x+ind, zpl_size_of(x[0])*(zpl__ah->count - ind)); \
+        x[ind] = item; \
+    } while (0)
+
 #define zpl_array_appendv(x, items, item_count) do {                    \
         zpl_array_header_t *zpl__ah = ZPL_ARRAY_HEADER(x);              \
         ZPL_ASSERT(zpl_size_of((items)[0]) == zpl_size_of((x)[0]));     \
@@ -1660,6 +1717,8 @@
 
 
 #define zpl_array_pop(x)   do { ZPL_ASSERT(ZPL_ARRAY_HEADER(x)->count > 0); ZPL_ARRAY_HEADER(x)->count--; } while (0)
+#define zpl_array_back(x)  x[ZPL_ARRAY_HEADER(x)->count - 1]
+#define zpl_array_front(x) x[0]
 #define zpl_array_clear(x) do { ZPL_ARRAY_HEADER(x)->count = 0; } while (0)
 
 #define zpl_array_resize(x, new_count) do {               \
@@ -2006,7 +2065,7 @@
     ZPL_DEF void           zpl_file_free_contents(zpl_file_contents_t *fc);
 
 
-    // TODO: Should these have different na,es as they do not take in a zpl_file_t * ???
+    // TODO: Should these have different names as they do not take in a zpl_file_t * ???
     ZPL_DEF b32        zpl_file_exists         (char const *filepath);
     ZPL_DEF zpl_file_time_t zpl_file_last_write_time(char const *filepath);
     ZPL_DEF b32        zpl_file_copy           (char const *existing_filename, char const *new_filename, b32 fail_if_exists);
@@ -5512,6 +5571,33 @@ extern "C" {
     }
 
 
+    ////////////////////////////////////////////////////////////////
+    //
+    // zpl_list_t
+    //
+
+
+    zpl_inline void zpl_list_init(zpl_list_t *list, void *ptr) {
+        zpl_list_t list_ = {0};
+        *list = list_;
+        list->ptr = ptr;
+    }
+
+    zpl_inline zpl_list_t *zpl_list_add(zpl_list_t *list, zpl_list_t *item) {
+        list->next = item;
+        item->next = NULL;
+        item->prev = list;
+        return item;
+    }
+
+    zpl_inline zpl_list_t *zpl_list_remove(zpl_list_t *list) {
+        if (list->prev) {
+            list->prev->next = list->next;
+        }
+
+        return list->next;
+    }
+
 
 
     ////////////////////////////////////////////////////////////////
@@ -6277,9 +6363,20 @@ extern "C" {
         f->ops.seek(f->fd, 0, ZPL_SEEK_WHENCE_CURRENT, &new_offset);
         return new_offset;
     }
-    zpl_inline b32 zpl_file_read       (zpl_file_t *f, void *buffer, isize size)       { return zpl_file_read_at(f, buffer, size, zpl_file_tell(f)); }
-    zpl_inline b32 zpl_file_write      (zpl_file_t *f, void const *buffer, isize size) { return zpl_file_write_at(f, buffer, size, zpl_file_tell(f)); }
 
+    zpl_inline b32 zpl_file_read(zpl_file_t *f, void *buffer, isize size) {
+        i64 cur_offset = zpl_file_tell(f);
+        b32 result = zpl_file_read_at(f, buffer, size, zpl_file_tell(f));
+        zpl_file_seek(f, cur_offset + size);
+        return result;
+    }
+
+    zpl_inline b32 zpl_file_write(zpl_file_t *f, void const *buffer, isize size) {
+        i64 cur_offset = zpl_file_tell(f);
+        b32 result = zpl_file_write_at(f, buffer, size, zpl_file_tell(f));
+        zpl_file_seek(f, cur_offset + size);
+        return result;
+    }
 
     zplFileError zpl_file_create(zpl_file_t *f, char const *filename) {
         return zpl_file_open_mode(f, ZPL_FILE_MODE_WRITE|ZPL_FILE_MODE_RW, filename);

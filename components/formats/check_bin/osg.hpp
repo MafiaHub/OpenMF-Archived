@@ -18,7 +18,7 @@ namespace MFFormat
 class OSGCheckBinLoader : public OSGLoader
 {
 public:
-    typedef struct 
+    typedef struct
     {
         osg::Vec3f mStart;
         osg::Vec3f mEnd;
