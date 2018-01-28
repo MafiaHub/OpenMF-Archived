@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     options.parse_positional({"i", "f"});
     options.positional_help("file internal_file");
 
-    auto arguments = options.parse(argc,argv);
+    auto arguments = options.parse(argc, argv);
 
     if (arguments.count("h") > 0) {
         omf_logger_raw(options.help().c_str());
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     std::string input = arguments["i"].as<std::string>();
     zpl_file_t file = {0};
 
-    if (!omf_vfs_open(&file, input.c_str(), ZPL_FILE_MODE_READ)) {
+    if (!omf_vfs_open(&file, input.c_str())) {
         omf_logger_fatal("could not open file %s", input.c_str());
         return 1;
     }
@@ -112,6 +112,7 @@ int main(int argc, char** argv)
     }
 
     debug_dump(&format);
+    omf_vfs_close(&file);
     omf_checkbin_free(&format);
 
     return 0;

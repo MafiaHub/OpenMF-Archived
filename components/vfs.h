@@ -10,10 +10,13 @@ extern "C" {
     zpl_global zpl_array_t(zpl_string_t) omf_vfs_paths;
 
     ZPL_DEF void omf_vfs_init        ();
-    ZPL_DEF b32  omf_vfs_open        (zpl_file_t *file, char const *file_name, zpl_file_mode_t mode);
+    ZPL_DEF b32  omf_vfs_open_mode   (zpl_file_t *file, char const *file_name, zpl_file_mode_t mode);
+    ZPL_DEF b32  omf_vfs_close       (zpl_file_t *file);
     ZPL_DEF void omf_vfs_add_path_at (char const *path, usize index);
     ZPL_DEF void omf_vfs_add_path    (char const *path);
     ZPL_DEF void omf_vfs_prepend_path(char const *path);
+
+    #define omf_vfs_open(file, filename) omf_vfs_open_mode(file, filename, ZPL_FILE_MODE_READ)
 
 #if __cplusplus
 }
@@ -73,7 +76,7 @@ extern "C" {
         zpl_array_append(omf_vfs_paths, omf_vfs__make_path(path));
     }
 
-    zpl_inline b32 omf_vfs_open(zpl_file_t *file, char const *file_name, zpl_file_mode_t mode) {
+    zpl_inline b32 omf_vfs_open_mode(zpl_file_t *file, char const *file_name, zpl_file_mode_t mode) {
         for (usize i=0; i<zpl_array_count(omf_vfs_paths); i++) {
             zpl_string_t real_path = zpl_string_duplicate(zpl_heap_allocator(), omf_vfs_paths[i]);
             real_path = zpl_string_append_fmt(real_path, "%c%s", ZPL_PATH_SEPARATOR, file_name);
@@ -94,6 +97,11 @@ extern "C" {
         return false;
     }
 
+    zpl_inline b32 omf_vfs_close(zpl_file_t *file) {
+        ZPL_ASSERT(file);
+        return (zpl_file_close(file) == ZPL_FILE_ERROR_NONE);
+    }
+
 #if __cplusplus
 }
 #endif
@@ -109,7 +117,7 @@ extern "C" {
 //     omf_vfs_prepend_path("testdir");
 
 //     zpl_file_t f = {0};
-//     if (omf_vfs_open(&f, "test.txt", ZPL_FILE_MODE_READ)) {
+//     if (omf_vfs_open(&f, "test.txt")) {
 //        char buf[5] = {0};
 //        zpl_file_read(&f, buf, 4);
 //        zpl_printf("Output: %s\n", buf);
