@@ -1,9 +1,75 @@
 #include <renderer/osg_renderer.hpp>
+#include <osg/Node>
+#include <osgDB/ReadFile>
+#include <osgViewer/Viewer>
+#include <formats/4ds/osg.hpp>
+#include <formats/scene2_bin/osg.hpp>
+#include <formats/cache_bin/osg.hpp>
+#include <formats/check_bin/osg.hpp>
+#include <osg/Texture2D>
+#include <osg/LightModel>
+#include <loggers/console.hpp>
+#include <osgGA/TrackballManipulator>
+#include <loader_cache.hpp>
+#include <osgViewer/ViewerEventHandlers>
+#include <osgUtil/Optimizer>
+#include <osg/Fog>
+#include <osgUtil/PrintVisitor>
+#include <vfs/vfs.hpp>
 
 namespace MFRender
 {
 
-void OSGRenderer::showProfiler()
+class OSGRenderer::Impl: public Renderer
+{
+public:
+    Impl();
+    virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
+    virtual bool loadSingleModel(std::string model) override;
+    virtual void frame(double dt) override;
+    virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
+    virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
+    virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
+    virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;
+    virtual void setWindowSize(unsigned int width, unsigned int height) override;
+    virtual bool exportScene(std::string fileName) override;
+    virtual void debugClick(unsigned int x, unsigned int y) override;
+    virtual int  getSelectedEntityId() override;
+    virtual void showProfiler() override;
+
+    /**
+      Sets a custom viewer window to display the rendering. Do not use this if setUpInWindow is called.
+    */
+    void setUpInCustomWindow(unsigned int width, unsigned int height);
+    void setUpInWindow(osgViewer::GraphicsWindow *window);
+
+    void setRenderMask(osg::Node::NodeMask mask);
+    osg::Group *getRootNode()                      { return mRootNode.get(); };
+    osgViewer::Viewer *getViewer()                 { return mViewer.get();   };
+
+protected:
+    osg::ref_ptr<osgViewer::Viewer> mViewer;
+    osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
+    MFFile::FileSystem *mFileSystem;
+    MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
+
+    void optimize();
+
+    /**
+      Given a list of light sources in the scene, the function decides which scene node should be lit by which
+      light and applies this decision to the lights and scene, adds a defaults light if there is none etc.
+     */
+
+    void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
+
+    osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
+    osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection
+    osg::ref_ptr<osg::Material> mMaterialBackup;
+
+    osg::ref_ptr<osgViewer::StatsHandler> mStatsHandler;
+};
+
+void OSGRenderer::Impl::showProfiler()
 {
     // hack: simulate the key press
     osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter;
@@ -12,19 +78,19 @@ void OSGRenderer::showProfiler()
     mStatsHandler->handle(*(event.get()),*(mViewer.get()));
 }
 
-void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
+void OSGRenderer::Impl::setRenderMask(osg::Node::NodeMask mask)
 {
     mViewer->getCamera()->setCullMask(mask);
 }
 
-bool OSGRenderer::exportScene(std::string fileName)
+bool OSGRenderer::Impl::exportScene(std::string fileName)
 {
     const osg::Node *n = mRootNode.get();
     auto result = osgDB::Registry::instance()->writeNode(*n,fileName,NULL);
     return result.success();
 }
 
-void OSGRenderer::setWindowSize(unsigned int width, unsigned int height)
+void OSGRenderer::Impl::setWindowSize(unsigned int width, unsigned int height)
 {
     mViewer->getCamera()->setViewport(0,0,width,height);
 
@@ -34,7 +100,7 @@ void OSGRenderer::setWindowSize(unsigned int width, unsigned int height)
     mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, width / ((double) height), zNear, zFar);
 }
 
-void OSGRenderer::debugClick(unsigned int x, unsigned int y)
+void OSGRenderer::Impl::debugClick(unsigned int x, unsigned int y)
 {
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector =
         new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y);
@@ -75,7 +141,7 @@ void OSGRenderer::debugClick(unsigned int x, unsigned int y)
     }
 }
 
-void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
+void OSGRenderer::Impl::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix = mViewer->getCamera()->getViewMatrix();
 
@@ -98,7 +164,7 @@ void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3
     rotYawPitchRoll.z = r;
 }
 
-void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)
+void OSGRenderer::Impl::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)
 {
     osg::Vec3f f,r,u;
 
@@ -111,15 +177,15 @@ void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMa
     up    = MFMath::Vec3(u.x(),u.y(),u.z());
 }
 
-void OSGRenderer::setUpInCustomWindow(unsigned int width, unsigned int height)
+void OSGRenderer::Impl::setUpInCustomWindow(unsigned int width, unsigned int height)
 {
-    mViewer->setUpViewInWindow(40,40,width,height); 
+    mViewer->setUpViewInWindow(40,40,width,height);
 
     if (!mViewer->isRealized())
         mViewer->realize();
 }
 
-void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
+void OSGRenderer::Impl::setUpInWindow(osgViewer::GraphicsWindow *window)
 {
     int x,y,w,h;
     window->getWindowRectangle(x,y,w,h);
@@ -130,7 +196,7 @@ void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
         mViewer->realize();
 }
 
-void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)
+void OSGRenderer::Impl::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)
 {
     osg::Matrixd viewMatrix;
 
@@ -141,7 +207,7 @@ void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 
     mViewer->getCamera()->setViewMatrix(viewMatrix);
 }
 
-int OSGRenderer::getSelectedEntityId()
+int OSGRenderer::Impl::getSelectedEntityId()
 {
     if (mSelected)
     {
@@ -157,15 +223,15 @@ int OSGRenderer::getSelectedEntityId()
             }
         }
     }
-    
-    return -1; 
+
+    return -1;
 }
 
-OSGRenderer::OSGRenderer(): Renderer()
+OSGRenderer::Impl::Impl(): Renderer()
 {
     MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();
-                
+
     mFileSystem = MFFile::FileSystem::getInstance();
 
     mViewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
@@ -200,7 +266,7 @@ OSGRenderer::OSGRenderer(): Renderer()
     mSelected = 0;
 }
 
-void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
+void OSGRenderer::Impl::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
 {
     // FIXME: looks like near/far setting doesn't work - OSG automatically computes them from viewport - turn it off
 
@@ -218,7 +284,7 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     }
 }
 
-bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
+bool OSGRenderer::Impl::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
 {
     std::string missionDir = "missions/" + mission;
     std::string scene4dsPath = missionDir + "/scene.4ds";
@@ -280,7 +346,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     if (!lightsAreSet)
         setUpLights(0);
 
-    if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath)) 
+    if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath))
     {
         osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
 
@@ -292,7 +358,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         fileCacheBin.close();
     }
 
-    //NOTE(DavoSK): Only for debug 
+    //NOTE(DavoSK): Only for debug
     if(mFileSystem->open(fileCheckBin,checkBinPath))
     {
         osg::ref_ptr<osg::Node> n = lCheck.load(fileCheckBin);
@@ -301,7 +367,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         else
             mRootNode->addChild(n);
 
-        fileCheckBin.close();    
+        fileCheckBin.close();
     }
 
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
@@ -320,7 +386,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     return true;
 }
 
-void OSGRenderer::optimize()
+void OSGRenderer::Impl::optimize()
 {
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
@@ -354,7 +420,7 @@ void OSGRenderer::optimize()
     mRootNode->accept(sceneBalancer);
 }
 
-bool OSGRenderer::loadSingleModel(std::string model)
+bool OSGRenderer::Impl::loadSingleModel(std::string model)
 {
     std::ifstream file4DS;
     MFFormat::OSG4DSLoader l4ds;
@@ -366,7 +432,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
         MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
         return false;
     }
-     
+
     mRootNode->addChild( l4ds.load(file4DS) );
 
     file4DS.close();
@@ -379,7 +445,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     return true;
 }
 
-void OSGRenderer::frame(double dt)
+void OSGRenderer::Impl::frame(double dt)
 {
     if (mViewer->done() || mDone)
     {
@@ -394,7 +460,7 @@ void OSGRenderer::frame(double dt)
     }
 }
 
-void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)
+void OSGRenderer::Impl::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)
 {
     if (lightNodes == 0 || lightNodes->size() == 0)
     {
@@ -445,5 +511,91 @@ void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *light
         }
     }
 }
+
+// PIMPL STUFF FOLLOWS
+OSGRenderer::OSGRenderer() : impl(new Impl())
+{
+}
+
+OSGRenderer::~OSGRenderer() = default;
+
+bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
+{
+    return impl->loadMission(mission, load4ds, loadScene2Bin, loadCacheBin);
+}
+
+bool OSGRenderer::loadSingleModel(std::string model)
+{
+    return impl->loadSingleModel(model);
+}
+
+void OSGRenderer::frame(double dt) {
+    impl->frame(dt);
+}
+
+void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
+{
+    impl->setCameraParameters(perspective, fov, orthoSize, nearDist, farDist);
+}
+
+void OSGRenderer::getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)
+{
+    impl->getCameraPositionRotation(position, rotYawPitchRoll);
+}
+
+void OSGRenderer::setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)
+{
+    impl->setCameraPositionRotation(position, rotYawPitchRoll);
+}
+
+void OSGRenderer::getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)
+{
+    impl->getCameraVectors(forw, right, up);
+}
+
+void OSGRenderer::setWindowSize(unsigned int width, unsigned int height)
+{
+    impl->setWindowSize(width, height);
+}
+
+bool OSGRenderer::exportScene(std::string fileName) {
+    return impl->exportScene(fileName);
+}
+
+void OSGRenderer::debugClick(unsigned int x, unsigned int y)
+{
+    impl->debugClick(x, y);
+}
+
+int  OSGRenderer::getSelectedEntityId()
+{
+    return impl->getSelectedEntityId();
+}
+
+void OSGRenderer::showProfiler()
+{
+    impl->showProfiler();
+}
+
+osg::Group *OSGRenderer::getRootNode()
+{
+    return impl->getRootNode();
+}
+
+osgViewer::Viewer *OSGRenderer::getViewer()
+{
+    return impl->getViewer();
+}
+
+void OSGRenderer::setUpInWindow(osgViewer::GraphicsWindow *window)
+{
+    impl->setUpInWindow(window);
+}
+
+void OSGRenderer::setRenderMask(unsigned mask)
+{
+    impl->setRenderMask(mask);
+}
+
 
 }
