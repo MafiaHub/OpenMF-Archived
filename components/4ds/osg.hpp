@@ -13,14 +13,14 @@
 #include <4ds/parser.hpp>
 #include <loggers/console.hpp>
 #include <utils/openmf.hpp>
-#include <osg_masks.hpp>
+#include <renderer/osg_masks.hpp>
 #include <utils/osg.hpp>
 #include <base_loader.hpp>
 #include <osg/FrontFace>
 #include <osg/BlendFunc>
 #include <osg/BlendEquation>
 #include <osg/AlphaFunc>
-#include <bmp_analyser.hpp>
+#include <utils/bmp_analyser.hpp>
 #include <osg/TexGen>
 #include <osg/TexEnv>
 #include <osg/CullFace>

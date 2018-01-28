@@ -5,7 +5,7 @@
 #include <osg/Node>
 #include <osg/PolygonMode>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <osg_masks.hpp>
+#include <renderer/osg_masks.hpp>
 #include <osg/MatrixTransform>
 #include <btBulletDynamicsCommon.h>
 #include <osg/Material>

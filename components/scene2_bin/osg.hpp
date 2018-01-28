@@ -3,7 +3,7 @@
 
 #include <osg/Node>
 #include <osg/Geometry>
-#include <osg_masks.hpp>
+#include <renderer/osg_masks.hpp>
 #include <osg/MatrixTransform>
 #include <osg/Texture2D>
 #include <osg/ShapeDrawable>

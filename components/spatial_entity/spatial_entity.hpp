@@ -1,7 +1,7 @@
 #ifndef SPATIAL_ENTITY_H
 #define SPATIAL_ENTITY_H
 
-#include <math.hpp>
+#include <utils/math.hpp>
 #include <id_manager.hpp>
 #include <string>
 #include <memory>

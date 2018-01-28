@@ -3,7 +3,6 @@
 
 #include <controllers/free_camera_controller.hpp>
 #include <physics/bullet_physics_world.hpp>
-#include <math.hpp>
 
 namespace MFGame
 {

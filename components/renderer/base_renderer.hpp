@@ -2,7 +2,7 @@
 #define RENDERER_BASE_H
 
 #include <fstream>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 namespace MFRender
 {

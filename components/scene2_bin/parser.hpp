@@ -2,7 +2,7 @@
 #define FORMAT_PARSERS_SCENE2_BIN_H
 
 #include <cstring>
-#include <math.hpp>
+#include <utils/math.hpp>
 #include <base_parser.hpp>
 
 namespace MFFormat

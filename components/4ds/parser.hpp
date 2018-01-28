@@ -3,7 +3,7 @@
 
 #include <base_parser.hpp>
 #include <cstring>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 namespace MFFormat
 {

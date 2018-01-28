@@ -8,7 +8,7 @@
 #include <osg/ShapeDrawable>
 #include <utils/openmf.hpp>
 #include <base_loader.hpp>
-#include <osg_masks.hpp>
+#include <renderer/osg_masks.hpp>
 
 #define OSGCHECKBIN_MODULE_STR "loader check.bin"
 

@@ -6,7 +6,7 @@
 #include <loggers/console.hpp>
 #include <vfs/vfs.hpp>
 #include <loader_cache.hpp>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 #define OSGLOADER_MODULE_STR "OSG loader"
 

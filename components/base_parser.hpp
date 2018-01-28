@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <string>
 #include <loggers/console.hpp>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 namespace MFFormat
 {

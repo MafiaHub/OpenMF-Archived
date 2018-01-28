@@ -6,7 +6,7 @@
 #include <loggers/console.hpp>
 #include <cxxopts.hpp>
 #include <algorithm>
-#include <osdefines.hpp>
+#include <utils/os_defines.hpp>
 
 #define ZPL_IMPLEMENTATION
 #include <zpl.h>

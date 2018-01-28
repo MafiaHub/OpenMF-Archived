@@ -2,7 +2,7 @@
 #define MF_PHYSICS_WORLD_H
 
 #include <spatial_entity/spatial_entity.hpp>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 namespace MFPhysics
 {

@@ -1,4 +1,4 @@
-#include <bmp_analyser.hpp>
+#include <utils/bmp_analyser.hpp>
 
 namespace MFFormat
 {
