@@ -1,16 +1,16 @@
 #include <iostream>
 #include <load_def/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
 #include <cxxopts.hpp>
 
 void dump(MFFormat::DataFormatLoadDEF loadDef)
 {
-    MFLogger::ConsoleLogger::raw("number of loading screens: " + std::to_string(loadDef.getNumLoadingScreens()), "dump");
+    MFLogger::Logger::raw("number of loading screens: " + std::to_string(loadDef.getNumLoadingScreens()), "dump");
     for (auto loadingScreen : loadDef.getLoadingScreens())
     {
-        MFLogger::ConsoleLogger::raw("\t" + std::string(loadingScreen.mMissionName) + "\t" + std::string(loadingScreen.mFileName) + "\t" + std::to_string(loadingScreen.mTextId), "dump");
+        MFLogger::Logger::raw("\t" + std::string(loadingScreen.mMissionName) + "\t" + std::string(loadingScreen.mFileName) + "\t" + std::to_string(loadingScreen.mTextId), "dump");
     }
 }
 
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
+        MFLogger::Logger::fatal("Expected file.", "dump");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
     if (!fs->open(f, inputFile, std::ifstream::binary))
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;
     }
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not parse file " + inputFile + ".", "dump");
         return 1;
     }
 

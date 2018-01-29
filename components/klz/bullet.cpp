@@ -146,20 +146,20 @@ void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &
 
         if (m == 0)
         {
-            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - link not found.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            MFLogger::Logger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - link not found.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
             continue;
         }
 
         if (m->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD &&
             m->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_COLLISION)
         {
-            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - unsupported mesh type: " + std::to_string(m->mMeshType) + ".",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            MFLogger::Logger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - unsupported mesh type: " + std::to_string(m->mMeshType) + ".",TREE_KLZ_BULLET_LOADER_MODULE_STR);
             continue;
         }
 
         if (m->mStandard.mLODs.size() == 0)
         {
-            MFLogger::ConsoleLogger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - no LODs.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
+            MFLogger::Logger::warn("Could not load face collisions for \"" + mFaceCollisions[i].mMeshName + "\" - no LODs.",TREE_KLZ_BULLET_LOADER_MODULE_STR);
             continue;
         }
 

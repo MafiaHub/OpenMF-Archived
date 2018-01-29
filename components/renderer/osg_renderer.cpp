@@ -65,12 +65,12 @@ void OSGRenderer::debugClick(unsigned int x, unsigned int y)
             mMaterialBackup = static_cast<osg::Material *>(mSelected->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
             mSelected->getOrCreateStateSet()->setAttributeAndModes(mHighlightMaterial);
 
-            MFLogger::ConsoleLogger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::info(MFUtil::makeInfoString(result.drawable.get()),OSGRENDERER_MODULE_STR);
 
             for (int i = 0; i < (int) result.nodePath.size(); ++i)
-                MFLogger::ConsoleLogger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
+                MFLogger::Logger::info("  " + MFUtil::makeInfoString(result.nodePath[result.nodePath.size() - 1 - i]),OSGRENDERER_MODULE_STR);
 
-            MFLogger::ConsoleLogger::info("------",OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::info("------",OSGRENDERER_MODULE_STR);
         }
     }
 }
@@ -163,7 +163,7 @@ int OSGRenderer::getSelectedEntityId()
 
 OSGRenderer::OSGRenderer(): Renderer()
 {
-    MFLogger::ConsoleLogger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
+    MFLogger::Logger::info("initiating OSG renderer", OSGRENDERER_MODULE_STR);
     mViewer = new osgViewer::Viewer();
                 
     mFileSystem = MFFile::FileSystem::getInstance();
@@ -249,14 +249,14 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Could not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::warn("Could not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
         file4DS.close();
     }
     else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
-        MFLogger::ConsoleLogger::warn("Could not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
+        MFLogger::Logger::warn("Could not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
 
     bool lightsAreSet = false;
 
@@ -265,7 +265,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
         else
         {
             mRootNode->addChild(n);
@@ -285,7 +285,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
 
         if (!n)
-            MFLogger::ConsoleLogger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
@@ -297,7 +297,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     {
         osg::ref_ptr<osg::Node> n = lCheck.load(fileCheckBin);
         if (!n)
-            MFLogger::ConsoleLogger::warn("Couldn't not parse check.bin file: " + checkBinPath + ".", OSGRENDERER_MODULE_STR);
+            MFLogger::Logger::warn("Couldn't not parse check.bin file: " + checkBinPath + ".", OSGRENDERER_MODULE_STR);
         else
             mRootNode->addChild(n);
 
@@ -325,7 +325,7 @@ void OSGRenderer::optimize()
     // TODO(drummy): I went crazy with optimization, but this will probably
     // need to be changed once we want to have dynamic objects etc.
 
-    MFLogger::ConsoleLogger::info("optimizing", OSGRENDERER_MODULE_STR);
+    MFLogger::Logger::info("optimizing", OSGRENDERER_MODULE_STR);
 
     osgUtil::Optimizer::FlattenStaticTransformsVisitor flattener;
     osgUtil::Optimizer::SpatializeGroupsVisitor sceneBalancer;
@@ -363,7 +363,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
 
     if (!mFileSystem->open(file4DS,"models/" + model))
     {
-        MFLogger::ConsoleLogger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
+        MFLogger::Logger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
         return false;
     }
      
@@ -435,7 +435,7 @@ void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *light
             if (lightTypeStr.compare("directional") == 0 ||
                 lightTypeStr.compare("ambient") == 0)
             {
-                MFLogger::ConsoleLogger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
+                MFLogger::Logger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
                 (*lightNodes)[i]->getLight()->setLightNum(lightNum);
                 mRootNode->getOrCreateStateSet()->setAttributeAndModes((*lightNodes)[i]->getLight());
                 lightNum++;

@@ -11,7 +11,7 @@
 #include <check_bin/osg.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <osgGA/TrackballManipulator>
 #include <loader_cache.hpp>
 #include <osgViewer/ViewerEventHandlers>

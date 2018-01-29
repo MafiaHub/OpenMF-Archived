@@ -1,5 +1,5 @@
 #include <spatial_entity/spatial_entity_implementation.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 
 namespace MFGame
 {
@@ -196,7 +196,7 @@ std::string SpatialEntityImplementation::toString()
 
 void SpatialEntityImplementation::ready()
 {
-    MFLogger::ConsoleLogger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+    MFLogger::Logger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
 
     if (mOSGNode)
     {
@@ -231,7 +231,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
     if (!mOSGRoot)
     {
-        MFLogger::ConsoleLogger::warn("Cannot create debug OSG node for \"" + mName + "\": no access to scene root.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+        MFLogger::Logger::warn("Cannot create debug OSG node for \"" + mName + "\": no access to scene root.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
         return;
     }
 
@@ -285,7 +285,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
             if (vertexType != PHY_FLOAT)  // TODO: maybe support also double?
             {
-                MFLogger::ConsoleLogger::warn("Vertex type not supported: " + std::to_string(vertexType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+                MFLogger::Logger::warn("Vertex type not supported: " + std::to_string(vertexType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
                 break;
             }
 
@@ -311,7 +311,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         }
 
         default:
-            MFLogger::ConsoleLogger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+            MFLogger::Logger::warn("Unknown shape type for \"" + mName + "\": " + std::to_string(shapeType) + ".",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
             break;
     }
 
@@ -347,7 +347,7 @@ void SpatialEntityImplementation::syncDebugPhysicsNode()
 
     if (transformMat.isNaN())
     {
-        MFLogger::ConsoleLogger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
+        MFLogger::Logger::warn("Matrix for the entity \"" + getName() + "\" is NaN, replacing with identity.",SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
         transformMat = osg::Matrixd::identity();
     }
 

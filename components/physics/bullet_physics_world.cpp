@@ -5,7 +5,7 @@ namespace MFPhysics
 
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
-    MFLogger::ConsoleLogger::info("Initializing physics world.",BULLET_PHYSICS_WORLD_MODULE_STR);
+    MFLogger::Logger::info("Initializing physics world.",BULLET_PHYSICS_WORLD_MODULE_STR);
     mPairCache           = new btSortedOverlappingPairCache();    // TODO: choose the right type of cache
 
     // TODO: How to determine the world AABB for Axis Sweep when the bodies aren't loaded yet? Maybe from tree.klz grid?
@@ -94,7 +94,7 @@ std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
 
 bool BulletPhysicsWorld::loadMission(std::string mission)
 {
-    MFLogger::ConsoleLogger::info("Loading physics world for mission " + mission + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+    MFLogger::Logger::info("Loading physics world for mission " + mission + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
 
     std::string missionDir = "missions/" + mission;
     std::string treeKlzPath = missionDir + "/tree.klz";
@@ -108,7 +108,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
 
     if (!mFileSystem->open(fileScene4ds,scene4dsPath))    // FIXME: parsed files should be retrieved from LoaderCache to avoid parsing the same file twice
     {
-        MFLogger::ConsoleLogger::warn("Couldn't open scene.4ds file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+        MFLogger::Logger::warn("Couldn't open scene.4ds file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
         return false;
     }
 
@@ -128,7 +128,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     else
     {
         fileScene4ds.close();
-        MFLogger::ConsoleLogger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
+        MFLogger::Logger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
         return false;
     }
 

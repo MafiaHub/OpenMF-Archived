@@ -96,7 +96,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
         f.close();
     }
     else
-        MFLogger::ConsoleLogger::warn("Could not open file " + fileName + ".", OSGLOADER_MODULE_STR);
+        MFLogger::Logger::warn("Could not open file " + fileName + ".", OSGLOADER_MODULE_STR);
 
     return n;
 }

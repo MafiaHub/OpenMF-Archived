@@ -2,7 +2,7 @@
 #define INPUT_MANAGER_IMPLEMENTATION_H
 
 #include <input/base_input_manager.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>

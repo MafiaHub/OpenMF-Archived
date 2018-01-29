@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cache_bin/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
 #include <cxxopts.hpp>
@@ -10,25 +10,25 @@ using namespace MFLogger;
 
 void dump(MFFormat::DataFormatCacheBIN cacheBin)
 {
-    ConsoleLogger::raw("number of objects: " + std::to_string(cacheBin.getNumObjects()) + ".", "dump");
+    MFLogger::Logger::raw("number of objects: " + std::to_string(cacheBin.getNumObjects()) + ".", "dump");
     for (auto object : cacheBin.getObjects())
     {
-        ConsoleLogger::raw("object name: " + object.mObjectName + ":", "dump");
-        ConsoleLogger::raw("\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",", "dump");
-        ConsoleLogger::raw("\tnumber of instances: " + std::to_string(object.mInstances.size()) + ",", "dump");
+        MFLogger::Logger::raw("object name: " + object.mObjectName + ":", "dump");
+        MFLogger::Logger::raw("\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ",", "dump");
+        MFLogger::Logger::raw("\tnumber of instances: " + std::to_string(object.mInstances.size()) + ",", "dump");
 
         for (auto instance : object.mInstances)
         {
-            ConsoleLogger::raw("\t\tmodel name: " + instance.mModelName + ",", "dump");
-            ConsoleLogger::raw("\t\tposition: [" + instance.mPos.str() + "],", "dump");
-            ConsoleLogger::raw("\t\trotation: [" + instance.mRot.str() + "],", "dump");
-            ConsoleLogger::raw("\t\tscale: [" + instance.mScale.str() + "],", "dump");
-            ConsoleLogger::raw("\t\tscale2: [" + instance.mScale2.str() + "],", "dump");
-            ConsoleLogger::raw("\t\tunk0: " + std::to_string(instance.mUnk0) + ",", "dump");
-            ConsoleLogger::raw("", "dump");
+            MFLogger::Logger::raw("\t\tmodel name: " + instance.mModelName + ",", "dump");
+            MFLogger::Logger::raw("\t\tposition: [" + instance.mPos.str() + "],", "dump");
+            MFLogger::Logger::raw("\t\trotation: [" + instance.mRot.str() + "],", "dump");
+            MFLogger::Logger::raw("\t\tscale: [" + instance.mScale.str() + "],", "dump");
+            MFLogger::Logger::raw("\t\tscale2: [" + instance.mScale2.str() + "],", "dump");
+            MFLogger::Logger::raw("\t\tunk0: " + std::to_string(instance.mUnk0) + ",", "dump");
+            MFLogger::Logger::raw("", "dump");
         }
 
-        ConsoleLogger::raw("end of object: " + object.mObjectName, "dump");
+        MFLogger::Logger::raw("end of object: " + object.mObjectName, "dump");
     }
 }
 
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
+        MFLogger::Logger::fatal("Expected file.", "dump");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;
     }
 
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not parse file " + inputFile + ".", "dump");
         return 1;
     }
 

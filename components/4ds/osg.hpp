@@ -11,7 +11,7 @@
 #include <fstream>
 #include <algorithm>
 #include <4ds/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <utils/openmf.hpp>
 #include <renderer/osg_masks.hpp>
 #include <utils/osg.hpp>

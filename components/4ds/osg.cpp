@@ -89,7 +89,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
 
     logStr += ".";
 
-    MFLogger::ConsoleLogger::info(logStr, OSG4DS_MODULE_STR);
+    MFLogger::Logger::info(logStr, OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D();
      
@@ -114,7 +114,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     {
         if (fileLocation.length() == 0)
         {
-            MFLogger::ConsoleLogger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
+            MFLogger::Logger::warn("Could not load texture: " + fileName, OSG4DS_MODULE_STR);
         }
         else
         {
@@ -143,7 +143,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     {
         if (fileLocationAlpha.length() == 0)
         {
-            MFLogger::ConsoleLogger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
+            MFLogger::Logger::warn("Could not load alpha texture: " + fileNameAlpha, OSG4DS_MODULE_STR);
         }
         else
         {
@@ -174,7 +174,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
         bool isBillboard,
         osg::Vec3f billboardAxis)
 {
-    MFLogger::ConsoleLogger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", OSG4DS_MODULE_STR);
+    MFLogger::Logger::info("      loading facegroup, material: " + std::to_string(faceGroup->mMaterialID) + ".", OSG4DS_MODULE_STR);
 
     osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(GL_TRIANGLES);
 
@@ -260,7 +260,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
 
     std::string meshName = std::string(mesh->mMeshName,0,mesh->mMeshNameLength);
 
-    MFLogger::ConsoleLogger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
+    MFLogger::Logger::info("  loading mesh (" + std::string(meshName) + "), LOD level: " + std::to_string((int) standard.mLODLevel) +
         ", type: " + std::to_string((int) mesh->mMeshType) +
         ", parent: " + std::to_string((int) mesh->mParentID) +
         ", instanced: " + std::to_string(standard.mInstanced), 
@@ -292,7 +292,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
     bool isBillboard,
     osg::Vec3 billboardAxis)
 {
-    MFLogger::ConsoleLogger::info("    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
+    MFLogger::Logger::info("    loading LOD, vertices: " + std::to_string(meshLOD->mVertexCount) +
         ", face groups: " + std::to_string((int) meshLOD->mFaceGroupCount),
  
         OSG4DS_MODULE_STR);
@@ -524,13 +524,13 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
         logStr += ", meshes: " + std::to_string(model.mMeshCount);
         logStr += ", materials: " + std::to_string(model.mMaterialCount);
 
-        MFLogger::ConsoleLogger::info(logStr,OSG4DS_MODULE_STR);
+        MFLogger::Logger::info(logStr,OSG4DS_MODULE_STR);
 
         MaterialList materials;
 
         for (int i = 0; i < model.mMaterialCount; ++i)  // load materials
         {
-            MFLogger::ConsoleLogger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
+            MFLogger::Logger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
             materials.push_back(make4dsMaterial(&(model.mMaterials[i])));
         }
 

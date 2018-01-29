@@ -3,7 +3,7 @@
 
 #include <osg/MatrixTransform>
 #include <fstream>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <loader_cache.hpp>
 #include <utils/math.hpp>

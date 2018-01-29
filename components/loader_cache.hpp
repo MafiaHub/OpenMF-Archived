@@ -2,7 +2,7 @@
 #define LOADER_CACHE_H
 
 #include <unordered_map>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 
 #define LOADERCACHE_MODULE_STR "loader cache"
 
@@ -34,7 +34,7 @@ public:
         if (result)
         {
             mCacheHits++;
-            MFLogger::ConsoleLogger::info("loading cached: " + identifier, LOADERCACHE_MODULE_STR);
+            MFLogger::Logger::info("loading cached: " + identifier, LOADERCACHE_MODULE_STR);
         }
 
         return result;
@@ -56,10 +56,10 @@ public:
 
     void logStats()
     {
-        MFLogger::ConsoleLogger::info("CACHE STATS:",LOADERCACHE_MODULE_STR);
-        MFLogger::ConsoleLogger::info("  objects: " + std::to_string(getNumObjects()),LOADERCACHE_MODULE_STR);
-        MFLogger::ConsoleLogger::info("  cache hits: " + std::to_string(getCacheHits()),LOADERCACHE_MODULE_STR);
-        MFLogger::ConsoleLogger::info("  cache array memory size: " + std::to_string(getCacheSize()),LOADERCACHE_MODULE_STR);
+        MFLogger::Logger::info("CACHE STATS:",LOADERCACHE_MODULE_STR);
+        MFLogger::Logger::info("  objects: " + std::to_string(getNumObjects()),LOADERCACHE_MODULE_STR);
+        MFLogger::Logger::info("  cache hits: " + std::to_string(getCacheHits()),LOADERCACHE_MODULE_STR);
+        MFLogger::Logger::info("  cache array memory size: " + std::to_string(getCacheSize()),LOADERCACHE_MODULE_STR);
     }
 
 protected:

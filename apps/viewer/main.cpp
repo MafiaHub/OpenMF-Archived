@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <cxxopts.hpp>
 #include <renderer/osg_renderer.hpp>
 #include <physics/bullet_physics_world.hpp>
@@ -256,25 +256,25 @@ int main(int argc, char** argv)
 
     if (arguments.count("v") > 0)
     {
-        MFLogger::ConsoleLogger::getInstance()->setVerbosityFlags(0xffff);
+        MFLogger::Logger::setVerbosityFlags(0xffff);
     }
     else
     {
-        MFLogger::ConsoleLogger::getInstance()->setVerbosityFlags(0xffff);
-        MFLogger::ConsoleLogger::getInstance()->addFilter(VIEWER_MODULE_STR);
-        MFLogger::ConsoleLogger::getInstance()->addFilter(OSGRENDERER_MODULE_STR);
-        MFLogger::ConsoleLogger::getInstance()->setFilterMode(false);
+        MFLogger::Logger::setVerbosityFlags(0xffff);
+        MFLogger::Logger::addFilter(VIEWER_MODULE_STR);
+        MFLogger::Logger::addFilter(OSGRENDERER_MODULE_STR);
+        MFLogger::Logger::setFilterMode(false);
     }
 
     if (arguments.count("l") > 0)
     {
-        MFLogger::ConsoleLogger::getInstance()->addFilter(arguments["l"].as<std::string>());
-        MFLogger::ConsoleLogger::getInstance()->setFilterMode(false);
+        MFLogger::Logger::addFilter(arguments["l"].as<std::string>());
+        MFLogger::Logger::setFilterMode(false);
     }
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", VIEWER_MODULE_STR);
+        MFLogger::Logger::fatal("Expected file.", VIEWER_MODULE_STR);
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -347,7 +347,7 @@ int main(int argc, char** argv)
 
         if (cameraPtr == nullptr)
         {
-            MFLogger::ConsoleLogger::fatal("Camera was not initialized!");
+            MFLogger::Logger::fatal("Camera was not initialized!");
             return 0;
         }
 

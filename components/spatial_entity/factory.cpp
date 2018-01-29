@@ -172,7 +172,7 @@ public:
 
                     if (matches.size() == 0)
                     {
-                        MFLogger::ConsoleLogger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                        MFLogger::Logger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
                         mEntityFactory->createEntity(&n,0,0,fullName);
                     }
                     else

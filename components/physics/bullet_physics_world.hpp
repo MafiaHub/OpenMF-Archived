@@ -2,7 +2,7 @@
 #define BULLET_PHYSICS_WORLD_H
 
 #include <physics/base_physics_world.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <klz/bullet.hpp>
 #include <4ds/parser.hpp>
 #include <btBulletDynamicsCommon.h>

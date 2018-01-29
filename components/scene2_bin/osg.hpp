@@ -12,7 +12,7 @@
 #include <fstream>
 #include <algorithm>
 #include <scene2_bin/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <osg/Material>
 #include <utils/openmf.hpp>
 #include <utils/osg.hpp>

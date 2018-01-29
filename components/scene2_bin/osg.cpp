@@ -125,7 +125,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("scene2.bin");
-    MFLogger::ConsoleLogger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
+    MFLogger::Logger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
     MFFormat::DataFormatScene2BIN parser;
     MFFormat::OSG4DSLoader loader4DS;
     loader4DS.setBaseDir(mBaseDir);
@@ -140,7 +140,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         std::vector<std::string> loadedNames;
 
         if (!mNodeMap)
-            MFLogger::ConsoleLogger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
+            MFLogger::Logger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
         else
             nodeMap = mNodeMap;
 
@@ -192,7 +192,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                         
                         if (!mFileSystem->open(f,"models/" + object.mModelName))
                         {
-                            MFLogger::ConsoleLogger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
+                            MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
                         }
                         else
                         {
@@ -214,7 +214,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 }
             }
             
-            MFLogger::ConsoleLogger::info(logStr, OSGSCENE2BIN_MODULE_STR);
+            MFLogger::Logger::info(logStr, OSGSCENE2BIN_MODULE_STR);
 
             if (objectNode.get())
             {
@@ -248,7 +248,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                 (*nodeMap)[parentName]->addChild(loadedNodes[i]);
             else
             {
-                MFLogger::ConsoleLogger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
+                MFLogger::Logger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
                 group->addChild(loadedNodes[i]);
             }
         }

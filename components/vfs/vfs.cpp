@@ -72,7 +72,7 @@ bool FileSystem::open(std::ifstream &file, std::string fileName, std::ios_base::
 
     if (fileLocation.length() == 0)
     {
-        MFLogger::ConsoleLogger::warn("Could not open file: " + fileName + ".",VFS_MODULE_STR);
+        MFLogger::Logger::warn("Could not open file: " + fileName + ".",VFS_MODULE_STR);
         return false;
     }
 

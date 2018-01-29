@@ -1,43 +1,43 @@
 #include <iostream>
 #include <mnu/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
 #include <cxxopts.hpp>
 
 void dump(MFFormat::DataFormatMenuDEF menuDef)
 {
-    MFLogger::ConsoleLogger::raw("Controls: " + std::to_string(menuDef.getNumControls()));
+    MFLogger::Logger::raw("Controls: " + std::to_string(menuDef.getNumControls()));
     for (auto control : menuDef.getControls())
     {
-        MFLogger::ConsoleLogger::raw("type: " + MFUtil::strReverse(std::string(control.mType)));
-        MFLogger::ConsoleLogger::raw("\tpos: " + std::to_string(control.mPos.x) + " " + std::to_string(control.mPos.y));
-        MFLogger::ConsoleLogger::raw("\tscaleX: " + std::to_string(control.mScaleX));
-        MFLogger::ConsoleLogger::raw("\tscaleY: " + std::to_string(control.mScaleY));
-        MFLogger::ConsoleLogger::raw("\ttextID: " + std::to_string(control.mTextId));
-        MFLogger::ConsoleLogger::raw("\ttextColor: " + std::to_string(control.mTextColor));
-        MFLogger::ConsoleLogger::raw("\tbgColor: " + std::to_string(control.mBgColor));
+        MFLogger::Logger::raw("type: " + MFUtil::strReverse(std::string(control.mType)));
+        MFLogger::Logger::raw("\tpos: " + std::to_string(control.mPos.x) + " " + std::to_string(control.mPos.y));
+        MFLogger::Logger::raw("\tscaleX: " + std::to_string(control.mScaleX));
+        MFLogger::Logger::raw("\tscaleY: " + std::to_string(control.mScaleY));
+        MFLogger::Logger::raw("\ttextID: " + std::to_string(control.mTextId));
+        MFLogger::Logger::raw("\ttextColor: " + std::to_string(control.mTextColor));
+        MFLogger::Logger::raw("\tbgColor: " + std::to_string(control.mBgColor));
     }
 }
 
 void dump(MFFormat::DataFormatMNU mnu)
 {
-    MFLogger::ConsoleLogger::raw("Controls: " + std::to_string(mnu.getNumControls()));
+    MFLogger::Logger::raw("Controls: " + std::to_string(mnu.getNumControls()));
     for (auto control : mnu.getControls())
     {
-        MFLogger::ConsoleLogger::raw("type: " + MFUtil::strReverse(std::string(control.mType)));
-        MFLogger::ConsoleLogger::raw("\tpos: " + std::to_string(control.mPos.x) + " " + std::to_string(control.mPos.y));
-        MFLogger::ConsoleLogger::raw("\tscaleX: " + std::to_string(control.mScaleX));
-        MFLogger::ConsoleLogger::raw("\tscaleY: " + std::to_string(control.mScaleY));
-        MFLogger::ConsoleLogger::raw("\ttextID: " + std::to_string(control.mTextId));
-        MFLogger::ConsoleLogger::raw("\ttextColor: " + std::to_string(control.mTextColor));
-        MFLogger::ConsoleLogger::raw("\tbgColor: " + std::to_string(control.mBgColor));
+        MFLogger::Logger::raw("type: " + MFUtil::strReverse(std::string(control.mType)));
+        MFLogger::Logger::raw("\tpos: " + std::to_string(control.mPos.x) + " " + std::to_string(control.mPos.y));
+        MFLogger::Logger::raw("\tscaleX: " + std::to_string(control.mScaleX));
+        MFLogger::Logger::raw("\tscaleY: " + std::to_string(control.mScaleY));
+        MFLogger::Logger::raw("\ttextID: " + std::to_string(control.mTextId));
+        MFLogger::Logger::raw("\ttextColor: " + std::to_string(control.mTextColor));
+        MFLogger::Logger::raw("\tbgColor: " + std::to_string(control.mBgColor));
     }
 }
 
 int main(int argc, char** argv)
 {
-    MFLogger::ConsoleLogger::info("text");
+    MFLogger::Logger::info("text");
 
     cxxopts::Options options("menu","CLI utility for Mafia menu.def files.");
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
+        MFLogger::Logger::fatal("Expected file.", "dump");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     if (!fs->open(f, inputFile, std::ifstream::binary))
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not open file " + inputFile + ".", "dump");
         return 1;
     }
 
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
         if (!success)
         {
-            MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+            MFLogger::Logger::fatal("Could not parse file " + inputFile + ".", "dump");
             return 1;
         }
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
         if (!success)
         {
-            MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+            MFLogger::Logger::fatal("Could not parse file " + inputFile + ".", "dump");
             return 1;
         }
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        MFLogger::ConsoleLogger::fatal("Unsupported file extension");
+        MFLogger::Logger::fatal("Unsupported file extension");
         return 1;
     }
 

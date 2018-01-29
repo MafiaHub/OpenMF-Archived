@@ -8,7 +8,7 @@
 #include <utils/os_defines.hpp>
 #include <dta/parser.hpp>
 
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 
 #ifdef OMF_SYSTEM_LINUX
 #include <unistd.h>

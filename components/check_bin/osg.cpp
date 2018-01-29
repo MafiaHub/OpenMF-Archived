@@ -72,7 +72,7 @@ osg::ref_ptr<osg::Node> OSGCheckBinLoader::load(std::ifstream &srcFile, std::str
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setNodeMask(MFRender::MASK_DEBUG);
     group->setName("check.bin");
-    MFLogger::ConsoleLogger::info("loading check.bin", OSGCHECKBIN_MODULE_STR);
+    MFLogger::Logger::info("loading check.bin", OSGCHECKBIN_MODULE_STR);
     MFFormat::DataFormatCheckBIN parser;
    
     bool success = parser.load(srcFile);
