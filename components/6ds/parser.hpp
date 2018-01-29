@@ -55,7 +55,7 @@ bool DataFormat6DS::load(std::ifstream &srcFile)
     Header header = {};
     read(srcFile, &header);
 
-    if (header.mMagic != '6DS')
+    if (std::string(header.mMagic) != "6DS")
     {
         return false;
     }
