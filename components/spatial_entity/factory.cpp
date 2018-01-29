@@ -34,7 +34,7 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mCapsuleShape = std::make_shared<btCapsuleShape>(1.0f, 3.0f);
 }
 
-MFGame::Id SpatialEntityFactory::createEntity(
+MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     osg::MatrixTransform *graphicNode,
     std::shared_ptr<btRigidBody> physicsBody,
     std::shared_ptr<btDefaultMotionState> physicsMotionsState, 
@@ -55,7 +55,7 @@ MFGame::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::Id SpatialEntityFactory::createCapsuleEntity()
+MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
 {
     MFUtil::FullRigidBody body;
 
@@ -77,7 +77,7 @@ MFGame::Id SpatialEntityFactory::createCapsuleEntity()
     return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule");
 }
 
-MFGame::Id SpatialEntityFactory::createCameraEntity()
+MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
 {
     MFUtil::FullRigidBody body;
 
@@ -100,7 +100,7 @@ MFGame::Id SpatialEntityFactory::createCameraEntity()
     return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera");
 }
 
-MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
+MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
 {
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     visualTransform->addChild(visualNode);
@@ -120,12 +120,12 @@ MFGame::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShap
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
 }
 
-MFGame::Id SpatialEntityFactory::createTestBallEntity()
+MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
 {
     return createTestShapeEntity(mTestPhysicalSphereShape.get(),mTestSphereNode.get());
 }
 
-MFGame::Id SpatialEntityFactory::createTestBoxEntity()
+MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBoxEntity()
 {
     return createTestShapeEntity(mTestPhysicalBoxShape.get(),mTestBoxNode.get());
 }

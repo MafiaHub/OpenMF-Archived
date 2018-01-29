@@ -1,4 +1,5 @@
 #include <spatial_entity/spatial_entity_implementation.hpp>
+#include <loggers/console.hpp>
 
 namespace MFGame
 {

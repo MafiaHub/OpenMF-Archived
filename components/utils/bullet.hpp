@@ -2,7 +2,6 @@
 #define BULLET_UTILS_H
 
 #include <string>
-#include <id_manager.hpp>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 #include <btBulletDynamicsCommon.h>

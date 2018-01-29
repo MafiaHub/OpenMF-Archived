@@ -21,7 +21,7 @@ public:
     ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
-    virtual MFGame::Id pointCollision(MFMath::Vec3 position) override;
+    virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position) override;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 

@@ -19,18 +19,18 @@ public:
     void createMissionEntities();
     void setDebugMode(bool enable)    { mDebugMode = enable; };
 
-    MFGame::Id createEntity(
+    MFGame::SpatialEntity::Id createEntity(
         osg::MatrixTransform *graphicNode,
         std::shared_ptr<btRigidBody> physicsBody=0,
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="");
 
-    MFGame::Id createTestBallEntity();
-    MFGame::Id createTestBoxEntity();
-    MFGame::Id createCapsuleEntity();
-    MFGame::Id createCameraEntity();
+    MFGame::SpatialEntity::Id createTestBallEntity();
+    MFGame::SpatialEntity::Id createTestBoxEntity();
+    MFGame::SpatialEntity::Id createCapsuleEntity();
+    MFGame::SpatialEntity::Id createCameraEntity();
 
-    MFGame::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+    MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
 
 protected: 
     MFGame::SpatialEntityManager *mEntityManager;

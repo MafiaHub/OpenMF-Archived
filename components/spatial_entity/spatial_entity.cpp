@@ -3,20 +3,16 @@
 namespace MFGame
 {
 
-std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<DEFAULT_ID_MANAGER>();
+SpatialEntity::Id SpatialEntity::sNextId = 1;
 
 SpatialEntity::SpatialEntity()
 {
-    mId = sIDManager->allocate();
+    mId = SpatialEntity::sNextId;
+    SpatialEntity::sNextId++;
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
     mPhysicsBehavior = ENTITY_MOVABLE;
-}
-
-SpatialEntity::~SpatialEntity()
-{
-    sIDManager->deallocate(mId);
 }
 
 }

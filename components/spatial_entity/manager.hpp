@@ -16,7 +16,7 @@ class SpatialEntityManager
 public:
     typedef std::unordered_map<uint64_t, std::shared_ptr<SpatialEntity>> EntityMap;
     SpatialEntityManager() {};
-    SpatialEntity *getEntityById(MFGame::Id id);
+    SpatialEntity *getEntityById(MFGame::SpatialEntity::Id id);
 
     /**
      * \brief Returns valid entity by a raw index,
@@ -25,9 +25,9 @@ public:
      */
     SpatialEntity *getEntityByIndex(unsigned int index);
 
-    Id addEntity(std::shared_ptr<SpatialEntity> entity);
-    void removeEntity(Id ident);
-    bool isValid(Id ident);
+    MFGame::SpatialEntity::Id addEntity(std::shared_ptr<SpatialEntity> entity);
+    void removeEntity(MFGame::SpatialEntity::Id ident);
+    bool isValid(MFGame::SpatialEntity::Id ident);
 
     /**
       Update all managed entities.

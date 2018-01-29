@@ -2,7 +2,6 @@
 #define SPATIAL_ENTITY_H
 
 #include <utils/math.hpp>
-#include <id_manager.hpp>
 #include <string>
 #include <memory>
 
@@ -20,7 +19,9 @@ class SpatialEntity
 {
 public:
     SpatialEntity();
-    ~SpatialEntity();
+
+    typedef uint32_t Id;
+    static const Id NullId = 0;
 
     virtual void update(double dt)=0;
 
@@ -51,17 +52,11 @@ public:
     bool isReady()                                      { return mReady;        };
     Id getId()                                          { return mId;           };
 
-    void setPhysicsBehavior(int behavior) { mPhysicsBehavior = behavior; }
-    int  getPhysicsBehavior()             { return mPhysicsBehavior; }
+    void setPhysicsBehavior(int behavior)               { mPhysicsBehavior = behavior; };
+    int  getPhysicsBehavior()                           { return mPhysicsBehavior;     };
 
-    // TODO deal with ID sync between old and a new manager at some point.
-    //static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
-    static IDManager *getIDManager() 
+    typedef enum
     {
-        return sIDManager.get(); 
-    }
-
-    typedef enum {
         ENTITY_STATIC,
         ENTITY_MOVABLE,
         ENTITY_RIGID,
@@ -75,10 +70,9 @@ public:
     std::string mName;
     bool mReady;
     Id mId;
-    static std::shared_ptr<IDManager> sIDManager;
-
-private:
     int mPhysicsBehavior;
+
+    static Id sNextId;
 };
 
 }
