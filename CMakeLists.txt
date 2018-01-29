@@ -131,6 +131,7 @@ set(USED_OSG_PLUGINS
 
 include_directories(components)
 include_directories(extern)
+include_directories(tests)
 
 if(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
@@ -188,3 +189,11 @@ if(BUILD_UTILS)
     add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  )
     target_link_libraries ( scene2_bin components                        )
 endif(BUILD_UTILS)
+
+if(BUILD_TESTS)
+    add_executable        ( test_suite tests/test_suite.cpp              )
+    target_link_libraries ( test_suite components                        )
+
+    add_executable        ( test_suite_local tests/test_suite.cpp        )
+    target_link_libraries ( test_suite_local components                  )
+endif(BUILD_TESTS)
