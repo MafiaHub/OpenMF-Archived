@@ -33,7 +33,6 @@ static bool sSimulatePhysics = false;
 double timeGet()
 {
     static auto epoch = std::chrono::high_resolution_clock::now();
-
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
 }
 
@@ -80,12 +79,9 @@ public:
         if (sSimulatePhysics && keyCode == SDL_SCANCODE_SPACE)      // SPACE
         {
             MFGame::SpatialEntity *e = mEntityManager->getEntityById(
-mEntityFactory->createCapsuleEntity());
-/*
                 mCounter % 2 == 0 ?
                     mEntityFactory->createTestBallEntity() :
                     mEntityFactory->createTestBoxEntity());
-*/
 
             MFMath::Vec3 f,r,u;
             mRenderer->getCameraVectors(f,r,u);
@@ -351,6 +347,10 @@ int main(int argc, char** argv)
     }
     
     cameraController->setSpeed(cameraSpeed);
+
+MFGame::SpatialEntity *e = entityManager.getEntityById(entityFactory.createCapsuleEntity());
+e->setPosition(renderer.getCameraPosition());
+MFGame::TestCharacterController testController(e,&inputManager);
 
     int lastSelectedEntity = -1;
     int infoCounter = 0;

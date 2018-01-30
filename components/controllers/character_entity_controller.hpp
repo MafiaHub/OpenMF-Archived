@@ -48,14 +48,7 @@ public:
 class TestCharacterController: public CharacterEntityController
 {
 public:
-    TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager): CharacterEntityController(entity)
-    {
-        mInputManager = inputManager;
-    };
-
-    void update(double dt); 
-protected:
-    MFInput::InputManager *mInputManager;
+    TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager);
 };
 
 }

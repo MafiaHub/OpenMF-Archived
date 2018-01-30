@@ -4,10 +4,38 @@
 namespace MFGame
 {
 
-void TestCharacterController::update(double dt)
+class TestCharacterCallback: public MFInput::KeyInputCallback
 {
-    std::cout << "uuuuuuu"<< std::endl;
-} 
+public:
+    TestCharacterCallback(CharacterEntityController *controller)
+    {
+        mController = controller;
+    }
+
+    virtual void call(bool down, unsigned int keyCode) override
+    {
+        switch (keyCode)
+        {
+            case 12: mController->moveForward(); break;
+            case 14: mController->moveBackward(); break;
+            case 13: mController->moveLeft(); break;
+            case 15: mController->moveRight(); break;
+            case 18: mController->jump(); break;
+            default: break;
+        }
+
+    }
+
+protected:
+    CharacterEntityController *mController;
+};
+
+TestCharacterController::TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager):
+    CharacterEntityController(entity)
+{
+    std::shared_ptr<TestCharacterCallback> cb = std::make_shared<TestCharacterCallback>(this);
+    inputManager->addKeyCallback(cb);
+}
 
 bool CharacterEntityController::isOnGround()
 {
