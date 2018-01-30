@@ -12,7 +12,7 @@ SpatialEntity::SpatialEntity()
     mPosition = MFMath::Vec3();
     mScale = MFMath::Vec3(1,1,1);
     mReady = true;
-    mPhysicsBehavior = ENTITY_MOVABLE;
+    mPhysicsBehavior = KINEMATIC;
 }
 
 }

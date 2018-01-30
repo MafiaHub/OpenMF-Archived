@@ -6,6 +6,35 @@ namespace MFGame
 
 osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
 
+void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior)
+{
+    if (!hasPhysics())
+        return;
+
+    mPhysicsBehavior = behavior;
+
+    // TODO: implement the cases
+
+    switch (behavior)
+    {
+        case SpatialEntity::STATIC:
+            break;
+
+        case SpatialEntity::KINEMATIC:
+            break;
+
+        case SpatialEntity::RIGID:
+            break;
+
+        case SpatialEntity::RIGID_PLAYER:
+            mBulletBody->setAngularFactor(0);
+            break;
+
+        default:
+            break;
+    }
+}
+
 bool SpatialEntityImplementation::canBeMoved()
 {
     if (!mBulletBody)    // no physical representation => nothing stops the entity from moving
@@ -19,6 +48,11 @@ bool SpatialEntityImplementation::canBeMoved()
 bool SpatialEntityImplementation::hasVisual()
 {
     return mOSGNode != 0;
+}
+
+bool SpatialEntityImplementation::hasPhysics()
+{
+    return mBulletBody != 0;
 }
 
 bool SpatialEntityImplementation::hasCollision()

@@ -23,7 +23,8 @@ public:
         osg::MatrixTransform *graphicNode,
         std::shared_ptr<btRigidBody> physicsBody=0,
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
-        std::string name="");
+        std::string name="",
+        SpatialEntity::PhysicsBehavior physicsBehavior=SpatialEntity::RIGID);
 
     MFGame::SpatialEntity::Id createTestBallEntity();
     MFGame::SpatialEntity::Id createTestBoxEntity();

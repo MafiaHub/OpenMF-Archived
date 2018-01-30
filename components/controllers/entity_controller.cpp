@@ -12,15 +12,15 @@ void EntityController::move(MFMath::Vec3 offset)
 {
     auto physicsBehavior = mEntity->getPhysicsBehavior();
 
-    if (physicsBehavior == SpatialEntity::ENTITY_MOVABLE)
-    {
-        mEntity->setPosition(mEntity->getPosition() + offset);
-    }
-    else if (physicsBehavior == SpatialEntity::ENTITY_RIGID)
+    if (physicsBehavior == SpatialEntity::RIGID || physicsBehavior == SpatialEntity::RIGID_PLAYER)
     {
         auto prevVel = mEntity->getVelocity();
         auto vel = (0.4f * prevVel + 0.6f * 65.f * offset);
         mEntity->setVelocity(vel);
+    }
+    else if (physicsBehavior != SpatialEntity::STATIC)
+    {
+        mEntity->setPosition(mEntity->getPosition() + offset);
     }
 }
 

@@ -37,10 +37,6 @@ void CharacterEntityController::move(MFMath::Vec3 offset)
 
 void CharacterEntityController::jump()
 {
-    if (mEntity->getPhysicsBehavior() == SpatialEntity::ENTITY_RIGID)
-    {
-        // TODO apply force to jump
-    }
 }
 
 void CharacterEntityController::setCrouch(bool state)
