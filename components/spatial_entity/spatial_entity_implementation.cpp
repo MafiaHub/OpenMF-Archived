@@ -271,6 +271,14 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
             break;
         }
 
+        case BroadphaseNativeTypes::CAPSULE_SHAPE_PROXYTYPE:
+        {
+            btCapsuleShape *capsule = static_cast<btCapsuleShape *>(mBulletBody->getCollisionShape());
+            osg::ref_ptr<osg::Shape> shape = new osg::Capsule(osg::Vec3f(0,0,0),capsule->getRadius(),capsule->getHalfHeight() * 2.0);
+            shapeNode = new osg::ShapeDrawable(shape.get());
+            break;
+        }
+
         case BroadphaseNativeTypes::TRIANGLE_MESH_SHAPE_PROXYTYPE:
         {
             btTriangleMesh *mesh =

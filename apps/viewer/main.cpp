@@ -86,9 +86,12 @@ public:
         if (sSimulatePhysics && keyCode == SDL_SCANCODE_SPACE)      // SPACE
         {
             MFGame::SpatialEntity *e = mEntityManager->getEntityById(
+mEntityFactory->createCapsuleEntity());
+/*
                 mCounter % 2 == 0 ?
                     mEntityFactory->createTestBallEntity() :
                     mEntityFactory->createTestBoxEntity());
+*/
 
 #if TEST_CONTROLLER
             e->setPhysicsBehavior(MFGame::SpatialEntity::ENTITY_RIGID);

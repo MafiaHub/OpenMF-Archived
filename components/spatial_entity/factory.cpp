@@ -30,8 +30,11 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mTestBoxNode->setStateSet(mTestStateSet);
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 
+    mCapsuleShape = new osg::Capsule(osg::Vec3f(0,0,0),1,3);
+    mCapsuleNode = new osg::ShapeDrawable(mCapsuleShape);
+    mPhysicalCapsuleShape = std::make_shared<btCapsuleShapeZ>(1.0f,3.0f);
+
     mCameraShape = std::make_shared<btSphereShape>(1.0f);
-    mCapsuleShape = std::make_shared<btCapsuleShape>(1.0f, 3.0f);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
@@ -62,16 +65,17 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
     btScalar mass = 1.0f;
     body.mMotionState = std::make_shared<btDefaultMotionState>(
         btTransform(btQuaternion(0, 0, 0, mass),
-                    btVector3(0, 0, 0)));
+        btVector3(0, 0, 0)));
 
     btVector3 inertia;
-    mCapsuleShape->calculateLocalInertia(mass, inertia);
-    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mCapsuleShape.get(), inertia);
+    mPhysicalCapsuleShape->calculateLocalInertia(mass,inertia);
+    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mPhysicalCapsuleShape.get(), inertia);
     body.mBody->setActivationState(DISABLE_DEACTIVATION);
     body.mBody->setAngularFactor(0);
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
 
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+    visualTransform->addChild(mCapsuleNode);
     mRenderer->getRootNode()->addChild(visualTransform);
 
     return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule");

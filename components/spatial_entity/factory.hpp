@@ -47,8 +47,12 @@ protected:
     osg::ref_ptr<osg::Shape> mTestVisualBoxShape;
     osg::ref_ptr<osg::ShapeDrawable> mTestBoxNode;
     std::shared_ptr<btCollisionShape> mTestPhysicalBoxShape;
+
+    osg::ref_ptr<osg::Shape> mCapsuleShape;
+    osg::ref_ptr<osg::ShapeDrawable> mCapsuleNode;
+    std::shared_ptr<btCollisionShape> mPhysicalCapsuleShape;
+
     std::shared_ptr<btCollisionShape> mCameraShape;
-    std::shared_ptr<btCollisionShape> mCapsuleShape;
 
     bool mDebugMode;
 };
