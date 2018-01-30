@@ -13,15 +13,17 @@ public:
 
     void setEntity(SpatialEntity *entity) { mEntity = entity; }
 
-
     virtual void move(MFMath::Vec3 offset);
     virtual void moveLeft();
     virtual void moveRight();
     virtual void moveForward();
     virtual void moveBackward();
+    virtual void moveUp();
 
   protected:
     SpatialEntity *mEntity;
+
+    void moveByRelativeVector(MFMath::Vec3 vector);
 };
 
 }

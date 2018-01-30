@@ -24,43 +24,37 @@ void EntityController::move(MFMath::Vec3 offset)
     }
 }
 
-void EntityController::moveLeft()
+void EntityController::moveByRelativeVector(MFMath::Vec3 vector)
 {
     auto rot = mEntity->getRotation();
-    auto right = MFMath::Vec3(1,0,0);
     MFMath::Mat4 m = MFMath::rotationMatrix(rot);
-    right = m.preMult(right);
+    vector = m.preMult(vector);
+    move(vector);
+}
 
-    move(-right);
+void EntityController::moveLeft()
+{
+    moveByRelativeVector(MFMath::Vec3(-1,0,0));
 }
 
 void EntityController::moveRight()
 {
-    auto rot = mEntity->getRotation();
-    auto right = MFMath::Vec3(1, 0, 0);
-    MFMath::Mat4 m = MFMath::rotationMatrix(rot);
-    right = m.preMult(right);
-
-    move(right);
+    moveByRelativeVector(MFMath::Vec3(1,0,0));
 }
 
 void EntityController::moveForward()
 {
-    auto rot = mEntity->getRotation();
-    auto forward = MFMath::Vec3(0, 1, 0);
-    MFMath::Mat4 m = MFMath::rotationMatrix(rot);
-    forward = m.preMult(forward);
-
-    move(forward);
+    moveByRelativeVector(MFMath::Vec3(0,1,0));
 }
+
 void EntityController::moveBackward()
 {
-    auto rot = mEntity->getRotation();
-    auto forward = MFMath::Vec3(0, 1, 0);
-    MFMath::Mat4 m = MFMath::rotationMatrix(rot);
-    forward = m.preMult(forward);
+    moveByRelativeVector(MFMath::Vec3(0,-1,0));
+}
 
-    move(-forward);
+void EntityController::moveUp()
+{
+    moveByRelativeVector(MFMath::Vec3(0,0,1));
 }
 
 }

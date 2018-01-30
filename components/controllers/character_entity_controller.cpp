@@ -1,35 +1,53 @@
 #include <controllers/character_entity_controller.hpp>
+#include <iostream>
 
 namespace MFGame
 {
 
+void TestCharacterController::update(double dt)
+{
+    std::cout << "uuuuuuu"<< std::endl;
+} 
+
+bool CharacterEntityController::isOnGround()
+{
+    // TODO: implement this
+    return true;
+}
+
+CharacterEntityController::CharacterEntityController(SpatialEntity *entity): EntityController(entity)
+{
+    mMovementState = WALK;
+    setSpeeds(0.5,1.0,2.0);
+}
+
 void CharacterEntityController::moveLeft()
 {
-    // TODO check if we can move (if we're not standing at ground, don't move)
-    EntityController::moveLeft();
+    if (isOnGround())
+        EntityController::moveLeft();
 }
 
 void CharacterEntityController::moveRight()
 {
-    // TODO check if we can move (if we're not standing at ground, don't move)
-    EntityController::moveRight();
+    if (isOnGround())
+        EntityController::moveRight();
 }
 
 void CharacterEntityController::moveForward()
 {
-    // TODO check if we can move (if we're not standing at ground, don't move)
-    EntityController::moveForward();
+    if (isOnGround())
+        EntityController::moveForward();
 }
 
 void CharacterEntityController::moveBackward()
 {
-    // TODO check if we can move (if we're not standing at ground, don't move)
-    EntityController::moveBackward();
+    if (isOnGround())
+        EntityController::moveBackward();
 }
 
 void CharacterEntityController::move(MFMath::Vec3 offset)
 {
-    float speed = mSpeed[mMoveBehavior];
+    float speed = mSpeeds[mMovementState];
     auto fin = offset * speed;
 
     EntityController::move(fin);
@@ -37,11 +55,8 @@ void CharacterEntityController::move(MFMath::Vec3 offset)
 
 void CharacterEntityController::jump()
 {
-}
-
-void CharacterEntityController::setCrouch(bool state)
-{
-    // TODO deal with this
+    if (isOnGround())
+        EntityController::moveUp();
 }
 
 }

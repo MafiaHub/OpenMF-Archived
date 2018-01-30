@@ -32,6 +32,7 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
 
     mCapsuleShape = new osg::Capsule(osg::Vec3f(0,0,0),1,3);
     mCapsuleNode = new osg::ShapeDrawable(mCapsuleShape);
+    mCapsuleNode->setStateSet(mTestStateSet);
     mPhysicalCapsuleShape = std::make_shared<btCapsuleShapeZ>(1.0f,3.0f);
 
     mCameraShape = std::make_shared<btSphereShape>(1.0f);

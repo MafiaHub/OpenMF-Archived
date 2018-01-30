@@ -2,55 +2,60 @@
 #define CHARACTER_ENTITY_CONTROLLER_H
 
 #include <controllers/entity_controller.hpp>
+#include <input/base_input_manager.hpp>
 
 namespace MFGame
 {
 
-typedef enum
-{
-    MOVE_WALK,
-    MOVE_RUN,
-    MOVE_CROUCH,
-} MoveBehavior;
-
 class CharacterEntityController: public EntityController
 {
 public:
-    CharacterEntityController(SpatialEntity *entity): EntityController(entity)
+    typedef enum
     {
-        mIsCrouching = false;
-        mMoveBehavior = MOVE_WALK;
+        WALK = 0,
+        RUN,
+        CROUCH,
+    } MovementState;
 
-        mSpeed[MOVE_WALK] = 1.0f;
-        mSpeed[MOVE_RUN] = 5.0f;
-        mSpeed[MOVE_CROUCH] = 0.5f;
-    }
+    CharacterEntityController(SpatialEntity *entity);
 
     virtual void move(MFMath::Vec3 offset) override;
 
-    void setSpeed(float walk, float run, float crouch)
+    void setSpeeds(float walk, float run, float crouch)
     {
-        mSpeed[MOVE_WALK] = walk;
-        mSpeed[MOVE_RUN] = run;
-        mSpeed[MOVE_CROUCH] = crouch;
+        mSpeeds[WALK] = walk;
+        mSpeeds[RUN] = run;
+        mSpeeds[CROUCH] = crouch;
     }
 
-    void setMoveBehavior(int moveBehavior)
+    void setMovementState(CharacterEntityController::MovementState newState)
     {
-        mMoveBehavior = moveBehavior;
+        mMovementState = newState;
     }
 
     void jump();
-    void setCrouch(bool state);
+    bool isOnGround();
     virtual void moveLeft() override;
     virtual void moveRight() override;
     virtual void moveForward() override;
     virtual void moveBackward() override;
 
   protected:
-    bool mIsCrouching;
-    int mMoveBehavior;
-    float mSpeed[3];
+    int mMovementState;
+    float mSpeeds[3];
+};
+
+class TestCharacterController: public CharacterEntityController
+{
+public:
+    TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager): CharacterEntityController(entity)
+    {
+        mInputManager = inputManager;
+    };
+
+    void update(double dt); 
+protected:
+    MFInput::InputManager *mInputManager;
 };
 
 }
