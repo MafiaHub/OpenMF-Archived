@@ -11,6 +11,7 @@ class Renderer
 {
 public:
     Renderer() { mDone = false; };
+    virtual ~Renderer() {};
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true)=0;
     virtual bool loadSingleModel(std::string model)=0;
     virtual void frame(double dt)=0;

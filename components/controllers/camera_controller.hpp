@@ -10,6 +10,7 @@ namespace MFGame
 class CameraController
 {
 public:
+    virtual ~CameraController() {};
     CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager) { mRenderer = renderer; mInputManager = inputManager; };
     virtual void update(double dt)=0;
 

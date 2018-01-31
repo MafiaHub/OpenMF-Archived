@@ -1,48 +1,20 @@
-#include <iostream>
-#include <fstream>
-#include <utils/logger.hpp>
+#include <engine/engine.hpp>
 #include <cxxopts.hpp>
-#include <renderer/osg_renderer.hpp>
-#include <physics/bullet_physics_world.hpp>
-#include <string.h>
-#include <stdlib.h>
-#include <spatial_entity/spatial_entity.hpp>
-#include <spatial_entity/manager.hpp>
-#include <spatial_entity/factory.hpp>
-#include <input/input_manager_implementation.hpp>
 #include <controllers/free_camera_controller.hpp>
 #include <controllers/rigid_camera_controller.hpp>
-#include <controllers/character_entity_controller.hpp>
+#include <spatial_entity/spatial_entity.hpp>
 
-#define DEFAULT_CAMERA_SPEED 7.0
 #define VIEWER_MODULE_STR "viewer"
 
-// TODO: Introduce Platform class and store it there?
-static bool sIsRunning = true;
-
-// HACK: Deal with this differently
-static bool sSimulatePhysics = false;
-
-// TODO: Replace with configurable value
-#define MS_PER_UPDATE 1 / 60.0f
-
-// TODO move this to Platform class
-#include <chrono>
-#include <thread>
-
-double timeGet()
-{
-    static auto epoch = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
-}
+#define DEFAULT_CAMERA_SPEED 7.0
+#define DEFAULT_CAMERA_FOV 75.0
 
 class RightButtonCallback: public MFInput::ButtonInputCallback
 {
 public:
-    RightButtonCallback(MFRender::Renderer *renderer, MFInput::InputManager *inputManager): MFInput::ButtonInputCallback()
+    RightButtonCallback(MFGame::Engine *engine): MFInput::ButtonInputCallback()
     {
-        mRenderer = renderer;
-        mInputManager = inputManager;
+        mEngine = engine;
     }
 
     virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y) override
@@ -50,24 +22,21 @@ public:
         if (buttonNumber == 3 && down)
         {
             unsigned int w,h;
-            mInputManager->getWindowSize(w,h);
-            mRenderer->debugClick(x,h - y);
+            mEngine->getInputManager()->getWindowSize(w,h);
+            mEngine->getRenderer()->debugClick(x,h - y);
         }
     }
 
 protected:
-    MFRender::Renderer *mRenderer;
-    MFInput::InputManager *mInputManager;
+    MFGame::Engine *mEngine;
 };
 
 class KeyCallback: public MFInput::KeyInputCallback
 {
 public:
-    KeyCallback(MFGame::SpatialEntityFactory *entityFactory, MFGame::SpatialEntityManager *entityManager, MFRender::Renderer *renderer): MFInput::KeyInputCallback()
+    KeyCallback(MFGame::Engine *engine): MFInput::KeyInputCallback()
     {
-        mEntityFactory = entityFactory;
-        mEntityManager = entityManager;
-        mRenderer = renderer;
+        mEngine = engine;
         mCounter = 0;
     }
 
@@ -76,115 +45,99 @@ public:
         if (!down)
             return;
 
-        if (sSimulatePhysics && keyCode == SDL_SCANCODE_SPACE)      // SPACE
+        if (keyCode == SDL_SCANCODE_SPACE)   // SPACE
         {
-            MFGame::SpatialEntity *e = mEntityManager->getEntityById(
+            MFGame::SpatialEntity *e = mEngine->getSpatialEntityManager()->getEntityById(
                 mCounter % 2 == 0 ?
-                    mEntityFactory->createTestBallEntity() :
-                    mEntityFactory->createTestBoxEntity());
+                    mEngine->getSpatialEntityFactory()->createTestBallEntity() :
+                    mEngine->getSpatialEntityFactory()->createTestBoxEntity());
 
             MFMath::Vec3 f,r,u;
-            mRenderer->getCameraVectors(f,r,u);
+            mEngine->getRenderer()->getCameraVectors(f,r,u);
 
             const float speed = 10.0;
 
-            e->setPosition(mRenderer->getCameraPosition() + f * 2.0f);
+            e->setPosition(mEngine->getRenderer()->getCameraPosition() + f * 2.0f);
             e->setVelocity(f * speed);
             mCounter++;
         }
         else if (keyCode == SDL_SCANCODE_F3) // F3
         {
-            mRenderer->showProfiler();
+            mEngine->getRenderer()->showProfiler();
         }
     }
 
 protected:
-    MFGame::SpatialEntityFactory *mEntityFactory;
-    MFGame::SpatialEntityManager *mEntityManager;
-    MFRender::Renderer *mRenderer;
+    MFGame::Engine *mEngine;
     unsigned int mCounter;
 };
 
-class WindowResizeCallback: public MFInput::WindowResizeCallback
+class ViewerEngine: public MFGame::Engine
 {
 public:
-    WindowResizeCallback(MFRender::Renderer *renderer)
+    ViewerEngine(MFGame::Engine::EngineSettings settings, bool printCameraInfo, bool printCollisionInfo, bool rigidCamera): MFGame::Engine(settings)
     {
-        mRenderer = renderer;
+        std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(this);
+        mInputManager->addButtonCallback(rbcb);
+
+        std::shared_ptr<KeyCallback> kcb = std::make_shared<KeyCallback>(this);
+        mInputManager->addKeyCallback(kcb);
+
+        mPrintCameraInfo = printCameraInfo;
+        mPrintCollisionInfo = printCollisionInfo;
+
+        if (!rigidCamera)
+        {
+            mCameraController = new MFGame::FreeCameraController(mRenderer,mInputManager);
+        }
+        else
+        {
+            auto cameraEntity = mSpatialEntityFactory->createCameraEntity();
+            auto cameraPtr = mSpatialEntityManager->getEntityById(cameraEntity);
+            auto pos = mRenderer->getCameraPosition();
+
+            cameraPtr->setPosition(pos);
+            mCameraController = new MFGame::RigidCameraController(mRenderer,mInputManager,cameraPtr);
+        }
     }
 
-    virtual void call(unsigned int width, unsigned int height) override
+    virtual ~ViewerEngine()
     {
-        mRenderer->setWindowSize(width,height);
+        delete mCameraController;
+    }
+
+    virtual void frame() override
+    {
+        mCameraController->update(mEngineSettings.mUpdatePeriod);
+
+        if (mFrameNumber % 128)
+        {
+            if (mPrintCameraInfo)
+                std::cout << "cam: " << getCameraInfoString() << std::endl;
+
+            if (mPrintCollisionInfo)
+            {
+                std::cout << "col: ";
+
+                MFMath::Vec3 pos = mRenderer->getCameraPosition();
+                MFGame::SpatialEntity::Id entityID = mPhysicsWorld->pointCollision(pos);
+                MFGame::SpatialEntity *e = mSpatialEntityManager->getEntityById(entityID);
+
+                std::cout << (e ? e->toString() : "none") << std::endl;
+            }
+        }
+    }
+
+    void setCameraSpeed(double speed)
+    {
+        mCameraController->setSpeed(speed);
     }
 
 protected:
-    MFRender::Renderer *mRenderer;
+    MFGame::FreeCameraController *mCameraController;
+    bool mPrintCameraInfo;
+    bool mPrintCollisionInfo;
 };
-
-std::string getCameraString(MFRender::Renderer *renderer)
-{
-    double cam[6];
-    MFMath::Vec3 pos,rot;
-    renderer->getCameraPositionRotation(pos,rot);
-
-    cam[0] = pos.x;
-    cam[1] = pos.y;
-    cam[2] = pos.z;
-    cam[3] = rot.x;
-    cam[4] = rot.y;
-    cam[5] = rot.z;
-
-    std::string camStr;
-
-    bool first = true;
-
-    for (int i = 0; i < 6; ++i)
-    {
-        if (first)
-            first = false;
-        else
-            camStr += ",";
-
-        camStr += std::to_string(cam[i]);
-    }
-
-    return camStr;
-}
-
-std::string getCollisionString(MFRender::Renderer *renderer, MFPhysics::MFPhysicsWorld *world,
-    MFGame::SpatialEntityManager *entityManager)
-{
-    std::string result = "collision: ";
-
-    MFMath::Vec3 pos = renderer->getCameraPosition();
-    MFGame::SpatialEntity::Id entityID = world->pointCollision(pos);
-    MFGame::SpatialEntity *e = entityManager->getEntityById(entityID);
-
-    if (e)
-        result += entityManager->getEntityById(entityID)->toString();
-    else
-        result += "none";
-
-    return result;
-}
-
-void parseCameraString(std::string str, double params[6])
-{
-    char *token;
-    char cStr[256];
-    char delims[] = ",; ";
-
-    strncpy(cStr,str.c_str(),256);
-
-    token = strtok(cStr,delims);
-
-    for (int i = 0; i < 6; ++i)
-    {
-        params[i] = atof(token);
-        token = strtok(NULL,delims);
-    } 
-}
 
 int main(int argc, char** argv)
 {
@@ -214,32 +167,39 @@ int main(int argc, char** argv)
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
-    bool cameraInfo = arguments.count("c") > 0;
-    bool collisionInfo = arguments.count("C") > 0;
-    bool cameraPlace = arguments.count("p") > 0;
-    bool cameraRigid = arguments.count("r") > 0;
-    bool model = arguments.count("4") > 0;
-    sSimulatePhysics = arguments.count("P") > 0;
-    std::string exportFileName;
-
-    if (arguments.count("e") > 0)
-        exportFileName = arguments["e"].as<std::string>();
-
-    bool load4ds = arguments.count("no-4ds") < 1;
-    bool loadScene2Bin = arguments.count("no-scene2bin") < 1;
-    bool loadCacheBin = arguments.count("no-cachebin") < 1;
-    bool loadTreeKlz = arguments.count("no-treeklz") < 1;
-
-    double cameraSpeed = DEFAULT_CAMERA_SPEED;
-
-    if (arguments.count("s") > 0)
-        cameraSpeed = arguments["s"].as<double>();
-
     if (arguments.count("h") > 0)
     {
         std::cout << options.help() << std::endl;
         return 0;
     }
+
+    if (arguments.count("b") > 0)
+        MFFile::FileSystem::getInstance()->prependPath(arguments["b"].as<std::string>());
+
+    MFGame::Engine::EngineSettings settings;
+
+    settings.mSimulatePhysics = arguments.count("P") > 0;
+    settings.mLoad4ds         = arguments.count("no-4ds") < 1;
+    settings.mLoadScene2Bin   = arguments.count("no-scene2bin") < 1;
+    settings.mLoadCacheBin    = arguments.count("no-cachebin") < 1;
+    settings.mLoadTreeKlz     = arguments.count("no-treeklz") < 1;
+
+    ViewerEngine engine(
+        settings,
+        arguments.count("c") > 0,
+        arguments.count("C") > 0,
+        arguments.count("r") > 0);
+
+    if (arguments.count("p") > 0)
+        engine.setCameraFromString(arguments["p"].as<std::string>());
+
+    std::string inputFile = arguments["i"].as<std::string>();
+
+    double fov = arguments.count("f") > 0 ? arguments["f"].as<int>() : DEFAULT_CAMERA_FOV;
+    engine.getRenderer()->setCameraParameters(true,fov,0,0.25,2000);
+
+    double camSpeed = arguments.count("s") > 0 ? arguments["s"].as<double>() : DEFAULT_CAMERA_SPEED;
+    engine.setCameraSpeed(camSpeed);
 
     if (arguments.count("v") > 0)
     {
@@ -259,184 +219,21 @@ int main(int argc, char** argv)
         MFLogger::Logger::setFilterMode(false);
     }
 
-    if (arguments.count("i") < 1)
-    {
-        MFLogger::Logger::fatal("Expected file.", VIEWER_MODULE_STR);
-        std::cout << options.help() << std::endl;
-        return 1;
-    }
-
-    int fov = 75;
-
-    if (arguments.count("f") > 0)
-        fov = arguments["f"].as<int>();
-
-    if (arguments.count("b") > 0)
-        MFFile::FileSystem::getInstance()->prependPath(arguments["b"].as<std::string>());
-
-    std::string inputFile = arguments["i"].as<std::string>();
-
-    MFRender::OSGRenderer renderer;
-
-    MFPhysics::BulletPhysicsWorld physicsWorld;
-    MFGame::SpatialEntityManager entityManager;
-    MFGame::SpatialEntityFactory entityFactory(&renderer,&physicsWorld,&entityManager);
-
-    MFInput::InputManagerImplementation inputManager;
-    inputManager.initWindow(800,600,100,100);
-    renderer.setUpInWindow(inputManager.getWindow());
-
     if (arguments.count("m") > 0)
     {
-        renderer.setRenderMask(arguments["m"].as<unsigned int>());
-        entityFactory.setDebugMode(true);
+        ((MFRender::OSGRenderer *) engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
+        engine.getSpatialEntityFactory()->setDebugMode(true);
     }
 
-    std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(&renderer,&inputManager);
-    inputManager.addButtonCallback(rbcb);
-
-    std::shared_ptr<WindowResizeCallback> wrcb = std::make_shared<WindowResizeCallback>(&renderer);
-    inputManager.addWindowResizeCallback(wrcb);
-
-    std::shared_ptr<KeyCallback> skcb = std::make_shared<KeyCallback>(&entityFactory,&entityManager,&renderer);
-    inputManager.addKeyCallback(skcb);
-
-    std::unique_ptr<MFGame::FreeCameraController> cameraController;
-
-    if (model)
-    {
-        renderer.loadSingleModel(inputFile);
-    }
+    if (arguments.count("4") == 0)
+        engine.loadMission(inputFile);
     else
-    {
-        renderer.loadMission(inputFile,load4ds,loadScene2Bin,loadCacheBin);
+        engine.loadSingleModel(inputFile);
 
-        if (loadTreeKlz)
-            physicsWorld.loadMission(inputFile);
-
-        entityFactory.createMissionEntities();
-    }
-
-    renderer.setCameraParameters(true,fov,0,0.25,2000);
-    
-    if (cameraPlace)
-    {
-        double cam[6];
-        parseCameraString(arguments["p"].as<std::string>(),cam);
-        renderer.setCameraPositionRotation(MFMath::Vec3(cam[0],cam[1],cam[2]),MFMath::Vec3(cam[3],cam[4],cam[5]));
-    }
-
-    if (cameraRigid)
-    {
-        auto cameraEntity = entityFactory.createCameraEntity();
-        auto cameraPtr = entityManager.getEntityById(cameraEntity);
-        auto pos = renderer.getCameraPosition();
-
-        if (cameraPtr == nullptr)
-        {
-            MFLogger::Logger::fatal("Camera was not initialized!");
-            return 0;
-        }
-
-        cameraPtr->setPosition(pos);
-        cameraController = std::make_unique<MFGame::RigidCameraController>(&renderer, &inputManager, cameraPtr);
-    }
+    if (arguments.count("e") < 1)
+        engine.run();
     else
-    {
-        cameraController = std::make_unique<MFGame::FreeCameraController>(&renderer, &inputManager);
-    }
-    
-    cameraController->setSpeed(cameraSpeed);
+        engine.exportScene(arguments["e"].as<std::string>());
 
-MFGame::SpatialEntity *e = entityManager.getEntityById(entityFactory.createCapsuleEntity());
-e->setPosition(renderer.getCameraPosition());
-MFGame::TestCharacterController testController(e,&inputManager);
-
-    int lastSelectedEntity = -1;
-    int infoCounter = 0;
-
-    if (exportFileName.length() > 0)
-    {
-        if (!renderer.exportScene(exportFileName))
-            return 1;
-    }
-
-    // TODO Simplify this code
-    else
-    {
-        double lastTime = timeGet();
-        double extraTime = 0.0f;
-
-        while (sIsRunning)
-        {
-            if (inputManager.windowClosed())
-                sIsRunning = false;
-          
-            bool render = false;
-            double startTime = timeGet();
-            double passedTime = startTime - lastTime;
-            lastTime = startTime;
-            extraTime += passedTime;
-
-            while (extraTime > MS_PER_UPDATE)
-            {
-                int selectedId = renderer.getSelectedEntityId();
-
-                if (selectedId >= 0 && selectedId != lastSelectedEntity)
-                {
-                    MFGame::SpatialEntity *e = entityManager.getEntityById(selectedId);
-
-                    if (e)
-                    {
-                        std::cout << "selected entity: " << e->toString() << std::endl;
-                        lastSelectedEntity = selectedId;
-                    }
-                }
-
-                if (cameraInfo || collisionInfo)
-                {
-                    if (infoCounter <= 0)
-                    {
-                        if (cameraInfo)
-                            std::cout << "camera: " + getCameraString(&renderer) << std::endl;
-
-                        if (collisionInfo)
-                            std::cout << getCollisionString(&renderer, &physicsWorld, &entityManager) << std::endl;
-
-                        infoCounter = 30;
-                    }
-
-                    infoCounter--;
-                }
-
-                // TODO use UPDATE_TIME to make fixed-time-delta loop
-                
-                inputManager.processEvents();
-                entityManager.update(MS_PER_UPDATE);
-                cameraController->update(MS_PER_UPDATE);
-
-                if (sSimulatePhysics)
-                    physicsWorld.frame(MS_PER_UPDATE);
-              
-                render = true;
-                extraTime -= MS_PER_UPDATE;
-            }
-              
-            if (render)
-            {
-                renderer.frame(MS_PER_UPDATE); // TODO: Use actual delta time
-              
-                if (renderer.done())
-                    sIsRunning = false;
-            }
-            else
-            {
-                // Let OS do background work while we wait.
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
-        }
-    }
-
-    inputManager.destroyWindow();
     return 0;
 }

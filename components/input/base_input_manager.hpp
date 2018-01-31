@@ -32,6 +32,8 @@ public:
 class InputManager
 {
 public:
+    virtual ~InputManager() {};
+
     virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)=0;
     virtual void destroyWindow()=0;
     virtual bool windowClosed()=0;

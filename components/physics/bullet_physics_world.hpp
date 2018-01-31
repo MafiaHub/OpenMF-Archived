@@ -14,11 +14,11 @@
 namespace MFPhysics
 {
 
-class BulletPhysicsWorld: public MFPhysicsWorld
+class BulletPhysicsWorld: public PhysicsWorld
 {
 public:
     BulletPhysicsWorld();
-    ~BulletPhysicsWorld();
+    virtual ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
     virtual bool loadMission(std::string mission) override;
     virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position) override;

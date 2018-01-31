@@ -11,9 +11,10 @@ namespace MFPhysics
   Abstract interface for the physics world.
  */
 
-class MFPhysicsWorld
+class PhysicsWorld
 {
 public:
+    virtual ~PhysicsWorld() {};
     virtual void frame(double dt)=0;
     virtual bool loadMission(std::string mission)=0;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max)=0;
