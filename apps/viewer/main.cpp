@@ -75,8 +75,11 @@ protected:
 class ViewerEngine: public MFGame::Engine
 {
 public:
-    ViewerEngine(MFGame::Engine::EngineSettings settings, bool printCameraInfo, bool printCollisionInfo, bool rigidCamera): MFGame::Engine(settings)
+    ViewerEngine(MFGame::Engine::EngineSettings settings, bool printCameraInfo, bool printCollisionInfo, bool rigidCamera, std::string cameraInitString): MFGame::Engine(settings)
     {
+        if (cameraInitString.length() > 0)
+            setCameraFromString(cameraInitString);
+
         std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(this);
         mInputManager->addButtonCallback(rbcb);
 
@@ -184,14 +187,17 @@ int main(int argc, char** argv)
     settings.mLoadCacheBin    = arguments.count("no-cachebin") < 1;
     settings.mLoadTreeKlz     = arguments.count("no-treeklz") < 1;
 
+    std::string cameraString = "";
+
+    if (arguments.count("p") > 0)
+        cameraString =  arguments["p"].as<std::string>();
+
     ViewerEngine engine(
         settings,
         arguments.count("c") > 0,
         arguments.count("C") > 0,
-        arguments.count("r") > 0);
-
-    if (arguments.count("p") > 0)
-        engine.setCameraFromString(arguments["p"].as<std::string>());
+        arguments.count("r") > 0,
+        cameraString);
 
     std::string inputFile = arguments["i"].as<std::string>();
 
