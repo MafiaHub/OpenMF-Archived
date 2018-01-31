@@ -20,7 +20,7 @@ public:
     virtual void moveBackward();
     virtual void moveUp();
 
-  protected:
+protected:
     SpatialEntity *mEntity;
 
     void moveByRelativeVector(MFMath::Vec3 vector);

@@ -40,7 +40,7 @@ public:
     virtual void moveForward() override;
     virtual void moveBackward() override;
 
-  protected:
+protected:
     int mMovementState;
     float mSpeeds[3];
 };

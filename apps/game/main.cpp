@@ -1,12 +1,35 @@
 #include <iostream>
 #include <engine/engine.hpp>
+#include <controllers/player_controller.hpp>
 
 class OpenMFEngine: public MFGame::Engine
 {
 public:
     OpenMFEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
+        mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createCapsuleEntity());
+        mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager);
     };
+
+    virtual ~OpenMFEngine()
+    {
+        delete mPlayerController;
+    }
+
+    virtual void frame() override
+    {
+        mPlayerController->update();
+    };
+
+    void setPlayerPosition(MFMath::Vec3 pos)
+    {
+        mPlayerEntity->setPosition(pos);
+        mRenderer->setCameraPositionRotation(pos,MFMath::Vec3(0,0,0));
+    };
+
+protected:
+    MFGame::SpatialEntity *mPlayerEntity;
+    MFGame::PlayerController *mPlayerController;
 };
 
 int main( int argc, char** argv )
@@ -15,7 +38,7 @@ int main( int argc, char** argv )
     OpenMFEngine engine(settings);
 
     engine.loadMission("tutorial");
-    engine.setCameraFromString("126.019127,320.425720,3.670851,2.178184,1.295000,-0.000000");
+    engine.setPlayerPosition(MFMath::Vec3(126.02,320.43,3.67));
 
     engine.getRenderer()->setCameraParameters(true,110,0,0.25,2000);
 
