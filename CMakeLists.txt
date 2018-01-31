@@ -156,9 +156,14 @@ set(THIRD_PARTY_LIBS
 
 target_link_libraries(components ${THIRD_PARTY_LIBS})
 
-if(BUILD_GAME)
+if(BUILD_VIEWER)
     add_executable        ( viewer     apps/viewer/main.cpp              )
     target_link_libraries ( viewer     components                        )
+endif(BUILD_VIEWER)
+
+if(BUILD_GAME)
+    add_executable        ( game       apps/game/main.cpp                )
+    target_link_libraries ( game       components                        )
 endif(BUILD_GAME)
 
 if(BUILD_UTILS)
