@@ -14,17 +14,16 @@ public:
     virtual ~OpenMFEngine()
     {
         delete mPlayerController;
-    }
+    };
 
     virtual void frame() override
     {
-        mPlayerController->update();
+        mPlayerController->update(mEngineSettings.mUpdatePeriod);
     };
 
     void setPlayerPosition(MFMath::Vec3 pos)
     {
         mPlayerEntity->setPosition(pos);
-        mRenderer->setCameraPositionRotation(pos,MFMath::Vec3(0,0,0));
     };
 
 protected:

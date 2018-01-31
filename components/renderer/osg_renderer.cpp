@@ -3,6 +3,12 @@
 namespace MFRender
 {
 
+void OSGRenderer::cameraFace(MFMath::Vec3 position)
+{
+    osg::Vec3f pos = mViewer->getCamera()->getInverseViewMatrix().getTrans();
+    mViewer->getCamera()->setViewMatrixAsLookAt(pos,osg::Vec3f(position.x,position.y,position.z),osg::Vec3f(0,0,1));
+}
+
 void OSGRenderer::showProfiler()
 {
     // hack: simulate the key press

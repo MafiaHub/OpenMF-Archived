@@ -31,6 +31,7 @@ public:
     virtual void showProfiler()=0;
 
     MFMath::Vec3 getCameraPosition() { MFMath::Vec3 p,r; getCameraPositionRotation(p,r); return p; };
+    virtual void cameraFace(MFMath::Vec3 position)=0;
 
   protected:
     bool mDone;

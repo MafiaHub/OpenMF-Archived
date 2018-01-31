@@ -14,11 +14,14 @@ public:
     PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual ~PlayerController() {};
 
-    void update();
+    void update(double dt);
 
 protected:
     MFRender::Renderer *mRenderer;
     MFInput::InputManager *mInputManager;
+    double mRotationSpeed;
+    double mYaw;
+    double mPitch;
 };
 
 }

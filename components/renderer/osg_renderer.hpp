@@ -52,6 +52,8 @@ public:
     osg::Group *getRootNode()                      { return mRootNode.get(); };
     osgViewer::Viewer *getViewer()                 { return mViewer.get();   };
 
+    virtual void cameraFace(MFMath::Vec3 position) override;
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
