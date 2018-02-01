@@ -4,39 +4,6 @@
 namespace MFGame
 {
 
-class TestCharacterCallback: public MFInput::KeyInputCallback
-{
-public:
-    TestCharacterCallback(CharacterEntityController *controller)
-    {
-        mController = controller;
-    }
-
-    virtual void call(bool down, unsigned int keyCode) override
-    {
-        switch (keyCode)
-        {
-            case 12: mController->moveForward(); break;
-            case 14: mController->moveBackward(); break;
-            case 13: mController->moveLeft(); break;
-            case 15: mController->moveRight(); break;
-            case 18: mController->jump(); break;
-            default: break;
-        }
-
-    }
-
-protected:
-    CharacterEntityController *mController;
-};
-
-TestCharacterController::TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager):
-    CharacterEntityController(entity)
-{
-    std::shared_ptr<TestCharacterCallback> cb = std::make_shared<TestCharacterCallback>(this);
-    inputManager->addKeyCallback(cb);
-}
-
 bool CharacterEntityController::isOnGround()
 {
     // TODO: implement this
@@ -46,45 +13,36 @@ bool CharacterEntityController::isOnGround()
 CharacterEntityController::CharacterEntityController(SpatialEntity *entity): EntityController(entity)
 {
     mMovementState = WALK;
+    mMovementVector = MFMath::Vec3(0,0,0);
     setSpeeds(0.5,1.0,2.0);
 }
 
-void CharacterEntityController::moveLeft()
+void CharacterEntityController::moveLeft(bool start)
 {
-    if (isOnGround())
-        EntityController::moveLeft();
+    mMovementVector.x = start ? -1 : mMovementVector.x;
+    setRelativeVelocityVector(mMovementVector);
 }
 
-void CharacterEntityController::moveRight()
+void CharacterEntityController::moveRight(bool start)
 {
-    if (isOnGround())
-        EntityController::moveRight();
+    mMovementVector.x = start ? 1 : mMovementVector.x;
+    setRelativeVelocityVector(mMovementVector);
 }
 
-void CharacterEntityController::moveForward()
+void CharacterEntityController::moveForward(bool start)
 {
-    if (isOnGround())
-        EntityController::moveForward();
+    mMovementVector.y = start ? 1 : mMovementVector.y;
+    setRelativeVelocityVector(mMovementVector);
 }
 
-void CharacterEntityController::moveBackward()
+void CharacterEntityController::moveBackward(bool start)
 {
-    if (isOnGround())
-        EntityController::moveBackward();
-}
-
-void CharacterEntityController::move(MFMath::Vec3 offset)
-{
-    float speed = mSpeeds[mMovementState];
-    auto fin = offset * speed;
-
-    EntityController::move(fin);
+    mMovementVector.y = start ? -1 : mMovementVector.y;
+    setRelativeVelocityVector(mMovementVector);
 }
 
 void CharacterEntityController::jump()
 {
-    if (isOnGround())
-        EntityController::moveUp();
 }
 
 }

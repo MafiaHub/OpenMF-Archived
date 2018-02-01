@@ -27,7 +27,7 @@ public:
             mInitWindowX        = 100;
             mInitWindowY        = 100;
 
-            mSimulatePhysics    = false;
+            mSimulatePhysics    = true;
 
             mLoad4ds            = true;
             mLoadScene2Bin      = true;

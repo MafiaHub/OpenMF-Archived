@@ -19,8 +19,6 @@ public:
 
     CharacterEntityController(SpatialEntity *entity);
 
-    virtual void move(MFMath::Vec3 offset) override;
-
     void setSpeeds(float walk, float run, float crouch)
     {
         mSpeeds[WALK] = walk;
@@ -35,20 +33,15 @@ public:
 
     void jump();
     bool isOnGround();
-    virtual void moveLeft() override;
-    virtual void moveRight() override;
-    virtual void moveForward() override;
-    virtual void moveBackward() override;
+    virtual void moveLeft(bool start=true);
+    virtual void moveRight(bool start=true);
+    virtual void moveForward(bool start=true);
+    virtual void moveBackward(bool start=true);
 
 protected:
-    int mMovementState;
+    MovementState mMovementState;
+    MFMath::Vec3 mMovementVector;
     float mSpeeds[3];
-};
-
-class TestCharacterController: public CharacterEntityController
-{
-public:
-    TestCharacterController(SpatialEntity *entity, MFInput::InputManager *inputManager);
 };
 
 }

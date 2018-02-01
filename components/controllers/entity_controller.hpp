@@ -11,19 +11,14 @@ class EntityController
 public:
     EntityController(SpatialEntity *entity);
 
-    void setEntity(SpatialEntity *entity) { mEntity = entity; }
+    /**
+      Set the velocity vector relatively to where the entity is facing.
+    */
 
-    virtual void move(MFMath::Vec3 offset);
-    virtual void moveLeft();
-    virtual void moveRight();
-    virtual void moveForward();
-    virtual void moveBackward();
-    virtual void moveUp();
+    void setRelativeVelocityVector(MFMath::Vec3 vector);
 
 protected:
     SpatialEntity *mEntity;
-
-    void moveByRelativeVector(MFMath::Vec3 vector);
 };
 
 }
