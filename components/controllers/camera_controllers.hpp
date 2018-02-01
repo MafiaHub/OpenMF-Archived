@@ -42,6 +42,19 @@ protected:
     bool mPreviousRotationActive;
 };
 
+class OrbitEntityCameraController: public MouseRotateCameraController
+{
+public:
+    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+    virtual ~OrbitEntityCameraController() {};
+
+protected:
+    virtual void applyRotation() override;
+
+    SpatialEntity *mEntity;
+    float mMaxCameraDistance;
+};
+
 class FreeCameraController: public MouseRotateCameraController
 {
 public:

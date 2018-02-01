@@ -57,6 +57,23 @@ void MouseRotateCameraController::update(double dt)
     mPreviouslyCentered = true;
 }
 
+OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity):
+    MouseRotateCameraController(renderer,inputManager)
+{
+    mEntity = entity;
+    mMaxCameraDistance = 5.0;
+}
+
+void OrbitEntityCameraController::applyRotation()
+{
+    float yaw = mRotation.x;
+    float pitch = mRotation.y + MFMath::PI / 2.0;
+
+    MFMath::Vec3 camOffset = MFMath::Vec3(cos(yaw) * cos(pitch),sin(yaw) * cos(pitch),sin(pitch)) * ((float) mMaxCameraDistance);
+    mRenderer->setCameraPositionRotation(mEntity->getPosition() + camOffset,MFMath::Vec3(0,0,0));
+    mRenderer->cameraFace(mEntity->getPosition());
+}
+
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
     MouseRotateCameraController(renderer,inputManager)
 {
