@@ -19,6 +19,7 @@ public:
 protected:
     MFRender::Renderer *mRenderer;
     MFInput::InputManager *mInputManager;
+    double mMaxCameraDistance;
     double mRotationSpeed;
     double mYaw;
     double mPitch;

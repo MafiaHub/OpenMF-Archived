@@ -1,7 +1,6 @@
 #include <engine/engine.hpp>
 #include <cxxopts.hpp>
-#include <controllers/free_camera_controller.hpp>
-#include <controllers/rigid_camera_controller.hpp>
+#include <controllers/camera_controllers.hpp>
 #include <spatial_entity/spatial_entity.hpp>
 
 #define VIEWER_MODULE_STR "viewer"

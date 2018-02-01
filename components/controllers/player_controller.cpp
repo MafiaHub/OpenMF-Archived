@@ -34,6 +34,7 @@ PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender
     mRenderer = renderer;
     mInputManager = inputManager;
     mRotationSpeed = 1.0;
+    mMaxCameraDistance = 5.0;
     mYaw = 0.0;
     mPitch = 0.0;
 
@@ -61,7 +62,7 @@ void PlayerController::update(double dt)
     mPitch = std::min((double) MFMath::PI / 2.0 - 0.001,std::max((double) -MFMath::PI / 2.0 + 0.001,mPitch + rotOffset.y));
     mInputManager->setMousePosition(windowW / 2, windowH / 2);   // center the mouse
 
-    MFMath::Vec3 camOffset = MFMath::Vec3(cos(mYaw) * cos(mPitch),sin(mYaw) * cos(mPitch),sin(mPitch)) * 10.0f;
+    MFMath::Vec3 camOffset = MFMath::Vec3(cos(mYaw) * cos(mPitch),sin(mYaw) * cos(mPitch),sin(mPitch)) * ((float) mMaxCameraDistance);
 
     mRenderer->setCameraPositionRotation(mEntity->getPosition() + camOffset,MFMath::Vec3(0,0,0));
     mRenderer->cameraFace(mEntity->getPosition());

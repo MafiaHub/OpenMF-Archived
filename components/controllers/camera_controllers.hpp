@@ -1,11 +1,25 @@
-#ifndef FREE_CAMERA_CONTROLLER
-#define FREE_CAMERA_CONTROLLER
+#ifndef CAMERA_CONTROLLERS_H
+#define CAMERA_CONTROLLERS_H
 
-#include <controllers/camera_controller.hpp>
+#include <renderer/base_renderer.hpp>
+#include <input/base_input_manager.hpp>
 #include <utils/math.hpp>
+#include <spatial_entity/spatial_entity.hpp>
 
 namespace MFGame
 {
+
+class CameraController
+{
+public:
+    virtual ~CameraController() {};
+    CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager) { mRenderer = renderer; mInputManager = inputManager; };
+    virtual void update(double dt)=0;
+
+protected:
+    MFRender::Renderer *mRenderer;
+    MFInput::InputManager *mInputManager;
+};
 
 class FreeCameraController: public CameraController
 {
@@ -36,6 +50,16 @@ protected:
 
     double mSpeed;
     double mRotationSpeed;
+};
+
+class RigidCameraController: public FreeCameraController
+{
+public:
+    RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+
+protected:
+    virtual void handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset) override;
+    SpatialEntity *mCameraEntity;
 };
 
 }
