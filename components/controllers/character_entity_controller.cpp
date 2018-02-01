@@ -1,5 +1,4 @@
 #include <controllers/character_entity_controller.hpp>
-#include <iostream>
 
 namespace MFGame
 {
@@ -19,26 +18,26 @@ CharacterEntityController::CharacterEntityController(SpatialEntity *entity): Ent
 
 void CharacterEntityController::moveLeft(bool start)
 {
-    mMovementVector.x = start ? -1 : mMovementVector.x;
-    setRelativeVelocityVector(mMovementVector);
+    mMovementVector.x = start ? -1 : 0;
+    setRelativeVelocityVector(mMovementVector * mSpeeds[WALK]);
 }
 
 void CharacterEntityController::moveRight(bool start)
 {
-    mMovementVector.x = start ? 1 : mMovementVector.x;
-    setRelativeVelocityVector(mMovementVector);
+    mMovementVector.x = start ? 1 : 0;
+    setRelativeVelocityVector(mMovementVector * mSpeeds[WALK]);
 }
 
 void CharacterEntityController::moveForward(bool start)
 {
-    mMovementVector.y = start ? 1 : mMovementVector.y;
-    setRelativeVelocityVector(mMovementVector);
+    mMovementVector.y = start ? 1 : 0;
+    setRelativeVelocityVector(mMovementVector * mSpeeds[WALK]);
 }
 
 void CharacterEntityController::moveBackward(bool start)
 {
-    mMovementVector.y = start ? -1 : mMovementVector.y;
-    setRelativeVelocityVector(mMovementVector);
+    mMovementVector.y = start ? -1 : 0;
+    setRelativeVelocityVector(mMovementVector * mSpeeds[WALK]);
 }
 
 void CharacterEntityController::jump()

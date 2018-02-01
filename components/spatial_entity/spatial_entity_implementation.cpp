@@ -35,6 +35,12 @@ void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehav
     }
 }
 
+void SpatialEntityImplementation::setFriction(double factor)
+{
+    if (mBulletBody)
+        mBulletBody->setFriction(factor);
+}
+
 bool SpatialEntityImplementation::canBeMoved()
 {
     if (!mBulletBody)    // no physical representation => nothing stops the entity from moving

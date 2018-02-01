@@ -15,11 +15,11 @@ public:
     {
         switch (keyCode)
         {
-            case 12: mController->moveForward(down); break;
-            case 14: mController->moveBackward(down); break;
-            case 13: mController->moveLeft(down); break;
-            case 15: mController->moveRight(down); break;
-            case 18: mController->jump(); break;
+            case 26: mController->moveForward(down); break;
+            case 22: mController->moveBackward(down); break;
+            case 4:  mController->moveLeft(down); break;
+            case 7:  mController->moveRight(down); break;
+            case 44: mController->jump(); break;
             default: break;
         }
     }

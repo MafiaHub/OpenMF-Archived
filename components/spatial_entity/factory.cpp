@@ -74,6 +74,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
     mPhysicalCapsuleShape->calculateLocalInertia(mass,inertia);
     body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mPhysicalCapsuleShape.get(), inertia);
     body.mBody->setActivationState(DISABLE_DEACTIVATION);
+    body.mBody->setFriction(0);
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
 
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();

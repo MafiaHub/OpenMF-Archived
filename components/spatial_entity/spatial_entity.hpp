@@ -60,6 +60,8 @@ public:
     bool isReady()                                      { return mReady;               };
     Id getId()                                          { return mId;                  };
 
+    virtual void setFriction(double factor)=0;
+
     virtual void setPhysicsBehavior(PhysicsBehavior behavior)=0;
     int  getPhysicsBehavior()                           { return mPhysicsBehavior;     };
 
