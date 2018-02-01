@@ -41,7 +41,7 @@ public:
     virtual bool keyPressed(unsigned int keyCode)=0;
     virtual void setMousePosition(unsigned int x, unsigned int y)=0;
     virtual void getMousePosition(unsigned int &x, unsigned int &y)=0;
-    virtual void setMouseVisible(bool visible)=0;
+    virtual void setMouseVisible(bool visible)=0;                         // TODO: maybe rename to setCursorVisible?
     virtual bool mouseButtonPressed(unsigned int button)=0;
     virtual void processEvents()=0;
 

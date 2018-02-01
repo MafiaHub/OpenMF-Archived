@@ -5,15 +5,65 @@
 namespace MFGame
 {
 
-FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
+MouseRotateCameraController::MouseRotateCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
     CameraController(renderer,inputManager)
 {
+    mRotationSpeed = 0.2;
+    mRotationActive = true;
+    mPreviousRotationActive = false;
+    mHideCursorOnRotation = true;
+    mPreviouslyCentered = false;
+    mRotation = MFMath::Vec2(0,0);
+}
+
+void MouseRotateCameraController::update(double dt)
+{
+    if (mRotationActive != mPreviousRotationActive)
+    {
+        mInputManager->setMouseVisible(!mRotationActive);
+    }
+
+    mPreviousRotationActive = mRotationActive;
+
+    if (!mRotationActive)
+    {
+        mPreviouslyCentered = false;
+        return;
+    }
+
+    unsigned int x, y;
+
+    mInputManager->getMousePosition(x,y);
+
+    unsigned int windowW, windowH, halfWindowW, halfWindowH;
+    mInputManager->getWindowSize(windowW,windowH);
+
+    halfWindowW = windowW / 2;
+    halfWindowH = windowH / 2;
+
+    int dx = x - halfWindowW;
+    int dy = y - halfWindowH;
+    
+    if (mPreviouslyCentered)
+    {
+        const double pitchBias = 0.0001;
+        mRotation.x -= mRotationSpeed * dx * dt;
+        mRotation.y = std::max(pitchBias,
+            std::min(MFMath::PI - pitchBias,mRotation.y - mRotationSpeed * dy * dt));
+        applyRotation();
+    }
+
+    mInputManager->setMousePosition(halfWindowW,halfWindowH);   // center the mouse
+    mPreviouslyCentered = true;
+}
+
+FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
+    MouseRotateCameraController(renderer,inputManager)
+{
     mSpeed = 1.0;
-    mRotationSpeed = 0.005;
     mPreviousMouseButton = false;
 
     mPosition = MFMath::Vec3(0,0,0);
-    mRotation = MFMath::Vec3(0,0,0);
 
     mInitTransform = true;
 
@@ -35,12 +85,16 @@ void FreeCameraController::update(double dt)
         MFMath::Vec3 pos,rot;
         mRenderer->getCameraPositionRotation(pos,rot);
         mPosition = pos;
-        mRotation = rot;
+        mRotation = MFMath::Vec2(rot.x,rot.y);
         mInitTransform = false;
     }
 
+    mRotationActive = mInputManager->mouseButtonPressed(1);
+
+    MouseRotateCameraController::update(dt);
+
     MFMath::Vec3 pos, rot;
-    double distance = dt * mSpeed;
+    float distance = dt * mSpeed;
     MFMath::Vec3 direction = MFMath::Vec3(0,0,0);
 
     if (mInputManager->keyPressed(mKeySpeedup))
@@ -64,59 +118,31 @@ void FreeCameraController::update(double dt)
     if (mInputManager->keyPressed(mKeyDown))
         direction.z -= 1.0;
 
-    direction = direction * ((float) distance);
+    direction = direction * distance;
 
     MFMath::Vec3 f,r,u;
     mRenderer->getCameraVectors(f,r,u);
 
-    MFMath::Vec3 offset, rotOffset;
+    MFMath::Vec3 offset;
 
-    offset = direction.x * r + direction.y * f + direction.z * u;
-    rotOffset = MFMath::Vec3(0,0,0);
+    offset = f * direction.y + r * direction.x + u * direction.z;
 
-    if (mInputManager->mouseButtonPressed(1))  // rotation
-    {
-        unsigned int windowW, windowH;
-        mInputManager->getWindowSize(windowW,windowH);
-
-        if (mPreviousMouseButton)      // don't rotate if mouse wasn't centered previously
-        {
-            int dx, dy;
-            unsigned int x, y;
-            mInputManager->getMousePosition(x,y);
- 
-            dx = x - windowW / 2;
-            dy = y - windowH / 2;
-
-            rotOffset = MFMath::Vec3(-1 * mRotationSpeed * dx, -1 * mRotationSpeed * dy, 0);
-        }
-        else
-        {
-            mInputManager->setMouseVisible(false);
-        }
-
-        mPreviousMouseButton = true;
-        mInputManager->setMousePosition(windowW / 2, windowH / 2);   // center the mouse
-    }
-    else
-    {
-        if (mPreviousMouseButton)
-            mInputManager->setMouseVisible(true);
-
-        mPreviousMouseButton = false;
-    }
-
-    handleMovement(offset, rotOffset);
+    handleMovement(offset);
 }
 
-void FreeCameraController::handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset)
+void FreeCameraController::applyRotation()
 {
+    MFMath::Vec3 pos,rot;
+    mRenderer->getCameraPositionRotation(pos,rot);
+    mRenderer->setCameraPositionRotation(pos,MFMath::Vec3(mRotation.x,mRotation.y,0));
+}
+
+void FreeCameraController::handleMovement(MFMath::Vec3 offset)
+{
+    MFMath::Vec3 pos,rot;
     mPosition += offset;
-    mRotation += angOffset;
-
-    mRotation.y = std::max(0.0f, std::min(MFMath::PI - 0.001f, mRotation.y));
-
-    mRenderer->setCameraPositionRotation(mPosition, mRotation);
+    mRenderer->getCameraPositionRotation(pos,rot);
+    mRenderer->setCameraPositionRotation(mPosition,rot);
 }
 
 RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity): FreeCameraController(renderer, inputManager)
@@ -124,20 +150,17 @@ RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInp
     mCameraEntity = entity;
 }
 
-void RigidCameraController::handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset)
+void RigidCameraController::handleMovement(MFMath::Vec3 offset)
 {
     if (mCameraEntity)
     {
         mCameraEntity->setDamping(0.15f, 0);
-
         MFMath::Vec3 prevVel = mCameraEntity->getVelocity();
         MFMath::Vec3 vel = (0.4f * prevVel + 0.6f * 65.f * offset);
         mCameraEntity->setVelocity(vel);
     }
 
-    mRotation += angOffset;
-    mRotation.y = std::max(0.0f, std::min(MFMath::PI - 0.001f, mRotation.y));
-    mRenderer->setCameraPositionRotation(mCameraEntity->getPosition(), mRotation);
+    mRenderer->setCameraPositionRotation(mCameraEntity->getPosition(),MFMath::Vec3(mRotation.x,mRotation.y,0));
 }
 
 }

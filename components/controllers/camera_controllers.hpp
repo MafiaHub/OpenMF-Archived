@@ -21,24 +21,43 @@ protected:
     MFInput::InputManager *mInputManager;
 };
 
-class FreeCameraController: public CameraController
+class MouseRotateCameraController: public CameraController
+{
+public:
+    MouseRotateCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
+    virtual ~MouseRotateCameraController() {};
+    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
+    virtual void update(double dt) override;
+
+protected:
+    virtual void applyRotation()=0;
+
+    MFMath::Vec2 mRotation;    ///< yaw and pitch
+    double mRotationSpeed;
+
+    bool mRotationActive;      ///< Allows to turn the mouse rotation on/off.
+    bool mHideCursorOnRotation;
+
+    bool mPreviouslyCentered;  ///< Whether mouse was centered in the previous frame.
+    bool mPreviousRotationActive;
+};
+
+class FreeCameraController: public MouseRotateCameraController
 {
 public:
     FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
+    virtual ~FreeCameraController() {};
     virtual void update(double dt) override;
-
     void setSpeed(double speed)         { mSpeed = speed;         };
-    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
 
 protected:
-    virtual void handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset);
+    virtual void applyRotation() override;
+    virtual void handleMovement(MFMath::Vec3 offset);
 
     double mPreviousMouseButton;
-
     bool mInitTransform;
 
     MFMath::Vec3 mPosition;
-    MFMath::Vec3 mRotation;    // Euler angles
 
     unsigned int mKeyForward;
     unsigned int mKeyBackward;
@@ -49,16 +68,16 @@ protected:
     unsigned int mKeySpeedup;
 
     double mSpeed;
-    double mRotationSpeed;
 };
 
 class RigidCameraController: public FreeCameraController
 {
 public:
     RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+    virtual ~RigidCameraController() {};
 
 protected:
-    virtual void handleMovement(MFMath::Vec3 offset, MFMath::Vec3 angOffset) override;
+    virtual void handleMovement(MFMath::Vec3 offset) override;
     SpatialEntity *mCameraEntity;
 };
 
