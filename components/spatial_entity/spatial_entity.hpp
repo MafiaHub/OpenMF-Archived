@@ -1,9 +1,9 @@
 #ifndef SPATIAL_ENTITY_H
 #define SPATIAL_ENTITY_H
 
-#include <math.hpp>
-#include <id_manager.hpp>
+#include <utils/math.hpp>
 #include <string>
+#include <memory>
 
 #define DEFAULT_ID_MANAGER BackingIDManager
 
@@ -18,9 +18,18 @@ namespace MFGame
 class SpatialEntity
 {
 public:
-    SpatialEntity();
-    ~SpatialEntity();
+    typedef enum
+    {
+        STATIC,            ///< The entity cannot move.
+        KINEMATIC,         ///< The entity can move, but doesn't react to collisions.
+        RIGID,             ///< The entity can move and react to collisions as a rigid body.
+        RIGID_PLAYER       ///< Same as RIGID, but cannot rotate (e.g. player capsule collision).
+    } PhysicsBehavior;
 
+    typedef uint32_t Id;
+    static const Id NullId = 0;
+
+    SpatialEntity();
     virtual void update(double dt)=0;
 
     /**
@@ -28,45 +37,34 @@ public:
       is ready to work.
     */
     virtual void ready()=0;
-    virtual std::string toString()                      { return "";            };
-    MFMath::Vec3 getPosition()                          { return mPosition;     };
-    virtual void setPosition(MFMath::Vec3 position)     { mPosition = position; };   ///< Sets position without collisions.
+    virtual std::string toString()                      { return "";                   };
+    MFMath::Vec3 getPosition()                          { return mPosition;            };
+    virtual void setPosition(MFMath::Vec3 position)     { mPosition = position;        };   ///< Sets position without collisions.
     virtual void setVelocity(MFMath::Vec3 velocity)=0;
     virtual void setAngularVelocity(MFMath::Vec3 velocity)=0;
     virtual void setDamping(float lin, float ang) = 0;
     virtual MFMath::Vec3 getVelocity() = 0;
     virtual MFMath::Vec3 getAngularVelocity() = 0;
     virtual MFMath::Vec2 getDamping() = 0;
-    MFMath::Quat getRotation()                          { return mRotation;     };
-    virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation; };
+    MFMath::Quat getRotation()                          { return mRotation;            };
+    virtual void setRotation(MFMath::Quat rotation)     { mRotation = rotation;        };
     virtual bool hasVisual()=0;
+    virtual bool hasPhysics()=0;
     virtual bool canBeMoved()=0;                        ///< Says whether the entity can be transformed with setPosition(...) etc.
 //  detach()
 //  mergeWithChildren()
 
     virtual bool hasCollision()=0;
-    void setName(std::string name)                      { mName = name;         };
-    std::string getName()                               { return mName;         };
-    bool isReady()                                      { return mReady;        };
-    Id getId()                                          { return mId;           };
+    void setName(std::string name)                      { mName = name;                };
+    std::string getName()                               { return mName;                };
+    bool isReady()                                      { return mReady;               };
+    Id getId()                                          { return mId;                  };
 
-    void setPhysicsBehavior(int behavior) { mPhysicsBehavior = behavior; }
-    int  getPhysicsBehavior()             { return mPhysicsBehavior; }
+    virtual void setPhysicsBehavior(PhysicsBehavior behavior)=0;
+    int  getPhysicsBehavior()                           { return mPhysicsBehavior;     };
 
-    // TODO deal with ID sync between old and a new manager at some point.
-    //static void setIDManager(std::shared_ptr<IDManager> manager) { sIDManager = manager; }
-    static IDManager *getIDManager() 
-    {
-        return sIDManager.get(); 
-    }
 
-    typedef enum {
-        ENTITY_STATIC,
-        ENTITY_MOVABLE,
-        ENTITY_RIGID,
-    } PhysicsBehavior;
-
-  protected:
+protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
@@ -74,26 +72,11 @@ public:
     std::string mName;
     bool mReady;
     Id mId;
-    static std::shared_ptr<IDManager> sIDManager;
-
-private:
     int mPhysicsBehavior;
+
+    static Id sNextId;
 };
 
-SpatialEntity::SpatialEntity()
-{
-    mId = sIDManager->allocate();
-    mPosition = MFMath::Vec3();
-    mScale = MFMath::Vec3(1,1,1);
-    mReady = true;
-    mPhysicsBehavior = ENTITY_MOVABLE;
 }
 
-SpatialEntity::~SpatialEntity()
-{
-    sIDManager->deallocate(mId);
-}
-
-std::shared_ptr<IDManager> SpatialEntity::sIDManager = std::make_shared<DEFAULT_ID_MANAGER>();
-}
 #endif

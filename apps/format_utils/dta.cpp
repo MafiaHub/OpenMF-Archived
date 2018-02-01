@@ -2,11 +2,11 @@
 #include <iomanip>
 #include <dta/parser.hpp>
 #include <dta/key_extractor.hpp>
-#include <utils.hpp>
-#include <loggers/console.hpp>
+#include <utils/openmf.hpp>
+#include <utils/logger.hpp>
 #include <cxxopts.hpp>
 #include <algorithm>
-#include <osdefines.hpp>
+#include <utils/os_defines.hpp>
 
 #define ZPL_IMPLEMENTATION
 #include <zpl.h>
@@ -57,13 +57,13 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
         system(std::string("mkdir -p \"$(dirname \"" + outFile + "\")\" && touch \"" + outFile + "\"").c_str());
     #endif
 
-    MFLogger::ConsoleLogger::info("Extracting " + DTAFile + " to " + outFile + ".", DTA_MODULE_STR);
+    MFLogger::Logger::info("Extracting " + DTAFile + " to " + outFile + ".", DTA_MODULE_STR);
 
     int fileIndex = dta.getFileIndex(DTAFile);
 
     if (fileIndex < 0)
     {
-        MFLogger::ConsoleLogger::fatal("File " + DTAFile + " not found.", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("File " + DTAFile + " not found.", DTA_MODULE_STR);
         return false;
     }
 
@@ -72,7 +72,7 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + outFile + ".", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Could not open file " + outFile + ".", DTA_MODULE_STR);
         return false;
     }
 
@@ -86,7 +86,7 @@ bool extract(MFFormat::DataFormatDTA &dta, std::ifstream &DTAStream, std::string
 
 int main(int argc, char** argv)
 {
-    MFLogger::ConsoleLogger::getInstance()->setVerbosityFlags(1);
+    MFLogger::Logger::setVerbosityFlags(1);
 
     cxxopts::Options options(DTA_MODULE_STR,"CLI utility for Mafia DTA format.");
 
@@ -125,13 +125,13 @@ int main(int argc, char** argv)
 
     if (extractMode && extractAllMode)
     {
-        MFLogger::ConsoleLogger::fatal("Combination of -e and -E not allowed.", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Combination of -e and -E not allowed.", DTA_MODULE_STR);
         return 1;
     }
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Expected file.", DTA_MODULE_STR);
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -160,13 +160,13 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + inputFile + ".", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Could not open file " + inputFile + ".", DTA_MODULE_STR);
         return 1;
     }
 
     if(!gameExe.is_open())
     {
-        MFLogger::ConsoleLogger::fatal("Could not open file " + executableFile + ".", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Could not open file " + executableFile + ".", DTA_MODULE_STR);
         return 1;
     }
 
@@ -195,19 +195,19 @@ int main(int argc, char** argv)
             relativeShift = arguments["S"].as<int>();
 
         std::string outputFile = inputFile + ".decrypt" + std::to_string(relativeShift);
-        MFLogger::ConsoleLogger::info("decrypting into " + outputFile, DTA_MODULE_STR);
+        MFLogger::Logger::info("decrypting into " + outputFile, DTA_MODULE_STR);
 
         std::ofstream f2;
         f2.open(outputFile, std::ios::binary);
 
         if (!f2.is_open())
         {
-            MFLogger::ConsoleLogger::fatal("Could not open file " + outputFile + ".", DTA_MODULE_STR);
+            MFLogger::Logger::fatal("Could not open file " + outputFile + ".", DTA_MODULE_STR);
             f.close();
             return 1;
         }
 
-        ScopedBuffer buffer(fileSize);
+        MFUtil::ScopedBuffer buffer(fileSize);
         f.read(buffer,fileSize);
         f.close();
 
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        MFLogger::ConsoleLogger::fatal("Could not parse file " + inputFile + ".", DTA_MODULE_STR);
+        MFLogger::Logger::fatal("Could not parse file " + inputFile + ".", DTA_MODULE_STR);
         f.close();
         return 1;
     }
@@ -241,7 +241,7 @@ int main(int argc, char** argv)
     }
     else if (extractAllMode)
     {
-        MFLogger::ConsoleLogger::info("Extracting file " + inputFile + ".", DTA_MODULE_STR);
+        MFLogger::Logger::info("Extracting file " + inputFile + ".", DTA_MODULE_STR);
 
         for (int i = 0; i < (int) dta.getNumFiles(); ++i)
             extract(dta,f,dta.getFileName(i),MFUtil::strToLower(dta.getFileName(i)),output);

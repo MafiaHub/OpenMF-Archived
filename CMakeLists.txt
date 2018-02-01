@@ -1,121 +1,126 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
-PROJECT(OpenMF)
-MESSAGE(STATUS "Configuring OpenMF...")
+cmake_minimum_required(VERSION 3.1.0)
+project(OpenMF)
+message(STATUS "Configuring OpenMF...")
 
-OPTION(BUILD_GAME "build game" ON)
-OPTION(BUILD_VIEWER "build model/mission viewer" ON)
-OPTION(BUILD_UTILS "build format utils" ON)
-OPTION(BUILD_TESTS "build tests" ON)
+option(BUILD_GAME   "build game"                 ON)
+option(BUILD_VIEWER "build model/mission viewer" ON)
+option(BUILD_UTILS  "build format utils"         ON)
+option(BUILD_TESTS  "build tests"                ON)
 
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-SET(OpenMF_CMAKE_DIR "${OpenMF_SOURCE_DIR}/cmake")
+set(OpenMF_CMAKE_DIR "${OpenMF_SOURCE_DIR}/cmake")
 
-STRING(COMPARE NOTEQUAL ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} CMAKE_OUT_OF_SOURCE_BUILD)
+string(COMPARE NOTEQUAL ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} CMAKE_OUT_OF_SOURCE_BUILD)
 
-IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
-ENDIF()
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+endif()
 
-IF(CMAKE_OUT_OF_SOURCE_BUILD)
-	SET(DEFAULT_RELATIVE_PATHS OFF)
-ELSE()
-	SET(DEFAULT_RELATIVE_PATHS ON)
-ENDIF()
+if(CMAKE_OUT_OF_SOURCE_BUILD)
+    set(DEFAULT_RELATIVE_PATHS OFF)
+else()
+    set(DEFAULT_RELATIVE_PATHS ON)
+endif()
 
-OPTION(CMAKE_USE_RELATIVE_PATHS "If true, cmake will use relative paths in makefiles and projects." ${DEFAULT_RELATIVE_PATHS})
+option(CMAKE_USE_RELATIVE_PATHS "If true, cmake will use relative paths in makefiles and projects." ${DEFAULT_RELATIVE_PATHS})
 
-IF (WIN32)
-	SET(OSG_DIR CACHE PATH "Path where to find the OpenSceneGraph")
-	IF(NOT OSG_DIR)
-		#MESSAGE(FATAL_ERROR "Error: OpenSceneGraph not found.")
-		SET(WIN32_DEP_NOT_FOUND "ON")
-	ELSE(NOT OSG_DIR)
-		SET(OSG_DIR "${OSG_DIR};${OSG_DIR}/build")
-	ENDIF(NOT OSG_DIR)
+if(WIN32)
+    set(OSG_DIR cache path "Path where to find the OpenSceneGraph")
+    if(not OSG_DIR)
+        #message(FATAL_ERROR "Error: OpenSceneGraph not found.")
+        set(WIN32_DEP_not_FOUND "ON")
+    else(not OSG_DIR)
+        set(OSG_DIR "${OSG_DIR};${OSG_DIR}/build")
+    endif(not OSG_DIR)
 
-	SET(OSG_THIRD_PARTY_DIR CACHE PATH "Path where to find the osg third party dependencies")
-	IF(NOT OSG_THIRD_PARTY_DIR)
-	#	MESSAGE(FATAL_ERROR "Error: OpenSceneGraph 3rd Party Directory not found.")
-		SET(WIN32_DEP_NOT_FOUND "ON")
-	ENDIF(NOT OSG_THIRD_PARTY_DIR)
+    set(OSG_THIRD_PARTY_DIR cache path "Path where to find the osg third party dependencies")
+
+    if(not OSG_THIRD_PARTY_DIR)
+    #    message(FATAL_ERROR "Error: OpenSceneGraph 3rd Party Directory not found.")
+        set(WIN32_DEP_not_FOUND "ON")
+    endif(not OSG_THIRD_PARTY_DIR)
     
-    SET(BULLET_ROOT CACHE PATH "Path where to find Bullet3")
-    IF(NOT BULLET_ROOT)
-		#MESSAGE(FATAL_ERROR "Error: Bullet3 not found.")
-		SET(WIN32_DEP_NOT_FOUND "ON")
-    ELSE(NOT BULLET_ROOT)
-        SET(BULLET_ROOT "${BULLET_ROOT}")
-        SET(BULLET_INCLUDE_DIR "${BULLET_ROOT}/../src;")
-	ENDIF(NOT BULLET_ROOT)
-	
-	SET(SDL2_ROOT CACHE PATH "Path where to find SDL2")
-	IF(NOT SDL2_ROOT)
-		#MESSAGE(FATAL_ERROR "Error: SDL2 not found")
-		SET(WIN32_DEP_NOT_FOUND "ON")
-	ELSE(NOT SDL2_ROOT)
-		SET(SDL2_ROOT "${SDL2_ROOT}")
-		SET(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include;${SDL2_ROOT}/include/SDL2;")
-		IF(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-			SET(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x64/SDL2.lib;${SDL2_ROOT}/lib/x64/SDL2main.lib;")
-		ELSE(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-			SET(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x86/SDL2.lib;${SDL2_ROOT}/lib/x86/SDL2main.lib;") 
-		ENDIF(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-	ENDIF(NOT SDL2_ROOT)
+    set(BULLET_ROOT cache path "Path where to find Bullet3")
 
-	IF(WIN32_DEP_NOT_FOUND)
-		MESSAGE(FATAL_ERROR "Error: Some of your dependencies could not be found.")
-	ENDIF(WIN32_DEP_NOT_FOUND)
-ENDIF(WIN32)
+    if(not BULLET_ROOT)
+        #message(FATAL_ERROR "Error: Bullet3 not found.")
+        set(WIN32_DEP_not_FOUND "ON")
+    else(not BULLET_ROOT)
+        set(BULLET_ROOT "${BULLET_ROOT}")
+        set(BULLET_INCLUDE_DIR "${BULLET_ROOT}/../src;")
+    endif(not BULLET_ROOT)
+    
+    set(SDL2_ROOT cache path "Path where to find SDL2")
 
-IF(CMAKE_CONFIGURATION_TYPES)
-   SET(CMAKE_CONFIGURATION_TYPES Debug Release)
+    if(not SDL2_ROOT)
+        #message(FATAL_ERROR "Error: SDL2 not found")
+        set(WIN32_DEP_not_FOUND "ON")
+    else(not SDL2_ROOT)
+        set(SDL2_ROOT "${SDL2_ROOT}")
+        set(SDL2_INCLUDE_DIR "${SDL2_ROOT}/include;${SDL2_ROOT}/include/SDL2;")
+        if(${CMAKE_SIZEOF_VOID_P} matches 8)
+            set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x64/SDL2.lib;${SDL2_ROOT}/lib/x64/SDL2main.lib;")
+        else(${CMAKE_SIZEOF_VOID_P} matches 8)
+            set(SDL2_LIBRARIES "${SDL2_ROOT}/lib/x86/SDL2.lib;${SDL2_ROOT}/lib/x86/SDL2main.lib;") 
+        endif(${CMAKE_SIZEOF_VOID_P} matches 8)
+    endif(not SDL2_ROOT)
+
+    if(WIN32_DEP_not_FOUND)
+        message(FATAL_ERROR "Error: Some of your dependencies could not be found.")
+    endif(WIN32_DEP_not_FOUND)
+endif(WIN32)
+
+if(CMAKE_CONFIGURATION_TYPES)
+   set(CMAKE_CONFIGURATION_TYPES Debug Release)
    set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
      "Reset the configurations to what we need"
      FORCE)
-ENDIF()
+endif()
 
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH    ${PROJECT_BINARY_DIR}/lib)
 
-IF(WIN32)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"WIN32_LEAN_AND_MEAN\"")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"NOMINMAX\"")
-	
-	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
-	
-    IF(MSVC80)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wp64")
-    ENDIF(MSVC80)
-	
-	OPTION(MULTI_PROCESSOR_COMPILATION "Use multiple processors when compiling" ON)
-	IF(MULTI_PROCESSOR_COMPILATION)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-	ENDIF(MULTI_PROCESSOR_COMPILATION)
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"WIN32_LEAN_AND_MEAN\"")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D \"NOMINMAX\"")
+    
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
+    
+    if(MSVC80)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wp64")
+    endif(MSVC80)
+    
+    option(MULTI_PROCESSOR_COMPILATION "Use multiple processors when compiling" ON)
 
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-	IF (WARNINGS_AS_ERRORS)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
-	ENDIF (WARNINGS_AS_ERRORS)
-ENDIF(WIN32)
+    if(MULTI_PROCESSOR_COMPILATION)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    endif(MULTI_PROCESSOR_COMPILATION)
 
-FIND_PACKAGE(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 
-IF(NOT WIN32)
-	FIND_PACKAGE(SDL2 REQUIRED)
-ENDIF(NOT WIN32)
+    if (WARNINGS_AS_ERRORS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+    endif (WARNINGS_AS_ERRORS)
+endif(WIN32)
 
-FIND_PACKAGE(Threads)
-FIND_PACKAGE(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
+find_package(OpenSceneGraph 3.4.1 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
 
-INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS} ${BULLET_INCLUDE_DIRS} ${SDL2_INCLUDE_DIR} "/usr/include/bullet")
+if(NOT WIN32)
+    find_package(SDL2 REQUIRED)
+endif(NOT WIN32)
 
-IF(NOT WIN32)
-	LINK_DIRECTORIES(${SDL2_LIBRARY_DIRS})
-ENDIF(NOT WIN32)
+find_package(Threads)
+find_package(Bullet 2.88 REQUIRED BulletCommon BulletDynamics BulletCollision LinearMath)
 
-SET(USED_OSG_PLUGINS
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS} ${BULLET_INCLUDE_DIRS} ${SDL2_INCLUDE_DIR} "/usr/include/bullet")
+
+if(NOT WIN32)
+    LINK_DIRECTORIES(${SDL2_LIBRARY_DIRS})
+endif(NOT WIN32)
+
+set(USED_OSG_PLUGINS
     osgdb_bmp
     osgdb_dds
     osgdb_jpeg
@@ -124,6 +129,76 @@ SET(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
-INCLUDE_DIRECTORIES(components)
-INCLUDE_DIRECTORIES(extern)
-ADD_SUBDIRECTORY(apps)
+include_directories(components)
+include_directories(extern)
+include_directories(tests)
+
+if(NOT WIN32)
+    string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
+endif(NOT WIN32)
+
+file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "components/*.hpp" "extern/*.cpp" "extern/*.hpp")
+
+add_library(components ${COMPONENT_SOURCES})
+
+set(THIRD_PARTY_LIBS
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OPENTHREADS_LIBRARIES}
+    ${OSGPARTICLE_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGDB_LIBRARIES}
+    ${OSGVIEWER_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${CMAKE_DL_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${SDL2_LIBRARIES})
+
+target_link_libraries(components ${THIRD_PARTY_LIBS})
+
+if(BUILD_VIEWER)
+    add_executable        ( viewer     apps/viewer/main.cpp              )
+    target_link_libraries ( viewer     components                        )
+endif(BUILD_VIEWER)
+
+if(BUILD_GAME)
+    add_executable        ( game       apps/game/main.cpp                )
+    target_link_libraries ( game       components                        )
+endif(BUILD_GAME)
+
+if(BUILD_UTILS)
+    add_executable        ( dta        apps/format_utils/dta.cpp         )
+    target_link_libraries ( dta        components                        )
+
+    add_executable        ( cache_bin  apps/format_utils/cache_bin.cpp   )
+    target_link_libraries ( cache_bin  components                        )
+
+    add_executable        ( check_bin  apps/format_utils/check_bin.cpp   )
+    target_link_libraries ( check_bin  components                        )
+
+    add_executable        ( load_def   apps/format_utils/load_def.cpp    )
+    target_link_libraries ( load_def   components                        )
+
+    add_executable        ( mnu        apps/format_utils/mnu.cpp         )
+    target_link_libraries ( mnu        components                        )
+
+    add_executable        ( tree_klz   apps/format_utils/tree_klz.cpp    )
+    target_link_libraries ( tree_klz   components                        )
+
+    add_executable        ( textdb     apps/format_utils/textdb.cpp      )
+    target_link_libraries ( textdb     components                        )
+
+    add_executable        ( road_bin   apps/format_utils/road_bin.cpp    )
+    target_link_libraries ( road_bin   components                        )
+
+    add_executable        ( scene2_bin apps/format_utils/scene2_bin.cpp  )
+    target_link_libraries ( scene2_bin components                        )
+endif(BUILD_UTILS)
+
+if(BUILD_TESTS)
+    add_executable        ( test_suite tests/test_suite.cpp              )
+    target_link_libraries ( test_suite components                        )
+
+    add_executable        ( test_suite_local tests/test_suite.cpp        )
+    target_link_libraries ( test_suite_local components                  )
+endif(BUILD_TESTS)

@@ -1,2 +1,0 @@
-ADD_EXECUTABLE(tests tests.cpp)
-TARGET_LINK_LIBRARIES(tests)
