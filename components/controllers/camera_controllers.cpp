@@ -20,7 +20,7 @@ void MouseRotateCameraController::update(double dt)
 {
     if (mRotationActive != mPreviousRotationActive)
     {
-        mInputManager->setMouseVisible(!mRotationActive);
+        mInputManager->setCursorVisible(!mRotationActive);
     }
 
     mPreviousRotationActive = mRotationActive;
@@ -33,7 +33,7 @@ void MouseRotateCameraController::update(double dt)
 
     unsigned int x, y;
 
-    mInputManager->getMousePosition(x,y);
+    mInputManager->getCursorPosition(x,y);
 
     unsigned int windowW, windowH, halfWindowW, halfWindowH;
     mInputManager->getWindowSize(windowW,windowH);
@@ -53,7 +53,7 @@ void MouseRotateCameraController::update(double dt)
         applyRotation();
     }
 
-    mInputManager->setMousePosition(halfWindowW,halfWindowH);   // center the mouse
+    mInputManager->setCursorPosition(halfWindowW,halfWindowH);   // center the mouse
     mPreviouslyCentered = true;
 }
 

@@ -24,9 +24,9 @@ public:
     virtual bool windowClosed() override;
     virtual void getWindowSize(unsigned int &width, unsigned int &height) override;
     virtual bool keyPressed(unsigned int keyCode) override;
-    virtual void setMousePosition(unsigned int x, unsigned int y) override;
-    virtual void getMousePosition(unsigned int &x, unsigned int &y) override;
-    virtual void setMouseVisible(bool visible) override;
+    virtual void setCursorPosition(unsigned int x, unsigned int y) override;
+    virtual void getCursorPosition(unsigned int &x, unsigned int &y) override;
+    virtual void setCursorVisible(bool visible) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
     virtual osgViewer::GraphicsWindow *getWindow();

@@ -8,12 +8,12 @@ osgViewer::GraphicsWindow *InputManagerImplementation::getWindow()
     return mOSGWindow.get();
 }
 
-void InputManagerImplementation::setMousePosition(unsigned int x, unsigned int y)
+void InputManagerImplementation::setCursorPosition(unsigned int x, unsigned int y)
 {
     SDL_WarpMouseInWindow(mWindow,x,y);
 }
 
-void InputManagerImplementation::getMousePosition(unsigned int &x, unsigned int &y)
+void InputManagerImplementation::getCursorPosition(unsigned int &x, unsigned int &y)
 {
     int mx, my;
     SDL_GetMouseState(&mx,&my);
@@ -21,7 +21,7 @@ void InputManagerImplementation::getMousePosition(unsigned int &x, unsigned int 
     y = my;
 }
 
-void InputManagerImplementation::setMouseVisible(bool visible)
+void InputManagerImplementation::setCursorVisible(bool visible)
 {
     SDL_ShowCursor(visible ? SDL_ENABLE : SDL_DISABLE);
 }
@@ -144,7 +144,7 @@ void InputManagerImplementation::processEvents()
                 for (int i = 0; i < (int) mButtonCallbacks.size(); ++i)
                 {
                     unsigned int x, y;
-                    getMousePosition(x,y);
+                    getCursorPosition(x,y);
                     mButtonCallbacks[i]->call(true,button,x,y);
                 }
 
@@ -161,7 +161,7 @@ void InputManagerImplementation::processEvents()
                 for (int i = 0; i < (int) mButtonCallbacks.size(); ++i)
                 {
                     unsigned int x, y;
-                    getMousePosition(x,y);
+                    getCursorPosition(x,y);
                     mButtonCallbacks[i]->call(false,button,x,y);
                 }
 
