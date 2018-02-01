@@ -44,7 +44,7 @@ public:
         uint32_t mPointerToData;
     } PointerTable;
 
-    #pragma pop()
+    #pragma pack(pop)
 
     class AnimationSequence
     {
