@@ -3,6 +3,48 @@
 namespace MFPhysics
 {
 
+class ContactSensorCallback : public btCollisionWorld::ContactResultCallback
+{
+public:
+    ContactSensorCallback(btRigidBody *body): btCollisionWorld::ContactResultCallback()
+    {
+        mBody = body;
+        mResult = 0;
+    }
+
+    virtual btScalar addSingleResult(btManifoldPoint& cp,
+        const btCollisionObjectWrapper* colObj0,int /* partId0 */,int /* index0 */,
+        const btCollisionObjectWrapper* colObj1,int /* partId1 */,int /* index1 */) override
+    {
+        const btCollisionObjectWrapper *colObj = colObj0->getCollisionObject() == mBody ? colObj1 : colObj0;
+        mResult = colObj->getCollisionObject();
+
+        return 0;
+    }
+
+    const btCollisionObject *mResult;
+
+protected:
+    btRigidBody *mBody;
+};
+
+double BulletPhysicsWorld::castRay(MFMath::Vec3 origin, MFMath::Vec3 direction)
+{
+    double maxDistance = 5000.0;
+
+    btVector3 p1 = btVector3(origin.x,origin.y,origin.z);
+    btVector3 p2 = btVector3(direction.x,direction.y,direction.z).normalized() * maxDistance;
+
+    btCollisionWorld::ClosestRayResultCallback cb(p1,p2);
+
+    mWorld->rayTest(p1,p2,cb);
+
+    if (cb.hasHit())
+        return cb.m_closestHitFraction * maxDistance;
+
+    return -1.0;
+}
+
 BulletPhysicsWorld::BulletPhysicsWorld()
 {
     MFLogger::Logger::info("Initializing physics world.",BULLET_PHYSICS_WORLD_MODULE_STR);

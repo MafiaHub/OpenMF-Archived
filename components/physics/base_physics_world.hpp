@@ -23,6 +23,13 @@ public:
       Perform collision query on given point in the world, return colliding entity ID or -1.
     */
     virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position)=0;
+
+    /**
+      Perform a ray cast from given point in given direction. Returns the distance of the first
+      intersection, or a negative value if there is none.
+    */
+
+    virtual double castRay(MFMath::Vec3 origin, MFMath::Vec3 direction)=0;
 };
 
 }

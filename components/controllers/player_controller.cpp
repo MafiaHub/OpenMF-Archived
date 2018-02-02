@@ -45,13 +45,13 @@ void PlayerController::update(double dt)
     instantRotate(MFMath::Vec3(camRot.x - MFMath::PI / 2.0,0,0).toQuat());
 }
 
-PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager):
+PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld):
     CharacterEntityController(playerEntity)
 {
     mRenderer = renderer;
     mInputManager = inputManager;
 
-    mCameraController = new OrbitEntityCameraController(renderer,inputManager,playerEntity);
+    mCameraController = new OrbitEntityCameraController(renderer,inputManager,playerEntity,physicsWorld);
     mCameraController->setRelativeOffset(MFMath::Vec3(0,0,1.5));
 
     std::shared_ptr<CharacterKeyCallback> cb = std::make_shared<CharacterKeyCallback>(this);

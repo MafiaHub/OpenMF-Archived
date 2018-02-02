@@ -5,6 +5,7 @@
 #include <input/base_input_manager.hpp>
 #include <utils/math.hpp>
 #include <spatial_entity/spatial_entity.hpp>
+#include <physics/base_physics_world.hpp>
 
 namespace MFGame
 {
@@ -46,12 +47,19 @@ protected:
 class OrbitEntityCameraController: public MouseRotateCameraController
 {
 public:
-    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+    /**
+      Constructor.
+
+      @param physicsWorld Optional pointer to physics world - if provided, the camera will collide. 
+    */
+
+    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld=0);
     virtual ~OrbitEntityCameraController() {};
     SpatialEntity *getEntity()                   { return mEntity;           };
     void setRelativeOffset(MFMath::Vec3 offset)  { mRelativeOffset = offset; };
 
 protected:
+    MFPhysics::PhysicsWorld *mPhysicsWorld;
     virtual void applyRotation() override;
     MFMath::Vec3 mRelativeOffset;
     SpatialEntity *mEntity;

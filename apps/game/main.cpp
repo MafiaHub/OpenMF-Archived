@@ -8,7 +8,7 @@ public:
     OpenMFEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
         mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createCapsuleEntity());
-        mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager);
+        mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
 
         mSpatialEntityFactory->setDebugMode(false);
     };

@@ -5,6 +5,7 @@
 #include <controllers/camera_controllers.hpp>
 #include <renderer/base_renderer.hpp>
 #include <input/base_input_manager.hpp>
+#include <physics/base_physics_world.hpp>
 
 namespace MFGame
 {
@@ -12,7 +13,7 @@ namespace MFGame
 class PlayerController: public CharacterEntityController
 {
 public:
-    PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
+    PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld=0);
     virtual ~PlayerController();
     void update(double dt);
 

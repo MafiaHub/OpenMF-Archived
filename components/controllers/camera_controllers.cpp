@@ -1,7 +1,7 @@
 #include <controllers/camera_controllers.hpp>
 
 #include <SDL2/SDL.h> // TODO: temporary!!!
-
+#include <iostream>
 namespace MFGame
 {
 
@@ -57,11 +57,12 @@ void MouseRotateCameraController::update(double dt)
     mPreviouslyCentered = true;
 }
 
-OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity):
+OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld):
     MouseRotateCameraController(renderer,inputManager)
 {
     mEntity = entity;
-    mMaxCameraDistance = 2.5;
+    mMaxCameraDistance = 5.0;
+    mPhysicsWorld = physicsWorld;
 }
 
 void OrbitEntityCameraController::applyRotation()
@@ -73,7 +74,20 @@ void OrbitEntityCameraController::applyRotation()
     // TODO: relative offset only works in Z direction, fix that
 
     MFMath::Vec3 camOffset = MFMath::Vec3(cos(yaw) * cos(pitch),sin(yaw) * cos(pitch),sin(pitch)) * ((float) mMaxCameraDistance);
-    mRenderer->setCameraPositionRotation(targetPosition + camOffset,MFMath::Vec3(0,0,0));
+
+    MFMath::Vec3 newCameraPosition = targetPosition + camOffset;
+
+    if (mPhysicsWorld)    // physics world set => find a collision with camera and adjust the position
+    {
+        float intersectionDistance = mPhysicsWorld->castRay(targetPosition,camOffset);
+
+        if (intersectionDistance >= 0 && intersectionDistance < mMaxCameraDistance)
+            newCameraPosition = targetPosition + MFMath::normalize(camOffset) * (intersectionDistance - 0.2f);
+
+        // TODO: address the hard-coded bias above, maybe make it variable depending on the hit normal
+    }
+
+    mRenderer->setCameraPositionRotation(newCameraPosition,MFMath::Vec3(0,0,0));
 
     mRenderer->cameraFace(targetPosition);
 }
