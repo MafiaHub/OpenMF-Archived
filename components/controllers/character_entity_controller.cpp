@@ -17,7 +17,7 @@ bool CharacterEntityController::isOnGround()
 
 void CharacterEntityController::applyCurrentMotion()
 {
-    MFMath::Vec3 movementVec = mMovementVector * mSpeeds[WALK];
+    MFMath::Vec3 movementVec = mMovementVector * mSpeeds[mMovementState];
     movementVec.z = mEntity->getVelocity().z;
     setRelativeVelocityVector(movementVec);
 }
@@ -55,6 +55,8 @@ void CharacterEntityController::moveBackward(bool start)
 
 void CharacterEntityController::jump()
 {
+    if (isOnGround())
+        mEntity->setVelocity( mEntity->getVelocity() + MFMath::Vec3(0,0,10) );
 }
 
 }

@@ -61,7 +61,7 @@ OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *ren
     MouseRotateCameraController(renderer,inputManager)
 {
     mEntity = entity;
-    mMaxCameraDistance = 5.0;
+    mMaxCameraDistance = 2.5;
 }
 
 void OrbitEntityCameraController::applyRotation()
@@ -69,9 +69,13 @@ void OrbitEntityCameraController::applyRotation()
     float yaw = mRotation.x;
     float pitch = mRotation.y + MFMath::PI / 2.0;
 
+    MFMath::Vec3 targetPosition = mEntity->getPosition() + MFMath::Vec3(0,0,mRelativeOffset.z);
+    // TODO: relative offset only works in Z direction, fix that
+
     MFMath::Vec3 camOffset = MFMath::Vec3(cos(yaw) * cos(pitch),sin(yaw) * cos(pitch),sin(pitch)) * ((float) mMaxCameraDistance);
-    mRenderer->setCameraPositionRotation(mEntity->getPosition() + camOffset,MFMath::Vec3(0,0,0));
-    mRenderer->cameraFace(mEntity->getPosition());
+    mRenderer->setCameraPositionRotation(targetPosition + camOffset,MFMath::Vec3(0,0,0));
+
+    mRenderer->cameraFace(targetPosition);
 }
 
 FreeCameraController::FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager):

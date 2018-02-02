@@ -19,7 +19,7 @@ public:
 
     CharacterEntityController(SpatialEntity *entity);
 
-    void setSpeeds(float walk, float run, float crouch)
+    void setSpeeds(float crouch, float walk, float run)
     {
         mSpeeds[WALK] = walk;
         mSpeeds[RUN] = run;

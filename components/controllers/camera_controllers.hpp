@@ -48,11 +48,12 @@ class OrbitEntityCameraController: public MouseRotateCameraController
 public:
     OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
     virtual ~OrbitEntityCameraController() {};
-    SpatialEntity *getEntity()   { return mEntity; };
+    SpatialEntity *getEntity()                   { return mEntity;           };
+    void setRelativeOffset(MFMath::Vec3 offset)  { mRelativeOffset = offset; };
 
 protected:
     virtual void applyRotation() override;
-
+    MFMath::Vec3 mRelativeOffset;
     SpatialEntity *mEntity;
     float mMaxCameraDistance;
 };

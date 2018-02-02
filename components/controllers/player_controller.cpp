@@ -1,5 +1,5 @@
 #include <controllers/player_controller.hpp>
-
+#include <iostream>
 namespace MFGame
 {
 
@@ -19,7 +19,17 @@ public:
             case 22: mController->moveBackward(down); break;
             case 4:  mController->moveLeft(down); break;
             case 7:  mController->moveRight(down); break;
-            case 44: mController->jump(); break;
+            case 44: if (down) mController->jump(); break;
+            case 225:
+                mController->setMovementState(down
+                    ? CharacterEntityController::RUN :
+                      CharacterEntityController::WALK);
+                break;
+            case 224:
+                mController->setMovementState(down
+                    ? CharacterEntityController::CROUCH :
+                      CharacterEntityController::WALK);
+                break;
             default: break;
         }
     }
@@ -42,6 +52,7 @@ PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender
     mInputManager = inputManager;
 
     mCameraController = new OrbitEntityCameraController(renderer,inputManager,playerEntity);
+    mCameraController->setRelativeOffset(MFMath::Vec3(0,0,1.5));
 
     std::shared_ptr<CharacterKeyCallback> cb = std::make_shared<CharacterKeyCallback>(this);
     mInputManager->addKeyCallback(cb);

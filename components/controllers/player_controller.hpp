@@ -14,7 +14,6 @@ class PlayerController: public CharacterEntityController
 public:
     PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual ~PlayerController();
-
     void update(double dt);
 
 protected:

@@ -40,9 +40,7 @@ int main( int argc, char** argv )
 
     engine.loadMission("tutorial");
     engine.setPlayerPosition(MFMath::Vec3(126.02,320.43,3.67));
-
-    engine.getRenderer()->setCameraParameters(true,110,0,0.25,2000);
-
+    engine.getRenderer()->setCameraParameters(true,90,0,0.25,2000);
     engine.run();
 
     return 0;
