@@ -94,6 +94,23 @@ namespace MFMath
         constexpr const vec<T,2> &  xy() const                          { return *reinterpret_cast<const vec<T,2> *>(this); }
         vec<T,2> &                  xy()                                { return *reinterpret_cast<vec<T,2> *>(this); }
         std::string                 str()                               { return "[" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + "]"; }
+        vec<T,4>                    toQuat()                            {
+                                                                            vec<T,4> q;
+
+                                                                            double cy = std::cos(x * 0.5);
+                                                                            double sy = std::sin(x * 0.5);
+                                                                            double cr = std::cos(z * 0.5);
+                                                                            double sr = std::sin(z * 0.5);
+                                                                            double cp = std::cos(y * 0.5);
+                                                                            double sp = std::sin(y * 0.5);
+
+                                                                            q.w = cy * cr * cp + sy * sr * sp;
+                                                                            q.x = cy * sr * cp - sy * cr * sp;
+                                                                            q.y = cy * cr * sp + sy * sr * cp;
+                                                                            q.z = sy * cr * cp - cy * sr * sp;
+
+                                                                            return q;
+                                                                        }
     };
     template<class T> struct vec<T,4>
     {
@@ -114,6 +131,26 @@ namespace MFMath
         vec<T,3> &                  xyz()                               { return *reinterpret_cast<vec<T,3> *>(this); }
         std::string                 str()                               { return "[" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ", " + std::to_string(w) + "]"; }
         void                        fromMafia()                         { vec<T,4> tmp = vec<T,4>(x,y,z,w); x = tmp.y; y = tmp.z; z = tmp.w; w = -1 * tmp.x; }
+        vec<T,3>                    toEuler()                           {
+                                                                            vec<T,3> r;
+
+                                                                            double sqx = x * x;
+                                                                            double sqy = y * y;
+                                                                            double sqz = z * z;
+                                                                            double sqw = w * w;
+
+                                                                            double term1 = 2 * (x * y + w * z);
+                                                                            double term2 = sqw + sqx - sqy - sqz;
+                                                                            double term3 = -2 * (x * z - w * y);
+                                                                            double term4 = 2 * (w * x + y * z);
+                                                                            double term5 = sqw - sqx - sqy + sqz;
+
+                                                                            r.x = std::atan2(term1, term2);
+                                                                            r.y = std::atan2(term4, term5);
+                                                                            r.z = std::asin(term3);
+
+                                                                            return r;
+                                                                        }
     };
 
     // Small, fixed-size matrix type, consisting of exactly M rows and N columns of type T, stored in column-major order.

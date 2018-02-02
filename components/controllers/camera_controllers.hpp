@@ -26,7 +26,8 @@ class MouseRotateCameraController: public CameraController
 public:
     MouseRotateCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
     virtual ~MouseRotateCameraController() {};
-    void setRotationSpeed(double speed) { mRotationSpeed = speed; };
+    void setRotationSpeed(double speed)    { mRotationSpeed = speed; };
+    MFMath::Vec2 getRotation()             { return mRotation;       };
     virtual void update(double dt) override;
 
 protected:
@@ -47,6 +48,7 @@ class OrbitEntityCameraController: public MouseRotateCameraController
 public:
     OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
     virtual ~OrbitEntityCameraController() {};
+    SpatialEntity *getEntity()   { return mEntity; };
 
 protected:
     virtual void applyRotation() override;

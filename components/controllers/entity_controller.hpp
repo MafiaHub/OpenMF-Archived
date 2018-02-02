@@ -16,6 +16,7 @@ public:
     */
 
     void setRelativeVelocityVector(MFMath::Vec3 vector);
+    SpatialEntity *getEntity()    { return mEntity;   };
 
 protected:
     SpatialEntity *mEntity;

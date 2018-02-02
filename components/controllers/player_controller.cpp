@@ -1,5 +1,5 @@
 #include <controllers/player_controller.hpp>
-
+#include <iostream>
 namespace MFGame
 {
 
@@ -31,6 +31,8 @@ protected:
 void PlayerController::update(double dt)
 {
     mCameraController->update(dt);
+    MFMath::Vec2 camRot = mCameraController->getRotation();
+    mCameraController->getEntity()->setRotation(MFMath::Vec3(camRot.x - MFMath::PI / 2.0,0,0).toQuat());
 }
 
 PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager):

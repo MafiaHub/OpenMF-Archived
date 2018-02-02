@@ -9,6 +9,8 @@ public:
     {
         mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createCapsuleEntity());
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager);
+
+        mSpatialEntityFactory->setDebugMode(false);
     };
 
     virtual ~OpenMFEngine()
