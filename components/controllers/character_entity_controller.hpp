@@ -38,8 +38,10 @@ public:
     virtual void moveForward(bool start=true);
     virtual void moveBackward(bool start=true);
 
-protected:
+    void instantRotate(MFMath::Quat newRotation);
     void applyCurrentMotion();
+
+protected:
 
     MovementState mMovementState;
     MFMath::Vec3 mMovementVector;

@@ -74,6 +74,17 @@ void SpatialEntityImplementation::setVelocity(MFMath::Vec3 velocity)
     mBulletBody->setLinearVelocity(btVector3(velocity.x,velocity.y,velocity.z));
 }
 
+MFMath::Vec3 SpatialEntityImplementation::getVelocity()
+{
+    if (mBulletBody)
+    {
+        btVector3 v = mBulletBody->getLinearVelocity();
+        return MFMath::Vec3(v.x(),v.y(),v.z());
+    }
+
+    return MFMath::Vec3(0,0,0);
+}
+
 void SpatialEntityImplementation::setAngularVelocity(MFMath::Vec3 velocity)
 {
     if (!mBulletBody)
@@ -88,15 +99,6 @@ void SpatialEntityImplementation::setDamping(float lin, float ang)
         return;
 
     mBulletBody->setDamping(lin, ang);
-}
-
-MFMath::Vec3 SpatialEntityImplementation::getVelocity()
-{
-    if (!mBulletBody)
-        return MFMath::Vec3(0,0,0);
-
-    auto vel = mBulletBody->getLinearVelocity();
-    return MFMath::Vec3(vel.x(), vel.y(), vel.z());
 }
 
 MFMath::Vec3 SpatialEntityImplementation::getAngularVelocity()

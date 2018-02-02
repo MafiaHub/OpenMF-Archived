@@ -3,6 +3,12 @@
 namespace MFGame
 {
 
+void CharacterEntityController::instantRotate(MFMath::Quat newRotation)
+{
+    mEntity->setRotation(newRotation);
+    applyCurrentMotion();
+}
+
 bool CharacterEntityController::isOnGround()
 {
     // TODO: implement this
@@ -12,6 +18,7 @@ bool CharacterEntityController::isOnGround()
 void CharacterEntityController::applyCurrentMotion()
 {
     MFMath::Vec3 movementVec = mMovementVector * mSpeeds[WALK];
+    movementVec.z = mEntity->getVelocity().z;
     setRelativeVelocityVector(movementVec);
 }
 

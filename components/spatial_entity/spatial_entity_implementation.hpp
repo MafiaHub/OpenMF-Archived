@@ -29,9 +29,9 @@ public:
     virtual std::string toString() override;
     virtual void setPosition(MFMath::Vec3 position) override;
     virtual void setVelocity(MFMath::Vec3 velocity) override;
+    virtual MFMath::Vec3 getVelocity() override;
     virtual void setAngularVelocity(MFMath::Vec3 velocity) override;
     virtual void setDamping(float lin, float ang) override;
-    virtual MFMath::Vec3 getVelocity() override;
     virtual MFMath::Vec3 getAngularVelocity() override;
     virtual MFMath::Vec2 getDamping() override;
     virtual bool hasVisual() override;

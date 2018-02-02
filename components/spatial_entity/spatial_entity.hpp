@@ -41,9 +41,9 @@ public:
     MFMath::Vec3 getPosition()                          { return mPosition;            };
     virtual void setPosition(MFMath::Vec3 position)     { mPosition = position;        };   ///< Sets position without collisions.
     virtual void setVelocity(MFMath::Vec3 velocity)=0;
+    virtual MFMath::Vec3 getVelocity()=0;
     virtual void setAngularVelocity(MFMath::Vec3 velocity)=0;
     virtual void setDamping(float lin, float ang) = 0;
-    virtual MFMath::Vec3 getVelocity() = 0;
     virtual MFMath::Vec3 getAngularVelocity() = 0;
     virtual MFMath::Vec2 getDamping() = 0;
     MFMath::Quat getRotation()                          { return mRotation;            };
