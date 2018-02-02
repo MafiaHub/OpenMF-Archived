@@ -39,6 +39,8 @@ public:
     virtual void moveBackward(bool start=true);
 
 protected:
+    void applyCurrentMotion();
+
     MovementState mMovementState;
     MFMath::Vec3 mMovementVector;
     float mSpeeds[3];

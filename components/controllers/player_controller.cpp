@@ -1,5 +1,5 @@
 #include <controllers/player_controller.hpp>
-#include <iostream>
+
 namespace MFGame
 {
 
