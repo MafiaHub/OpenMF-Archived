@@ -143,7 +143,7 @@ protected:
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options(VIEWER_MODULE_STR,"3D viewer for Mafia 4DS files.");
+    cxxopts::Options options(VIEWER_MODULE_STR,"3D viewer for Mafia models and missions.");
 
     options.add_options()
         ("h,help","Display help and exit.")
