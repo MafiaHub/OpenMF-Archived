@@ -40,6 +40,7 @@ public:
     virtual bool canBeMoved() override;
     virtual void setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior) override;
     virtual void setFriction(double factor) override;
+    virtual MFMath::Vec3 getSize() override;
 
     void setVisualNode(osg::MatrixTransform *t)                                    { mOSGNode = t;                     };
     void setPhysicsBody(std::shared_ptr<btRigidBody> body)                         { mBulletBody = body;               };

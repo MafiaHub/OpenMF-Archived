@@ -46,7 +46,7 @@ void PlayerController::update(double dt)
 }
 
 PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld):
-    CharacterEntityController(playerEntity)
+    CharacterEntityController(playerEntity, physicsWorld)
 {
     mRenderer = renderer;
     mInputManager = inputManager;

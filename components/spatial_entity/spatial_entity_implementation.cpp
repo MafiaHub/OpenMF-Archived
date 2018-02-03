@@ -35,6 +35,20 @@ void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehav
     }
 }
 
+MFMath::Vec3 SpatialEntityImplementation::getSize()
+{
+    if (mBulletBody)
+    {
+        btVector3 p1, p2;
+        mBulletBody->getAabb(p1,p2);
+        return MFMath::Vec3(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
+    }
+
+    // TODO: Get the AABBox from OSG here?
+
+    return MFMath::Vec3(0,0,0);
+}
+
 void SpatialEntityImplementation::setFriction(double factor)
 {
     if (mBulletBody)

@@ -3,6 +3,7 @@
 
 #include <controllers/entity_controller.hpp>
 #include <input/base_input_manager.hpp>
+#include <physics/base_physics_world.hpp>
 
 namespace MFGame
 {
@@ -17,7 +18,7 @@ public:
         CROUCH,
     } MovementState;
 
-    CharacterEntityController(SpatialEntity *entity);
+    CharacterEntityController(SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld);
 
     void setSpeeds(float crouch, float walk, float run)
     {
@@ -42,6 +43,7 @@ public:
     void applyCurrentMotion();
 
 protected:
+    MFPhysics::PhysicsWorld *mPhysicsWorld;
 
     MovementState mMovementState;
     MFMath::Vec3 mMovementVector;

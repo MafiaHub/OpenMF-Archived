@@ -51,6 +51,8 @@ public:
     virtual bool hasVisual()=0;
     virtual bool hasPhysics()=0;
     virtual bool canBeMoved()=0;                        ///< Says whether the entity can be transformed with setPosition(...) etc.
+    virtual MFMath::Vec3 getSize()=0;                   ///< Get the AABBox size in x, y and z.
+
 //  detach()
 //  mergeWithChildren()
 

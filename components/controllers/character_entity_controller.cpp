@@ -11,8 +11,9 @@ void CharacterEntityController::instantRotate(MFMath::Quat newRotation)
 
 bool CharacterEntityController::isOnGround()
 {
-    // TODO: implement this
-    return true;
+    // Cast a ray downwards and measure the distance.
+    double distance = mPhysicsWorld->castRay(mEntity->getPosition(),MFMath::Vec3(0,0,-1));
+    return distance < mEntity->getSize().z / 2.0 + 0.1;
 }
 
 void CharacterEntityController::applyCurrentMotion()
@@ -22,8 +23,9 @@ void CharacterEntityController::applyCurrentMotion()
     setRelativeVelocityVector(movementVec);
 }
 
-CharacterEntityController::CharacterEntityController(SpatialEntity *entity): EntityController(entity)
+CharacterEntityController::CharacterEntityController(SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld): EntityController(entity)
 {
+    mPhysicsWorld = physicsWorld;
     mMovementState = WALK;
     mMovementVector = MFMath::Vec3(0,0,0);
     setSpeeds(5,10.0,20);
