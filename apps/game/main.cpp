@@ -8,7 +8,7 @@ class OpenMFEngine: public MFGame::Engine
 public:
     OpenMFEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createCapsuleEntity());
+        mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createCapsuleEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
 
         mSpatialEntityFactory->setDebugMode(false);

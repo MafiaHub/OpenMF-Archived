@@ -1,4 +1,8 @@
 #include <spatial_entity/factory.hpp>
+#include <4ds/osg.hpp>
+#include <4ds/parser.hpp>
+
+#define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 
 namespace MFGame
 {
@@ -7,6 +11,7 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
 {
     mDebugMode = false;
 
+    mFileSystem = MFFile::FileSystem::getInstance();
     mRenderer = renderer;
     mPhysicsWorld = physicsWorld;
     mEntityManager = entityManager;
@@ -64,7 +69,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
+MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string modelName)
 {
     MFUtil::FullRigidBody body;
 
@@ -81,7 +86,28 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
 
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
-    visualTransform->addChild(mCapsuleNode);
+
+    if (modelName.length() == 0)
+    {
+        visualTransform->addChild(mCapsuleNode);
+    }
+    else
+    {
+        std::ifstream file4DS;
+        MFFormat::OSG4DSLoader l4ds;
+
+        // TODO: use loader cache
+
+        if (!mFileSystem->open(file4DS,"models/" + modelName))
+        {
+            MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+        }
+        else
+        {
+            visualTransform->addChild(l4ds.load(file4DS));
+        }
+    }
+
     mRenderer->getRootNode()->addChild(visualTransform);
 
     return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PLAYER);

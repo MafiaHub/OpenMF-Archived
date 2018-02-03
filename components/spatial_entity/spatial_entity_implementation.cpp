@@ -195,6 +195,26 @@ void SpatialEntityImplementation::applyCurrentTransform()
     }
 }
 
+void SpatialEntityImplementation::setRotation(MFMath::Quat rotation)
+{
+    mRotation = rotation;
+
+    if (mOSGNode)
+    {
+        osg::Matrixd m = mOSGNode->getMatrix();
+        m.setRotate(osg::Quat(rotation.x,rotation.y,rotation.z,rotation.w));
+        mOSGNode->setMatrix(m);
+    }
+
+    if (mBulletBody)
+    {
+        // TODO: test this
+        btTransform t = mBulletBody->getWorldTransform();
+        t.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+        mBulletBody->setWorldTransform(t);
+    }
+}
+
 void SpatialEntityImplementation::setPosition(MFMath::Vec3 position)
 {
     SpatialEntity::setPosition(position);

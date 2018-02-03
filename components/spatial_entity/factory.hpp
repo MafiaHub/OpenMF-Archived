@@ -6,6 +6,7 @@
 #include <spatial_entity/spatial_entity_implementation.hpp>
 #include <renderer/osg_renderer.hpp>
 #include <spatial_entity/manager.hpp>
+#include <vfs/vfs.hpp>
 
 #define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 
@@ -28,14 +29,14 @@ public:
 
     MFGame::SpatialEntity::Id createTestBallEntity();
     MFGame::SpatialEntity::Id createTestBoxEntity();
-    MFGame::SpatialEntity::Id createCapsuleEntity();
+    MFGame::SpatialEntity::Id createCapsuleEntity(std::string modelName="");
     MFGame::SpatialEntity::Id createCameraEntity();
-
     MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
 
 protected: 
     MFGame::SpatialEntityManager *mEntityManager;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
+    MFFile::FileSystem *mFileSystem;
     MFRender::OSGRenderer *mRenderer;
 
     osg::ref_ptr<osg::StateSet> mTestStateSet;
