@@ -105,6 +105,9 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string 
         else
         {
             visualTransform->addChild(l4ds.load(file4DS));
+
+            // TMP: shift a little down
+            visualTransform->setMatrix(osg::Matrixd::translate(osg::Vec3(0,0,-1)));
         }
     }
 
