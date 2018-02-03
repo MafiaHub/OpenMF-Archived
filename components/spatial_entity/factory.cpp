@@ -30,8 +30,8 @@ SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPh
     mTestBoxNode->setStateSet(mTestStateSet);
     mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
 
-    const double capsuleRadius = 0.4;
-    const double capsuleHeight = 1.75;
+    const double capsuleRadius = 0.3;
+    const double capsuleHeight = 1.3;
 
     mCapsuleShape = new osg::Capsule(osg::Vec3f(0,0,0),capsuleRadius,capsuleHeight);
     mCapsuleNode = new osg::ShapeDrawable(mCapsuleShape);
@@ -68,7 +68,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity()
 {
     MFUtil::FullRigidBody body;
 
-    btScalar mass = 75.0f;
+    btScalar mass = 150.0f;
     body.mMotionState = std::make_shared<btDefaultMotionState>(
         btTransform(btQuaternion(0, 0, 0, mass),
         btVector3(0, 0, 0)));

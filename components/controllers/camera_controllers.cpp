@@ -61,7 +61,7 @@ OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *ren
     MouseRotateCameraController(renderer,inputManager)
 {
     mEntity = entity;
-    mMaxCameraDistance = 5.0;
+    mMaxCameraDistance = 2.0;
     mPhysicsWorld = physicsWorld;
 }
 

@@ -28,7 +28,7 @@ CharacterEntityController::CharacterEntityController(SpatialEntity *entity, MFPh
     mPhysicsWorld = physicsWorld;
     mMovementState = WALK;
     mMovementVector = MFMath::Vec3(0,0,0);
-    setSpeeds(5,10.0,20);
+    setSpeeds(2,5,10);
 }
 
 void CharacterEntityController::moveLeft(bool start)
@@ -58,7 +58,7 @@ void CharacterEntityController::moveBackward(bool start)
 void CharacterEntityController::jump()
 {
     if (isOnGround())
-        mEntity->setVelocity( mEntity->getVelocity() + MFMath::Vec3(0,0,10) );
+        mEntity->setVelocity(mEntity->getVelocity() + MFMath::Vec3(0,0,4));
 }
 
 }
