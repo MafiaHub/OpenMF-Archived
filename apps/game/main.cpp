@@ -37,6 +37,8 @@ protected:
 int main(int argc, char** argv)
 {
     MFGame::Engine::EngineSettings settings;
+    settings.mInitWindowWidth = 1024;
+    settings.mInitWindowHeight = 768;
     OpenMFEngine engine(settings);
 
     cxxopts::Options options("OpenMF","OpenMF game.");

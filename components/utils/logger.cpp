@@ -29,8 +29,7 @@ void Logger::removeFilter(std::string id)
 
 void Logger::raw(std::string str, std::string id)
 {
-    if (Logger::canPrint(id, LOG_VERBOSITY_FATAL))
-        std::cout << str << std::endl;
+    std::cout << str << std::endl;
 }
 
 void Logger::info(std::string str, std::string id)
