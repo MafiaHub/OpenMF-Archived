@@ -224,6 +224,30 @@ void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSi
     }
 }
 
+void OSGRenderer::getCameraParameters(bool &perspective, float &fov, float &orthoSize, float &nearDist, float &farDist)
+{
+    perspective = true;    // TODO: fix this when ortho is implemented
+    double aspect, fovY, nd, fd;
+    mViewer->getCamera()->getProjectionMatrixAsPerspective(fovY,aspect,nd,fd);
+    
+    fov = fovY;
+    nearDist = nd;
+    farDist = fd;
+}
+
+void OSGRenderer::setViewDistance(float dist)
+{
+    bool p;
+    float fov, os, nd, fd;
+
+    getCameraParameters(p,fov,os,nd,fd);
+
+    fd = dist;
+
+    setCameraParameters(p,fov,os,nd,fd); 
+    setFog(fd / 3.0,fd,MFMath::Vec3(0.5,0.5,0.5));
+}
+
 bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
 {
     std::string missionDir = "missions/" + mission;
@@ -266,6 +290,8 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
 
     bool lightsAreSet = false;
 
+    float viewDistance = 2000;    // default value
+
     if (loadScene2Bin && mFileSystem->open(fileScene2Bin,scene2BinPath))
     {
         osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
@@ -278,6 +304,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
             std::vector<osg::ref_ptr<osg::LightSource>> lightNodes = lScene2.getLightNodes();
             setUpLights(&lightNodes);
             lightsAreSet = true;
+            viewDistance = lScene2.getViewDistance();
         }
 
         fileScene2Bin.close();
@@ -310,20 +337,23 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
         fileCheckBin.close();    
     }
 
-    osg::ref_ptr<osg::Fog> fog = new osg::Fog;
-
-    fog->setMode(osg::Fog::LINEAR);
-    fog->setStart(300);
-    fog->setEnd(1500);
-    fog->setColor(osg::Vec4f(0.4,0.4,0.4,1));
-
-    mRootNode->getOrCreateStateSet()->setAttributeAndModes(fog,osg::StateAttribute::ON);
-
+    setViewDistance(viewDistance);
     optimize();
-
     mLoaderCache.logStats();
 
     return true;
+}
+
+void OSGRenderer::setFog(float distFrom, float distTo, MFMath::Vec3 color)
+{
+    osg::ref_ptr<osg::Fog> fog = new osg::Fog;
+
+    fog->setMode(osg::Fog::LINEAR);
+    fog->setStart(distFrom);
+    fog->setEnd(distTo);
+    fog->setColor(osg::Vec4f(color.x,color.y,color.z,1));
+
+    mRootNode->getOrCreateStateSet()->setAttributeAndModes(fog,osg::StateAttribute::ON);
 }
 
 void OSGRenderer::optimize()

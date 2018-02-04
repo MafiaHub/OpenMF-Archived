@@ -154,6 +154,7 @@ int main(int argc, char** argv)
         ("c,camera-info","Write camera position and rotation in console.")
         ("r,camera-rigid", "Camera will collide with the world.")
         ("C,collision-info","Write camera collisions in console.")
+        ("V,view-distance","Override the view distance with custom value.",cxxopts::value<int>())
         ("v,verbosity","Print verbose output.")
         ("P,physics","Simulate physics and allow space-key controlled spawning of test entities.")
         ("e,export","Export scene to file and exit.",cxxopts::value<std::string>())
@@ -234,6 +235,9 @@ int main(int argc, char** argv)
         engine.loadMission(inputFile);
     else
         engine.loadSingleModel(inputFile);
+
+    if (arguments.count("V") > 0)
+        engine.getRenderer()->setViewDistance(arguments["V"].as<int>());
 
     if (arguments.count("e") < 1)
         engine.run();

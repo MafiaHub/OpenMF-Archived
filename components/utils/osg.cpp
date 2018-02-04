@@ -1,4 +1,5 @@
 #include <utils/osg.hpp>
+#include <osg/Material>
 
 namespace MFUtil
 {
@@ -57,20 +58,39 @@ osg::Quat eulerToQuat(double yaw, double pitch, double roll)
     return mat.getRotate(); 
 }
 
-bool MoveEarthSkyWithEyePointTransform::computeLocalToWorldMatrix(osg::Matrix & matrix, osg::NodeVisitor * nv) const
+SkyboxNode::SkyboxNode(): osg::MatrixTransform()
+{
+    setName("camera relative");
+
+    // disable lights for backdrop sector:
+    osg::ref_ptr<osg::Material> mat = new osg::Material;
+
+    mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
+    mat->setColorMode(osg::Material::OFF);
+    getOrCreateStateSet()->setAttributeAndModes(mat,osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+    getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
+    getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");                    // render before the scene
+    getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);  // don't write to depth buffer
+
+    // FIXME: disabling depth writing this way also disables depth test => bad (osg::ClearNode?)
+}
+
+bool SkyboxNode::computeLocalToWorldMatrix(osg::Matrix & matrix, osg::NodeVisitor * nv) const
 { 
     osgUtil::CullVisitor * cv = dynamic_cast <osgUtil::CullVisitor*> (nv); 
 
     if (nv) 
     { 
-        osg::Vec3 eyePointLocal = cv-> getEyeLocal (); 
-        matrix.preMult (osg::Matrix::translate (eyePointLocal)); 
-    } 
+        osg::Vec3 eyePointLocal = cv-> getEyeLocal(); 
+        matrix.preMult(osg::Matrix::translate(eyePointLocal));
+        matrix.preMult(osg::Matrixd::scale(osg::Vec3(0.1,0.1,0.1)));   // FIXME: This is here to prevent view frustum culling, not nice.
+    }
 
     return true; 
 }
 
-bool MoveEarthSkyWithEyePointTransform::computeWorldToLocalMatrix(osg :: Matrix & matrix, osg :: NodeVisitor * nv) const
+bool SkyboxNode::computeWorldToLocalMatrix(osg :: Matrix & matrix, osg :: NodeVisitor * nv) const
 { 
     osgUtil::CullVisitor * cv = dynamic_cast <osgUtil::CullVisitor*> (nv); 
 

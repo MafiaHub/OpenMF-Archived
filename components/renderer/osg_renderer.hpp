@@ -32,7 +32,10 @@ public:
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
     virtual bool loadSingleModel(std::string model) override;
     virtual void frame(double dt) override;
-    virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist) override;
+    virtual void setCameraParameters(bool perspective,  float fov,  float orthoSize,  float nearDist,  float farDist) override;
+    virtual void getCameraParameters(bool &perspective, float &fov, float &orthoSize, float &nearDist, float &farDist) override;
+    virtual void setViewDistance(float dist) override;
+    virtual void setFog(float distFrom, float distTo, MFMath::Vec3 color) override;
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll) override;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll) override;
     virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up) override;

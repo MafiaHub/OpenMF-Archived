@@ -36,6 +36,7 @@ protected:
 
 OSGScene2BinLoader::OSGScene2BinLoader(): OSGLoader()
 {
+    mViewDistance = 0;
     mDebugPointLightNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),1));
     mDebugPointLightNode->setNodeMask(MFRender::MASK_DEBUG);
     mDebugPointLightNode->setName("debug point light node");
@@ -134,6 +135,8 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
 
     if (success)
     {
+        mViewDistance = parser.getViewDistance();
+
         NodeMap emptyNodeMap;
         NodeMap *nodeMap = &emptyNodeMap;
         std::vector<osg::Node *> loadedNodes;    
@@ -144,24 +147,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
         else
             nodeMap = mNodeMap;
 
-        mCameraRelative = new MFUtil::MoveEarthSkyWithEyePointTransform();   // for Backdrop sector (camera relative placement)
-        mCameraRelative->setCullingActive(false);
-
-        mCameraRelative->setName("camera relative");
-
-        // disable lights for backdrop sector:
-        osg::ref_ptr<osg::Material> mat = new osg::Material;
-
-        mat->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(1,1,1,1));
-        mat->setColorMode(osg::Material::OFF);
-        mCameraRelative->getOrCreateStateSet()->setAttributeAndModes(mat,osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
-        mCameraRelative->getOrCreateStateSet()->setMode(GL_FOG,osg::StateAttribute::OFF);
-        mCameraRelative->getOrCreateStateSet()->setRenderBinDetails(-1,"RenderBin");              // render before the scene
-        mCameraRelative->getOrCreateStateSet()->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);  // don't write to depth buffer
-
-        // FIXME: disabling depth writing this way also disables depth test => bad (osg::ClearNode?)
-
+        mCameraRelative = new MFUtil::SkyboxNode();   // for Backdrop sector (camera relative placement)
         group->addChild(mCameraRelative);
  
         for (auto pair : parser.getObjects())

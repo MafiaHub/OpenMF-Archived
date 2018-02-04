@@ -60,7 +60,7 @@ public:
 
     virtual void frame() {};       ///< This can be overriden to perform something each frame;
     virtual void run();
-   
+
     bool loadMission(std::string missionName); 
     bool loadSingleModel(std::string modelName); 
     bool exportScene(std::string outputFileName);

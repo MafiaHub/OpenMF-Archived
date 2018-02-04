@@ -12,7 +12,7 @@
 namespace MFUtil
 {
 
-/*** Call accept(v) on all children of n. */
+/** Call accept(v) on all children of n. */
 
 void traverse(osg::NodeVisitor *v,osg::Node &n);
 
@@ -26,11 +26,14 @@ void quatToEuler(osg::Quat q, double &yaw, double &pitch, double &roll);
 
 osg::Quat eulerToQuat(double yaw, double pitch, double roll);
 
-class MoveEarthSkyWithEyePointTransform: public osg::Transform
+/** Moves all children along with the camera and handles the correct rendering. */
+
+class SkyboxNode: public osg::MatrixTransform
 { 
-public: 
-    virtual bool computeLocalToWorldMatrix (osg::Matrix & matrix, osg::NodeVisitor * nv) const;
-    virtual bool computeWorldToLocalMatrix (osg :: Matrix & matrix, osg :: NodeVisitor * nv) const;
+public:
+    SkyboxNode();
+    virtual bool computeLocalToWorldMatrix(osg::Matrix & matrix, osg::NodeVisitor * nv) const;
+    virtual bool computeWorldToLocalMatrix(osg::Matrix & matrix, osg :: NodeVisitor * nv) const;
 };
 
 osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg);

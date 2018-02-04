@@ -34,16 +34,18 @@ public:
 
     OSGScene2BinLoader();
     osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
-    LightList getLightNodes() { return mLightNodes; };
+    LightList getLightNodes()            { return mLightNodes;           };
     osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };
+    float getViewDistance()              { return mViewDistance;         };
 
 protected:
+    float mViewDistance;
     LightList mLightNodes;
     osg::ref_ptr<osg::Node> mDebugPointLightNode;
     osg::ref_ptr<osg::Node> mDebugDirectionalLightNode;
     osg::ref_ptr<osg::Node> mDebugOtherLightNode;
 
-    osg::ref_ptr<MFUtil::MoveEarthSkyWithEyePointTransform> mCameraRelative;   ///< children of this node move relatively with the camera
+    osg::ref_ptr<osg::MatrixTransform> mCameraRelative;   ///< children of this node move relatively with the camera
     osg::ref_ptr<osg::Node> makeLightNode(MFFormat::DataFormatScene2BIN::Object object);
 };
 
