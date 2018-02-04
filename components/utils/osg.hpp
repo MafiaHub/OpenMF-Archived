@@ -34,18 +34,30 @@ public:
     SkyboxNode();
     virtual bool computeLocalToWorldMatrix(osg::Matrix & matrix, osg::NodeVisitor * nv) const;
     virtual bool computeWorldToLocalMatrix(osg::Matrix & matrix, osg :: NodeVisitor * nv) const;
+    virtual const char *className() const override { return mClassName.c_str(); };
+
+protected:
+    std::string mClassName;
 };
 
 osg::ref_ptr<osg::Image> addAlphaFromImage(osg::Image *img, osg::Image *alphaImg);
 osg::ref_ptr<osg::Image> applyColorKey(osg::Image *img, osg::Vec3f color, float err=0.01);
+
+/**
+  This class is here because SkyboxNode caused segfaults when debug selecting. FIXME: fix
+  SkyboxNode class and get rid of this one.
+*/
 
 class RobustIntersectionVisitor: public osgUtil::IntersectionVisitor
 {
 public:
     RobustIntersectionVisitor(osgUtil::Intersector* intersector=0);
 
-    virtual void apply(osg::MatrixTransform &transform) override       { osgUtil::IntersectionVisitor::apply(transform); };
-    virtual void apply(osg::Transform &transform) override             { return;                                         };
+    virtual void apply(osg::MatrixTransform &transform) override
+    {
+        if (std::string("SkyboxNode").compare(transform.className()) != 0)
+            osgUtil::IntersectionVisitor::apply(transform);
+    };
 };
 
 std::string toString(osg::Vec3f v);

@@ -60,6 +60,7 @@ osg::Quat eulerToQuat(double yaw, double pitch, double roll)
 
 SkyboxNode::SkyboxNode(): osg::MatrixTransform()
 {
+    mClassName = "SkyboxNode";
     setName("camera relative");
 
     // disable lights for backdrop sector:

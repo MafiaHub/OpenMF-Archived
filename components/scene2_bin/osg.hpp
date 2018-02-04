@@ -45,7 +45,7 @@ protected:
     osg::ref_ptr<osg::Node> mDebugDirectionalLightNode;
     osg::ref_ptr<osg::Node> mDebugOtherLightNode;
 
-    osg::ref_ptr<osg::MatrixTransform> mCameraRelative;   ///< children of this node move relatively with the camera
+    osg::ref_ptr<MFUtil::SkyboxNode> mCameraRelative;   ///< children of this node move relatively with the camera
     osg::ref_ptr<osg::Node> makeLightNode(MFFormat::DataFormatScene2BIN::Object object);
 };
 
