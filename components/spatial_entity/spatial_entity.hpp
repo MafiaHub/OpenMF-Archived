@@ -67,7 +67,6 @@ public:
     virtual void setPhysicsBehavior(PhysicsBehavior behavior)=0;
     int  getPhysicsBehavior()                           { return mPhysicsBehavior;     };
 
-
 protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;

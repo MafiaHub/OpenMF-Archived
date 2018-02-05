@@ -144,59 +144,64 @@ Engine::~Engine()
     delete mPhysicsWorld;
 }
 
+void Engine::step(double dt)
+{
+    if (mInputManager->windowClosed())
+    {
+        mIsRunning = false;
+        return;
+    }      
+
+    bool render = false;
+    double startTime = getTime();
+    double passedTime = startTime - mLastTime;
+    mLastTime = startTime;
+    mExtraTime += passedTime;
+
+    if (dt > 0)
+        mExtraTime = dt;
+
+    while (mExtraTime > mEngineSettings.mUpdatePeriod)
+    {
+        mInputManager->processEvents();
+        mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
+
+        if (mEngineSettings.mSimulatePhysics)
+            mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
+      
+        render = true;
+        mExtraTime -= mEngineSettings.mUpdatePeriod;
+     
+        frame();
+    }
+      
+    if (render)
+    {
+        mRenderer->frame(mEngineSettings.mUpdatePeriod); // TODO: Use actual delta time
+      
+        if (mRenderer->done())
+            mIsRunning = false;
+    }
+    else
+    {
+        // Let OS do background work while we wait.
+        std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
+    }
+
+    mFrameNumber++;
+}
+
 void Engine::run()
 {
     MFLogger::Logger::info("Starting the engine.",ENGINE_MODULE_STR);
 
     mIsRunning = true;
 
-    double lastTime = getTime();
-    double extraTime = 0.0f;
+    mLastTime = getTime();
+    mExtraTime = 0.0f;
 
     while (mIsRunning)       // main loop
-    {
-        if (mInputManager->windowClosed())
-        {
-            mIsRunning = false;
-            continue;
-        }      
-
-        bool render = false;
-        double startTime = getTime();
-        double passedTime = startTime - lastTime;
-        lastTime = startTime;
-        extraTime += passedTime;
-
-
-        while (extraTime > mEngineSettings.mUpdatePeriod)
-        {
-            mInputManager->processEvents();
-            mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
-
-            if (mEngineSettings.mSimulatePhysics)
-                mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
-          
-            render = true;
-            extraTime -= mEngineSettings.mUpdatePeriod;
-         
-            frame();
-        }
-          
-        if (render)
-        {
-            mRenderer->frame(mEngineSettings.mUpdatePeriod); // TODO: Use actual delta time
-          
-            if (mRenderer->done())
-                mIsRunning = false;
-        }
-        else
-        {
-            // Let OS do background work while we wait.
-            std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
-        }
-
-        mFrameNumber++;
-    }
+        step();
 }
 
 }

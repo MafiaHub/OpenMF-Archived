@@ -58,7 +58,8 @@ public:
     Engine(EngineSettings settings);
     virtual ~Engine();
 
-    virtual void frame() {};       ///< This can be overriden to perform something each frame;
+    virtual void frame() {};           ///< This can be overriden to perform something each frame.
+    virtual void step(double dt=-1);   ///< Performs one iteration of the game loop, positive dt can be used to step out of real-time.
     virtual void run();
 
     bool loadMission(std::string missionName); 
@@ -75,6 +76,9 @@ public:
 
 protected:
     double getTime(); 
+
+    double mLastTime;
+    double mExtraTime;
 
     unsigned long long mFrameNumber;
 
