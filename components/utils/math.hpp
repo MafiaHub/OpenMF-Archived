@@ -134,20 +134,20 @@ namespace MFMath
         vec<T,3>                    toEuler()                           {
                                                                             vec<T,3> r;
 
-                                                                            double sqx = x * x;
-                                                                            double sqy = y * y;
-                                                                            double sqz = z * z;
-                                                                            double sqw = w * w;
+                                                                            double sinr = 2.0 * (w * x + y * z);
+                                                                            double cosr = 1.0 - 2.0 * (x * x + y * y);
+                                                                            r.z = std::atan2(sinr, cosr);
 
-                                                                            double term1 = 2 * (x * y + w * z);
-                                                                            double term2 = sqw + sqx - sqy - sqz;
-                                                                            double term3 = -2 * (x * z - w * y);
-                                                                            double term4 = 2 * (w * x + y * z);
-                                                                            double term5 = sqw - sqx - sqy + sqz;
+                                                                            double sinp = 2.0 * (w * y - z * x);
 
-                                                                            r.x = std::atan2(term1, term2);
-                                                                            r.y = std::atan2(term4, term5);
-                                                                            r.z = std::asin(term3);
+                                                                            if (std::fabs(sinp) >= 1)
+                                                                                r.y =  copysign(PI / 2.0, sinp); // use 90 degrees if out of range
+                                                                            else
+                                                                                r.y =  std::asin(sinp);
+
+                                                                            double siny = 2.0 * (w * z + x * y);
+                                                                            double cosy = 1.0 - 2.0 * (y * y + z * z);  
+                                                                            r.x = std::atan2(siny, cosy);
 
                                                                             return r;
                                                                         }

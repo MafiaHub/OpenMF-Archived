@@ -7,9 +7,24 @@
 #include <utils/math.hpp>
 #include <engine/engine.hpp>
 
-int main()
+bool testMath()
 {
-    printHeader("OPENMF TEST SUITE");   
+    printSubHeader("Math");
+
+    auto testAngle = MFMath::Vec3(0.1,0.2,0.3);
+    auto toQuatAndBack = testAngle.toQuat().toEuler();
+    const double err = 0.01;
+
+    ass(std::abs(testAngle.x - toQuatAndBack.x) <= err && std::abs(testAngle.y - toQuatAndBack.y) <= err && std::abs(testAngle.z - toQuatAndBack.z) <= err);
+
+    ass(std::abs(MFMath::length(MFMath::Vec3(-1,1,2)) - 2.4494) <= 0.001);
+
+    return getNumErrors() == 0;
+}
+
+bool testEngine()
+{
+    printSubHeader("Engine");
 
     message("Create engine.");
     MFGame::Engine::EngineSettings settings;
@@ -44,6 +59,16 @@ int main()
 
     message("Delete engine.");
     delete testEngine;
+
+    return getNumErrors() == 0;
+}
+
+int main()
+{
+    printHeader("OPENMF TEST SUITE");   
+
+    testMath();
+    testEngine();
 
     printHeader("TEST RESULTS");
     message("errors: " + std::to_string(getNumErrors()));
