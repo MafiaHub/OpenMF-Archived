@@ -1,4 +1,4 @@
-#include <check_bin/osg.hpp>
+#include <check_bin/checkbin_osg.hpp>
 
 namespace MFFormat
 {

@@ -1,4 +1,4 @@
-#include <scene2_bin/parser.hpp>
+#include <scene2_bin/scene2bin_parser.hpp>
 
 namespace MFFormat
 {

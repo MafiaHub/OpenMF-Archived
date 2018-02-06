@@ -141,7 +141,7 @@ namespace MFMath
                                                                             double sinp = 2.0 * (w * y - z * x);
 
                                                                             if (std::fabs(sinp) >= 1)
-                                                                                r.y =  copysign(PI / 2.0, sinp); // use 90 degrees if out of range
+                                                                                r.y =  ::copysign(PI / 2.0, sinp); // use 90 degrees if out of range
                                                                             else
                                                                                 r.y =  std::asin(sinp);
 

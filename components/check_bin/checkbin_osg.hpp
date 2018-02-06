@@ -1,7 +1,7 @@
 #ifndef OSG_CHECK_BIN_LOADER_H
 #define OSG_CHECK_BIN_LOADER_H
 
-#include <check_bin/parser.hpp>
+#include <check_bin/checkbin_parser.hpp>
 #include <osg/Node>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>

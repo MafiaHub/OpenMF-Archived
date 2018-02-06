@@ -63,6 +63,10 @@ bool testEngine()
     return getNumErrors() == 0;
 }
 
+#ifdef main
+#undef main
+#endif // main
+
 int main()
 {
     printHeader("OPENMF TEST SUITE");   

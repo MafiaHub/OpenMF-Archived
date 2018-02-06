@@ -1,5 +1,5 @@
 #include <iostream>
-#include <scene2_bin/parser.hpp>
+#include <scene2_bin/scene2bin_parser.hpp>
 #include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <utils/os_defines.hpp>
-#include <dta/parser.hpp>
+#include <dta/dta_parser.hpp>
 
 #include <utils/logger.hpp>
 

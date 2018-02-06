@@ -1,4 +1,4 @@
-#include <mnu/parser.hpp>
+#include <mnu/mnu_parser.hpp>
 
 namespace MFFormat
 {

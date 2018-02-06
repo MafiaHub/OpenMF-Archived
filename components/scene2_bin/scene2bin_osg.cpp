@@ -1,5 +1,5 @@
-#include <scene2_bin/osg.hpp>
-#include <4ds/osg.hpp>
+#include <scene2_bin/scene2bin_osg.hpp>
+#include <4ds/4ds_osg.hpp>
 
 namespace MFFormat
 {

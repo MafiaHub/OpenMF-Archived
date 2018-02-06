@@ -1,4 +1,4 @@
-#include <check_bin/parser.hpp>
+#include <check_bin/checkbin_parser.hpp>
 
 namespace MFFormat
 {
