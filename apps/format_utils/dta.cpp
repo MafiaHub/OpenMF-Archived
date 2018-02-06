@@ -7,6 +7,7 @@
 #include <cxxopts.hpp>
 #include <algorithm>
 #include <utils/os_defines.hpp>
+#include <vfs/vfs.hpp>
 
 #define ZPL_IMPLEMENTATION
 #include <zpl.h>
@@ -146,15 +147,17 @@ int main(int argc, char** argv)
 
     std::ifstream f, gameExe;
 
+    auto fs = MFFile::FileSystem::getInstance();
+
     if (decryptMode) 
     {
-        f.open(inputFile, std::ios::ate | std::ios::binary);
-        gameExe.open(executableFile, std::ios::binary);
+        fs->open(f, inputFile, std::ios::ate | std::ios::binary);
+        fs->open(gameExe, executableFile);
     }
     else
     {
-        gameExe.open(executableFile, std::ios::binary);
-        f.open(inputFile, std::ios::binary);
+        fs->open(f, inputFile);
+        fs->open(gameExe, executableFile);
     }
         
 

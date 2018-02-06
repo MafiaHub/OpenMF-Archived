@@ -112,10 +112,10 @@ int main(int argc, char** argv)
 
     std::string inputFile = arguments["i"].as<std::string>();
 
+    auto fs = MFFile::FileSystem::getInstance();
     std::ifstream f;
-    f.open(inputFile, std::ios::binary);
 
-    if (!f.is_open())
+    if (!fs->open(f, inputFile))
     {
         MFLogger::Logger::fatal("Could not open file " + inputFile + ".");
         return 1;
