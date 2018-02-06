@@ -8,8 +8,8 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include <loggers/console.hpp>
-#include <math.hpp>
+#include <utils/logger.hpp>
+#include <utils/math.hpp>
 
 namespace MFFormat
 {
@@ -20,8 +20,8 @@ class DataFormat
 {
 public:
     virtual bool load(std::ifstream &srcFile)=0;
-    virtual bool save(std::ofstream /* &dstFile */) { return false; /* optional */ };
-    virtual std::string getErrorStr() { return "Unknown error"; };
+    virtual bool save(std::ofstream &dstFile)    { return false; /* optional */ };
+    virtual std::string getErrorStr()            { return "Unknown error";      };
 
 protected:
     template<typename T>

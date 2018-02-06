@@ -1,8 +1,8 @@
 #include <iostream>
 #include <scene2_bin/parser.hpp>
-#include <loggers/console.hpp>
+#include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
-#include <utils.hpp>
+#include <utils/openmf.hpp>
 #include <cxxopts.hpp>
 
 using namespace MFLogger;
@@ -45,11 +45,11 @@ char const *getTypeName(size_t count, TypeName const *typeNames, uint32_t objTyp
 
 void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
-    ConsoleLogger::raw("view distance: " + std::to_string(scene2Bin.getViewDistance()) + ",", "dump");
-    ConsoleLogger::raw("field of view: " + std::to_string(scene2Bin.getFov()) + ",", "dump");
-    ConsoleLogger::raw("clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],", "dump");
-    ConsoleLogger::raw("number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ",", "dump");
-    ConsoleLogger::raw("", "dump");
+    std::cout << "view distance: " + std::to_string(scene2Bin.getViewDistance()) + ","<< std::endl;
+    std::cout << "field of view: " + std::to_string(scene2Bin.getFov()) + ","<< std::endl;
+    std::cout << "clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],"<< std::endl;
+    std::cout << "number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ","<< std::endl;
+    std::cout << ""<< std::endl;
 
     for (auto pair : scene2Bin.getObjects())
     {
@@ -57,30 +57,30 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 
         if (object.mType != objType && objType != 0) continue;
 
-        ConsoleLogger::raw("\tobject name: " + object.mName + " {", "dump");
-        ConsoleLogger::raw("\t\ttype: " + std::string(getTypeName(7, gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),", "dump");
-        ConsoleLogger::raw("\t\tposition: [" + object.mPos.str() + "],", "dump");
-        ConsoleLogger::raw("\t\tposition2: [" + object.mPos2.str() + "],", "dump");
-        ConsoleLogger::raw("\t\trotation: [" + object.mRot.str() + "],", "dump");
-        ConsoleLogger::raw("\t\tscale: [" + object.mScale.str() + "],", "dump");
-        ConsoleLogger::raw("\t\tparent name: " + object.mParentName + ",", "dump");
+        std::cout << "\tobject name: " + object.mName + " {"<< std::endl;
+        std::cout << "\t\ttype: " + std::string(getTypeName(7, gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),"<< std::endl;
+        std::cout << "\t\tposition: [" + object.mPos.str() + "],"<< std::endl;
+        std::cout << "\t\tposition2: [" + object.mPos2.str() + "],"<< std::endl;
+        std::cout << "\t\trotation: [" + object.mRot.str() + "],"<< std::endl;
+        std::cout << "\t\tscale: [" + object.mScale.str() + "],"<< std::endl;
+        std::cout << "\t\tparent name: " + object.mParentName + ","<< std::endl;
 
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL)
-            ConsoleLogger::raw("\t\tmodel name: " + object.mModelName + ",", "dump");
+            std::cout << "\t\tmodel name: " + object.mModelName + ","<< std::endl;
         
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT)
         {
-            ConsoleLogger::raw("\t\tlight properties {", "dump");
-            ConsoleLogger::raw("\t\t\tlight type: " + std::string(getTypeName(5, gLightTypeNames, object.mLightType)) + "(" + std::to_string(object.mLightType) + "),", "dump");
-            ConsoleLogger::raw("\t\t\tlight colour: [" + object.mLightColour.str() + "],", "dump");
-            ConsoleLogger::raw("\t\t\tlight power: " + std::to_string(object.mLightPower), "dump");
-            ConsoleLogger::raw("\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ",", "dump");
-            ConsoleLogger::raw("\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ",", "dump");
-            ConsoleLogger::raw("\t\t\tlight near: " + std::to_string(object.mLightNear) + ",", "dump");
-            ConsoleLogger::raw("\t\t\tlight far: " + std::to_string(object.mLightFar) + ",", "dump");
-            ConsoleLogger::raw("\t\t}", "dump");
+            std::cout << "\t\tlight properties {"<< std::endl;
+            std::cout << "\t\t\tlight type: " + std::string(getTypeName(5, gLightTypeNames, object.mLightType)) + "(" + std::to_string(object.mLightType) + "),"<< std::endl;
+            std::cout << "\t\t\tlight colour: [" + object.mLightColour.str() + "],"<< std::endl;
+            std::cout << "\t\t\tlight power: " + std::to_string(object.mLightPower)<< std::endl;
+            std::cout << "\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ","<< std::endl;
+            std::cout << "\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ","<< std::endl;
+            std::cout << "\t\t\tlight near: " + std::to_string(object.mLightNear) + ","<< std::endl;
+            std::cout << "\t\t\tlight far: " + std::to_string(object.mLightFar) + ","<< std::endl;
+            std::cout << "\t\t}"<< std::endl;
         }
-        ConsoleLogger::raw("\t}", "dump");
+        std::cout << "\t}"<< std::endl;
     }
 }
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("i") < 1)
     {
-        MFLogger::ConsoleLogger::fatal("Expected file.", "dump");
+        MFLogger::Logger::fatal("Expected file.");
         std::cout << options.help() << std::endl;
         return 1;
     }
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
     if (!f.is_open())
     {
-        ConsoleLogger::fatal("Could not open file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not open file " + inputFile + ".");
         return 1;
     }
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     if (!success)
     {
-        ConsoleLogger::fatal("Could not parse file " + inputFile + ".", "dump");
+        MFLogger::Logger::fatal("Could not parse file " + inputFile + ".");
         return 1;
     }
 

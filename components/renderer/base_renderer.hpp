@@ -2,7 +2,7 @@
 #define RENDERER_BASE_H
 
 #include <fstream>
-#include <math.hpp>
+#include <utils/math.hpp>
 
 namespace MFRender
 {
@@ -10,11 +10,15 @@ namespace MFRender
 class Renderer
 {
 public:
-    Renderer();
+    Renderer() { mDone = false; };
+    virtual ~Renderer() {};
     virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true)=0;
     virtual bool loadSingleModel(std::string model)=0;
     virtual void frame(double dt)=0;
-    virtual void setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)=0;
+    virtual void setCameraParameters(bool perspective,  float fov,  float orthoSize,  float nearDist,  float farDist)=0;
+    virtual void getCameraParameters(bool &perspective, float &fov, float &orthoSize, float &nearDist, float &farDist)=0;
+    virtual void setFog(float distFrom, float distTo, MFMath::Vec3 color)=0;
+    virtual void setViewDistance(float dist)=0;       ///< Sets the view distance including fog.
     virtual void getCameraPositionRotation(MFMath::Vec3 &position, MFMath::Vec3 &rotYawPitchRoll)=0;
     virtual void setCameraPositionRotation(MFMath::Vec3 position, MFMath::Vec3 rotYawPitchRoll)=0;
     virtual void getCameraVectors(MFMath::Vec3 &forw, MFMath::Vec3 &right, MFMath::Vec3 &up)=0;
@@ -30,15 +34,11 @@ public:
     virtual void showProfiler()=0;
 
     MFMath::Vec3 getCameraPosition() { MFMath::Vec3 p,r; getCameraPositionRotation(p,r); return p; };
+    virtual void cameraFace(MFMath::Vec3 position)=0;
 
-  protected:
+protected:
     bool mDone;
 };
-
-Renderer::Renderer():
-    mDone(false)
-{
-}
 
 }
 
