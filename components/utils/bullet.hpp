@@ -11,7 +11,7 @@
 namespace MFUtil
 {
 
-inline btVector3 mafiaVec3ToBullet(double x, double y, double z);
+btVector3 mafiaVec3ToBullet(double x, double y, double z);
 btTransform mafiaMat4ToBullet(MFMath::Mat4 m);
 
 /**

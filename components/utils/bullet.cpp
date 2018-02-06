@@ -3,7 +3,7 @@
 namespace MFUtil
 {
 
-inline btVector3 mafiaVec3ToBullet(double x, double y, double z)
+btVector3 mafiaVec3ToBullet(double x, double y, double z)
 {
     return btVector3(x,z,y); 
 }
