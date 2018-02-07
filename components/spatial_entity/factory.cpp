@@ -69,7 +69,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string modelName)
+MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string modelName)
 {
     MFUtil::FullRigidBody body;
 
@@ -113,7 +113,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string 
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PLAYER);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PAWN);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
@@ -135,7 +135,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", SpatialEntity::RIGID_PLAYER);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", SpatialEntity::RIGID_PAWN);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)

@@ -29,7 +29,7 @@ public:
 
     MFGame::SpatialEntity::Id createTestBallEntity();
     MFGame::SpatialEntity::Id createTestBoxEntity();
-    MFGame::SpatialEntity::Id createCapsuleEntity(std::string modelName="");
+    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="");
     MFGame::SpatialEntity::Id createCameraEntity();
     MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
 
