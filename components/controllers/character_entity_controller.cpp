@@ -76,8 +76,12 @@ void CharacterEntityController::moveBackward(bool start)
 
 void CharacterEntityController::jump()
 {
-    if (isOnGround())
-        mEntity->setVelocity(mEntity->getVelocity() + MFMath::Vec3(0,0,4));
+    // TODO: Jumping in Mafia is more advanced than it seems
+    // Cast a ray to see if we can step up, otherwise perform forward dash
+    //
+    
+   /*if (isOnGround())
+        mEntity->setVelocity(mEntity->getVelocity() + MFMath::Vec3(0,0,4));*/
 }
 
 }
