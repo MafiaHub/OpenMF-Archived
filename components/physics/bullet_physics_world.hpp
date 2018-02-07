@@ -4,7 +4,7 @@
 #include <physics/base_physics_world.hpp>
 #include <utils/logger.hpp>
 #include <klz/klz_bullet.hpp>
-#include <4ds/4ds_parser.hpp>
+#include <4ds/parser_4ds.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <vfs/vfs.hpp>
 #include <utils/bullet.hpp>

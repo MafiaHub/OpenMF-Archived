@@ -1,4 +1,4 @@
-#include <4ds/4ds_osg.hpp>
+#include <4ds/osg_4ds.hpp>
 
 namespace MFFormat
 {

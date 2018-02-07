@@ -5,7 +5,7 @@
 #include <osg/Node>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
-#include <4ds/4ds_osg.hpp>
+#include <4ds/osg_4ds.hpp>
 #include <scene2_bin/scene2bin_osg.hpp>
 #include <cache_bin/cachebin_osg.hpp>
 #include <check_bin/checkbin_osg.hpp>

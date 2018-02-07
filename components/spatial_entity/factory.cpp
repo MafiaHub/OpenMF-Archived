@@ -1,6 +1,6 @@
 #include <spatial_entity/factory.hpp>
-#include <4ds/4ds_osg.hpp>
-#include <4ds/4ds_parser.hpp>
+#include <4ds/osg_4ds.hpp>
+#include <4ds/parser_4ds.hpp>
 
 #define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 
