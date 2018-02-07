@@ -25,6 +25,8 @@
 namespace MFRender
 {
 
+typedef MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> OSGCache;
+
 class OSGRenderer: public Renderer
 {
 public:
@@ -52,8 +54,9 @@ public:
     void setUpInWindow(osgViewer::GraphicsWindow *window);
 
     void setRenderMask(osg::Node::NodeMask mask);
-    osg::Group *getRootNode()                      { return mRootNode.get(); };
-    osgViewer::Viewer *getViewer()                 { return mViewer.get();   };
+    osg::Group        *getRootNode()          { return mRootNode.get(); };
+    osgViewer::Viewer *getViewer()            { return mViewer.get();   };
+    OSGCache          *getLoaderCache()       { return &mLoaderCache;   };
 
     virtual void cameraFace(MFMath::Vec3 position) override;
 
@@ -61,7 +64,7 @@ protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
     MFFile::FileSystem *mFileSystem;
-    MFFormat::LoaderCache<MFFormat::OSGLoader::OSGCached> mLoaderCache;
+    OSGCache mLoaderCache;
 
     void optimize();
 
