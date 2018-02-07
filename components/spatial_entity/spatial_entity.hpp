@@ -23,7 +23,7 @@ public:
         STATIC,            ///< The entity cannot move.
         KINEMATIC,         ///< The entity can move, but doesn't react to collisions.
         RIGID,             ///< The entity can move and react to collisions as a rigid body.
-        RIGID_PLAYER       ///< Same as RIGID, but cannot rotate (e.g. player capsule collision).
+        RIGID_PAWN       ///< Same as RIGID, but cannot rotate (e.g. player capsule collision).
     } PhysicsBehavior;
 
     typedef uint32_t Id;

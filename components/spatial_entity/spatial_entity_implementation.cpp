@@ -26,7 +26,7 @@ void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehav
         case SpatialEntity::RIGID:
             break;
 
-        case SpatialEntity::RIGID_PLAYER:
+        case SpatialEntity::RIGID_PAWN:
             mBulletBody->setAngularFactor(0);
             break;
 

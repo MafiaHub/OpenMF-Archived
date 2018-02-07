@@ -69,7 +69,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string modelName)
+MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string modelName)
 {
     MFUtil::FullRigidBody body;
 
@@ -93,27 +93,33 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCapsuleEntity(std::string 
     }
     else
     {
-        std::ifstream file4DS;
-        MFFormat::OSG4DSLoader l4ds;
+        auto cache = mRenderer->getLoaderCache();
+        auto model = (osg::Node *)cache->getObject(modelName).get();
 
-        // TODO: use loader cache
+        if (!model) {
+            std::ifstream file4DS;
+            MFFormat::OSG4DSLoader l4ds;
+            l4ds.setLoaderCache(cache);
 
-        if (!mFileSystem->open(file4DS,"models/" + modelName))
-        {
-            MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".",SPATIAL_ENTITY_FACTORY_MODULE_STR);
+            if (!mFileSystem->open(file4DS, "models/" + modelName)) {
+                MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
+            }
+            else {
+                model = l4ds.load(file4DS, modelName);
+                file4DS.close();
+                model->setName(modelName);
+            }
         }
-        else
-        {
-            visualTransform->addChild(l4ds.load(file4DS));
 
-            // TMP: shift a little down
-            visualTransform->setMatrix(osg::Matrixd::translate(osg::Vec3(0,0,-1)));
-        }
+        visualTransform->addChild(model);
+
+        // TMP: shift a little down
+        visualTransform->setMatrix(osg::Matrixd::translate(osg::Vec3(0, 0, -1)));
     }
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PLAYER);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PAWN);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
@@ -135,7 +141,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", SpatialEntity::RIGID_PLAYER);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", SpatialEntity::RIGID_PAWN);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
