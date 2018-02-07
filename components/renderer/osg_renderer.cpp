@@ -26,7 +26,7 @@ void OSGRenderer::setRenderMask(osg::Node::NodeMask mask)
 bool OSGRenderer::exportScene(std::string fileName)
 {
     const osg::Node *n = mRootNode.get();
-    auto result = osgDB::Registry::instance()->writeNode(*n,fileName,NULL);
+    auto result = osgDB::Registry::instance()->writeNode(*n,fileName,nullptr);
     return result.success();
 }
 
@@ -63,7 +63,7 @@ void OSGRenderer::debugClick(unsigned int x, unsigned int y)
 
         if (mSelected == result.drawable)  // clicking the same node twice will deselect it
         {
-            mSelected = 0;
+            mSelected = nullptr;
         }
         else
         {
@@ -202,8 +202,8 @@ OSGRenderer::OSGRenderer(): Renderer()
     mHighlightMaterial->setAmbient(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
     mHighlightMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
     mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
-    mMaterialBackup = 0;
-    mSelected = 0;
+    mMaterialBackup = nullptr;
+    mSelected = nullptr;
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)
@@ -311,7 +311,7 @@ bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2
     }
 
     if (!lightsAreSet)
-        setUpLights(0);
+        setUpLights(nullptr);
 
     if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath)) 
     {
@@ -408,7 +408,7 @@ bool OSGRenderer::loadSingleModel(std::string model)
     file4DS.close();
 
     optimize();
-    setUpLights(0);
+    setUpLights(nullptr);
 
     mLoaderCache.logStats();
 
@@ -432,7 +432,7 @@ void OSGRenderer::frame(double dt)
 
 void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes)
 {
-    if (lightNodes == 0 || lightNodes->size() == 0)
+    if (lightNodes == nullptr || lightNodes->empty())
     {
         // no lights, add a default one
 
@@ -460,24 +460,24 @@ void OSGRenderer::setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *light
     {
         unsigned int lightNum = 0;
 
-        for (int i = 0; i < (int) lightNodes->size(); ++i)
+        for (auto & lightNode : *lightNodes)
         {
             if (lightNum > 7)     // fixed pipeline only supports 8 lights
                 break;
 
-            std::string lightTypeStr = (*lightNodes)[i]->getName();
+            std::string lightTypeStr = lightNode->getName();
 
             // for now only add global lights, i.e. directional and ambient
             if (lightTypeStr.compare("directional") == 0 ||
                 lightTypeStr.compare("ambient") == 0)
             {
                 MFLogger::Logger::info("Adding " + lightTypeStr + " light.",OSGRENDERER_MODULE_STR);
-                (*lightNodes)[i]->getLight()->setLightNum(lightNum);
-                mRootNode->getOrCreateStateSet()->setAttributeAndModes((*lightNodes)[i]->getLight());
+                lightNode->getLight()->setLightNum(lightNum);
+                mRootNode->getOrCreateStateSet()->setAttributeAndModes(lightNode->getLight());
                 lightNum++;
             }
             else
-                (*lightNodes)[i]->getLight()->setLightNum(0);
+                lightNode->getLight()->setLightNum(0);
         }
     }
 }

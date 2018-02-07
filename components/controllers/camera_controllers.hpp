@@ -13,7 +13,7 @@ namespace MFGame
 class CameraController
 {
 public:
-    virtual ~CameraController() {};
+    virtual ~CameraController() = default;
     CameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager) { mRenderer = renderer; mInputManager = inputManager; };
     virtual void update(double dt)=0;
 
@@ -26,7 +26,7 @@ class MouseRotateCameraController: public CameraController
 {
 public:
     MouseRotateCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
-    virtual ~MouseRotateCameraController() {};
+    virtual ~MouseRotateCameraController() = default;
     void setRotationSpeed(double speed)    { mRotationSpeed = speed; };
     MFMath::Vec2 getRotation()             { return mRotation;       };
     virtual void update(double dt) override;
@@ -53,8 +53,8 @@ public:
       @param physicsWorld Optional pointer to physics world - if provided, the camera will collide. 
     */
 
-    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld=0);
-    virtual ~OrbitEntityCameraController() {};
+    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld=nullptr);
+    virtual ~OrbitEntityCameraController() = default;
     SpatialEntity *getEntity()                   { return mEntity;           };
     void setRelativeOffset(MFMath::Vec3 offset)  { mRelativeOffset = offset; };
 
@@ -70,7 +70,7 @@ class FreeCameraController: public MouseRotateCameraController
 {
 public:
     FreeCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager);
-    virtual ~FreeCameraController() {};
+    virtual ~FreeCameraController() = default;
     virtual void update(double dt) override;
     void setSpeed(double speed)         { mSpeed = speed;         };
 
@@ -98,7 +98,7 @@ class RigidCameraController: public FreeCameraController
 {
 public:
     RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
-    virtual ~RigidCameraController() {};
+    virtual ~RigidCameraController() = default;
 
 protected:
     virtual void handleMovement(MFMath::Vec3 offset) override;
