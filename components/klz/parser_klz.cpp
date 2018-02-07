@@ -1,4 +1,4 @@
-#include <klz/klz_parser.hpp>
+#include <klz/parser_klz.hpp>
 
 namespace MFFormat
 {

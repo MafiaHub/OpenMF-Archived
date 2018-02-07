@@ -10,7 +10,7 @@
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <klz/klz_parser.hpp>
+#include <klz/parser_klz.hpp>
 #include <4ds/parser_4ds.hpp>    // needed for face collisions
 
 #define TREE_KLZ_BULLET_LOADER_MODULE_STR "loader tree klz"

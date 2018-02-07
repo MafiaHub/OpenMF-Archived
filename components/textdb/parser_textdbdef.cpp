@@ -1,4 +1,4 @@
-#include <textdb/textdb_parser.hpp>
+#include <textdb/parser_textdbdef.hpp>
 
 namespace MFFormat
 {

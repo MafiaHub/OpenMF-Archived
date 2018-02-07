@@ -1,5 +1,5 @@
 #include <iostream>
-#include <klz/klz_parser.hpp>
+#include <klz/parser_klz.hpp>
 #include <utils/logger.hpp>
 #include <cxxopts.hpp>
 #include <vector>

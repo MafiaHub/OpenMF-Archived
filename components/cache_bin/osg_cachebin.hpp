@@ -1,7 +1,7 @@
 #ifndef OSG_CACHE_BIN_LOADER_H
 #define OSG_CACHE_BIN_LOADER_H
 
-#include <cache_bin/cachebin_parser.hpp>
+#include <cache_bin/parser_cachebin.hpp>
 #include <4ds/osg_4ds.hpp>
 #include <base_loader.hpp>
 

@@ -6,9 +6,9 @@
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 #include <4ds/osg_4ds.hpp>
-#include <scene2_bin/scene2bin_osg.hpp>
-#include <cache_bin/cachebin_osg.hpp>
-#include <check_bin/checkbin_osg.hpp>
+#include <scene2_bin/osg_scene2bin.hpp>
+#include <cache_bin/osg_cachebin.hpp>
+#include <check_bin/osg_checkbin.hpp>
 #include <osg/Texture2D>
 #include <osg/LightModel>
 #include <utils/logger.hpp>

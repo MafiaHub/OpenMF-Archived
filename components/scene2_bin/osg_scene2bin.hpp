@@ -11,7 +11,7 @@
 #include <osg/LightSource>
 #include <fstream>
 #include <algorithm>
-#include <scene2_bin/scene2bin_parser.hpp>
+#include <scene2_bin/parser_scene2bin.hpp>
 #include <utils/logger.hpp>
 #include <osg/Material>
 #include <utils/openmf.hpp>

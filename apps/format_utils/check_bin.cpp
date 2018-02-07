@@ -1,5 +1,5 @@
 #include <iostream>
-#include <check_bin/checkbin_parser.hpp>
+#include <check_bin/parser_checkbin.hpp>
 #include <utils/logger.hpp>
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
