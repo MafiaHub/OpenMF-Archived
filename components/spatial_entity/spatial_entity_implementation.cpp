@@ -4,7 +4,7 @@
 namespace MFGame
 {
 
-osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = 0;
+osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = nullptr;
 
 void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior)
 {
@@ -37,8 +37,7 @@ void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehav
 
 MFMath::Vec3 SpatialEntityImplementation::getSize()
 {
-    if (mBulletBody)
-    {
+    if (mBulletBody) {
         btVector3 p1, p2;
         mBulletBody->getAabb(p1,p2);
         return MFMath::Vec3(p2.x() - p1.x(), p2.y() - p1.y(), p2.z() - p1.z());
@@ -67,17 +66,17 @@ bool SpatialEntityImplementation::canBeMoved()
 
 bool SpatialEntityImplementation::hasVisual()
 {
-    return mOSGNode != 0;
+    return mOSGNode != nullptr;
 }
 
 bool SpatialEntityImplementation::hasPhysics()
 {
-    return mBulletBody != 0;
+    return mBulletBody != nullptr;
 }
 
 bool SpatialEntityImplementation::hasCollision()
 {
-    return mBulletBody != 0;
+    return mBulletBody != nullptr;
 }
 
 void SpatialEntityImplementation::setVelocity(MFMath::Vec3 velocity)
@@ -241,15 +240,14 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
         SpatialEntityImplementation::sDebugStateSet->setAttributeAndModes(mode);
     }
 
-    mOSGNode = 0;
-    mBulletBody = 0;
-    mBulletMotionState = 0;
+    mOSGNode = nullptr;
+    mBulletBody = nullptr;
+    mBulletMotionState = nullptr;
     mCreateDebugGeometry = false;
 }
 
 SpatialEntityImplementation::~SpatialEntityImplementation()
-{ 
-}
+= default;
 
 void SpatialEntityImplementation::update(double dt)
 {
@@ -264,8 +262,8 @@ void SpatialEntityImplementation::update(double dt)
 
 std::string SpatialEntityImplementation::toString()
 {
-    int hasOSG = mOSGNode != 0;
-    int hasBullet = mBulletBody != 0;
+    int hasOSG = mOSGNode != nullptr;
+    int hasBullet = mBulletBody != nullptr;
 
     return "\"" + mName + "\", ID: " + std::to_string(mId) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
@@ -341,7 +339,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         case BroadphaseNativeTypes::CYLINDER_SHAPE_PROXYTYPE:
         {
-            btCylinderShape *cylinder = static_cast<btCylinderShape *>(mBulletBody->getCollisionShape());
+            auto *cylinder = static_cast<btCylinderShape *>(mBulletBody->getCollisionShape());
             osg::ref_ptr<osg::Shape> shape = new osg::Cylinder(osg::Vec3f(0,0,0),cylinder->getRadius(),cylinder->getHalfExtentsWithoutMargin().z() * 2);
             shapeNode = new osg::ShapeDrawable(shape.get());
             break;
@@ -349,7 +347,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         case BroadphaseNativeTypes::CAPSULE_SHAPE_PROXYTYPE:
         {
-            btCapsuleShape *capsule = static_cast<btCapsuleShape *>(mBulletBody->getCollisionShape());
+            auto *capsule = static_cast<btCapsuleShape *>(mBulletBody->getCollisionShape());
             osg::ref_ptr<osg::Shape> shape = new osg::Capsule(osg::Vec3f(0,0,0),capsule->getRadius(),capsule->getHalfHeight() * 2.0);
             shapeNode = new osg::ShapeDrawable(shape.get());
             break;
@@ -357,7 +355,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
 
         case BroadphaseNativeTypes::TRIANGLE_MESH_SHAPE_PROXYTYPE:
         {
-            btTriangleMesh *mesh =
+            auto *mesh =
                 static_cast<btTriangleMesh *>(
                     static_cast<btTriangleMeshShape *>(mBulletBody->getCollisionShape())->getMeshInterface());
 
