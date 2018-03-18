@@ -14,10 +14,7 @@ public:
         mSpatialEntityFactory->setDebugMode(false);
     };
 
-    virtual ~OpenMFEngine()
-    {
-        delete mPlayerController;
-    };
+    virtual ~OpenMFEngine() = default;
 
     virtual void frame() override
     {

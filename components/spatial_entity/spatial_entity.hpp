@@ -33,7 +33,7 @@ public:
     virtual void update(double dt)=0;
 
     /**
-      Initialises the entity with currently set data (OSG node, Bullet body, ...) so that it
+      Initializes the entity with currently set data (OSG node, Bullet body, ...) so that it
       is ready to work.
     */
     virtual void ready()=0;

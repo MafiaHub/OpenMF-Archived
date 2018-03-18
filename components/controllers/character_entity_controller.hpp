@@ -47,6 +47,8 @@ protected:
 
     MovementState mMovementState;
     MFMath::Vec3 mMovementVector;
+    MFMath::Vec3 mLastJumpMovementVector;
+    bool mIsGrounded;
     float mSpeeds[3];
 };
 
