@@ -270,17 +270,17 @@ DataFormat4DS::SingleMeshLodJoint DataFormat4DS::loadSingleMeshLodJoint(std::ifs
 {
     SingleMeshLodJoint newJoint = {};
     read(file, &newJoint.mTransform);
-    read(file, &newJoint.mUnk0, sizeof(uint32_t));
-    read(file, &newJoint.mAdditionalValuesCount);
+    read(file, &newJoint.mOneWeightedVertCount);
+    read(file, &newJoint.mWeightCount);
     read(file, &newJoint.mBoneID);
     read(file, &newJoint.mMinBox);
     read(file, &newJoint.mMaxBox);
   
-    for (size_t i = 0; i < newJoint.mAdditionalValuesCount; ++i)
+    for (size_t i = 0; i < newJoint.mWeightCount; ++i)
     {
         float f;
-        read(file,&f,sizeof(f));
-        newJoint.mAdditionalValues.push_back(f);
+        read(file, &f, sizeof(f));
+        newJoint.mWeights.push_back(f);
     }
 
     return newJoint;
@@ -288,9 +288,16 @@ DataFormat4DS::SingleMeshLodJoint DataFormat4DS::loadSingleMeshLodJoint(std::ifs
 
 DataFormat4DS::SingleMeshLod DataFormat4DS::loadSingleMeshLod(std::ifstream &file)
 {
+    // Every LOD's vertext buffer is sorted in the following order:
+    // - non-weighted vertices
+    // - BONE0's fully-weighted vertices (1.0f weight)
+    // - BONE0's weighted vertices
+    // - BONE1's fully-weighted vertices (1.0f weight)
+    // - BONE1's weighted vertices
+    // and so on
     SingleMeshLod newLod = {};
     read(file, &newLod.mJointCount);
-    read(file, &newLod.mUnk0);
+    read(file, &newLod.mNonWeightedVertCount);
     read(file, &newLod.mMinBox);
     read(file, &newLod.mMaxBox);
 

@@ -241,18 +241,18 @@ public:
     typedef struct
     {
         float mTransform[16];
-        uint32_t mUnk0;
-        uint32_t mAdditionalValuesCount;
-        uint32_t mBoneID;
+        uint32_t mOneWeightedVertCount; // amount of vertices that should have a weight of 1.0f
+        uint32_t mWeightCount; // amount of vertices whose weights are stored in mWeights
+        uint32_t mBoneID; // this is likely a reference to a paired bone, which takes the remainder (1.0f - w) of weight
         MFMath::Vec3 mMinBox;
         MFMath::Vec3 mMaxBox;
-        std::vector<float> mAdditionalValues;
+        std::vector<float> mWeights;
     } SingleMeshLodJoint;
 
     typedef struct
     {
         uint8_t mJointCount;
-        uint32_t mUnk0;
+        uint32_t mNonWeightedVertCount;
         MFMath::Vec3 mMinBox;
         MFMath::Vec3 mMaxBox;
         std::vector<SingleMeshLodJoint> mJoints;
