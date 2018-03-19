@@ -56,7 +56,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     if (physicsBody && physicsMotionsState && physicsBody->getMotionState() != physicsMotionsState.get())
         physicsBody->setMotionState(physicsMotionsState.get());
 
-    std::shared_ptr<MFGame::SpatialEntityImplementation> newEntity = std::make_shared<MFGame::SpatialEntityImplementation>();
+    std::shared_ptr<MFGame::SpatialEntityImpl> newEntity = std::make_shared<MFGame::SpatialEntityImpl>();
     newEntity->setName(name);
     newEntity->setDebugMode(mDebugMode);
     newEntity->setOSGRootNode(mRenderer->getRootNode());

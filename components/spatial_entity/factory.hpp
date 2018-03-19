@@ -3,7 +3,7 @@
 
 #include <osg/Group>
 #include <physics/bullet_physics_world.hpp>
-#include <spatial_entity/spatial_entity_implementation.hpp>
+#include <spatial_entity/spatial_entity_impl.hpp>
 #include <renderer/osg_renderer.hpp>
 #include <spatial_entity/manager.hpp>
 #include <vfs/vfs.hpp>

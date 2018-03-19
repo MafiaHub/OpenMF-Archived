@@ -19,11 +19,11 @@
 namespace MFGame
 {
 
-class SpatialEntityImplementation: public SpatialEntity
+class SpatialEntityImpl: public SpatialEntity
 {
 public:
-    SpatialEntityImplementation();
-    ~SpatialEntityImplementation();
+    SpatialEntityImpl();
+    ~SpatialEntityImpl();
     virtual void update(double dt) override;
     virtual void ready() override;
     virtual std::string toString() override;

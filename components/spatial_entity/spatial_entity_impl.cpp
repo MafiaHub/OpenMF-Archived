@@ -1,12 +1,12 @@
-#include <spatial_entity/spatial_entity_implementation.hpp>
+#include <spatial_entity/spatial_entity_impl.hpp>
 #include <utils/logger.hpp>
 
 namespace MFGame
 {
 
-osg::ref_ptr<osg::StateSet> SpatialEntityImplementation::sDebugStateSet = nullptr;
+osg::ref_ptr<osg::StateSet> SpatialEntityImpl::sDebugStateSet = nullptr;
 
-void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior)
+void SpatialEntityImpl::setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior)
 {
     if (!hasPhysics())
         return;
@@ -35,7 +35,7 @@ void SpatialEntityImplementation::setPhysicsBehavior(SpatialEntity::PhysicsBehav
     }
 }
 
-MFMath::Vec3 SpatialEntityImplementation::getSize()
+MFMath::Vec3 SpatialEntityImpl::getSize()
 {
     if (mBulletBody) {
         btVector3 p1, p2;
@@ -48,13 +48,13 @@ MFMath::Vec3 SpatialEntityImplementation::getSize()
     return MFMath::Vec3(0,0,0);
 }
 
-void SpatialEntityImplementation::setFriction(double factor)
+void SpatialEntityImpl::setFriction(double factor)
 {
     if (mBulletBody)
         mBulletBody->setFriction(factor);
 }
 
-bool SpatialEntityImplementation::canBeMoved()
+bool SpatialEntityImpl::canBeMoved()
 {
     if (!mBulletBody)    // no physical representation => nothing stops the entity from moving
         return true;
@@ -64,22 +64,22 @@ bool SpatialEntityImplementation::canBeMoved()
     return false;
 }
 
-bool SpatialEntityImplementation::hasVisual()
+bool SpatialEntityImpl::hasVisual()
 {
     return mOSGNode != nullptr;
 }
 
-bool SpatialEntityImplementation::hasPhysics()
+bool SpatialEntityImpl::hasPhysics()
 {
     return mBulletBody != nullptr;
 }
 
-bool SpatialEntityImplementation::hasCollision()
+bool SpatialEntityImpl::hasCollision()
 {
     return mBulletBody != nullptr;
 }
 
-void SpatialEntityImplementation::setVelocity(MFMath::Vec3 velocity)
+void SpatialEntityImpl::setVelocity(MFMath::Vec3 velocity)
 {
     if (!mBulletBody)
         return;
@@ -87,7 +87,7 @@ void SpatialEntityImplementation::setVelocity(MFMath::Vec3 velocity)
     mBulletBody->setLinearVelocity(btVector3(velocity.x,velocity.y,velocity.z));
 }
 
-MFMath::Vec3 SpatialEntityImplementation::getVelocity()
+MFMath::Vec3 SpatialEntityImpl::getVelocity()
 {
     if (mBulletBody)
     {
@@ -98,7 +98,7 @@ MFMath::Vec3 SpatialEntityImplementation::getVelocity()
     return MFMath::Vec3(0,0,0);
 }
 
-void SpatialEntityImplementation::setAngularVelocity(MFMath::Vec3 velocity)
+void SpatialEntityImpl::setAngularVelocity(MFMath::Vec3 velocity)
 {
     if (!mBulletBody)
         return;
@@ -106,7 +106,7 @@ void SpatialEntityImplementation::setAngularVelocity(MFMath::Vec3 velocity)
     mBulletBody->setAngularVelocity(btVector3(velocity.x,velocity.y,velocity.z));
 }
 
-void SpatialEntityImplementation::setDamping(float lin, float ang)
+void SpatialEntityImpl::setDamping(float lin, float ang)
 {
     if (!mBulletBody)
         return;
@@ -114,7 +114,7 @@ void SpatialEntityImplementation::setDamping(float lin, float ang)
     mBulletBody->setDamping(lin, ang);
 }
 
-MFMath::Vec3 SpatialEntityImplementation::getAngularVelocity()
+MFMath::Vec3 SpatialEntityImpl::getAngularVelocity()
 {
     if (!mBulletBody)
         return MFMath::Vec3(0, 0, 0);
@@ -123,7 +123,7 @@ MFMath::Vec3 SpatialEntityImplementation::getAngularVelocity()
     return MFMath::Vec3(vel.x(), vel.y(), vel.z());
 }
 
-MFMath::Vec2 SpatialEntityImplementation::getDamping()
+MFMath::Vec2 SpatialEntityImpl::getDamping()
 {
     if (!mBulletBody)
         return MFMath::Vec2(0,0);
@@ -131,7 +131,7 @@ MFMath::Vec2 SpatialEntityImplementation::getDamping()
     return MFMath::Vec2(mBulletBody->getLinearDamping(), mBulletBody->getAngularDamping());
 }
 
-void SpatialEntityImplementation::computeCurrentTransform()
+void SpatialEntityImpl::computeCurrentTransform()
 {
     if (mBulletBody)
     {
@@ -161,7 +161,7 @@ void SpatialEntityImplementation::computeCurrentTransform()
     }
 }
 
-void SpatialEntityImplementation::applyCurrentTransform()
+void SpatialEntityImpl::applyCurrentTransform()
 {
     MFMath::Vec3 relPos = mPosition - mInitialPosition;
 
@@ -194,7 +194,7 @@ void SpatialEntityImplementation::applyCurrentTransform()
     }
 }
 
-void SpatialEntityImplementation::setRotation(MFMath::Quat rotation)
+void SpatialEntityImpl::setRotation(MFMath::Quat rotation)
 {
     mRotation = rotation;
 
@@ -214,18 +214,18 @@ void SpatialEntityImplementation::setRotation(MFMath::Quat rotation)
     }
 }
 
-void SpatialEntityImplementation::setPosition(MFMath::Vec3 position)
+void SpatialEntityImpl::setPosition(MFMath::Vec3 position)
 {
     SpatialEntity::setPosition(position);
     applyCurrentTransform();
 }
 
-SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
+SpatialEntityImpl::SpatialEntityImpl(): SpatialEntity()
 {
-    if (!SpatialEntityImplementation::sDebugStateSet)
+    if (!SpatialEntityImpl::sDebugStateSet)
     {
         // let the first entity create the shared debug material
-        SpatialEntityImplementation::sDebugStateSet = new osg::StateSet;
+        SpatialEntityImpl::sDebugStateSet = new osg::StateSet;
 
         osg::ref_ptr<osg::Material> mat = new osg::Material();
         osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
@@ -236,8 +236,8 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
         mat->setSpecular(osg::Material::FRONT_AND_BACK,debugColor);
         mat->setEmission(osg::Material::FRONT_AND_BACK,debugColor);
 
-        SpatialEntityImplementation::sDebugStateSet->setAttributeAndModes(mat);
-        SpatialEntityImplementation::sDebugStateSet->setAttributeAndModes(mode);
+        SpatialEntityImpl::sDebugStateSet->setAttributeAndModes(mat);
+        SpatialEntityImpl::sDebugStateSet->setAttributeAndModes(mode);
     }
 
     mOSGNode = nullptr;
@@ -246,10 +246,10 @@ SpatialEntityImplementation::SpatialEntityImplementation(): SpatialEntity()
     mCreateDebugGeometry = false;
 }
 
-SpatialEntityImplementation::~SpatialEntityImplementation()
+SpatialEntityImpl::~SpatialEntityImpl()
 = default;
 
-void SpatialEntityImplementation::update(double dt)
+void SpatialEntityImpl::update(double dt)
 {
     // TODO: make use of MotionState to see if the transform has to be updated
 
@@ -260,7 +260,7 @@ void SpatialEntityImplementation::update(double dt)
     }
 }
 
-std::string SpatialEntityImplementation::toString()
+std::string SpatialEntityImpl::toString()
 {
     int hasOSG = mOSGNode != nullptr;
     int hasBullet = mBulletBody != nullptr;
@@ -268,7 +268,7 @@ std::string SpatialEntityImplementation::toString()
     return "\"" + mName + "\", ID: " + std::to_string(mId) + ", representations: " + std::to_string(hasOSG) + std::to_string(hasBullet) + ", pos: " + mPosition.str();
 }
 
-void SpatialEntityImplementation::ready()
+void SpatialEntityImpl::ready()
 {
     MFLogger::Logger::info("readying entity: " + toString(),SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR);
 
@@ -298,7 +298,7 @@ void SpatialEntityImplementation::ready()
     mReady = true;
 }
 
-void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
+void SpatialEntityImpl::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.
 {
     if (!mBulletBody || !mCreateDebugGeometry)
         return;
@@ -402,7 +402,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
         shapeNode->setName("collision: " + getName());
         shapeNode->setNodeMask(MFRender::MASK_DEBUG);
 
-        shapeNode->setStateSet(SpatialEntityImplementation::sDebugStateSet);
+        shapeNode->setStateSet(SpatialEntityImpl::sDebugStateSet);
 
         mOSGPhysicsDebugNode = new osg::MatrixTransform();
         mOSGPhysicsDebugNode->addChild(shapeNode);
@@ -413,7 +413,7 @@ void SpatialEntityImplementation::makePhysicsDebugOSGNode()        ///< Creates 
     }
 }
 
-void SpatialEntityImplementation::syncDebugPhysicsNode()
+void SpatialEntityImpl::syncDebugPhysicsNode()
 {
     if (!mOSGPhysicsDebugNode)
         return;
