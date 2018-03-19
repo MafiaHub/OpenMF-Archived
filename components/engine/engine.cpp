@@ -161,19 +161,27 @@ void Engine::step(double dt)
     if (dt > 0)
         mExtraTime = dt;
 
+    double physicsTime;
+    double physicsTimeBegin = getTime();
+    double physicsTimeEnd = getTime();
+
     while (mExtraTime > mEngineSettings.mUpdatePeriod)
     {
         mInputManager->processEvents();
         mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
 
+        double physicsStartTime = getTime();
         if (mEngineSettings.mSimulatePhysics)
             mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
+        physicsTime += (getTime() - physicsStartTime);
       
         render = true;
         mExtraTime -= mEngineSettings.mUpdatePeriod;
      
         frame();
     }
+
+    physicsTimeEnd += physicsTime;
       
     if (render)
     {
@@ -186,6 +194,15 @@ void Engine::step(double dt)
     {
         // Let OS do background work while we wait.
         std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
+    }
+
+    auto frameNumber = mRenderer->getViewer()->getFrameStamp()->getFrameNumber();
+    auto stats = mRenderer->getViewer()->getViewerStats();
+    if (stats) 
+    {
+        stats->setAttribute(frameNumber, "physics_time_begin", physicsTimeBegin);
+        stats->setAttribute(frameNumber, "physics_time_taken", physicsTime);
+        stats->setAttribute(frameNumber, "physics_time_end", physicsTimeEnd);
     }
 
     mFrameNumber++;
