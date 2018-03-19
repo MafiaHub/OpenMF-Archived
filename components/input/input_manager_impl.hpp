@@ -15,10 +15,10 @@
 namespace MFInput
 {
 
-class InputManagerImplementation: public InputManager
+class InputManagerImpl: public InputManager
 {
 public:
-    InputManagerImplementation();
+    InputManagerImpl();
     virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y) override;
     virtual void destroyWindow() override;
     virtual bool windowClosed() override;
@@ -29,6 +29,7 @@ public:
     virtual void setCursorVisible(bool visible) override;
     virtual bool mouseButtonPressed(unsigned int button) override;
     virtual void processEvents() override;
+    virtual unsigned int translateKey(unsigned int code) override;
     virtual osgViewer::GraphicsWindow *getWindow();
 
 protected:

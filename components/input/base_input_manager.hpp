@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <input/input_keymap.hpp>
 
 namespace MFInput
 {
@@ -44,6 +45,7 @@ public:
     virtual void setCursorVisible(bool visible)=0;
     virtual bool mouseButtonPressed(unsigned int button)=0;
     virtual void processEvents()=0;
+    virtual unsigned int translateKey(unsigned int code)=0;
 
     void addKeyCallback(std::shared_ptr<KeyInputCallback> callback)               { mKeyCallbacks.push_back(callback);          };
     void addButtonCallback(std::shared_ptr<ButtonInputCallback> callback)         { mButtonCallbacks.push_back(callback);       };

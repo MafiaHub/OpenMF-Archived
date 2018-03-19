@@ -1,7 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <input/input_manager_implementation.hpp>
+#include <input/input_manager_impl.hpp>
 #include <spatial_entity/spatial_entity.hpp>
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
@@ -82,7 +82,7 @@ protected:
 
     unsigned long long mFrameNumber;
 
-    MFInput::InputManagerImplementation *mInputManager;
+    MFInput::InputManagerImpl *mInputManager;
     MFGame::SpatialEntityManager        *mSpatialEntityManager;
     MFGame::SpatialEntityFactory        *mSpatialEntityFactory;
     MFRender::OSGRenderer               *mRenderer;
