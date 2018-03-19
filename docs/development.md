@@ -17,6 +17,8 @@ required libraries:
 
 build targets: (`GAME`, `VIEWER`, `UTILS`, `TESTS`)
 
+NOTE about OpenSceneGraph, the requested package is: `libopenscenegraph-3.4-dev` if using Debian/Ubuntu repositories.
+
 ## Compilation (Linux)
 
 We're using the standard CMake build:
