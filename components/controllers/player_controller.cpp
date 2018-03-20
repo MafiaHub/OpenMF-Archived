@@ -15,19 +15,15 @@ public:
     {
         switch (keyCode)
         {
-            case 26: mController->moveForward(down); break;
-            case 22: mController->moveBackward(down); break;
-            case 4:  mController->moveLeft(down); break;
-            case 7:  mController->moveRight(down); break;
-            case 44: if (down) mController->jump(); break;
-            case 225:
+            case OMFK_w: mController->moveForward(down); break;
+            case OMFK_s: mController->moveBackward(down); break;
+            case OMFK_a:  mController->moveLeft(down); break;
+            case OMFK_d:  mController->moveRight(down); break;
+            case OMFK_SPACE: if (down) mController->jump(); break;
+            case OMF_SCANCODE_RSHIFT:
+            case OMF_SCANCODE_LSHIFT:
                 mController->setMovementState(down
                     ? CharacterEntityController::RUN :
-                      CharacterEntityController::WALK);
-                break;
-            case 224:
-                mController->setMovementState(down
-                    ? CharacterEntityController::CROUCH :
                       CharacterEntityController::WALK);
                 break;
             default: break;

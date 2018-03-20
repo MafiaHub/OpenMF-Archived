@@ -1,19 +1,19 @@
-#include <input/input_manager_implementation.hpp>
+#include <input/input_manager_impl.hpp>
 
 namespace MFInput
 {
 
-osgViewer::GraphicsWindow *InputManagerImplementation::getWindow()
+osgViewer::GraphicsWindow *InputManagerImpl::getWindow()
 {
     return mOSGWindow.get();
 }
 
-void InputManagerImplementation::setCursorPosition(unsigned int x, unsigned int y)
+void InputManagerImpl::setCursorPosition(unsigned int x, unsigned int y)
 {
     SDL_WarpMouseInWindow(mWindow,x,y);
 }
 
-void InputManagerImplementation::getCursorPosition(unsigned int &x, unsigned int &y)
+void InputManagerImpl::getCursorPosition(unsigned int &x, unsigned int &y)
 {
     int mx, my;
     SDL_GetMouseState(&mx,&my);
@@ -21,12 +21,12 @@ void InputManagerImplementation::getCursorPosition(unsigned int &x, unsigned int
     y = my;
 }
 
-void InputManagerImplementation::setCursorVisible(bool visible)
+void InputManagerImpl::setCursorVisible(bool visible)
 {
     SDL_ShowCursor(visible ? SDL_ENABLE : SDL_DISABLE);
 }
 
-InputManagerImplementation::InputManagerImplementation(): InputManager()
+InputManagerImpl::InputManagerImpl(): InputManager()
 {
     mWindow = 0;
     mClosed = false;
@@ -40,18 +40,18 @@ InputManagerImplementation::InputManagerImplementation(): InputManager()
         mMouseState[i] = false;
 }
 
-void InputManagerImplementation::getWindowSize(unsigned int &width, unsigned int &height)
+void InputManagerImpl::getWindowSize(unsigned int &width, unsigned int &height)
 {
     width = mWindowWidth;
     height = mWindowHeight;
 }
 
-bool InputManagerImplementation::windowClosed()
+bool InputManagerImpl::windowClosed()
 {
     return mClosed;
 }
 
-void InputManagerImplementation::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
+void InputManagerImpl::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
 {
     // taken from https://github.com/OpenMW/openmw/blob/c7f60a6dc87db0f59a064415ba844917a394af78/apps/openmw/engine.cpp#L317
 
@@ -93,11 +93,11 @@ void InputManagerImplementation::initWindow(unsigned int width, unsigned int hei
     mOSGWindow = new SDLUtil::GraphicsWindowSDL2(traits);
 }
 
-void InputManagerImplementation::destroyWindow()
+void InputManagerImpl::destroyWindow()
 {
 }
 
-void InputManagerImplementation::processEvents()
+void InputManagerImpl::processEvents()
 {
     SDL_Event event;
 
@@ -110,7 +110,8 @@ void InputManagerImplementation::processEvents()
                 if (event.key.repeat)
                     break;
 
-                unsigned int code = event.key.keysym.scancode;
+                unsigned int oldCode = event.key.keysym.scancode;
+                unsigned int code    = translateKey(oldCode);
 
                 for (int i = 0; i < (int) mKeyCallbacks.size(); ++i)
                     mKeyCallbacks[i]->call(true,code);
@@ -123,7 +124,8 @@ void InputManagerImplementation::processEvents()
 
             case SDL_KEYUP:
             {
-                unsigned int code = event.key.keysym.scancode;
+                unsigned int oldCode = event.key.keysym.scancode;
+                unsigned int code = translateKey(oldCode);
 
                 for (int i = 0; i < (int) mKeyCallbacks.size(); ++i)
                     mKeyCallbacks[i]->call(false,code);
@@ -198,12 +200,18 @@ void InputManagerImplementation::processEvents()
     }
 }
 
-bool InputManagerImplementation::keyPressed(unsigned int keyCode)
+unsigned int InputManagerImpl::translateKey(unsigned int code)
+{
+    // Return code since the implemented Input Manager is based on the same keymap.
+    return code;
+}
+
+bool InputManagerImpl::keyPressed(unsigned int keyCode)
 {
     return mKeyboardState[keyCode];
 }
 
-bool InputManagerImplementation::mouseButtonPressed(unsigned int button)
+bool InputManagerImpl::mouseButtonPressed(unsigned int button)
 {
     return mMouseState[button];
 }

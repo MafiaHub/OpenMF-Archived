@@ -17,7 +17,7 @@ SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::SpatialEntity::Id id)
 {
     if (id == MFGame::SpatialEntity::NullId)
-        return 0;
+        return nullptr;
 
     auto entity = mEntities[id];
 

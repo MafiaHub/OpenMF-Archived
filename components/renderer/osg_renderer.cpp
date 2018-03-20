@@ -182,6 +182,9 @@ OSGRenderer::OSGRenderer(): Renderer()
     mStatsHandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
     mViewer->addEventHandler(mStatsHandler);
 
+    mStatsHandler->addUserStatsLine("Physics", osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f),
+                                    osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f), "physics_time_taken", 1000.0f, true, false, "physics_time_begin", "physics_time_end", 10000);
+
     mRootNode = new osg::Group();
     mRootNode->setName("root");
 
