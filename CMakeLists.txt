@@ -177,6 +177,9 @@ if(BUILD_UTILS)
     add_executable        ( check_bin  apps/format_utils/check_bin.cpp   $<TARGET_OBJECTS:components> )
     target_link_libraries ( check_bin                                    ${THIRD_PARTY_LIBS}  )
 
+    add_executable        ( effects_bin   apps/format_utils/effects_bin.cpp   $<TARGET_OBJECTS:components> )
+    target_link_libraries ( effects_bin                                       ${THIRD_PARTY_LIBS}  )
+
     add_executable        ( load_def   apps/format_utils/load_def.cpp    $<TARGET_OBJECTS:components> )
     target_link_libraries ( load_def                                     ${THIRD_PARTY_LIBS}  )
 
