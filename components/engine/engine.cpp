@@ -176,7 +176,7 @@ void Engine::step(double dt)
     double physicsTimeBegin = 0.0f;
     double physicsTimeEnd = physicsTimeBegin;
 
-    while (getTickCount() >= mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
+    while ((double)getTickCount() > mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
     {
 		mInputManager->processEvents();
 		frame();
@@ -192,10 +192,8 @@ void Engine::step(double dt)
 			physicsTime += (physicsTimeEnd - physicsTimeBegin);
 		}
 		
-		mNextGameTick += mEngineSettings.mUpdatePeriod * 1000.0;
+		mNextGameTick += (double)(mEngineSettings.mUpdatePeriod * 1000.0);
 		mNumberOfLoops++;
-
-		
     }
 	
 	mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
@@ -224,7 +222,7 @@ void Engine::run()
 
 	mNumberOfLoops = 0;
 	mRenderTime = 0.0f;
-	mNextGameTick = getTickCount();
+	mNextGameTick = (double)getTickCount();
 
     while (mIsRunning)       // main loop
         step();

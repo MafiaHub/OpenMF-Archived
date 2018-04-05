@@ -86,7 +86,7 @@ protected:
 
 
 	int mNumberOfLoops;
-	int mNextGameTick;
+	double mNextGameTick;
 	float mRenderTime;
 
     unsigned long long mFrameNumber;
