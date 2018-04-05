@@ -5,6 +5,10 @@
 #include <renderer/osg_renderer.hpp>
 #include <utils/math.hpp>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #define ENGINE_MODULE_STR "engine"
 
 namespace MFGame
@@ -47,7 +51,8 @@ Engine::Engine(EngineSettings settings)
         mEngineSettings.mInitWindowWidth,
         mEngineSettings.mInitWindowHeight,
         mEngineSettings.mInitWindowX,
-        mEngineSettings.mInitWindowY);
+        mEngineSettings.mInitWindowY,
+		mEngineSettings.mVsync);
 
     std::shared_ptr<WindowResizeCallback> wrcb = std::make_shared<WindowResizeCallback>(mRenderer);
     mInputManager->addWindowResizeCallback(wrcb);
@@ -129,7 +134,20 @@ double Engine::getTime()
 {
     static auto epoch = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
-} 
+}
+
+int Engine::getTickCount()
+{
+#ifdef _WIN32
+	return GetTickCount();
+#else
+	struct timeval tv;
+	if (gettimeofday(&tv, NULL) != 0)
+		return 0;
+
+	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+#endif
+}
 
 Engine::~Engine()
 {
@@ -150,51 +168,40 @@ void Engine::step(double dt)
     {
         mIsRunning = false;
         return;
-    }      
+    }
 
-    bool render = false;
-    double startTime = getTime();
-    double passedTime = startTime - mLastTime;
-    mLastTime = startTime;
-    mExtraTime += passedTime;
+	mNumberOfLoops = 0;
 
-    if (dt > 0)
-        mExtraTime = dt;
+	double physicsTime = 0.0f;
+    double physicsTimeBegin = 0.0f;
+    double physicsTimeEnd = physicsTimeBegin;
 
-    double physicsTime;
-    double physicsTimeBegin = getTime();
-    double physicsTimeEnd = getTime();
-
-    while (mExtraTime > mEngineSettings.mUpdatePeriod)
+    while (getTickCount() > mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
     {
-        mInputManager->processEvents();
+		mInputManager->processEvents();
         mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
 
-        double physicsStartTime = getTime();
-        if (mEngineSettings.mSimulatePhysics)
-            mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
-        physicsTime += (getTime() - physicsStartTime);
-      
-        render = true;
-        mExtraTime -= mEngineSettings.mUpdatePeriod;
-     
-        frame();
+		if (mEngineSettings.mSimulatePhysics) {
+			if (physicsTimeBegin == 0.0f)
+				physicsTimeBegin = getTime();
+
+			mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
+
+			physicsTimeEnd = getTime();
+			physicsTime += (physicsTimeEnd - physicsTimeBegin);
+		}
+		
+		mNextGameTick += mEngineSettings.mUpdatePeriod * 1000.0;
+		mNumberOfLoops++;
+
+		frame();
     }
 
-    physicsTimeEnd += physicsTime;
-      
-    if (render)
-    {
-        mRenderer->frame(mEngineSettings.mUpdatePeriod); // TODO: Use actual delta time
-      
-        if (mRenderer->done())
-            mIsRunning = false;
-    }
-    else
-    {
-        // Let OS do background work while we wait.
-        std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
-    }
+	mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
+	mRenderer->frame(mRenderTime);
+	
+	if (mRenderer->done())
+		mIsRunning = false;
 
     auto frameNumber = mRenderer->getViewer()->getFrameStamp()->getFrameNumber();
     auto stats = mRenderer->getViewer()->getViewerStats();
@@ -214,8 +221,9 @@ void Engine::run()
 
     mIsRunning = true;
 
-    mLastTime = getTime();
-    mExtraTime = 0.0f;
+	mNumberOfLoops = 0;
+	mRenderTime = 0.0f;
+	mNextGameTick = getTickCount();
 
     while (mIsRunning)       // main loop
         step();

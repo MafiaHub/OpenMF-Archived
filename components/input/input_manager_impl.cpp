@@ -51,7 +51,7 @@ bool InputManagerImpl::windowClosed()
     return mClosed;
 }
 
-void InputManagerImpl::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y)
+void InputManagerImpl::initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y, bool vsync)
 {
     // taken from https://github.com/OpenMW/openmw/blob/c7f60a6dc87db0f59a064415ba844917a394af78/apps/openmw/engine.cpp#L317
 
@@ -86,7 +86,7 @@ void InputManagerImpl::initWindow(unsigned int width, unsigned int height, unsig
     traits->alpha = 0;
     traits->depth = 24;
     traits->stencil = 8;
-    traits->vsync = false;
+    traits->vsync = vsync;
     traits->doubleBuffer = true;
     traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 

@@ -33,8 +33,11 @@ public:
             mLoadScene2Bin      = true;
             mLoadCacheBin       = true;
             mLoadTreeKlz        = true;
+			mVsync              = true;
 
-            mUpdatePeriod       = 1.0 / 60.0f;
+			mTicksPerSecond     = 60.0;
+            mUpdatePeriod       = 1.0 / mTicksPerSecond;
+			mFrameSkip          = 5;
             mSleepPeriod        = 1;
         };
 
@@ -49,8 +52,11 @@ public:
         bool         mLoadScene2Bin;
         bool         mLoadCacheBin;
         bool         mLoadTreeKlz;
+		bool         mVsync;
 
-        float        mUpdatePeriod;
+		double        mTicksPerSecond;
+		double        mUpdatePeriod;
+		int          mFrameSkip;
         unsigned int mSleepPeriod;
 
     } EngineSettings;
@@ -75,10 +81,13 @@ public:
     void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().
 
 protected:
-    double getTime(); 
+    double getTime();
+	int getTickCount();
 
-    double mLastTime;
-    double mExtraTime;
+
+	int mNumberOfLoops;
+	int mNextGameTick;
+	float mRenderTime;
 
     unsigned long long mFrameNumber;
 

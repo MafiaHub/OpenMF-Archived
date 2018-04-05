@@ -19,7 +19,7 @@ class InputManagerImpl: public InputManager
 {
 public:
     InputManagerImpl();
-    virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y) override;
+    virtual void initWindow(unsigned int width, unsigned int height, unsigned int x, unsigned int y, bool vsync) override;
     virtual void destroyWindow() override;
     virtual bool windowClosed() override;
     virtual void getWindowSize(unsigned int &width, unsigned int &height) override;
