@@ -164,7 +164,7 @@ int main(int argc, char** argv)
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
         ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
-        ("no-vsync","Disable VSYNC.")
+        ("vsync","Enable VSYNC.")
         ("no-4ds","Do not load scene.4ds for the mission.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
         ("no-cachebin","Do not load cache.bin for the mission.")
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
     settings.mLoadScene2Bin   = arguments.count("no-scene2bin") < 1;
     settings.mLoadCacheBin    = arguments.count("no-cachebin") < 1;
     settings.mLoadTreeKlz     = arguments.count("no-treeklz") < 1;
-    settings.mVsync           = arguments.count("no-vsync") < 1;
+    settings.mVsync           = arguments.count("vsync") > 0;
 
     std::string cameraString = "";
 

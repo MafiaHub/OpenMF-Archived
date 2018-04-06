@@ -136,6 +136,15 @@ double Engine::getTime()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
 }
 
+void Engine::yield()
+{
+#if defined(_WIN32)
+    Sleep(mEngineSettings.mSleepPeriod);
+#else
+    sleep(mEngineSettings.mSleepPeriod); // TODO please check or fix this if required to
+#endif
+}
+
 Engine::~Engine()
 {
     MFLogger::Logger::info("Shutting down the engine.",ENGINE_MODULE_STR);
@@ -157,6 +166,7 @@ void Engine::update(double dt)
         return;
     }
 
+    bool render = false;
     double startTime = getTime();
     double passedTime = startTime - mLastTime;
     mLastTime = startTime;
@@ -187,12 +197,18 @@ void Engine::update(double dt)
         mUnprocessedTime -= mEngineSettings.mUpdatePeriod;
 
         step();
+        render = true;
     }
-    
-    mRenderTime = mEngineSettings.mUpdatePeriod; // Use actual delta time
-    frame(mRenderTime);
-    mRenderer->frame(mRenderTime);
-    
+
+    if (render) {
+        mRenderTime = mEngineSettings.mUpdatePeriod; // Use actual delta time
+        frame(mRenderTime);
+        mRenderer->frame(mRenderTime);
+    }
+    else if(!mEngineSettings.mVsync) {
+        yield();
+    }
+
     if (mRenderer->done())
         mIsRunning = false;
 

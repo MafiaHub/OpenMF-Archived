@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     options.add_options()
         ("h,help","Display help and exit.")
-        ("no-vsync","Disable VSYNC.")
+        ("vsync","Enable VSYNC.")
         ("s,scenario","Set test game scenario number.",cxxopts::value<unsigned int>());
 
     auto arguments = options.parse(argc,argv);
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     MFGame::Engine::EngineSettings settings;
     settings.mInitWindowWidth = 1024;
     settings.mInitWindowHeight = 768;
-    settings.mVsync = arguments.count("no-vsync") < 1;
+    settings.mVsync = arguments.count("vsync") > 1;
     MafiaEngine engine(settings);
 
     switch (scenario)

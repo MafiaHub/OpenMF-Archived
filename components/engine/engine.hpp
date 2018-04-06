@@ -33,9 +33,10 @@ public:
             mLoadScene2Bin      = true;
             mLoadCacheBin       = true;
             mLoadTreeKlz        = true;
-            mVsync              = true;
+            mVsync              = false;
 
             mUpdatePeriod       = 1.0 / 60.0;
+            mSleepPeriod        = 1.0;
         };
 
         unsigned int mInitWindowWidth;
@@ -52,7 +53,7 @@ public:
         bool         mVsync;
 
         double       mUpdatePeriod;
-
+        double       mSleepPeriod;
     } EngineSettings;
 
     Engine(EngineSettings settings);
@@ -78,6 +79,7 @@ public:
 
 protected:
     double getTime();
+    void yield();
 
 
     double mLastTime;
