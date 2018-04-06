@@ -41,15 +41,11 @@ protected:
 
 int main(int argc, char** argv)
 {
-    MFGame::Engine::EngineSettings settings;
-    settings.mInitWindowWidth = 1024;
-    settings.mInitWindowHeight = 768;
-    OpenMFEngine engine(settings);
-
     cxxopts::Options options("OpenMF","OpenMF game.");
 
     options.add_options()
         ("h,help","Display help and exit.")
+        ("no-vsync","Disable VSYNC.")
         ("s,scenario","Set test game scenario number.",cxxopts::value<unsigned int>());
 
     auto arguments = options.parse(argc,argv);
@@ -64,6 +60,12 @@ int main(int argc, char** argv)
 
     if (arguments.count("s") > 0)
         scenario = arguments["s"].as<unsigned int>();
+
+    MFGame::Engine::EngineSettings settings;
+    settings.mInitWindowWidth = 1024;
+    settings.mInitWindowHeight = 768;
+    settings.mVsync = arguments.count("no-vsync") < 1;
+    OpenMFEngine engine(settings);
 
     switch (scenario)
     {
