@@ -82,6 +82,11 @@ int main(int argc, char** argv)
             engine.loadMission("mise02-saliery");
             engine.setPlayerPosition(MFMath::Vec3(-1774.71,31.45,-2.52));
             break;
+
+		case 5:
+			engine.loadMission("mise06-autodrom");
+			engine.setPlayerPosition(MFMath::Vec3(161.601547, -136.590485, 1.929724));
+			break;
  
         default:
             engine.loadMission("tutorial");
