@@ -15,10 +15,10 @@ public:
     {
         switch (keyCode)
         {
-            case OMFK_w: mController->moveForward(down); break;
-            case OMFK_s: mController->moveBackward(down); break;
-            case OMFK_a:  mController->moveLeft(down); break;
-            case OMFK_d:  mController->moveRight(down); break;
+            case OMF_SCANCODE_W: mController->moveForward(down); break;
+            case OMF_SCANCODE_S: mController->moveBackward(down); break;
+            case OMF_SCANCODE_A:  mController->moveLeft(down); break;
+            case OMF_SCANCODE_D:  mController->moveRight(down); break;
             case OMFK_SPACE: if (down) mController->jump(); break;
             case OMF_SCANCODE_RSHIFT:
             case OMF_SCANCODE_LSHIFT:

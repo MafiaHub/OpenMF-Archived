@@ -179,7 +179,6 @@ void Engine::step(double dt)
     while ((double)getTickCount() > mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
     {
 		mInputManager->processEvents();
-		frame();
         mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
 
 		if (mEngineSettings.mSimulatePhysics) {
@@ -196,6 +195,7 @@ void Engine::step(double dt)
 		mNumberOfLoops++;
     }
 	
+	frame();
 	mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
 	mRenderer->frame(mRenderTime);
 	
