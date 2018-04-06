@@ -145,7 +145,7 @@ if(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 endif(NOT WIN32)
 
-file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "components/*.hpp" "extern/*.cpp" "extern/*.hpp")
+file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "components/*.hpp" "extern/*.cpp" "extern/*.c" "extern/*.hpp")
 
 set(THIRD_PARTY_LIBS
     ${OPENSCENEGRAPH_LIBRARIES}
@@ -159,6 +159,12 @@ set(THIRD_PARTY_LIBS
     ${CMAKE_DL_LIBS}
     ${CMAKE_THREAD_LIBS_INIT}
     ${SDL2_LIBRARIES})
+
+if(WIN32)
+    set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} opengl32)
+else(WIN32)
+    set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} gl)
+endif(WIN32)
 
 add_library(components OBJECT ${COMPONENT_SOURCES})
 
