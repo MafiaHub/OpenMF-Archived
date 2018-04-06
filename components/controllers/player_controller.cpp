@@ -19,7 +19,7 @@ public:
             case OMF_SCANCODE_S: mController->moveBackward(down); break;
             case OMF_SCANCODE_A:  mController->moveLeft(down); break;
             case OMF_SCANCODE_D:  mController->moveRight(down); break;
-            case OMFK_SPACE: if (down) mController->jump(); break;
+            case OMF_SCANCODE_SPACE: if (down) mController->jump(); break;
             case OMF_SCANCODE_RSHIFT:
             case OMF_SCANCODE_LSHIFT:
                 mController->setMovementState(down

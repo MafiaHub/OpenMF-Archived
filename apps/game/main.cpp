@@ -10,6 +10,7 @@ public:
     {
         mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
+		mPlayerController->setMafiaPhysicsEmulation(false);
 
         mSpatialEntityFactory->setDebugMode(false);
     };
