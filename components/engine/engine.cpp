@@ -214,6 +214,11 @@ void Engine::step(double dt)
     mFrameNumber++;
 }
 
+void Engine::RequestExit()
+{
+	mIsRunning = false;
+}
+
 void Engine::run()
 {
     MFLogger::Logger::info("Starting the engine.",ENGINE_MODULE_STR);

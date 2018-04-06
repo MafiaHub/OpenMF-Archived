@@ -44,7 +44,7 @@ public:
         if (!down)
             return;
 
-        if (keyCode == SDL_SCANCODE_SPACE)   // SPACE
+        if (keyCode == OMF_SCANCODE_SPACE)   // SPACE
         {
             MFGame::SpatialEntity *e = mEngine->getSpatialEntityManager()->getEntityById(
                 mCounter % 2 == 0 ?
@@ -60,10 +60,13 @@ public:
             e->setVelocity(f * speed);
             mCounter++;
         }
-        else if (keyCode == SDL_SCANCODE_F3) // F3
+        else if (keyCode == OMF_SCANCODE_F3) // F3
         {
             mEngine->getRenderer()->showProfiler();
         }
+		else if (keyCode == OMF_SCANCODE_ESCAPE) {
+			mEngine->RequestExit();
+		}
     }
 
 protected:

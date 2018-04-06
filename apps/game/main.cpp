@@ -19,6 +19,10 @@ public:
     virtual void frame() override
     {
         mPlayerController->update(mEngineSettings.mUpdatePeriod);
+
+		if (mInputManager->keyPressed(SDL_SCANCODE_ESCAPE)) {
+			mIsRunning = false;
+		}
     };
 
     void setPlayerPosition(MFMath::Vec3 pos)
