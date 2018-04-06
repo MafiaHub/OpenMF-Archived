@@ -207,6 +207,11 @@ OSGRenderer::OSGRenderer(): Renderer()
     mHighlightMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4f(0.5,0,0,1));
     mMaterialBackup = nullptr;
     mSelected = nullptr;
+
+    // TODO make this work
+    /*mImGuiHandler = new ImGuiHandler(new ImGuiHandler::GuiCallback);
+    mImGuiHandler->setCameraCallbacks(mViewer->getCamera());
+    mViewer->addEventHandler(mImGuiHandler);*/
 }
 
 void OSGRenderer::setCameraParameters(bool perspective, float fov, float orthoSize, float nearDist, float farDist)

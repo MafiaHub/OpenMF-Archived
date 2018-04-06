@@ -20,6 +20,8 @@
 #include <osgUtil/PrintVisitor>
 #include <vfs/vfs.hpp>
 
+#include <imgui/ImGuiHandler.hpp>
+
 #define OSGRENDERER_MODULE_STR "renderer"
 
 namespace MFRender
@@ -63,6 +65,7 @@ public:
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
+    osg::ref_ptr<ImGuiHandler> mImGuiHandler;
     MFFile::FileSystem *mFileSystem;
     OSGCache mLoaderCache;
 
