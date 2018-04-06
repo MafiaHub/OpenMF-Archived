@@ -21,7 +21,7 @@ protected:
     OrbitEntityCameraController *mCameraController;
     MFRender::Renderer *mRenderer;
     MFInput::InputManager *mInputManager;
-	std::shared_ptr<MFInput::KeyInputCallback> mKeyCallback;
+    std::shared_ptr<MFInput::KeyInputCallback> mKeyCallback;
 };
 
 }

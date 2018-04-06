@@ -41,7 +41,7 @@ public:
 
     void instantRotate(MFMath::Quat newRotation);
     void applyCurrentMotion();
-	void setMafiaPhysicsEmulation(bool state);
+    void setMafiaPhysicsEmulation(bool state);
 
 protected:
     MFPhysics::PhysicsWorld *mPhysicsWorld;
@@ -50,7 +50,7 @@ protected:
     MFMath::Vec3 mMovementVector;
     MFMath::Vec3 mLastJumpMovementVector;
     bool mIsGrounded;
-	bool mEmulatesMafiaPhysics;
+    bool mEmulatesMafiaPhysics;
     float mSpeeds[3];
 };
 

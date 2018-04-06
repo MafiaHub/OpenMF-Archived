@@ -10,23 +10,23 @@ public:
     {
         mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
-		mPlayerController->setMafiaPhysicsEmulation(false);
+        mPlayerController->setMafiaPhysicsEmulation(false);
 
         mSpatialEntityFactory->setDebugMode(false);
     };
 
-	virtual ~OpenMFEngine()
-	{
-		delete mPlayerController;
-	};
+    virtual ~OpenMFEngine()
+    {
+        delete mPlayerController;
+    };
 
     virtual void step() override
     {
         mPlayerController->update(mEngineSettings.mUpdatePeriod);
 
-		if (mInputManager->keyPressed(SDL_SCANCODE_ESCAPE)) {
-			mIsRunning = false;
-		}
+        if (mInputManager->keyPressed(SDL_SCANCODE_ESCAPE)) {
+            mIsRunning = false;
+        }
     };
 
     void setPlayerPosition(MFMath::Vec3 pos)
@@ -87,10 +87,10 @@ int main(int argc, char** argv)
             engine.setPlayerPosition(MFMath::Vec3(-1774.71,31.45,-2.52));
             break;
 
-		case 5:
-			engine.loadMission("mise06-autodrom");
-			engine.setPlayerPosition(MFMath::Vec3(161.601547, -136.590485, 1.929724));
-			break;
+        case 5:
+            engine.loadMission("mise06-autodrom");
+            engine.setPlayerPosition(MFMath::Vec3(161.601547, -136.590485, 1.929724));
+            break;
  
         default:
             engine.loadMission("tutorial");

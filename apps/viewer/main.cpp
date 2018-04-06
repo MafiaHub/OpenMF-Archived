@@ -64,9 +64,9 @@ public:
         {
             mEngine->getRenderer()->showProfiler();
         }
-		else if (keyCode == OMF_SCANCODE_ESCAPE) {
-			mEngine->RequestExit();
-		}
+        else if (keyCode == OMF_SCANCODE_ESCAPE) {
+            mEngine->RequestExit();
+        }
     }
 
 protected:
@@ -162,10 +162,10 @@ int main(int argc, char** argv)
         ("P,physics","Simulate physics and allow space-key controlled spawning of test entities.")
         ("e,export","Export scene to file and exit.",cxxopts::value<std::string>())
         ("b,base-dir","Specify base game directory.",cxxopts::value<std::string>())
-		("u,update-fps","The target FPS used to update the engine.",cxxopts::value<float>())
+        ("u,update-fps","The target FPS used to update the engine.",cxxopts::value<float>())
         ("p,place-camera","Place camera at position X,Y,Z,YAW,PITCH,ROLL.",cxxopts::value<std::string>())
         ("l,log-id","Specify a module to print logs of, with a string ID. Combine with -v.",cxxopts::value<std::string>())
-		("vsync","Enable VSYNC.")
+        ("vsync","Enable VSYNC.")
         ("no-4ds","Do not load scene.4ds for the mission.")
         ("no-scene2bin","Do not load scene2.bin for the mission.")
         ("no-cachebin","Do not load cache.bin for the mission.")
@@ -191,9 +191,9 @@ int main(int argc, char** argv)
     settings.mLoadScene2Bin   = arguments.count("no-scene2bin") < 1;
     settings.mLoadCacheBin    = arguments.count("no-cachebin") < 1;
     settings.mLoadTreeKlz     = arguments.count("no-treeklz") < 1;
-	settings.mVsync           = arguments.count("vsync") > 0;
-	settings.mTicksPerSecond  = arguments.count("update-fps") > 0 ? arguments["update-fps"].as<float>() : 60.0;
-	settings.mUpdatePeriod    = 1.0 / settings.mTicksPerSecond;
+    settings.mVsync           = arguments.count("vsync") > 0;
+    settings.mTicksPerSecond  = arguments.count("update-fps") > 0 ? arguments["update-fps"].as<float>() : 60.0;
+    settings.mUpdatePeriod    = 1.0 / settings.mTicksPerSecond;
 
     std::string cameraString = "";
 

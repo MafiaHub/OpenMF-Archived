@@ -33,11 +33,11 @@ public:
             mLoadScene2Bin      = true;
             mLoadCacheBin       = true;
             mLoadTreeKlz        = true;
-			mVsync              = true;
+            mVsync              = true;
 
-			mTicksPerSecond     = 60.0;
+            mTicksPerSecond     = 60.0;
             mUpdatePeriod       = 1.0 / mTicksPerSecond;
-			mFrameSkip          = 5;
+            mFrameSkip          = 5;
             mSleepPeriod        = 1;
         };
 
@@ -52,11 +52,11 @@ public:
         bool         mLoadScene2Bin;
         bool         mLoadCacheBin;
         bool         mLoadTreeKlz;
-		bool         mVsync;
+        bool         mVsync;
 
-		double        mTicksPerSecond;
-		double        mUpdatePeriod;
-		int          mFrameSkip;
+        double        mTicksPerSecond;
+        double        mUpdatePeriod;
+        int          mFrameSkip;
         unsigned int mSleepPeriod;
 
     } EngineSettings;
@@ -65,7 +65,7 @@ public:
     virtual ~Engine();
 
     virtual void frame(double dt=-1) {};           ///< This can be overriden to perform something each frame.
-	virtual void step() {};            ///< This can be overriden to perform something each update step.
+    virtual void step() {};            ///< This can be overriden to perform something each update step.
     virtual void update(double dt=-1);   ///< Performs one iteration of the game loop.
     virtual void run();
 
@@ -80,16 +80,16 @@ public:
 
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
     void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().
-	void RequestExit();
+    void RequestExit();
 
 protected:
     double getTime();
-	int getTickCount();
+    int getTickCount();
 
 
-	int mNumberOfLoops;
-	double mNextGameTick;
-	float mRenderTime;
+    int mNumberOfLoops;
+    double mNextGameTick;
+    float mRenderTime;
 
     unsigned long long mFrameNumber;
 

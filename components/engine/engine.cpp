@@ -52,7 +52,7 @@ Engine::Engine(EngineSettings settings)
         mEngineSettings.mInitWindowHeight,
         mEngineSettings.mInitWindowX,
         mEngineSettings.mInitWindowY,
-		mEngineSettings.mVsync);
+        mEngineSettings.mVsync);
 
     std::shared_ptr<WindowResizeCallback> wrcb = std::make_shared<WindowResizeCallback>(mRenderer);
     mInputManager->addWindowResizeCallback(wrcb);
@@ -139,13 +139,13 @@ double Engine::getTime()
 int Engine::getTickCount()
 {
 #ifdef _WIN32
-	return GetTickCount();
+    return GetTickCount();
 #else
-	struct timeval tv;
-	if (gettimeofday(&tv, NULL) != 0)
-		return 0;
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) != 0)
+        return 0;
 
-	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 #endif
 }
 
@@ -170,39 +170,39 @@ void Engine::update(double dt)
         return;
     }
 
-	mNumberOfLoops = 0;
+    mNumberOfLoops = 0;
 
-	double physicsTime = 0.0f;
+    double physicsTime = 0.0f;
     double physicsTimeBegin = 0.0f;
     double physicsTimeEnd = physicsTimeBegin;
 
     while ((double)getTickCount() > mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
     {
-		mInputManager->processEvents();
+        mInputManager->processEvents();
         mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
 
-		if (mEngineSettings.mSimulatePhysics) {
-			if (physicsTimeBegin == 0.0f)
-				physicsTimeBegin = getTime();
+        if (mEngineSettings.mSimulatePhysics) {
+            if (physicsTimeBegin == 0.0f)
+                physicsTimeBegin = getTime();
 
-			mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
+            mPhysicsWorld->frame(mEngineSettings.mUpdatePeriod);
 
-			physicsTimeEnd = getTime();
-			physicsTime += (physicsTimeEnd - physicsTimeBegin);
-		}
-		
-		mNextGameTick += (double)(mEngineSettings.mUpdatePeriod * 1000.0);
-		mNumberOfLoops++;
+            physicsTimeEnd = getTime();
+            physicsTime += (physicsTimeEnd - physicsTimeBegin);
+        }
+        
+        mNextGameTick += (double)(mEngineSettings.mUpdatePeriod * 1000.0);
+        mNumberOfLoops++;
 
-		step();
+        step();
     }
-	
-	mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
-	mRenderer->frame(mRenderTime);
-	frame(mRenderTime);
-	
-	if (mRenderer->done())
-		mIsRunning = false;
+    
+    mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
+    mRenderer->frame(mRenderTime);
+    frame(mRenderTime);
+    
+    if (mRenderer->done())
+        mIsRunning = false;
 
     auto frameNumber = mRenderer->getViewer()->getFrameStamp()->getFrameNumber();
     auto stats = mRenderer->getViewer()->getViewerStats();
@@ -218,7 +218,7 @@ void Engine::update(double dt)
 
 void Engine::RequestExit()
 {
-	mIsRunning = false;
+    mIsRunning = false;
 }
 
 void Engine::run()
@@ -227,9 +227,9 @@ void Engine::run()
 
     mIsRunning = true;
 
-	mNumberOfLoops = 0;
-	mRenderTime = 0.0f;
-	mNextGameTick = (double)getTickCount();
+    mNumberOfLoops = 0;
+    mRenderTime = 0.0f;
+    mNextGameTick = (double)getTickCount();
 
     while (mIsRunning)       // main loop
         update();
