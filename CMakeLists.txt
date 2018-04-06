@@ -214,6 +214,6 @@ if(BUILD_TESTS)
     add_executable        ( test_suite tests/test_suite.cpp              $<TARGET_OBJECTS:components>)
     target_link_libraries ( test_suite                                   ${THIRD_PARTY_LIBS})
 
-    add_executable        ( test_suite_local tests/test_suite.cpp        $<TARGET_OBJECTS:components>)
+    add_executable        ( test_suite_local tests/test_suite_local.cpp  $<TARGET_OBJECTS:components>)
     target_link_libraries ( test_suite_local                             ${THIRD_PARTY_LIBS})
 endif(BUILD_TESTS)
