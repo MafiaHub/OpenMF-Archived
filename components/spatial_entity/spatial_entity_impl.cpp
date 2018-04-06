@@ -155,6 +155,7 @@ void SpatialEntityImpl::computeCurrentTransform()
     }
     else
     {
+        // An entity with no physical nor visual representation shall have identity transformation in case it's being used for special purposes.
         mPosition = MFMath::Vec3(0,0,0);
         mRotation = MFMath::Quat(0,0,0,1);
         mScale = MFMath::Vec3(1,1,1);
