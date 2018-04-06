@@ -51,6 +51,10 @@ public:
     void addButtonCallback(std::shared_ptr<ButtonInputCallback> callback)         { mButtonCallbacks.push_back(callback);       };
     void addWindowResizeCallback(std::shared_ptr<WindowResizeCallback> callback)  { mWindowResizeCallbacks.push_back(callback); };
 
+	void removeKeyCallback(std::shared_ptr<KeyInputCallback> callback);
+	void removeButtonCallback(std::shared_ptr<ButtonInputCallback> callback);
+	void removeWindowResizeCallback(std::shared_ptr<WindowResizeCallback> callback);
+
 protected:
     std::vector<std::shared_ptr<KeyInputCallback>>      mKeyCallbacks;
     std::vector<std::shared_ptr<ButtonInputCallback>>   mButtonCallbacks;

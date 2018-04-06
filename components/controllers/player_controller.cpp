@@ -50,13 +50,14 @@ PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender
     mCameraController = new OrbitEntityCameraController(renderer,inputManager,playerEntity,physicsWorld);
     mCameraController->setRelativeOffset(MFMath::Vec3(0,0,1.5));
 
-    std::shared_ptr<CharacterKeyCallback> cb = std::make_shared<CharacterKeyCallback>(this);
-    mInputManager->addKeyCallback(cb);
+	mKeyCallback = std::make_shared<CharacterKeyCallback>(this);
+    mInputManager->addKeyCallback(mKeyCallback);
 }
 
 PlayerController::~PlayerController()
 {
     delete mCameraController;
+	mInputManager->removeKeyCallback(mKeyCallback);
 }
 
 }
