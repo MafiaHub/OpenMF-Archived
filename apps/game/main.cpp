@@ -3,10 +3,10 @@
 #include <controllers/player_controller.hpp>
 #include <cxxopts.hpp>
 
-class OpenMFEngine: public MFGame::Engine
+class MafiaEngine: public MFGame::Engine
 {
 public:
-    OpenMFEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
+    MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
         mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
@@ -15,7 +15,7 @@ public:
         mSpatialEntityFactory->setDebugMode(false);
     };
 
-    virtual ~OpenMFEngine()
+    virtual ~MafiaEngine()
     {
         delete mPlayerController;
     };
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     settings.mInitWindowWidth = 1024;
     settings.mInitWindowHeight = 768;
     settings.mVsync = arguments.count("no-vsync") < 1;
-    OpenMFEngine engine(settings);
+    MafiaEngine engine(settings);
 
     switch (scenario)
     {
