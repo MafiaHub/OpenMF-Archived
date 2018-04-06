@@ -163,6 +163,9 @@ void Engine::update(double dt)
     mLastTime = startTime;
     mUnprocessedTime += passedTime;
 
+    if (dt > 0)
+        mUnprocessedTime = dt;
+
     double physicsTime = 0.0;
     double physicsTimeBegin = 0.0;
     double physicsTimeEnd = physicsTimeBegin;

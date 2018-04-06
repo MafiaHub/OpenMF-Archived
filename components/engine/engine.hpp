@@ -62,7 +62,7 @@ public:
 
     virtual void frame(double dt=-1) {};           ///< This can be overriden to perform something each frame.
     virtual void step() {};            ///< This can be overriden to perform something each update step.
-    virtual void update(double dt=-1);   ///< Performs one iteration of the game loop.
+    virtual void update(double dt=-1);   ///< Performs one iteration of the game loop, positive dt can be used to step out of real-time.
     virtual void run();
 
     bool loadMission(std::string missionName); 
