@@ -35,9 +35,7 @@ public:
             mLoadTreeKlz        = true;
             mVsync              = true;
 
-            mTicksPerSecond     = 60.0;
-            mUpdatePeriod       = 1.0 / mTicksPerSecond;
-            mFrameSkip          = 5;
+            mUpdatePeriod       = 1.0 / 60.0;
             mSleepPeriod        = 1;
         };
 
@@ -54,9 +52,7 @@ public:
         bool         mLoadTreeKlz;
         bool         mVsync;
 
-        double        mTicksPerSecond;
-        double        mUpdatePeriod;
-        int          mFrameSkip;
+        double       mUpdatePeriod;
         unsigned int mSleepPeriod;
 
     } EngineSettings;
@@ -84,11 +80,10 @@ public:
 
 protected:
     double getTime();
-    int getTickCount();
 
 
-    int mNumberOfLoops;
-    double mNextGameTick;
+    double mLastTime;
+    double mUnprocessedTime;
     float mRenderTime;
 
     unsigned long long mFrameNumber;

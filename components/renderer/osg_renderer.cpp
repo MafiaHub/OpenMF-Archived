@@ -185,6 +185,9 @@ OSGRenderer::OSGRenderer(): Renderer()
     mStatsHandler->addUserStatsLine("Physics", osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f),
                                     osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f), "physics_time_taken", 1000.0f, true, false, "physics_time_begin", "physics_time_end", 10000);
 
+    mStatsHandler->addUserStatsLine("Sleep", osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f),
+        osg::Vec4(1.0f, 0.0f, 1.0f, 1.0f), "sleep_time_taken", 1000.0f, true, false, "sleep_time_begin", "sleep_time_end", 10000);
+
     mRootNode = new osg::Group();
     mRootNode->setName("root");
 

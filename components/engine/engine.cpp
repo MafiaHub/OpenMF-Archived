@@ -136,19 +136,6 @@ double Engine::getTime()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
 }
 
-int Engine::getTickCount()
-{
-#ifdef _WIN32
-    return GetTickCount();
-#else
-    struct timeval tv;
-    if (gettimeofday(&tv, NULL) != 0)
-        return 0;
-
-    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-#endif
-}
-
 Engine::~Engine()
 {
     MFLogger::Logger::info("Shutting down the engine.",ENGINE_MODULE_STR);
@@ -170,13 +157,20 @@ void Engine::update(double dt)
         return;
     }
 
-    mNumberOfLoops = 0;
+    bool render = false;
+    double startTime = getTime();
+    double passedTime = startTime - mLastTime;
+    mLastTime = startTime;
+    mUnprocessedTime += passedTime;
 
-    double physicsTime = 0.0f;
-    double physicsTimeBegin = 0.0f;
+    double physicsTime = 0.0;
+    double physicsTimeBegin = 0.0;
     double physicsTimeEnd = physicsTimeBegin;
 
-    while ((double)getTickCount() > mNextGameTick && mNumberOfLoops < mEngineSettings.mFrameSkip)
+    double sleepTimeBegin = 0.0;
+    double sleepTimeEnd = 0.0;
+
+    while (mUnprocessedTime >= mEngineSettings.mUpdatePeriod)
     {
         mInputManager->processEvents();
         mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
@@ -190,16 +184,26 @@ void Engine::update(double dt)
             physicsTimeEnd = getTime();
             physicsTime += (physicsTimeEnd - physicsTimeBegin);
         }
-        
-        mNextGameTick += (double)(mEngineSettings.mUpdatePeriod * 1000.0);
-        mNumberOfLoops++;
+
+        mUnprocessedTime -= mEngineSettings.mUpdatePeriod;
+
+        render = true;
 
         step();
     }
     
-    mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
-    mRenderer->frame(mRenderTime);
-    frame(mRenderTime);
+    if (render) {
+        mRenderTime = mEngineSettings.mUpdatePeriod; // Use actual delta time
+        frame(mRenderTime);
+        mRenderer->frame(mRenderTime);
+    }
+    else {
+        // Let OS do background work while we wait.
+        sleepTimeBegin = getTime();
+        std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
+        sleepTimeEnd = getTime();
+    }
+    
     
     if (mRenderer->done())
         mIsRunning = false;
@@ -211,6 +215,10 @@ void Engine::update(double dt)
         stats->setAttribute(frameNumber, "physics_time_begin", physicsTimeBegin);
         stats->setAttribute(frameNumber, "physics_time_taken", physicsTime);
         stats->setAttribute(frameNumber, "physics_time_end", physicsTimeEnd);
+
+        stats->setAttribute(frameNumber, "sleep_time_begin", sleepTimeBegin);
+        stats->setAttribute(frameNumber, "sleep_time_taken", sleepTimeEnd - sleepTimeBegin);
+        stats->setAttribute(frameNumber, "sleep_time_end", sleepTimeEnd);
     }
 
     mFrameNumber++;
@@ -227,9 +235,9 @@ void Engine::run()
 
     mIsRunning = true;
 
-    mNumberOfLoops = 0;
+    mLastTime = getTime();
+    mUnprocessedTime = 0.0f;
     mRenderTime = 0.0f;
-    mNextGameTick = (double)getTickCount();
 
     while (mIsRunning)       // main loop
         update();
