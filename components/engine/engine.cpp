@@ -162,7 +162,7 @@ Engine::~Engine()
     delete mPhysicsWorld;
 }
 
-void Engine::step(double dt)
+void Engine::update(double dt)
 {
     if (mInputManager->windowClosed())
     {
@@ -193,11 +193,13 @@ void Engine::step(double dt)
 		
 		mNextGameTick += (double)(mEngineSettings.mUpdatePeriod * 1000.0);
 		mNumberOfLoops++;
-		frame();
+
+		step();
     }
 	
 	mRenderTime = float(getTickCount() + mEngineSettings.mUpdatePeriod - mNextGameTick) / float(mEngineSettings.mUpdatePeriod);
 	mRenderer->frame(mRenderTime);
+	frame(mRenderTime);
 	
 	if (mRenderer->done())
 		mIsRunning = false;
@@ -230,7 +232,7 @@ void Engine::run()
 	mNextGameTick = (double)getTickCount();
 
     while (mIsRunning)       // main loop
-        step();
+        update();
 }
 
 }

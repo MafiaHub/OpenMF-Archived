@@ -20,7 +20,7 @@ public:
 		delete mPlayerController;
 	};
 
-    virtual void frame() override
+    virtual void step() override
     {
         mPlayerController->update(mEngineSettings.mUpdatePeriod);
 

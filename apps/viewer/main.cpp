@@ -111,7 +111,7 @@ public:
         delete mCameraController;
     }
 
-    virtual void frame() override
+    virtual void step() override
     {
         mCameraController->update(mEngineSettings.mUpdatePeriod);
 
