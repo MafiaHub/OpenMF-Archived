@@ -36,7 +36,6 @@ public:
             mVsync              = true;
 
             mUpdatePeriod       = 1.0 / 60.0;
-            mSleepPeriod        = 1;
         };
 
         unsigned int mInitWindowWidth;
@@ -53,7 +52,6 @@ public:
         bool         mVsync;
 
         double       mUpdatePeriod;
-        unsigned int mSleepPeriod;
 
     } EngineSettings;
 

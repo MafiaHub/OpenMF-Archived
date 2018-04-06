@@ -157,7 +157,6 @@ void Engine::update(double dt)
         return;
     }
 
-    bool render = false;
     double startTime = getTime();
     double passedTime = startTime - mLastTime;
     mLastTime = startTime;
@@ -169,9 +168,6 @@ void Engine::update(double dt)
     double physicsTime = 0.0;
     double physicsTimeBegin = 0.0;
     double physicsTimeEnd = physicsTimeBegin;
-
-    double sleepTimeBegin = 0.0;
-    double sleepTimeEnd = 0.0;
 
     while (mUnprocessedTime >= mEngineSettings.mUpdatePeriod)
     {
@@ -190,23 +186,12 @@ void Engine::update(double dt)
 
         mUnprocessedTime -= mEngineSettings.mUpdatePeriod;
 
-        render = true;
-
         step();
     }
     
-    if (render) {
-        mRenderTime = mEngineSettings.mUpdatePeriod; // Use actual delta time
-        frame(mRenderTime);
-        mRenderer->frame(mRenderTime);
-    }
-    else {
-        // Let OS do background work while we wait.
-        sleepTimeBegin = getTime();
-        std::this_thread::sleep_for(std::chrono::milliseconds(mEngineSettings.mSleepPeriod));
-        sleepTimeEnd = getTime();
-    }
-    
+    mRenderTime = mEngineSettings.mUpdatePeriod; // Use actual delta time
+    frame(mRenderTime);
+    mRenderer->frame(mRenderTime);
     
     if (mRenderer->done())
         mIsRunning = false;
@@ -218,10 +203,6 @@ void Engine::update(double dt)
         stats->setAttribute(frameNumber, "physics_time_begin", physicsTimeBegin);
         stats->setAttribute(frameNumber, "physics_time_taken", physicsTime);
         stats->setAttribute(frameNumber, "physics_time_end", physicsTimeEnd);
-
-        stats->setAttribute(frameNumber, "sleep_time_begin", sleepTimeBegin);
-        stats->setAttribute(frameNumber, "sleep_time_taken", sleepTimeEnd - sleepTimeBegin);
-        stats->setAttribute(frameNumber, "sleep_time_end", sleepTimeEnd);
     }
 
     mFrameNumber++;
