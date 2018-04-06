@@ -50,7 +50,7 @@ bool testEngine()
     message("Step " + std::to_string(steps) + " frames.");
 
     for (unsigned int i = 0; i < steps; ++i)
-        testEngine->step(0.1);
+        testEngine->update(0.1);
 
     MFMath::Vec3 endPos = entity1->getPosition();
     message("entity position: " + endPos.str());
