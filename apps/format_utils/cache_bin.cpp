@@ -18,7 +18,7 @@ void dump(MFFormat::DataFormatCacheBIN cacheBin)
     {
         std::cout << "        {\n";
         dumpValue("objectName", object.mObjectName, 3);
-        //dumpValue("bounds", "[" + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, ", ") + "]", 3, false);
+        dumpValue("bounds", "[" + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, ", ") + "]", 3, false);
         dumpValue("numberOfInstances", std::to_string(object.mInstances.size()), 3, false);
         std::cout << "            \"instances\": [" << std::endl;
 

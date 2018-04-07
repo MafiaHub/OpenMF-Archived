@@ -7,11 +7,23 @@
 
 void dump(MFFormat::DataFormatEffectsBIN effectsBin)
 {
-    MFLogger::Logger::raw("number of effects: " + std::to_string(effectsBin.getNumEffects()), "dump");
+    using namespace MFUtil;
+    std::cout << "{\n";
+    dumpValue("numberOfEffects", std::to_string(effectsBin.getNumEffects()), 1);
+    std::cout << "    \"effects\": [\n";
     for (auto effect : effectsBin.getEffects())
     {
-        MFLogger::Logger::raw("[" + std::to_string(effect.mEffectId) + "] " + std::to_string(effect.mPos.x) + " " + std::to_string(effect.mPos.y) + " " + std::to_string(effect.mPos.z), "dump");
+        std::cout << "        {\n";
+        dumpValue("id", std::to_string(effect.mEffectId), 3, false);
+        dumpValue("position", effect.mPos.str(), 3, false);
+        dumpValue("sign", std::to_string(effect.mSign), 3, false);
+        dumpValue("unk0", "["+arrayToString<uint8_t>(effect.mUnk0, 48, ", ")+"]", 3, false);
+        dumpValue("unk1", std::to_string(effect.mUnk1), 3, false);
+        dumpValue("size", std::to_string(effect.mSize), 3, false);
+        std::cout << "        },\n";
     }
+    std::cout << "    ],\n";
+    std::cout << "}\n";
 }
 
 int main(int argc, char** argv)
