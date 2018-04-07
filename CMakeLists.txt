@@ -154,20 +154,50 @@ if(NOT WIN32)
     string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 endif(NOT WIN32)
 
-file(GLOB_RECURSE COMPONENT_SOURCES "components/*.cpp" "components/*.hpp" "extern/*.cpp" "extern/*.c" "extern/*.hpp")
+file(GLOB_RECURSE COMPONENT_SOURCES 
+    "components/parser_*.cpp"
+    "components/utils/openmf.cpp"
+    "components/utils/logger.cpp"
+    "components/utils/bmp_analyser.cpp"
+    "components/vfs/*.cpp"
+    
+    "components/dta/dta_parser.cpp"
+    "components/dta/key_extractor.cpp")
+
+file(GLOB_RECURSE GAME_COMPONENT_SOURCES 
+    "components/osg_*.cpp" 
+    "components/bullet_*.cpp" 
+    "components/controllers/*.cpp" 
+    "components/physics/*.cpp"
+    "components/input/*.cpp"
+    "components/renderer/*.cpp"
+    "components/spatial_entity/*.cpp"
+    "components/engine/*.cpp"
+    "components/utils/osg.cpp"
+    "components/utils/bullet.cpp"
+    "components/base_loader.cpp"
+    )
+
+set (GAME_COMPONENT_SOURCES
+    "${GAME_COMPONENT_SOURCES}"
+    "extern/sdl_graphics_window.cpp"
+    "extern/GL/gl3w.c"
+    "extern/imgui/imgui.cpp"
+    "extern/imgui/imgui_draw.cpp"
+    "extern/imgui/imgui_demo.cpp"
+    "extern/imgui/ImGuiHandler.cpp")
+
 
 set(THIRD_PARTY_LIBS
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
-    ${BULLET_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
     ${OSGGA_LIBRARIES}
     ${CMAKE_DL_LIBS}
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${SDL2_LIBRARIES})
+    ${CMAKE_THREAD_LIBS_INIT})
 
 if(WIN32)
     set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} opengl32)
@@ -175,16 +205,22 @@ else(WIN32)
     set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} GL)
 endif(WIN32)
 
+set(GAME_THIRD_PARTY_LIBS 
+    ${THIRD_PARTY_LIBS}
+    ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARIES})
+
 add_library(components OBJECT ${COMPONENT_SOURCES})
+add_library(game_components OBJECT ${COMPONENT_SOURCES} ${GAME_COMPONENT_SOURCES})
 
 if(BUILD_VIEWER)
-    add_executable        ( viewer     apps/viewer/main.cpp              $<TARGET_OBJECTS:components> )
-    target_link_libraries ( viewer                                       ${THIRD_PARTY_LIBS}  )
+    add_executable        ( viewer     apps/viewer/main.cpp              $<TARGET_OBJECTS:game_components> )
+    target_link_libraries ( viewer                                       ${GAME_THIRD_PARTY_LIBS}  )
 endif(BUILD_VIEWER)
 
 if(BUILD_GAME)
-    add_executable        ( game       apps/game/main.cpp                $<TARGET_OBJECTS:components> )
-    target_link_libraries ( game                                         ${THIRD_PARTY_LIBS}  )
+    add_executable        ( game       apps/game/main.cpp                $<TARGET_OBJECTS:game_components> )
+    target_link_libraries ( game                                         ${GAME_THIRD_PARTY_LIBS}  )
 endif(BUILD_GAME)
 
 if(BUILD_UTILS)
@@ -220,9 +256,9 @@ if(BUILD_UTILS)
 endif(BUILD_UTILS)
 
 if(BUILD_TESTS)
-    add_executable        ( test_suite tests/test_suite.cpp              $<TARGET_OBJECTS:components>)
-    target_link_libraries ( test_suite                                   ${THIRD_PARTY_LIBS})
+    add_executable        ( test_suite tests/test_suite.cpp              $<TARGET_OBJECTS:game_components>)
+    target_link_libraries ( test_suite                                   ${GAME_THIRD_PARTY_LIBS})
 
-    add_executable        ( test_suite_local tests/test_suite_local.cpp  $<TARGET_OBJECTS:components>)
-    target_link_libraries ( test_suite_local                             ${THIRD_PARTY_LIBS})
+    add_executable        ( test_suite_local tests/test_suite_local.cpp  $<TARGET_OBJECTS:game_components>)
+    target_link_libraries ( test_suite_local                             ${GAME_THIRD_PARTY_LIBS})
 endif(BUILD_TESTS)
