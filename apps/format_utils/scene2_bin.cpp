@@ -21,6 +21,7 @@ TypeName const gObjectTypeNames[] = {
     {0x0C, "OBJECT_TYPE_OCCLUDER"},
     {0x99, "OBJECT_TYPE_SECTOR"},
     {0x9B, "OBJECT_TYPE_SCRIPT"},
+    {0x23, "SPECIAL_OBJECT_TYPE_PHYSICAL"},
 };
 
 TypeName const gLightTypeNames[] = {
@@ -58,15 +59,25 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
         if (object.mType != objType && objType != 0) continue;
 
         std::cout << "\tobject name: " + object.mName + " {"<< std::endl;
-        std::cout << "\t\ttype: " + std::string(getTypeName(7, gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),"<< std::endl;
+        std::cout << "\t\ttype: " + std::string(getTypeName(sizeof(gObjectTypeNames)/sizeof(gObjectTypeNames[0]), gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),"<< std::endl;
         std::cout << "\t\tposition: [" + object.mPos.str() + "],"<< std::endl;
         std::cout << "\t\tposition2: [" + object.mPos2.str() + "],"<< std::endl;
         std::cout << "\t\trotation: [" + object.mRot.str() + "],"<< std::endl;
         std::cout << "\t\tscale: [" + object.mScale.str() + "],"<< std::endl;
         std::cout << "\t\tparent name: " + object.mParentName + ","<< std::endl;
 
-        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL)
+        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL | MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL)
             std::cout << "\t\tmodel name: " + object.mModelName + ","<< std::endl;
+
+        if (object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL) {
+            auto props = object.mSpecialProps;
+            std::cout << "\t\tphysical object properties {" << std::endl;
+            std::cout << "\t\t\tmovement value: [" + MFUtil::arrayToString<float>(props.mMovVal, 4, ", ") + "]," << std::endl;
+            std::cout << "\t\t\tmovement value 5: " + std::to_string(props.mMovVal5) + "," << std::endl;
+            std::cout << "\t\t\tweight: " + std::to_string(props.mWeight) + "," << std::endl;
+            std::cout << "\t\t\tsound: " + std::to_string(props.mSound) + "," << std::endl;
+            std::cout << "\t\t}" << std::endl;
+        }
         
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT)
         {

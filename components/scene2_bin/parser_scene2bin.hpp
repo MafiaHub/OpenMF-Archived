@@ -21,20 +21,24 @@ public:
        HEADER_VIEW_DISTANCE = 0x3011,
        HEADER_CLIPPING_PLANES = 0x3211,
        HEADER_WORLD = 0x4000,
+       HEADER_SPECIAL_WORLD = 0xAE20,
        HEADER_ENTITIES = 0xAE20,
        HEADER_INIT = 0xAE50,
         // WORLD subHeader
-       HEADER_OBJECT = 0x4010
+       HEADER_OBJECT = 0x4010,
+       HEADER_SPECIAL_OBJECT = 0xAE21,
     } HeaderType;
 
     typedef enum {
-        OBJECT_TYPE = 0x4011,
+        OBJECT_TYPE_SPECIAL = 0xAE22,
+        OBJECT_TYPE_NORMAL = 0x4011,
         OBJECT_POSITION = 0x0020,
         OBJECT_ROTATION = 0x0022,
         OBJECT_POSITION_2 = 0x002C,
         OBJECT_SCALE = 0x002D,
         OBJECT_PARENT = 0x4020,
         OBJECT_NAME = 0x0010, 
+        OBJECT_NAME_SPECIAL = 0xAE23,
         OBJECT_MODEL = 0x2012,
         OBJECT_LIGHT_MAIN = 0x4040,
         OBJECT_LIGHT_TYPE = 0x4041,
@@ -43,7 +47,8 @@ public:
         OBJECT_LIGHT_UNK_1 = 0x4043,
         OBJECT_LIGHT_RANGE = 0x4044,
         OBJECT_LIGHT_FLAGS = 0x4045,
-        OBJECT_LIGHT_SECTOR= 0x4046
+        OBJECT_LIGHT_SECTOR= 0x4046,
+        OBJECT_SPECIAL_DATA= 0xAE24,
     } ObjectProperty;
 
     typedef enum {
@@ -55,6 +60,10 @@ public:
         OBJECT_TYPE_SECTOR = 0x99,
         OBJECT_TYPE_SCRIPT = 0x9B
     } ObjectType;
+
+    typedef enum {
+        SPECIAL_OBJECT_TYPE_PHYSICAL = 0x23,
+    } SpecialObjectType;
 
     typedef enum {
         LIGHT_TYPE_POINT = 0x01,
@@ -94,6 +103,14 @@ public:
         float mLightNear;
         float mLightFar;
         char mLightSectors[5000];
+
+        struct {
+            // Physical object properties
+            float mMovVal[4];
+            uint32_t mMovVal5;
+            float mWeight;
+            uint32_t mSound;
+        } mSpecialProps;
     } Object;
 
     virtual bool load(std::ifstream &srcFile);

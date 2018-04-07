@@ -41,6 +41,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
 {
     switch(header->mType)
     {
+        case HEADER_SPECIAL_WORLD:
         case HEADER_WORLD:
         {
             uint32_t position = offset;
@@ -73,6 +74,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
         } 
         break;
 
+        case HEADER_SPECIAL_OBJECT:
         case HEADER_OBJECT:
         {
             uint32_t position = offset;
@@ -86,7 +88,19 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
                 position += nextHeader.mSize;
             }
 
-            mObjects.insert(make_pair(newObject.mName, newObject));
+            if (header->mType == HEADER_OBJECT) {
+                mObjects.insert(make_pair(newObject.mName, newObject));
+            }
+            else {
+                auto object_it = mObjects.find(newObject.mName);
+
+                if (object_it != mObjects.end()) {
+                    auto object = &object_it->second;
+                    object->mType = newObject.mType;
+
+                    memcpy(&object->mSpecialProps, &newObject.mSpecialProps, sizeof(newObject.mSpecialProps));
+                }
+            }
         } 
         break;
     }
@@ -96,13 +110,15 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 {
     switch(header->mType)
     {
-        case OBJECT_TYPE:
+        case OBJECT_TYPE_SPECIAL:
+        case OBJECT_TYPE_NORMAL:
         {
             read(srcFile, &object->mType);
         }
         break;
 
         case OBJECT_NAME:
+        case OBJECT_NAME_SPECIAL:
         {
             char *name = reinterpret_cast<char*>(malloc(header->mSize + 1));
             read(srcFile, name, header->mSize - 1);
@@ -110,6 +126,29 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
             object->mName = std::string(name);
             free(name);
+        }
+        break;
+
+        case OBJECT_SPECIAL_DATA:
+        {
+            switch (object->mType) {
+                case SPECIAL_OBJECT_TYPE_PHYSICAL:
+                {
+                    srcFile.seekg(offset + 2, srcFile.beg);
+                    offset += 2;
+
+                    read(srcFile, object->mSpecialProps.mMovVal, sizeof(float) * 2);
+                    read(srcFile, &object->mSpecialProps.mWeight);
+                    read(srcFile, object->mSpecialProps.mMovVal + 2, sizeof(float) * 2);
+                    read(srcFile, &object->mSpecialProps.mSound);
+                    
+                    srcFile.seekg(offset + 1, srcFile.beg);
+                    offset += 1;
+
+                    read(srcFile, &object->mSpecialProps.mMovVal5);
+                }
+                break;
+            }
         }
         break;
 
