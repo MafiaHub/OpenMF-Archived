@@ -164,8 +164,6 @@ file(GLOB_RECURSE COMPONENT_SOURCES
     "components/utils/logger.cpp"
     "components/utils/bmp_analyser.cpp"
     "components/vfs/*.cpp"
-    
-    "components/dta/dta_parser.cpp"
     "components/dta/key_extractor.cpp")
 
 file(GLOB_RECURSE GAME_COMPONENT_SOURCES 
