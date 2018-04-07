@@ -1,6 +1,12 @@
 #include <vfs/vfs.hpp>
 #include <utils/openmf.hpp>
 
+#ifdef OMF_SYSTEM_LINUX
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#endif
+
 namespace MFFile
 {
     

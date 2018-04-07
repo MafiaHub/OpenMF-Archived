@@ -10,12 +10,6 @@
 
 #include <utils/logger.hpp>
 
-#ifdef OMF_SYSTEM_LINUX
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-#endif
-
 #define VFS_MODULE_STR "VFS"
 #define MAFIA_INSTALL_DIR "MAFIA_INSTALL_DIR"
 
