@@ -44,55 +44,64 @@ char const *getTypeName(size_t count, TypeName const *typeNames, uint32_t objTyp
     return defaultType;
 }
 
+// draft
+
+void dumpValue(std::string name, std::string value, int offset, bool useQuotes=true, bool useComma=true)
+{
+    printf("%*s\"%s\": %s%c\n", offset*4, " ", name, useQuotes ? ("\""+value+"\"").c_str() : value.c_str(), useComma ? ',' : ' ');
+}
+
 void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
-    std::cout << "view distance: " + std::to_string(scene2Bin.getViewDistance()) + ","<< std::endl;
-    std::cout << "field of view: " + std::to_string(scene2Bin.getFov()) + ","<< std::endl;
-    std::cout << "clipping planes: [" + scene2Bin.getClippingPlanes().str() + "],"<< std::endl;
-    std::cout << "number of objects: " + std::to_string(scene2Bin.getNumObjects()) + ","<< std::endl;
-    std::cout << ""<< std::endl;
+    std::cout << "{" << std::endl;
+    dumpValue("viewDistance", std::to_string(scene2Bin.getViewDistance()), 1, false);
+    dumpValue("fieldOfView", std::to_string(scene2Bin.getFov()), 1, false);
+    dumpValue("clippingPlanes", scene2Bin.getClippingPlanes().str(), 1, false);
+    dumpValue("numberOfObjects", std::to_string(scene2Bin.getNumObjects()), 1, false);
+    std::cout << "    \"objects\": ["<< std::endl;
 
     for (auto pair : scene2Bin.getObjects())
     {
         auto object = pair.second;
-
         if (object.mType != objType && objType != 0) continue;
 
-        std::cout << "\tobject name: " + object.mName + " {"<< std::endl;
-        std::cout << "\t\ttype: " + std::string(getTypeName(sizeof(gObjectTypeNames)/sizeof(gObjectTypeNames[0]), gObjectTypeNames, object.mType)) + "(" + std::to_string(object.mType) + "),"<< std::endl;
-        std::cout << "\t\tposition: [" + object.mPos.str() + "],"<< std::endl;
-        std::cout << "\t\tposition2: [" + object.mPos2.str() + "],"<< std::endl;
-        std::cout << "\t\trotation: [" + object.mRot.str() + "],"<< std::endl;
-        std::cout << "\t\tscale: [" + object.mScale.str() + "],"<< std::endl;
-        std::cout << "\t\tparent name: " + object.mParentName + ","<< std::endl;
+        std::cout << "        {\n";
 
-        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL | MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL)
-            std::cout << "\t\tmodel name: " + object.mModelName + ","<< std::endl;
+        dumpValue("objectName", object.mName, 3);
+        dumpValue("type", std::string(getTypeName(sizeof(gObjectTypeNames) / sizeof(gObjectTypeNames[0]), gObjectTypeNames, object.mType)), 3);
+        dumpValue("typeRaw", std::to_string(object.mType), 3, false);
+        dumpValue("position", object.mPos.str(), 3, false);
+        dumpValue("position2", object.mPos2.str(), 3, false);
+        dumpValue("rotation", object.mRot.str(), 3, false);
+        dumpValue("scale", object.mScale.str(), 3, false);
+        dumpValue("parentName", object.mParentName, 3, true);
+
+        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL || object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL)
+            dumpValue("modelName", object.mModelName, 3, true);
 
         if (object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL) {
             auto props = object.mSpecialProps;
-            std::cout << "\t\tphysical object properties {" << std::endl;
-            std::cout << "\t\t\tmovement value: [" + MFUtil::arrayToString<float>(props.mMovVal, 4, ", ") + "]," << std::endl;
-            std::cout << "\t\t\tmovement value 5: " + std::to_string(props.mMovVal5) + "," << std::endl;
-            std::cout << "\t\t\tweight: " + std::to_string(props.mWeight) + "," << std::endl;
-            std::cout << "\t\t\tsound: " + std::to_string(props.mSound) + "," << std::endl;
-            std::cout << "\t\t}" << std::endl;
+            
+            dumpValue("movVal", "["+MFUtil::arrayToString<float>(props.mMovVal, 4, ", ")+"]", 3, false);
+            dumpValue("movVal5", std::to_string(props.mMovVal5), 3, false);
+            dumpValue("weight", std::to_string(props.mWeight), 3, false);
+            dumpValue("sound", std::to_string(props.mSound), 3, false);
         }
         
         if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT)
         {
-            std::cout << "\t\tlight properties {"<< std::endl;
-            std::cout << "\t\t\tlight type: " + std::string(getTypeName(5, gLightTypeNames, object.mLightType)) + "(" + std::to_string(object.mLightType) + "),"<< std::endl;
-            std::cout << "\t\t\tlight colour: [" + object.mLightColour.str() + "],"<< std::endl;
-            std::cout << "\t\t\tlight power: " + std::to_string(object.mLightPower)<< std::endl;
-            std::cout << "\t\t\tlight unk0: " + std::to_string(object.mLightUnk0) + ","<< std::endl;
-            std::cout << "\t\t\tlight unk1: " + std::to_string(object.mLightUnk1) + ","<< std::endl;
-            std::cout << "\t\t\tlight near: " + std::to_string(object.mLightNear) + ","<< std::endl;
-            std::cout << "\t\t\tlight far: " + std::to_string(object.mLightFar) + ","<< std::endl;
-            std::cout << "\t\t}"<< std::endl;
+            dumpValue("lightType", std::string(getTypeName(5, gLightTypeNames, object.mLightType)), 3);
+            dumpValue("lightTypeRaw", std::to_string(object.mLightType), 3, false);
+            dumpValue("lightColour", object.mLightColour.str(), 3, false);
+            dumpValue("lightPower", std::to_string(object.mLightPower), 3, false);
+            dumpValue("lightUnk0", std::to_string(object.mLightUnk0), 3, false);
+            dumpValue("lightUnk1", std::to_string(object.mLightUnk1), 3, false);
+            dumpValue("lightNear", std::to_string(object.mLightNear), 3, false);
+            dumpValue("lightFar", std::to_string(object.mLightFar), 3, false);
         }
-        std::cout << "\t}"<< std::endl;
+        std::cout << "        },\n";
     }
+    std::cout << "    ],\n}" << std::endl;
 }
 
 int main(int argc, char** argv)

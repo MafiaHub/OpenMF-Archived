@@ -97,7 +97,11 @@ std::string arrayToString(T *array, size_t len, std::string delim)
 
     for (int i = 0; i < (int) len; i++)
     {
-        sstream << std::to_string(array[i]) << delim;
+        sstream << std::to_string(array[i]);
+
+        if (i + 1 != len) {
+            sstream << delim;
+        }
     }
     
     // TODO(zaklaus): erase last occurence of delimiter!
