@@ -110,7 +110,7 @@ Bullet rigid bodies) of in-game objects.
 - Try to make everything replaceable by first creating an independent abstract class (an interface) for a component, then subclass it with
 a concrete implementation (see for example renderer).
 - Make a good use of design patterns.
-- Format utils **MUST** output any dumped content in a valid JSON format. Reasons are listed [here](https://github.com/OpenMafia/OpenMF/issues/128).
+- Format utils **MUST** output any dumped content in a valid [JSON5](https://github.com/json5/json5) format. Reasons are listed [here](https://github.com/OpenMafia/OpenMF/issues/128).
 
 ## Useful resources
 
