@@ -21,7 +21,11 @@ TypeName const gObjectTypeNames[] = {
     {0x0C, "OBJECT_TYPE_OCCLUDER"},
     {0x99, "OBJECT_TYPE_SECTOR"},
     {0x9B, "OBJECT_TYPE_SCRIPT"},
-    {0x23, "SPECIAL_OBJECT_TYPE_PHYSICAL"},
+};
+
+TypeName const gSpecialObjectTypeNames[] = {
+    { 0x00, "TYPE_NONE" },
+    { 0x23, "TYPE_PHYSICAL" },
 };
 
 TypeName const gLightTypeNames[] = {
@@ -46,7 +50,7 @@ char const *getTypeName(size_t count, TypeName const *typeNames, uint32_t objTyp
 
 // draft
 
-void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
+void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType, uint32_t specialObjType)
 {
     using namespace MFUtil;
     std::cout << "{" << std::endl;
@@ -60,22 +64,25 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
     {
         auto object = pair.second;
         if (object.mType != objType && objType != 0) continue;
+        if (object.mSpecialType != specialObjType && specialObjType != 0) continue;
 
         std::cout << "        {\n";
 
         dumpValue("objectName", object.mName, 3);
         dumpValue("type", std::string(getTypeName(sizeof(gObjectTypeNames) / sizeof(gObjectTypeNames[0]), gObjectTypeNames, object.mType)), 3);
         dumpValue("typeRaw", std::to_string(object.mType), 3, false);
+        dumpValue("specialType", std::string(getTypeName(sizeof(gSpecialObjectTypeNames) / sizeof(gSpecialObjectTypeNames[0]), gSpecialObjectTypeNames, object.mSpecialType)), 3);
+        dumpValue("specialTypeRaw", std::to_string(object.mSpecialType), 3, false);
         dumpValue("position", object.mPos.str(), 3, false);
         dumpValue("position2", object.mPos2.str(), 3, false);
         dumpValue("rotation", object.mRot.str(), 3, false);
         dumpValue("scale", object.mScale.str(), 3, false);
         dumpValue("parentName", object.mParentName, 3, true);
 
-        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL || object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL)
+        if (object.mType == MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL)
             dumpValue("modelName", object.mModelName, 3, true);
 
-        if (object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL) {
+        if (object.mSpecialType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL) {
             auto props = object.mSpecialProps;
             
             dumpValue("movVal1", std::to_string(props.mMovVal1), 3, false);
@@ -110,10 +117,11 @@ int main(int argc, char** argv)
     options.add_options()
         ("h,help","Display help and exit.")
         ("i,input","Specify input file name.",cxxopts::value<std::string>())
-        ("t,type","Specify object type.",cxxopts::value<int>());
+        ("t,type","Specify object type.",cxxopts::value<int>())
+        ("s,stype", "Specify special object type.", cxxopts::value<int>());
 
-    options.parse_positional({"i","t"});
-    options.positional_help("file [type]");
+    options.parse_positional({"i","t","s"});
+    options.positional_help("file [type] [special type]");
     auto arguments = options.parse(argc,argv);
 
     if (arguments.count("h") > 0)
@@ -150,12 +158,15 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    uint32_t objType = 0;
+    uint32_t objType = 0, specialObjType = 0;
 
     if (arguments.count("t") >= 1)
         objType = arguments["t"].as<int>();
 
-    dump(scene2Bin, objType);
+    if (arguments.count("s") >= 1)
+        specialObjType = arguments["s"].as<int>();
+
+    dump(scene2Bin, objType, specialObjType);
 
     return 0;
 }

@@ -96,7 +96,7 @@ void DataFormatScene2BIN::readHeader(std::ifstream &srcFile, Header* header, uin
 
                 if (object_it != mObjects.end()) {
                     auto object = &object_it->second;
-                    object->mType = newObject.mType;
+                    object->mSpecialType = newObject.mSpecialType;
 
                     memcpy(&object->mSpecialProps, &newObject.mSpecialProps, sizeof(newObject.mSpecialProps));
                 }
@@ -111,6 +111,11 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
     switch(header->mType)
     {
         case OBJECT_TYPE_SPECIAL:
+        {
+            read(srcFile, &object->mSpecialType);
+        }
+        break;
+
         case OBJECT_TYPE_NORMAL:
         {
             read(srcFile, &object->mType);
@@ -131,7 +136,7 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
 
         case OBJECT_SPECIAL_DATA:
         {
-            switch (object->mType) {
+            switch (object->mSpecialType) {
                 case SPECIAL_OBJECT_TYPE_PHYSICAL:
                 {
                     srcFile.seekg(2, srcFile.cur);

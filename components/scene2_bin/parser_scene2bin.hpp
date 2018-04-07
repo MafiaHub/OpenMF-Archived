@@ -62,6 +62,7 @@ public:
     } ObjectType;
 
     typedef enum {
+        SPECIAL_OBJECT_TYPE_NONE = 0,
         SPECIAL_OBJECT_TYPE_PHYSICAL = 0x23,
     } SpecialObjectType;
 
@@ -85,6 +86,7 @@ public:
     typedef struct _Object
     {
         uint32_t mType;
+        uint32_t mSpecialType;
         MFMath::Vec3 mPos;
         MFMath::Quat mRot;
         MFMath::Vec3 mPos2; // precomputed final world transform position
