@@ -106,10 +106,14 @@ public:
 
         struct {
             // Physical object properties
-            float mMovVal[4];
-            uint32_t mMovVal5;
+            float mMovVal1;
+            float mMovVal2;
+            float mFriction;
+            float mMovVal4;
+
+            int32_t mMovVal5;
             float mWeight;
-            uint32_t mSound;
+            int32_t mSound;
         } mSpecialProps;
     } Object;
 

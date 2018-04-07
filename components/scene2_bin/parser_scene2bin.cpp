@@ -134,16 +134,16 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
             switch (object->mType) {
                 case SPECIAL_OBJECT_TYPE_PHYSICAL:
                 {
-                    srcFile.seekg(offset + 2, srcFile.beg);
-                    offset += 2;
+                    srcFile.seekg(2, srcFile.cur);
 
-                    read(srcFile, object->mSpecialProps.mMovVal, sizeof(float) * 2);
+                    read(srcFile, &object->mSpecialProps.mMovVal1);
+                    read(srcFile, &object->mSpecialProps.mMovVal2);
                     read(srcFile, &object->mSpecialProps.mWeight);
-                    read(srcFile, object->mSpecialProps.mMovVal + 2, sizeof(float) * 2);
+                    read(srcFile, &object->mSpecialProps.mFriction);
+                    read(srcFile, &object->mSpecialProps.mMovVal4);
                     read(srcFile, &object->mSpecialProps.mSound);
                     
-                    srcFile.seekg(offset + 1, srcFile.beg);
-                    offset += 1;
+                    srcFile.seekg(1, srcFile.cur);
 
                     read(srcFile, &object->mSpecialProps.mMovVal5);
                 }

@@ -78,7 +78,10 @@ void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
         if (object.mType == MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL) {
             auto props = object.mSpecialProps;
             
-            dumpValue("movVal", "["+MFUtil::arrayToString<float>(props.mMovVal, 4, ", ")+"]", 3, false);
+            dumpValue("movVal1", std::to_string(props.mMovVal1), 3, false);
+            dumpValue("movVal2", std::to_string(props.mMovVal2), 3, false);
+            dumpValue("friction", std::to_string(props.mFriction), 3, false);
+            dumpValue("movVal4", std::to_string(props.mMovVal4), 3, false);
             dumpValue("movVal5", std::to_string(props.mMovVal5), 3, false);
             dumpValue("weight", std::to_string(props.mWeight), 3, false);
             dumpValue("sound", std::to_string(props.mSound), 3, false);
