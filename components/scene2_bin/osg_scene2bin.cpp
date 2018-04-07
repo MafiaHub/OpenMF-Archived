@@ -166,6 +166,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::st
                     break;
                 }
 
+                case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL:
                 case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
                 {
                     logStr += "model: " + object.mModelName;
