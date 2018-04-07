@@ -9,8 +9,10 @@
 #include <utils/os_defines.hpp>
 #include <vfs/vfs.hpp>
 
+#ifdef _WIN32
 #define ZPL_IMPLEMENTATION
 #include <zpl.h>
+#endif
 
 #define ALIGN 50
 #define DTA_MODULE_STR "DTA util"
