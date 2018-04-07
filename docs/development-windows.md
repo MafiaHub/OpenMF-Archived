@@ -26,6 +26,13 @@ Afterwards, we need to clone/download our fork of OpenSceneGraph.
 3. Use CMake to generate projects.
 4. Open the solution inside Visual Studio and compile the project (can take up to 30-60 minutes!)
 
+OR
+
+You can also download our pre-compiled binaries for OpenSceneGraph, built using VS 2017 Win64 with Release configuration.
+
+1. Download our pre-compiled binaries from [dropbox link](https://www.dropbox.com/s/5lxzkm7ip6lixd3/omf_osg_vs2017_win64_rel.zip?dl=0)
+2. Extract it to a directory accessible by our build system (e.g. `W:\osg\build`.)
+
 ### Bullet3
 
 It's quite straightforward to build our bullet3 dependency.
@@ -34,6 +41,13 @@ It's quite straightforward to build our bullet3 dependency.
 2. Navigate to our newly designated folder and create a build directory inside of it.
 3. Use CMake to generate projects.
 4. Open the solution inside Visual Studio and compile the project.
+
+OR
+
+You can also download our pre-compiled binaries for Bullet3, built using VS 2017 Win64.
+
+1. Download our pre-compiled binaries from [dropbox link](https://www.dropbox.com/s/b4m39h93j5cgku1/omf_bullet3_vs2017_win64.zip?dl=0)
+2. Extract it to a directory accessible by our build system (e.g. `W:\bullet3\build`.)
 
 ### SDL2
 
