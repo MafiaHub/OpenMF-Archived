@@ -72,6 +72,8 @@ void _split(const std::string &s, char delim, Out result)
     }
 }
 
+void dumpValue(std::string name, std::string value, int offset, bool useQuotes = true);
+
 std::vector<std::string> strSplit(const std::string &s, char delim);
 std::string strReverse(std::string s);
 
@@ -80,9 +82,14 @@ std::string vecToString(const std::vector<T> &vec, std::string delim)
 {
     std::stringstream sstream;
 
+    int i = 0;
     for (auto value : vec)
     {
-        sstream << std::to_string(value) << delim;
+        sstream << std::to_string(value);
+
+        if (i + 1 != vec.size())
+            sstream << delim;
+        i++;
     }
     
     // TODO(zaklaus): erase last occurence of delimiter!

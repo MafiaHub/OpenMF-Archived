@@ -46,13 +46,9 @@ char const *getTypeName(size_t count, TypeName const *typeNames, uint32_t objTyp
 
 // draft
 
-void dumpValue(std::string name, std::string value, int offset, bool useQuotes=true, bool useComma=true)
-{
-    printf("%*s\"%s\": %s%c\n", offset*4, " ", name, useQuotes ? ("\""+value+"\"").c_str() : value.c_str(), useComma ? ',' : ' ');
-}
-
 void dump(MFFormat::DataFormatScene2BIN scene2Bin, uint32_t objType)
 {
+    using namespace MFUtil;
     std::cout << "{" << std::endl;
     dumpValue("viewDistance", std::to_string(scene2Bin.getViewDistance()), 1, false);
     dumpValue("fieldOfView", std::to_string(scene2Bin.getFov()), 1, false);

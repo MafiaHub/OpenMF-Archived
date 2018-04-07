@@ -10,26 +10,34 @@ using namespace MFLogger;
 
 void dump(MFFormat::DataFormatCacheBIN cacheBin)
 {
-    std::cout << "number of objects: " + std::to_string(cacheBin.getNumObjects()) + "."<< std::endl;
+    using namespace MFUtil;
+    std::cout << "{\n";
+    dumpValue("numberOfObjects", std::to_string(cacheBin.getNumObjects()), 1);
+    std::cout << "    \"objects\": [" << std::endl;
     for (auto object : cacheBin.getObjects())
     {
-        std::cout << "object name: " + object.mObjectName + ":"<< std::endl;
-        std::cout << "\tbounds: " + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, " ") + ","<< std::endl;
-        std::cout << "\tnumber of instances: " + std::to_string(object.mInstances.size()) + ","<< std::endl;
+        std::cout << "        {\n";
+        dumpValue("objectName", object.mObjectName, 3);
+        //dumpValue("bounds", "[" + MFUtil::arrayToString<int8_t>(object.mBounds, 0x4C, ", ") + "]", 3, false);
+        dumpValue("numberOfInstances", std::to_string(object.mInstances.size()), 3, false);
+        std::cout << "            \"instances\": [" << std::endl;
 
         for (auto instance : object.mInstances)
         {
-            std::cout << "\t\tmodel name: " + instance.mModelName + ","<< std::endl;
-            std::cout << "\t\tposition: [" + instance.mPos.str() + "],"<< std::endl;
-            std::cout << "\t\trotation: [" + instance.mRot.str() + "],"<< std::endl;
-            std::cout << "\t\tscale: [" + instance.mScale.str() + "],"<< std::endl;
-            std::cout << "\t\tscale2: [" + instance.mScale2.str() + "],"<< std::endl;
-            std::cout << "\t\tunk0: " + std::to_string(instance.mUnk0) + ","<< std::endl;
-            std::cout << ""<< std::endl;
+            std::cout << "                {\n";
+            dumpValue("modelName", instance.mModelName, 5);
+            dumpValue("position", instance.mPos.str(), 5, false);
+            dumpValue("rotation", instance.mRot.str(), 5, false);
+            dumpValue("scale", instance.mScale.str(), 5, false);
+            dumpValue("scale2", instance.mScale2.str(), 5, false);
+            dumpValue("unk0", std::to_string(instance.mUnk0), 5, false);
+            std::cout << "                },\n";
         }
 
-        std::cout << "end of object: " + object.mObjectName<< std::endl;
+        std::cout << "            ],\n        },\n";
     }
+
+    std::cout << "    ],\n}\n";
 }
 
 int main(int argc, char** argv)

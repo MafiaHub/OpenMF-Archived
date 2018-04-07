@@ -64,6 +64,11 @@ void ScopedBuffer::copy_from(size_t offset, const void *sptr, size_t ssize)
     memcpy(mData + offset, sptr, ssize);
 }
 
+void dumpValue(std::string name, std::string value, int offset, bool useQuotes)
+{
+    printf("%*s\"%s\": %s,\n", offset * 4, " ", name.c_str(), useQuotes ? ("\"" + value + "\"").c_str() : value.c_str());
+}
+
 std::string strToLower(std::string str)
 {
     std::string result = str;
