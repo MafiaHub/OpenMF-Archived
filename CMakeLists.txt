@@ -11,6 +11,13 @@ option(LTO_BUILD    "build with LTO"             OFF)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# specify debug information format and disable optimization build.
+# TODO get rid of it once we make Debug build work correctly.
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+  string(REGEX REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(LTO_BUILD)
