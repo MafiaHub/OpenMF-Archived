@@ -156,6 +156,9 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 file(GLOB_RECURSE COMPONENT_SOURCES 
+    "components/*.hpp"
+    "extern/*.hpp"
+
     "components/parser_*.cpp"
     "components/utils/openmf.cpp"
     "components/utils/logger.cpp"
