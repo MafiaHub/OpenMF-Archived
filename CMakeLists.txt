@@ -175,6 +175,7 @@ file(GLOB_RECURSE GAME_COMPONENT_SOURCES
     "components/renderer/*.cpp"
     "components/spatial_entity/*.cpp"
     "components/engine/*.cpp"
+    "components/mission/*.cpp"
     "components/utils/osg.cpp"
     "components/utils/bullet.cpp"
     "components/base_loader.cpp"
