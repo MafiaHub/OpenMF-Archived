@@ -3,6 +3,31 @@
 #include <controllers/player_controller.hpp>
 #include <cxxopts.hpp>
 
+class KeyCallback : public MFInput::KeyInputCallback
+{
+public:
+    KeyCallback(MFGame::Engine *engine) : MFInput::KeyInputCallback()
+    {
+        mEngine = engine;
+        mCounter = 0;
+    }
+
+    virtual void call(bool down, unsigned int keyCode) override
+    {
+        if (!down)
+            return;
+
+        if (keyCode == OMF_SCANCODE_F3) // F3
+        {
+            mEngine->getRenderer()->showProfiler();
+        }
+    }
+
+protected:
+    MFGame::Engine *mEngine;
+    unsigned int mCounter;
+};
+
 class MafiaEngine: public MFGame::Engine
 {
 public:
@@ -13,6 +38,9 @@ public:
         mPlayerController->setMafiaPhysicsEmulation(false);
 
         mSpatialEntityFactory->setDebugMode(false);
+
+        std::shared_ptr<KeyCallback> cb = std::make_shared<KeyCallback>(this);
+        mInputManager->addKeyCallback(cb);
     };
 
     virtual ~MafiaEngine()
