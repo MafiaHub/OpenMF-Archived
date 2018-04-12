@@ -19,11 +19,11 @@ public:
     SpatialEntity *getEntityById(MFGame::SpatialEntity::Id id);
 
     /**
-     * \brief Returns valid entity by a raw index,
-     * if entity is invalid (e.g. removed) or index points outside the bounds of the pool
-     * it returns nullptr.
+     * Retrieves entity by its name.
+     * Note that there might be multiple entities with the same name and this method
+     * retrieves only the first one found. This makes the use case much more restricted.
      */
-    SpatialEntity *getEntityByIndex(unsigned int index);
+    SpatialEntity *getEntityByName(std::string name);
 
     MFGame::SpatialEntity::Id addEntity(std::shared_ptr<SpatialEntity> entity);
     void removeEntity(MFGame::SpatialEntity::Id ident);
@@ -43,6 +43,8 @@ public:
      * \brief Returns the number of entity slots
      **/
     unsigned int getNumEntitySlots();
+
+    EntityMap *getEntities() { return &mEntities; };
 
 protected:
     EntityMap mEntities;

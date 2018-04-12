@@ -6,6 +6,7 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 #include <renderer/base_renderer.hpp>
+#include <mission/mission_manager.hpp>
 #include <string>
 
 namespace MFGame
@@ -65,14 +66,15 @@ public:
     virtual void run();
 
     bool loadMission(std::string missionName); 
-    bool loadSingleModel(std::string modelName); 
     bool exportScene(std::string outputFileName);
 
     MFRender::Renderer *getRenderer()                       { return mRenderer;             };
+    MFPhysics::BulletPhysicsWorld *getPhysicsWorld()        { return mPhysicsWorld; };
     MFGame::SpatialEntityFactory *getSpatialEntityFactory() { return mSpatialEntityFactory; };
     MFGame::SpatialEntityManager *getSpatialEntityManager() { return mSpatialEntityManager; };
     MFInput::InputManager *getInputManager()                { return mInputManager;         };
-
+    MFGame::MissionManager *getMissionManager()             { return mMissionManager; };
+    
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
     void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().
     void RequestExit();
@@ -93,7 +95,7 @@ protected:
     MFGame::SpatialEntityFactory        *mSpatialEntityFactory;
     MFRender::OSGRenderer               *mRenderer;
     MFPhysics::BulletPhysicsWorld       *mPhysicsWorld;
-
+    MFGame::MissionManager              *mMissionManager;
     bool mIsRunning;
 
     EngineSettings mEngineSettings;

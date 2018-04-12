@@ -20,13 +20,13 @@ public:
     BulletPhysicsWorld();
     virtual ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
-    virtual bool loadMission(std::string mission) override;
     virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position) override;
     virtual double castRay(MFMath::Vec3 origin, MFMath::Vec3 direction) override;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }
 
     std::vector<MFUtil::NamedRigidBody> getTreeKlzBodies();
+    void setTreeKlzBodies(std::vector<MFUtil::NamedRigidBody> bodies) { mTreeKlzBodies = bodies; };
 protected:
     btDiscreteDynamicsWorld             *mWorld;
     btBroadphaseInterface               *mBroadphaseInterface;

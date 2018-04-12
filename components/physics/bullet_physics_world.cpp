@@ -147,47 +147,4 @@ std::vector<MFUtil::NamedRigidBody> BulletPhysicsWorld::getTreeKlzBodies()
     return mTreeKlzBodies;
 }
 
-bool BulletPhysicsWorld::loadMission(std::string mission)
-{
-    MFLogger::Logger::info("Loading physics world for mission " + mission + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
-
-    std::string missionDir = "missions/" + mission;
-    std::string treeKlzPath = missionDir + "/tree.klz";
-    std::string scene4dsPath = missionDir + "/scene.4ds";
-
-    std::ifstream fileTreeKlz;
-    std::ifstream fileScene4ds;
-
-    BulletTreeKlzLoader treeKlzLoader;
-    MFFormat::DataFormat4DS loader4DS;
-
-    if (!mFileSystem->open(fileScene4ds,scene4dsPath))    // FIXME: parsed files should be retrieved from LoaderCache to avoid parsing the same file twice
-    {
-        MFLogger::Logger::warn("Couldn't open scene.4ds file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
-        return false;
-    }
-
-    if (mFileSystem->open(fileTreeKlz,treeKlzPath))
-    {
-        loader4DS.load(fileScene4ds);
-        treeKlzLoader.load(fileTreeKlz,loader4DS);
-        mTreeKlzBodies = treeKlzLoader.mRigidBodies; 
-        fileTreeKlz.close();
-
-        for (int i = 0; i < (int) mTreeKlzBodies.size(); ++i)
-        {
-            mTreeKlzBodies[i].mRigidBody.mBody->setActivationState(0);
-            mWorld->addRigidBody(mTreeKlzBodies[i].mRigidBody.mBody.get()); 
-        }
-    }
-    else
-    {
-        fileScene4ds.close();
-        MFLogger::Logger::warn("Couldn't open tree.klz file: " + treeKlzPath + ".",BULLET_PHYSICS_WORLD_MODULE_STR);
-        return false;
-    }
-
-    return true;
-}
-
 }

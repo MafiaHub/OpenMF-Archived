@@ -3,23 +3,32 @@
 namespace MFGame
 {
 
-SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
-{
-    if (index < 0 || index > mEntities.size())
-    {
-        return nullptr;
-    }
-
-    // TODO return entity by index
-    return nullptr;
-}
-
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::SpatialEntity::Id id)
 {
     if (id == MFGame::SpatialEntity::NullId)
         return nullptr;
 
     auto entity = mEntities[id];
+
+    if (!entity.get())
+    {
+        MFLogger::Logger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
+        return nullptr;
+    }
+
+    return entity.get();
+}
+
+SpatialEntity *SpatialEntityManager::getEntityByName(std::string name)
+{
+    std::shared_ptr<SpatialEntity> entity = nullptr;
+
+    for (auto const pair : mEntities) {
+        if (pair.second && !pair.second->getName().compare(name)) {
+            entity = pair.second;
+            break;
+        }
+    }
 
     if (!entity.get())
     {
@@ -61,7 +70,6 @@ void SpatialEntityManager::removeEntity(MFGame::SpatialEntity::Id ident)
         MFLogger::Logger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return;
     }
-    mEntities[ident].reset();
     mEntities.erase(ident);
     mNumEntities--;
 }

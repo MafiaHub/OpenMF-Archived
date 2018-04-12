@@ -33,10 +33,10 @@
 namespace MFFormat
 {
 
-class OSG4DSLoader: public OSGLoader
+class OSGModelLoader: public OSGLoader
 {
 public:
-    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="") override;
+    osg::ref_ptr<osg::Node> load(MFFormat::DataFormat4DS *format, std::string fileName="");
 
 protected:
     typedef std::vector<osg::ref_ptr<osg::StateSet>> MaterialList;

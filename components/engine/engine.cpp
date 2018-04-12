@@ -46,7 +46,7 @@ Engine::Engine(EngineSettings settings)
     mInputManager = new MFInput::InputManagerImpl();
     mSpatialEntityManager = new SpatialEntityManager();
     mSpatialEntityFactory = new SpatialEntityFactory(mRenderer,mPhysicsWorld,mSpatialEntityManager);
-
+    
     mInputManager->initWindow(
         mEngineSettings.mInitWindowWidth,
         mEngineSettings.mInitWindowHeight,
@@ -58,6 +58,8 @@ Engine::Engine(EngineSettings settings)
     mInputManager->addWindowResizeCallback(wrcb);
 
     mRenderer->setUpInWindow(mInputManager->getWindow());
+    
+    mMissionManager = new MFGame::MissionManager(this);
 }
 
 std::string Engine::getCameraInfoString()
@@ -114,21 +116,10 @@ bool Engine::exportScene(std::string outputFileName)
 
 bool Engine::loadMission(std::string missionName)
 { 
-    mRenderer->loadMission(missionName,mEngineSettings.mLoad4ds,mEngineSettings.mLoadScene2Bin,mEngineSettings.mLoadCacheBin);
-
-    if (mEngineSettings.mLoadTreeKlz)
-        mPhysicsWorld->loadMission(missionName);
-
-    mSpatialEntityFactory->createMissionEntities();
+    mMissionManager->loadMission(missionName);
 
     return true;   // TODO: perform some actual checks
 }
- 
-bool Engine::loadSingleModel(std::string modelName)
-{
-    mRenderer->loadSingleModel(modelName);
-    return true;   // TODO: perform some actual checks
-} 
 
 double Engine::getTime()
 {

@@ -13,28 +13,22 @@
 namespace MFGame
 {
 
-class SpatialEntityFactory
-{
+    typedef MFFormat::LoaderCache<MFFormat::DataFormat4DS*> ModelCache;
+    typedef MFFormat::LoaderCache<btTriangleMesh*> FaceColsCache;
+
+class ObjectFactory {
 public:
-    SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
-    void createMissionEntities();
-    void setDebugMode(bool enable)    { mDebugMode = enable; };
+    ObjectFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld);
+    
+    osg::ref_ptr<osg::Node> loadModel(std::string modelName);
+    MFFormat::DataFormat4DS *loadModelData(std::string modelName);
+    btTriangleMesh *loadFaceCols(std::string modelName, int meshId=0);
+    
+    void setDebugMode(bool enable) { mDebugMode = enable; };
 
-    MFGame::SpatialEntity::Id createEntity(
-        osg::MatrixTransform *graphicNode,
-        std::shared_ptr<btRigidBody> physicsBody=0,
-        std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
-        std::string name="",
-        SpatialEntity::PhysicsBehavior physicsBehavior=SpatialEntity::RIGID);
-
-    MFGame::SpatialEntity::Id createTestBallEntity();
-    MFGame::SpatialEntity::Id createTestBoxEntity();
-    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="");
-    MFGame::SpatialEntity::Id createCameraEntity();
-    MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
-
-protected: 
-    MFGame::SpatialEntityManager *mEntityManager;
+protected:
+    ModelCache mModelCache;
+    FaceColsCache mFaceColsCache;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFFile::FileSystem *mFileSystem;
     MFRender::OSGRenderer *mRenderer;
@@ -57,6 +51,30 @@ protected:
     std::shared_ptr<btCollisionShape> mCameraShape;
 
     bool mDebugMode;
+};
+
+class SpatialEntityFactory : public ObjectFactory
+{
+public:
+    SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
+
+    MFGame::SpatialEntity::Id createEntity(
+        osg::MatrixTransform *graphicNode,
+        std::shared_ptr<btRigidBody> physicsBody=0,
+        std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
+        std::string name="",
+        SpatialEntity::PhysicsBehavior physicsBehavior=SpatialEntity::RIGID);
+
+    MFGame::SpatialEntity::Id createTestBallEntity();
+    MFGame::SpatialEntity::Id createTestBoxEntity();
+    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f);
+    MFGame::SpatialEntity::Id createCameraEntity();
+    MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+    MFGame::SpatialEntity::Id createPropEntity(MFFormat::DataFormatScene2BIN::Object *object);
+    MFGame::SpatialEntity::Id createPropEntity(std::string modelName, btScalar mass=20.0f);
+
+protected: 
+    MFGame::SpatialEntityManager *mEntityManager;
 };
 
 }
