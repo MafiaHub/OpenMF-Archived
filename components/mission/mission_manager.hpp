@@ -1,6 +1,6 @@
 #pragma once
 
-#define MISSION_MANAGER_MODULE_STR "MissionManager"
+#define MISSION_MANAGER_MODULE_STR "mission manager"
 
 #include "mission/mission.hpp"
 

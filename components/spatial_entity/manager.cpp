@@ -3,17 +3,6 @@
 namespace MFGame
 {
 
-SpatialEntity *SpatialEntityManager::getEntityByIndex(unsigned int index)
-{
-    if (index < 0 || index > mEntities.size())
-    {
-        return nullptr;
-    }
-
-    // TODO return entity by index
-    return nullptr;
-}
-
 SpatialEntity *SpatialEntityManager::getEntityById(MFGame::SpatialEntity::Id id)
 {
     if (id == MFGame::SpatialEntity::NullId)
@@ -61,7 +50,6 @@ void SpatialEntityManager::removeEntity(MFGame::SpatialEntity::Id ident)
         MFLogger::Logger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return;
     }
-    mEntities[ident].reset();
     mEntities.erase(ident);
     mNumEntities--;
 }

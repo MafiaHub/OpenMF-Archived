@@ -221,6 +221,7 @@ int main(int argc, char** argv)
         MFLogger::Logger::setVerbosityFlags(0xffff);
         MFLogger::Logger::addFilter(VIEWER_MODULE_STR);
         MFLogger::Logger::addFilter(OSGRENDERER_MODULE_STR);
+        MFLogger::Logger::addFilter(MISSION_MANAGER_MODULE_STR);
         MFLogger::Logger::setFilterMode(false);
     }
 

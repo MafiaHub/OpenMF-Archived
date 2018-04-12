@@ -268,19 +268,48 @@ void MissionImpl::createMissionEntities()
 
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_CHARACTER:
                     {
+                        // TODO real character support
+
                         auto entityId = mEngine->getSpatialEntityFactory()->createPawnEntity(object.mModelName, 1000.0f);
                         entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
                     }
                     break;
 
-                    default:
-                        break;
+                    case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PLAYER:
+                    {
+                        osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+                        auto node = mEngine->getSpatialEntityFactory()->loadModel(object.mModelName);
+                        transform->addChild(node);
+                        mRenderer->getRootNode()->addChild(transform);
+
+                        auto entityId = mEngine->getSpatialEntityFactory()->createEntity(transform, 0, 0, "player start");
+                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                    }
+                    break;
+
+                    default: 
+                    {
+                        if (!object.mSpecialType)continue;
+                        MFLogger::Logger::info("Unsupported special object: " + object.mName + " with type: " + std::to_string(object.mSpecialType), MISSION_MANAGER_MODULE_STR);
+                        
+                        if (object.mModelName.length() == 0) continue;
+                        auto node = mEngine->getSpatialEntityFactory()->loadModel(object.mModelName);
+
+                        osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+                        transform->addChild(node);
+                        mRenderer->getRootNode()->addChild(transform);
+
+                        auto entityId = mEngine->getSpatialEntityFactory()->createEntity(transform, 0, 0, object.mName);
+                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                    }
+                    break;
                 }
             }
             break;
 
             default:
-                break;
+                if (!object.mSpecialType)continue;
+                MFLogger::Logger::info("Unsupported special object: " + object.mName + " with type: " + std::to_string(object.mSpecialType), MISSION_MANAGER_MODULE_STR);
         }
 
         if (!entity) continue;
@@ -293,14 +322,12 @@ void MissionImpl::createMissionEntities()
             osg::Vec3f oPos = parent->getMatrix().getTrans();
             osg::Quat oRot = parent->getMatrix().getRotate();
             osg::Vec3f oScale = parent->getMatrix().getScale();
-
+            
             // TODO make sure entity starts at transform calculated from his parent
-            //auto pos = MFMath::Vec3(oPos.x(), oPos.y(), oPos.z());
-            //auto rot = MFMath::Quat(oRot.x(), oRot.y(), oRot.z(), oRot.w());
+            auto pos = MFMath::Vec3(oPos.x() + object.mPos.x, oPos.y() + object.mPos.z, oPos.z() + object.mPos.y);
+            auto rot = MFMath::Quat(oRot.x(), oRot.y(), oRot.z(), oRot.w());
+            //rot *= MFMath::Quat(object.mRot.x, object.mRot.x, object.mRot.x, object.mRot.w);
             //auto scale = MFMath::Vec3(oScale.x(), oScale.y(), oScale.z());
-
-            auto pos = object.mPos;
-            auto rot = object.mRot;
 
             entity->setPosition(pos);
             entity->setRotation(rot);

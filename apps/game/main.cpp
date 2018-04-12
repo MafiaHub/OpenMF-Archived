@@ -33,7 +33,7 @@ class MafiaEngine: public MFGame::Engine
 public:
     MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
+        mPlayerEntity = (MFGame::SpatialEntityImpl *)mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
 
@@ -62,8 +62,25 @@ public:
         mPlayerEntity->setPosition(pos);
     };
 
+    void useDefaultPlayer()
+    {
+        for (auto const& pair : *mSpatialEntityManager->getEntities()) {
+            if (pair.second->getName() == "player start") {
+                auto pos = pair.second->getPosition();
+                auto spat = (MFGame::SpatialEntityImpl *)pair.second.get();
+                setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
+
+                mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
+
+                mPlayerEntity->setVisualNode(spat->getVisualNode());
+                
+                return;
+            }
+        }
+    };
+
 protected:
-    MFGame::SpatialEntity *mPlayerEntity;
+    MFGame::SpatialEntityImpl *mPlayerEntity;
     MFGame::PlayerController *mPlayerController;
 };
 
@@ -73,6 +90,7 @@ int main(int argc, char** argv)
 
     options.add_options()
         ("h,help","Display help and exit.")
+        ("d,default-pos","Use default player position from selected scenario.")
         ("vsync","Enable VSYNC.")
         ("s,scenario","Set test game scenario number.",cxxopts::value<unsigned int>());
 
@@ -136,6 +154,10 @@ int main(int argc, char** argv)
             engine.loadMission("tutorial");
             engine.setPlayerPosition(MFMath::Vec3(126.02,320.43,3.67));
             break;
+    }
+
+    if (arguments.count("d") < 1) {
+        engine.useDefaultPlayer();
     }
 
     engine.getRenderer()->setCameraParameters(true,90,0,0.25,2000);

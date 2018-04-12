@@ -66,6 +66,9 @@ public:
         SPECIAL_OBJECT_TYPE_PHYSICAL = 0x23,
         SPECIAL_OBJECT_TYPE_PLAYER = 0x02,
         SPECIAL_OBJECT_TYPE_CHARACTER = 0x1B,
+        SPECIAL_OBJECT_TYPE_CAR = 0x06,
+        SPECIAL_OBJECT_TYPE_PUB_VEHICLE = 0x08,
+        SPECIAL_OBJECT_TYPE_SCRIPT = 0x05,
     } SpecialObjectType;
 
     typedef enum {

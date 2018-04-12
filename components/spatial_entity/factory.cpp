@@ -156,7 +156,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(MFFormat::DataF
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body, motionState, "dynamic " + object->mName, SpatialEntity::RIGID);
+    return createEntity(visualTransform.get(), body, motionState, object->mName, SpatialEntity::RIGID);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(std::string modelName, btScalar mass)
@@ -188,7 +188,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(std::string mod
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body, motionState, "dynamic (undefined)", SpatialEntity::RIGID);
+    return createEntity(visualTransform.get(), body, motionState, "(undefined)", SpatialEntity::RIGID);
 }
 
 osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
