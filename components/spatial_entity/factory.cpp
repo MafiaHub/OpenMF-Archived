@@ -120,7 +120,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisio
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createDynamicEntity(MFFormat::DataFormatScene2BIN::Object * object)
+MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(MFFormat::DataFormatScene2BIN::Object * object)
 {
     btScalar mass = object->mSpecialProps.mWeight;
     btTransform transform;
@@ -135,7 +135,6 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createDynamicEntity(MFFormat::Da
     shape->setMargin(0.05f);
     shape->calculateLocalInertia(mass, inertia);
     auto body = std::make_shared<btRigidBody>(mass, motionState.get(), shape, inertia);
-    body->setActivationState(DISABLE_DEACTIVATION);
     mPhysicsWorld->getWorld()->addRigidBody(body.get());
     
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();

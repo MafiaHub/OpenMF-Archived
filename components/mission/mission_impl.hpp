@@ -5,32 +5,11 @@
 
 #include <osg/Group>
 
-// --- CLEANUP
-#include <renderer/base_renderer.hpp>
-#include <osg/Node>
-#include <osgDB/ReadFile>
-#include <osgViewer/Viewer>
-#include <4ds/osg_4ds.hpp>
 #include <scene2_bin/osg_scene2bin.hpp>
 #include <cache_bin/osg_cachebin.hpp>
 #include <check_bin/osg_checkbin.hpp>
-#include <osg/Texture2D>
-#include <osg/LightModel>
-#include <utils/logger.hpp>
-#include <osgGA/TrackballManipulator>
-#include <loader_cache.hpp>
-#include <osgViewer/ViewerEventHandlers>
-#include <osgUtil/Optimizer>
-#include <osg/Fog>
-#include <osgUtil/PrintVisitor>
 #include <vfs/vfs.hpp>
-#include <osg/MatrixTransform>
-#include <fstream>
-#include <utils/logger.hpp>
-#include <vfs/vfs.hpp>
-#include <loader_cache.hpp>
 #include <utils/math.hpp>
-// ---
 
 #include "scene2_bin/parser_scene2bin.hpp"
 #include "klz/parser_klz.hpp"

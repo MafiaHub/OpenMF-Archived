@@ -261,7 +261,7 @@ void MissionImpl::createMissionEntities()
                 switch (object.mSpecialType) {
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL:
                     {
-                        auto entityId = mEngine->getSpatialEntityFactory()->createDynamicEntity(&object);
+                        auto entityId = mEngine->getSpatialEntityFactory()->createPropEntity(&object);
                         entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
                     }
                     break;
