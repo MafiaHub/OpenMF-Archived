@@ -49,3 +49,4 @@ If you'd like to join us and contribute, see [development.md](https://github.com
 
 ## Screenshots    
 ![](https://github.com/OpenMafia/openmf/blob/master/resources/screens.jpg?raw=true)
+![](https://i.imgur.com/41q3JQe.gif)
