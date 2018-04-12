@@ -19,6 +19,26 @@ SpatialEntity *SpatialEntityManager::getEntityById(MFGame::SpatialEntity::Id id)
     return entity.get();
 }
 
+SpatialEntity *SpatialEntityManager::getEntityByName(std::string name)
+{
+    std::shared_ptr<SpatialEntity> entity = nullptr;
+
+    for (auto const pair : mEntities) {
+        if (pair.second && !pair.second->getName().compare(name)) {
+            entity = pair.second;
+            break;
+        }
+    }
+
+    if (!entity.get())
+    {
+        MFLogger::Logger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
+        return nullptr;
+    }
+
+    return entity.get();
+}
+
 bool SpatialEntityManager::isValid(MFGame::SpatialEntity::Id ident)
 {
     auto entity = mEntities[ident];

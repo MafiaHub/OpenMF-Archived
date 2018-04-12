@@ -18,6 +18,13 @@ public:
     SpatialEntityManager() {};
     SpatialEntity *getEntityById(MFGame::SpatialEntity::Id id);
 
+    /**
+     * Retrieves entity by its name.
+     * Note that there might be multiple entities with the same name and this method
+     * retrieves only the first one found. This makes the use case much more restricted.
+     */
+    SpatialEntity *getEntityByName(std::string name);
+
     MFGame::SpatialEntity::Id addEntity(std::shared_ptr<SpatialEntity> entity);
     void removeEntity(MFGame::SpatialEntity::Id ident);
     bool isValid(MFGame::SpatialEntity::Id ident);

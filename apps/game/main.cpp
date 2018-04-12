@@ -64,18 +64,16 @@ public:
 
     void useDefaultPlayer()
     {
-        for (auto const& pair : *mSpatialEntityManager->getEntities()) {
-            if (pair.second->getName() == "player start") {
-                auto pos = pair.second->getPosition();
-                auto spat = (MFGame::SpatialEntityImpl *)pair.second.get();
-                setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
+        auto spawnEntity = mSpatialEntityManager->getEntityByName("player start");
 
-                mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
+        if (spawnEntity) {
+            auto pos = spawnEntity->getPosition();
+            auto spat = (MFGame::SpatialEntityImpl *)spawnEntity;
+            setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
 
-                mPlayerEntity->setVisualNode(spat->getVisualNode());
-                
-                return;
-            }
+            mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
+
+            mPlayerEntity->setVisualNode(spat->getVisualNode());
         }
     };
 
