@@ -6,6 +6,7 @@
 #include <spatial_entity/manager.hpp>
 #include <spatial_entity/factory.hpp>
 #include <renderer/base_renderer.hpp>
+#include <mission/mission_manager.hpp>
 #include <string>
 
 namespace MFGame
@@ -65,7 +66,6 @@ public:
     virtual void run();
 
     bool loadMission(std::string missionName); 
-    bool loadSingleModel(std::string modelName); 
     bool exportScene(std::string outputFileName);
 
     MFRender::Renderer *getRenderer()                       { return mRenderer;             };
@@ -93,7 +93,7 @@ protected:
     MFGame::SpatialEntityFactory        *mSpatialEntityFactory;
     MFRender::OSGRenderer               *mRenderer;
     MFPhysics::BulletPhysicsWorld       *mPhysicsWorld;
-
+    MFGame::MissionManager              *mMissionManager;
     bool mIsRunning;
 
     EngineSettings mEngineSettings;

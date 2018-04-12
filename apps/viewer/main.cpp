@@ -151,7 +151,6 @@ int main(int argc, char** argv)
     options.add_options()
         ("h,help","Display help and exit.")
         ("i,input","Specify input, mission name by default.",cxxopts::value<std::string>())
-        ("4,4ds","Load single 4ds model instead of mission.")
         ("f,fov","Specify camera field of view in degrees.",cxxopts::value<int>())
         ("s,camera-speed","Set camera speed (default is " + std::to_string(DEFAULT_CAMERA_SPEED) +  ").",cxxopts::value<double>())
         ("c,camera-info","Write camera position and rotation in console.")
@@ -236,10 +235,7 @@ int main(int argc, char** argv)
         engine.getSpatialEntityFactory()->setDebugMode(true);
     }
 
-    if (arguments.count("4") == 0)
-        engine.loadMission(inputFile);
-    else
-        engine.loadSingleModel(inputFile);
+    engine.loadMission(inputFile);
 
     if (arguments.count("V") > 0)
         engine.getRenderer()->setViewDistance(arguments["V"].as<int>());

@@ -105,7 +105,9 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string mod
                 MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
             }
             else {
-                model = l4ds.load(file4DS, modelName);
+                MFFormat::DataFormat4DS l4dsParser;
+                l4dsParser.load(file4DS);
+                model = l4ds.load(&l4dsParser, modelName);
                 file4DS.close();
                 model->setName(modelName);
             }

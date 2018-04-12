@@ -33,8 +33,6 @@ class OSGRenderer: public Renderer
 {
 public:
     OSGRenderer();
-    virtual bool loadMission(std::string mission, bool load4ds=true, bool loadScene2Bin=true, bool loadCacheBin=true) override;
-    virtual bool loadSingleModel(std::string model) override;
     virtual void frame(double dt) override;
     virtual void setCameraParameters(bool perspective,  float fov,  float orthoSize,  float nearDist,  float farDist) override;
     virtual void getCameraParameters(bool &perspective, float &fov, float &orthoSize, float &nearDist, float &farDist) override;
@@ -62,6 +60,13 @@ public:
 
     virtual void cameraFace(MFMath::Vec3 position) override;
 
+    /**
+    Given a list of light sources in the scene, the function decides which scene node should be lit by which
+    light and applies this decision to the lights and scene, adds a defaults light if there is none etc.
+    */
+
+    void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
@@ -70,13 +75,6 @@ protected:
     OSGCache mLoaderCache;
 
     void optimize();
-
-    /**
-      Given a list of light sources in the scene, the function decides which scene node should be lit by which
-      light and applies this decision to the lights and scene, adds a defaults light if there is none etc.
-     */
-
-    void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 
     osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
     osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection

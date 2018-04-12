@@ -21,14 +21,6 @@ public:
 
     OSGLoader();
 
-    /**
-        Load given object into OSG node.
-
-        @param srcFile    file stream to load the object from
-        @param fileName   optional file name that serves to reuse already loaded objects from cache
-    */
-    virtual osg::ref_ptr<osg::Node> load(std::ifstream &srcFile,std::string fileName="")=0;
-
     osg::ref_ptr<osg::Node> loadFile(std::string fileName);                                   // overloading load() didn't work somehow - why?
     void setBaseDir(std::string baseDir);
     void setLoaderCache(LoaderCache<OSGCached> *cache) { mLoaderCache = cache; };

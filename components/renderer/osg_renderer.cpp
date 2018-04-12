@@ -256,102 +256,6 @@ void OSGRenderer::setViewDistance(float dist)
     setFog(fd / 3.0,fd,MFMath::Vec3(0.5,0.5,0.5));
 }
 
-bool OSGRenderer::loadMission(std::string mission, bool load4ds, bool loadScene2Bin, bool loadCacheBin)
-{
-    std::string missionDir = "missions/" + mission;
-    std::string scene4dsPath = missionDir + "/scene.4ds";
-    std::string scene2BinPath = missionDir + "/scene2.bin";
-    std::string cacheBinPath = missionDir + "/cache.bin";
-    std::string checkBinPath = missionDir + "/check.bin";
-
-    MFFormat::OSG4DSLoader l4ds;
-    MFFormat::OSGScene2BinLoader lScene2;
-    MFFormat::OSGCacheBinLoader lCache;
-    MFFormat::OSGCheckBinLoader lCheck;
-
-    l4ds.setLoaderCache(&mLoaderCache);
-    lScene2.setLoaderCache(&mLoaderCache);
-    lCache.setLoaderCache(&mLoaderCache);
-
-    std::ifstream file4DS;
-    std::ifstream fileScene2Bin;
-    std::ifstream fileCacheBin;
-    std::ifstream fileCheckBin;
-
-    MFFormat::OSGLoader::NodeMap nodeMap;
-    l4ds.setNodeMap(&nodeMap);
-    lScene2.setNodeMap(&nodeMap);
-
-    if (load4ds && mFileSystem->open(file4DS,scene4dsPath))
-    {
-        osg::ref_ptr<osg::Node> n = l4ds.load(file4DS);
-
-        if (!n)
-            MFLogger::Logger::warn("Could not parse 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
-        else
-            mRootNode->addChild(n);
-
-        file4DS.close();
-    }
-    else if (load4ds) // each mission must have 4ds file, therefore not opening means warning
-        MFLogger::Logger::warn("Could not open 4ds file: " + scene4dsPath + ".", OSGRENDERER_MODULE_STR);
-
-    bool lightsAreSet = false;
-
-    float viewDistance = 2000;    // default value
-
-    if (loadScene2Bin && mFileSystem->open(fileScene2Bin,scene2BinPath))
-    {
-        osg::ref_ptr<osg::Node> n = lScene2.load(fileScene2Bin);
-
-        if (!n)
-            MFLogger::Logger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
-        else
-        {
-            mRootNode->addChild(n);
-            std::vector<osg::ref_ptr<osg::LightSource>> lightNodes = lScene2.getLightNodes();
-            setUpLights(&lightNodes);
-            lightsAreSet = true;
-            viewDistance = lScene2.getViewDistance();
-        }
-
-        fileScene2Bin.close();
-    }
-
-    if (!lightsAreSet)
-        setUpLights(nullptr);
-
-    if (loadCacheBin && mFileSystem->open(fileCacheBin,cacheBinPath)) 
-    {
-        osg::ref_ptr<osg::Node> n = lCache.load(fileCacheBin);
-
-        if (!n)
-            MFLogger::Logger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
-        else
-            mRootNode->addChild(n);
-
-        fileCacheBin.close();
-    }
-
-    //NOTE(DavoSK): Only for debug 
-    if(mFileSystem->open(fileCheckBin,checkBinPath))
-    {
-        osg::ref_ptr<osg::Node> n = lCheck.load(fileCheckBin);
-        if (!n)
-            MFLogger::Logger::warn("Couldn't not parse check.bin file: " + checkBinPath + ".", OSGRENDERER_MODULE_STR);
-        else
-            mRootNode->addChild(n);
-
-        fileCheckBin.close();    
-    }
-
-    setViewDistance(viewDistance);
-    optimize();
-    mLoaderCache.logStats();
-
-    return true;
-}
-
 void OSGRenderer::setFog(float distFrom, float distTo, MFMath::Vec3 color)
 {
     osg::ref_ptr<osg::Fog> fog = new osg::Fog;
@@ -396,31 +300,6 @@ void OSGRenderer::optimize()
     mRootNode->accept(geodesMerger);
 //    mRootNode->accept(stateOptimizer);
     mRootNode->accept(sceneBalancer);
-}
-
-bool OSGRenderer::loadSingleModel(std::string model)
-{
-    std::ifstream file4DS;
-    MFFormat::OSG4DSLoader l4ds;
-
-    l4ds.setLoaderCache(&mLoaderCache);
-
-    if (!mFileSystem->open(file4DS,"models/" + model))
-    {
-        MFLogger::Logger::warn("Couldn't not open 4ds file: " + model + ".", OSGRENDERER_MODULE_STR);
-        return false;
-    }
-     
-    mRootNode->addChild( l4ds.load(file4DS) );
-
-    file4DS.close();
-
-    optimize();
-    setUpLights(nullptr);
-
-    mLoaderCache.logStats();
-
-    return true;
 }
 
 void OSGRenderer::frame(double dt)

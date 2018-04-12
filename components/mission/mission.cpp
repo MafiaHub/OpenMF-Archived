@@ -3,7 +3,7 @@
 namespace MFGame
 {
 
-Mission::Mission()
+Mission::Mission(std::string missionName): mMissionName(missionName)
 {
 
 }

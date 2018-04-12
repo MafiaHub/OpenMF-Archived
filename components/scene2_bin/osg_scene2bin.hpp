@@ -33,7 +33,7 @@ public:
     typedef std::vector<osg::ref_ptr<osg::LightSource>> LightList;
 
     OSGScene2BinLoader();
-    osg::ref_ptr<osg::Node> load(std::ifstream &srcFile, std::string fileName="");
+    osg::ref_ptr<osg::Node> load(MFFormat::DataFormatScene2BIN *format, std::string fileName="");
     LightList getLightNodes()            { return mLightNodes;           };
     osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };
     float getViewDistance()              { return mViewDistance;         };

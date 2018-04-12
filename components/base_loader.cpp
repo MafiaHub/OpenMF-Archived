@@ -92,7 +92,7 @@ osg::ref_ptr<osg::Node> OSGLoader::loadFile(std::string fileName)
 
     if (f.is_open())
     {
-        n = load(f,fileName);
+        //n = load(f,fileName);
         f.close();
     }
     else

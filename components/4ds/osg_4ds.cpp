@@ -500,7 +500,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     return stateSet;
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string fileName)
+osg::ref_ptr<osg::Node> OSG4DSLoader::load(MFFormat::DataFormat4DS *format, std::string fileName)
 {
     if (fileName.length() > 0)
     {
@@ -512,65 +512,60 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::load(std::ifstream &srcFile, std::string f
 
     std::string logStr = "loading model";
 
-    MFFormat::DataFormat4DS format;
-
     osg::ref_ptr<osg::MatrixTransform> group = new osg::MatrixTransform();
     group->setName("4DS model");
 
-    if (format.load(srcFile))
-    {
-        auto model = format.getModel();
+    auto model = format->getModel();
         
-        logStr += ", meshes: " + std::to_string(model.mMeshCount);
-        logStr += ", materials: " + std::to_string(model.mMaterialCount);
+    logStr += ", meshes: " + std::to_string(model.mMeshCount);
+    logStr += ", materials: " + std::to_string(model.mMaterialCount);
 
-        MFLogger::Logger::info(logStr,OSG4DS_MODULE_STR);
+    MFLogger::Logger::info(logStr,OSG4DS_MODULE_STR);
 
-        MaterialList materials;
+    MaterialList materials;
 
-        for (int i = 0; i < model.mMaterialCount; ++i)  // load materials
-        {
-            MFLogger::Logger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
-            materials.push_back(make4dsMaterial(&(model.mMaterials[i])));
-        }
+    for (int i = 0; i < model.mMaterialCount; ++i)  // load materials
+    {
+        MFLogger::Logger::info("  Loading material " + std::to_string(i) + ".",OSG4DS_MODULE_STR);
+        materials.push_back(make4dsMaterial(&(model.mMaterials[i])));
+    }
 
-        std::vector<osg::ref_ptr<osg::MatrixTransform>> meshes;
+    std::vector<osg::ref_ptr<osg::MatrixTransform>> meshes;
 
-        for (int i = 0; i < model.mMeshCount; ++i)      // load meshes
-        {
-            osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
-            std::string meshName = MFUtil::charArrayToStr(model.mMeshes[i].mMeshName,model.mMeshes[i].mMeshNameLength);
-            transform->setName(meshName);  // don't mess with this name, it's needed to link with collisions etc.
+    for (int i = 0; i < model.mMeshCount; ++i)      // load meshes
+    {
+        osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+        std::string meshName = MFUtil::charArrayToStr(model.mMeshes[i].mMeshName,model.mMeshes[i].mMeshNameLength);
+        transform->setName(meshName);  // don't mess with this name, it's needed to link with collisions etc.
 
-            transform->getOrCreateUserDataContainer()->addDescription("4ds mesh");    // mark the node as a 4DS mesh
+        transform->getOrCreateUserDataContainer()->addDescription("4ds mesh");    // mark the node as a 4DS mesh
 
-            osg::Matrixd mat;
+        osg::Matrixd mat;
 
-            MFMath::Vec3 p, s;
-            MFMath::Quat r;
+        MFMath::Vec3 p, s;
+        MFMath::Quat r;
 
-            p = model.mMeshes[i].mPos;
-            s = model.mMeshes[i].mScale;
-            r = model.mMeshes[i].mRot;
+        p = model.mMeshes[i].mPos;
+        s = model.mMeshes[i].mScale;
+        r = model.mMeshes[i].mRot;
 
-            transform->setMatrix(makeTransformMatrix(p,s,r));
-            transform->addChild(make4dsMesh(&(model.mMeshes[i]),materials));
+        transform->setMatrix(makeTransformMatrix(p,s,r));
+        transform->addChild(make4dsMesh(&(model.mMeshes[i]),materials));
                 
-            meshes.push_back(transform);
+        meshes.push_back(transform);
 
-            if (mNodeMap)
-                mNodeMap->insert(mNodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(meshName,transform));
-        }
+        if (mNodeMap)
+            mNodeMap->insert(mNodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(meshName,transform));
+    }
 
-        for (int i = 0; i < model.mMeshCount; ++i)     // parent meshes
-        {
-            unsigned int parentID = model.mMeshes[i].mParentID;
+    for (int i = 0; i < model.mMeshCount; ++i)     // parent meshes
+    {
+        unsigned int parentID = model.mMeshes[i].mParentID;
 
-            if (parentID == 0)
-                group->addChild(meshes[i]);
-            else
-                meshes[parentID - 1]->addChild(meshes[i]);
-        }
+        if (parentID == 0)
+            group->addChild(meshes[i]);
+        else
+            meshes[parentID - 1]->addChild(meshes[i]);
     }
 
     if (fileName.length() > 0)

@@ -58,6 +58,8 @@ Engine::Engine(EngineSettings settings)
     mInputManager->addWindowResizeCallback(wrcb);
 
     mRenderer->setUpInWindow(mInputManager->getWindow());
+    
+    mMissionManager = new MFGame::MissionManager(this);
 }
 
 std::string Engine::getCameraInfoString()
@@ -114,7 +116,7 @@ bool Engine::exportScene(std::string outputFileName)
 
 bool Engine::loadMission(std::string missionName)
 { 
-    mRenderer->loadMission(missionName,mEngineSettings.mLoad4ds,mEngineSettings.mLoadScene2Bin,mEngineSettings.mLoadCacheBin);
+    mMissionManager->loadMission(missionName);
 
     if (mEngineSettings.mLoadTreeKlz)
         mPhysicsWorld->loadMission(missionName);
@@ -123,12 +125,6 @@ bool Engine::loadMission(std::string missionName)
 
     return true;   // TODO: perform some actual checks
 }
- 
-bool Engine::loadSingleModel(std::string modelName)
-{
-    mRenderer->loadSingleModel(modelName);
-    return true;   // TODO: perform some actual checks
-} 
 
 double Engine::getTime()
 {

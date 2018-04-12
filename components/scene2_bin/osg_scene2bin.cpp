@@ -122,121 +122,117 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatSc
     return lightGroup;
 }
 
-osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(std::ifstream &srcFile, std::string fileName)
+osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(MFFormat::DataFormatScene2BIN *format, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("scene2.bin");
     MFLogger::Logger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
-    MFFormat::DataFormatScene2BIN parser;
     MFFormat::OSG4DSLoader loader4DS;
     loader4DS.setBaseDir(mBaseDir);
 
-    bool success = parser.load(srcFile);
+    
+    mViewDistance = format->getViewDistance();
 
-    if (success)
-    {
-        mViewDistance = parser.getViewDistance();
+    NodeMap emptyNodeMap;
+    NodeMap *nodeMap = &emptyNodeMap;
+    std::vector<osg::Node *> loadedNodes;    
+    std::vector<std::string> loadedNames;
 
-        NodeMap emptyNodeMap;
-        NodeMap *nodeMap = &emptyNodeMap;
-        std::vector<osg::Node *> loadedNodes;    
-        std::vector<std::string> loadedNames;
+    if (!mNodeMap)
+        MFLogger::Logger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
+    else
+        nodeMap = mNodeMap;
 
-        if (!mNodeMap)
-            MFLogger::Logger::warn("loading scene2.bin without node map set, objects' parents may be wrong.");
-        else
-            nodeMap = mNodeMap;
-
-        mCameraRelative = new MFUtil::SkyboxNode();   // for Backdrop sector (camera relative placement)
-        group->addChild(mCameraRelative);
+    mCameraRelative = new MFUtil::SkyboxNode();   // for Backdrop sector (camera relative placement)
+    group->addChild(mCameraRelative);
  
-        for (auto pair : parser.getObjects())
+    for (auto pair : format->getObjects())
+    {
+        auto object = pair.second;
+        osg::ref_ptr<osg::Node> objectNode;
+        std::string logStr = object.mName + ": ";
+        bool hasTransform = true;
+
+        switch (object.mType)
         {
-            auto object = pair.second;
-            osg::ref_ptr<osg::Node> objectNode;
-            std::string logStr = object.mName + ": ";
-            bool hasTransform = true;
-
-            switch (object.mType)
+            case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
             {
-                case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_LIGHT:
+                logStr += "light (" + MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType) + ")";
+                objectNode = makeLightNode(object);
+                break;
+            }
+
+            case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
+            {
+                logStr += "model: " + object.mModelName;
+
+                objectNode = (osg::Node *) getFromCache(object.mModelName).get();
+
+                if (!objectNode)
                 {
-                    logStr += "light (" + MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType) + ")";
-                    objectNode = makeLightNode(object);
-                    break;
-                }
-
-                case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
-                {
-                    logStr += "model: " + object.mModelName;
-
-                    objectNode = (osg::Node *) getFromCache(object.mModelName).get();
-
-                    if (!objectNode)
-                    {
-                        std::ifstream f;
+                    std::ifstream f;
                         
-                        if (!mFileSystem->open(f,"models/" + object.mModelName))
-                        {
-                            MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
-                        }
-                        else
-                        {
-                            objectNode = loader4DS.load(f,object.mModelName);   
-                            storeToCache(object.mModelName,objectNode);
-                            f.close();
-                            objectNode->setName(object.mModelName);
-                        }
+                    if (!mFileSystem->open(f,"models/" + object.mModelName))
+                    {
+                        MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
                     }
-
-                    break;
+                    else
+                    {
+                        MFFormat::DataFormat4DS model; model.load(f);
+                        objectNode = loader4DS.load(&model,object.mModelName);   
+                        storeToCache(object.mModelName,objectNode);
+                        f.close();
+                        objectNode->setName(object.mModelName);
+                    }
                 }
 
-                default:
-                {
-                    logStr += "unknown";
-                    hasTransform = false;
-                    break;
-                }
+                break;
             }
+
+            default:
+            {
+                logStr += "unknown";
+                hasTransform = false;
+                break;
+            }
+        }
             
-            MFLogger::Logger::info(logStr, OSGSCENE2BIN_MODULE_STR);
+        MFLogger::Logger::info(logStr, OSGSCENE2BIN_MODULE_STR);
 
-            if (objectNode.get())
-            {
-                osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
-
-                if (hasTransform)
-                {
-                    osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
-                    objectTransform->setMatrix(m);
-                }
-
-                objectTransform->addChild(objectNode);
-                objectTransform->getOrCreateUserDataContainer()->addDescription("scene2.bin model"); // mark the node as a model loaded from scene2.bin
-                objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
-                nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
-                loadedNodes.push_back(objectTransform.get());
-                loadedNames.push_back(object.mName);
-            }
-        }   // for
-
-        for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
+        if (objectNode.get())
         {
-            std::string parentName = loadedNodes[i]->getName();
-            loadedNodes[i]->setName(loadedNames[i]);
+            osg::ref_ptr<osg::MatrixTransform> objectTransform = new osg::MatrixTransform();
 
-            if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
-                mCameraRelative->addChild(loadedNodes[i]);
-            else if (parentName.compare("Primary sector") == 0 || parentName.length() == 0)
-                group->addChild(loadedNodes[i]);
-            else if ( nodeMap->find(parentName) != nodeMap->end() )
-                (*nodeMap)[parentName]->addChild(loadedNodes[i]);
-            else
+            if (hasTransform)
             {
-                MFLogger::Logger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
-                group->addChild(loadedNodes[i]);
+                osg::Matrixd m = makeTransformMatrix(object.mPos,object.mScale,object.mRot);
+                objectTransform->setMatrix(m);
             }
+
+            objectTransform->addChild(objectNode);
+            objectTransform->getOrCreateUserDataContainer()->addDescription("scene2.bin model"); // mark the node as a model loaded from scene2.bin
+            objectTransform->setName(object.mParentName);    // hack: store the parent name in node name
+            nodeMap->insert(nodeMap->begin(),std::pair<std::string,osg::ref_ptr<osg::Group>>(object.mName,objectTransform));
+            loadedNodes.push_back(objectTransform.get());
+            loadedNames.push_back(object.mName);
+        }
+    }   // for
+
+    for (int i = 0; i < (int) loadedNodes.size(); ++i)   // set parents
+    {
+        std::string parentName = loadedNodes[i]->getName();
+        loadedNodes[i]->setName(loadedNames[i]);
+
+        if (parentName.compare("Backdrop sector") == 0)      // backdrop is for camera-relative stuff
+            mCameraRelative->addChild(loadedNodes[i]);
+        else if (parentName.compare("Primary sector") == 0 || parentName.length() == 0)
+            group->addChild(loadedNodes[i]);
+        else if ( nodeMap->find(parentName) != nodeMap->end() )
+            (*nodeMap)[parentName]->addChild(loadedNodes[i]);
+        else
+        {
+            MFLogger::Logger::warn("Parent \"" + parentName + "\" not found.",OSGSCENE2BIN_MODULE_STR);
+            group->addChild(loadedNodes[i]);
         }
     }
 
