@@ -7,6 +7,9 @@
 #include <vfs/vfs.hpp>
 #include <loader_cache.hpp>
 #include <utils/math.hpp>
+
+namespace MFGame { class ObjectFactory; }
+
 #define OSGLOADER_MODULE_STR "OSG loader"
 
 namespace MFFormat
@@ -26,7 +29,7 @@ public:
     osg::ref_ptr<osg::Node> loadFile(std::string fileName);                                   // overloading load() didn't work somehow - why?
     void setBaseDir(std::string baseDir);
     void setLoaderCache(LoaderCache<OSGCached> *cache) { mLoaderCache = cache; };
-    void setModelCache(MFFormat::ModelCache *cache) { mModelCache = cache; }
+    void setObjectFactory(MFGame::ObjectFactory *factory) { mObjectFactory = factory; }
 
     osg::Vec3f toOSG(MFMath::Vec3 v);
     osg::Quat toOSG(MFMath::Quat q);
@@ -50,7 +53,7 @@ protected:
     osg::Matrixd mMafiaToOSGMatrixInvert;
 
     LoaderCache<OSGCached> *mLoaderCache;   ///< Derived classes should make use of the cache with getFromChache/storeToCache.
-    MFFormat::ModelCache  *mModelCache;
+    MFGame::ObjectFactory *mObjectFactory;
 
     osg::ref_ptr<osg::Referenced> getFromCache(std::string identifier);
     void storeToCache(std::string identifier,OSGCached obj);

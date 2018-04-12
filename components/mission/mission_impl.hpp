@@ -33,6 +33,7 @@
 // ---
 
 #include "scene2_bin/parser_scene2bin.hpp"
+#include "klz/parser_klz.hpp"
 #include "renderer/osg_renderer.hpp"
 
 namespace MFGame
@@ -55,8 +56,9 @@ protected:
     MFFormat::DataFormat4DS mSceneModel;
     MFFormat::DataFormatScene2BIN mSceneData;
     MFFormat::DataFormatCacheBIN mCacheData;
+    MFFormat::DataFormatTreeKLZ mStaticColsData;
 
-    MFFormat::ModelCache mModelCache;
+    MFFormat::ModelCache *mModelCache;
 
 private:
     MFFile::FileSystem *mFileSystem;

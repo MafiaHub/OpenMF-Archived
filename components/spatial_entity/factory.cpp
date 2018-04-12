@@ -7,43 +7,10 @@
 namespace MFGame
 {
 
-SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager)
+SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager):
+    ObjectFactory(renderer, physicsWorld)
 {
-    mDebugMode = false;
-
-    mFileSystem = MFFile::FileSystem::getInstance();
-    mRenderer = renderer;
-    mPhysicsWorld = physicsWorld;
     mEntityManager = entityManager;
-
-    const double r = 0.7;
-    const double l = 1.0;
-
-    mTestMaterial = new osg::Material();
-    mTestMaterial->setEmission(osg::Material::FRONT_AND_BACK,osg::Vec4(0,0,0,0));
-
-    mTestStateSet = new osg::StateSet();
-    mTestStateSet->setAttributeAndModes(mTestMaterial);
-
-    mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0,0,0),r);
-    mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
-    mTestSphereNode->setStateSet(mTestStateSet);
-    mTestPhysicalSphereShape = std::make_shared<btSphereShape>(r);
-
-    mTestVisualBoxShape = new osg::Box(osg::Vec3f(0,0,0),l);
-    mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
-    mTestBoxNode->setStateSet(mTestStateSet);
-    mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l/2.0,l/2.0,l/2.0));
-
-    const double capsuleRadius = 0.3;
-    const double capsuleHeight = 1.3;
-
-    mCapsuleShape = new osg::Capsule(osg::Vec3f(0,0,0),capsuleRadius,capsuleHeight);
-    mCapsuleNode = new osg::ShapeDrawable(mCapsuleShape);
-    mCapsuleNode->setStateSet(mTestStateSet);
-    mPhysicalCapsuleShape = std::make_shared<btCapsuleShapeZ>(capsuleRadius,capsuleHeight);
-
-    mCameraShape = std::make_shared<btSphereShape>(1.0f);
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
@@ -94,26 +61,13 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string mod
     else
     {
         auto cache = mRenderer->getLoaderCache();
-        auto model = (osg::Node *)cache->getObject(modelName).get();
+        auto node = (osg::Node *)cache->getObject(modelName).get();
 
-        if (!model) {
-            std::ifstream file4DS;
-            MFFormat::OSG4DSLoader l4ds;
-            l4ds.setLoaderCache(cache);
-
-            if (!mFileSystem->open(file4DS, "models/" + modelName)) {
-                MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
-            }
-            else {
-                MFFormat::DataFormat4DS l4dsParser;
-                l4dsParser.load(file4DS);
-                model = l4ds.load(&l4dsParser, modelName);
-                file4DS.close();
-                model->setName(modelName);
-            }
+        if (!node) {
+            node = loadModel(modelName);
         }
 
-        visualTransform->addChild(model);
+        visualTransform->addChild(node);
 
         // TMP: shift a little down
         visualTransform->setMatrix(osg::Matrixd::translate(osg::Vec3(0, 0, -1)));
@@ -164,6 +118,49 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisio
     mPhysicsWorld->getWorld()->addRigidBody(physicalBody.get());
 
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
+}
+
+osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
+{
+    osg::ref_ptr<osg::Node> node = nullptr;
+    auto cache = mRenderer->getLoaderCache();
+    MFFormat::OSGModelLoader l4ds;
+    l4ds.setLoaderCache(cache);
+    auto model = loadModelData(modelName);
+
+    node = l4ds.load(model, modelName);
+    node->setName(modelName);
+
+    return node;
+}
+
+MFFormat::DataFormat4DS * ObjectFactory::loadModelData(std::string modelName)
+{
+    MFFormat::DataFormat4DS *model = nullptr;
+    if (mModelCache) {
+        model = mModelCache->getObject(modelName);
+
+    loadModel:
+        if (!model) {
+            model = new MFFormat::DataFormat4DS();
+            std::ifstream file4DS;
+            if (!mFileSystem->open(file4DS, "models/" + modelName)) {
+                MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
+            }
+            else {
+                model->load(file4DS);
+                file4DS.close();
+            }
+
+            if (mModelCache)
+                mModelCache->storeObject(modelName, model);
+        }
+    }
+    else {
+        goto loadModel;
+    }
+
+    return model;
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
@@ -294,6 +291,45 @@ void SpatialEntityFactory::createMissionEntities()
     }
 
     // TODO: set the static flag to the loaded bodies here
+}
+
+ObjectFactory::ObjectFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld)
+{
+    mModelCache = nullptr;
+    mDebugMode = false;
+
+    mFileSystem = MFFile::FileSystem::getInstance();
+    mRenderer = renderer;
+    mPhysicsWorld = physicsWorld;
+
+    const double r = 0.7;
+    const double l = 1.0;
+
+    mTestMaterial = new osg::Material();
+    mTestMaterial->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4(0, 0, 0, 0));
+
+    mTestStateSet = new osg::StateSet();
+    mTestStateSet->setAttributeAndModes(mTestMaterial);
+
+    mTestVisualSphereShape = new osg::Sphere(osg::Vec3f(0, 0, 0), r);
+    mTestSphereNode = new osg::ShapeDrawable(mTestVisualSphereShape);
+    mTestSphereNode->setStateSet(mTestStateSet);
+    mTestPhysicalSphereShape = std::make_shared<btSphereShape>(r);
+
+    mTestVisualBoxShape = new osg::Box(osg::Vec3f(0, 0, 0), l);
+    mTestBoxNode = new osg::ShapeDrawable(mTestVisualBoxShape);
+    mTestBoxNode->setStateSet(mTestStateSet);
+    mTestPhysicalBoxShape = std::make_shared<btBoxShape>(btVector3(l / 2.0, l / 2.0, l / 2.0));
+
+    const double capsuleRadius = 0.3;
+    const double capsuleHeight = 1.3;
+
+    mCapsuleShape = new osg::Capsule(osg::Vec3f(0, 0, 0), capsuleRadius, capsuleHeight);
+    mCapsuleNode = new osg::ShapeDrawable(mCapsuleShape);
+    mCapsuleNode->setStateSet(mTestStateSet);
+    mPhysicalCapsuleShape = std::make_shared<btCapsuleShapeZ>(capsuleRadius, capsuleHeight);
+
+    mCameraShape = std::make_shared<btSphereShape>(1.0f);
 }
 
 }

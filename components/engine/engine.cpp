@@ -46,6 +46,7 @@ Engine::Engine(EngineSettings settings)
     mInputManager = new MFInput::InputManagerImpl();
     mSpatialEntityManager = new SpatialEntityManager();
     mSpatialEntityFactory = new SpatialEntityFactory(mRenderer,mPhysicsWorld,mSpatialEntityManager);
+    mSpatialEntityFactory->setModelCache(&mModelCache);
 
     mInputManager->initWindow(
         mEngineSettings.mInitWindowWidth,

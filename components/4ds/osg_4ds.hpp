@@ -33,7 +33,7 @@
 namespace MFFormat
 {
 
-class OSG4DSLoader: public OSGLoader
+class OSGModelLoader: public OSGLoader
 {
 public:
     osg::ref_ptr<osg::Node> load(MFFormat::DataFormat4DS *format, std::string fileName="");

@@ -18,7 +18,7 @@
 namespace MFPhysics
 {
 
-class BulletTreeKlzLoader
+class BulletStaticCollisionLoader
 {
 public:
     void load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds);

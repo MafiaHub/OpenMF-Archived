@@ -158,7 +158,7 @@ bool BulletPhysicsWorld::loadMission(std::string mission)
     std::ifstream fileTreeKlz;
     std::ifstream fileScene4ds;
 
-    BulletTreeKlzLoader treeKlzLoader;
+    BulletStaticCollisionLoader treeKlzLoader;
     MFFormat::DataFormat4DS loader4DS;
 
     if (!mFileSystem->open(fileScene4ds,scene4dsPath))    // FIXME: parsed files should be retrieved from LoaderCache to avoid parsing the same file twice

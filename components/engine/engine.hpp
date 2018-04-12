@@ -9,6 +9,8 @@
 #include <mission/mission_manager.hpp>
 #include <string>
 
+#include <base_loader.hpp>
+
 namespace MFGame
 {
 
@@ -72,6 +74,7 @@ public:
     MFGame::SpatialEntityFactory *getSpatialEntityFactory() { return mSpatialEntityFactory; };
     MFGame::SpatialEntityManager *getSpatialEntityManager() { return mSpatialEntityManager; };
     MFInput::InputManager *getInputManager()                { return mInputManager;         };
+    MFFormat::ModelCache *getModelCache()                   { return &mModelCache; };
 
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
     void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().
@@ -95,6 +98,8 @@ protected:
     MFPhysics::BulletPhysicsWorld       *mPhysicsWorld;
     MFGame::MissionManager              *mMissionManager;
     bool mIsRunning;
+
+    MFFormat::ModelCache mModelCache;
 
     EngineSettings mEngineSettings;
 };

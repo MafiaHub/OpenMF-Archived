@@ -36,7 +36,7 @@ protected:
     unsigned int mFramePeriod;
 };
 
-std::vector<std::string> OSG4DSLoader::makeAnimationNames(std::string baseFileName, unsigned int frames)
+std::vector<std::string> OSGModelLoader::makeAnimationNames(std::string baseFileName, unsigned int frames)
 {
     // FIXME: make this nicer 
 
@@ -70,7 +70,7 @@ std::vector<std::string> OSG4DSLoader::makeAnimationNames(std::string baseFileNa
     return result;
 }
 
-osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
+osg::ref_ptr<osg::Texture2D> OSGModelLoader::loadTexture(std::string fileName, std::string fileNameAlpha, bool colorKey)
 {
     std::string textureIdentifier = fileName + ";" + fileNameAlpha + ";" + (colorKey ? "1" : "0");
 
@@ -166,7 +166,7 @@ osg::ref_ptr<osg::Texture2D> OSG4DSLoader::loadTexture(std::string fileName, std
     return tex;
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
+osg::ref_ptr<osg::Node> OSGModelLoader::make4dsFaceGroup(
         osg::Vec3Array *vertices,
         osg::Vec3Array *normals,
         osg::Vec2Array *uvs,
@@ -211,7 +211,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsFaceGroup(
     return geode;
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
+osg::ref_ptr<osg::Node> OSGModelLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, MaterialList &materials)
 {
     if (mesh->mMeshType != MFFormat::DataFormat4DS::MESHTYPE_STANDARD)
     {
@@ -286,7 +286,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMesh(DataFormat4DS::Mesh *mesh, Mat
     return nodeLOD; 
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
+osg::ref_ptr<osg::Node> OSGModelLoader::make4dsMeshLOD(
     DataFormat4DS::Lod *meshLOD,
     MaterialList &materials,
     bool isBillboard,
@@ -343,7 +343,7 @@ osg::ref_ptr<osg::Node> OSG4DSLoader::make4dsMeshLOD(
     return group;
 }
 
-osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4DS::Material *material)
+osg::ref_ptr<osg::StateSet> OSGModelLoader::make4dsMaterial(MFFormat::DataFormat4DS::Material *material)
 {
     osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
 
@@ -500,7 +500,7 @@ osg::ref_ptr<osg::StateSet> OSG4DSLoader::make4dsMaterial(MFFormat::DataFormat4D
     return stateSet;
 }
 
-osg::ref_ptr<osg::Node> OSG4DSLoader::load(MFFormat::DataFormat4DS *format, std::string fileName)
+osg::ref_ptr<osg::Node> OSGModelLoader::load(MFFormat::DataFormat4DS *format, std::string fileName)
 {
     if (fileName.length() > 0)
     {

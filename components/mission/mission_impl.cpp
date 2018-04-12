@@ -9,6 +9,7 @@ MissionImpl::MissionImpl(std::string missionName, MFGame::Engine *engine): Missi
     mFileSystem = MFFile::FileSystem::getInstance();
     mRenderer = (MFRender::OSGRenderer *)engine->getRenderer();
     mEngine = engine;
+    mModelCache = mEngine->getModelCache();
 }
 
 MissionImpl::~MissionImpl()
@@ -22,21 +23,23 @@ bool MissionImpl::load()
     std::string scene2BinPath = missionDir + "/scene2.bin";
     std::string cacheBinPath = missionDir + "/cache.bin";
     std::string checkBinPath = missionDir + "/check.bin";
+    std::string treeKlzPath = missionDir + "/tree.klz";
 
     std::ifstream file4DS;
     std::ifstream fileScene2Bin;
     std::ifstream fileCacheBin;
     std::ifstream fileCheckBin;
+    std::ifstream fileTreeKlz;
 
-    MFFormat::OSG4DSLoader l4ds;
+    MFFormat::OSGModelLoader l4ds;
     MFFormat::OSGStaticSceneLoader lScene2;
     MFFormat::OSGCachedCityLoader lCache;
 
     l4ds.setLoaderCache(mRenderer->getLoaderCache());
     lScene2.setLoaderCache(mRenderer->getLoaderCache());
-    lScene2.setModelCache(&mModelCache);
+    lScene2.setObjectFactory(mEngine->getSpatialEntityFactory());
     lCache.setLoaderCache(mRenderer->getLoaderCache());
-    lCache.setModelCache(&mModelCache);
+    lCache.setObjectFactory(mEngine->getSpatialEntityFactory());
 
     MFFormat::OSGLoader::NodeMap nodeMap;
     l4ds.setNodeMap(&nodeMap);
@@ -91,6 +94,11 @@ bool MissionImpl::load()
         fileCacheBin.close();
     }
 
+    if (mFileSystem->open(fileTreeKlz, treeKlzPath)) {
+        mStaticColsData.load(fileTreeKlz);
+        fileTreeKlz.close();
+    }
+
     ////NOTE(DavoSK): Only for debug 
     //if (mFileSystem->open(fileCheckBin, checkBinPath))
     //{
@@ -137,7 +145,7 @@ void MissionImpl::createMissionEntities()
                 switch (object.mSpecialType) {
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL:
                     {
-                        MFFormat::OSG4DSLoader model;
+                        MFFormat::OSGModelLoader model;
                     }
                     break;
 

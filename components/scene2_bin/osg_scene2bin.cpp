@@ -1,5 +1,6 @@
 #include <scene2_bin/osg_scene2bin.hpp>
 #include <4ds/osg_4ds.hpp>
+#include "spatial_entity/factory.hpp"
 
 namespace MFFormat
 {
@@ -48,8 +49,6 @@ OSGStaticSceneLoader::OSGStaticSceneLoader(): OSGLoader()
     mDebugOtherLightNode = new osg::ShapeDrawable(new osg::Box(osg::Vec3f(0,0,0),1));
     mDebugOtherLightNode->setNodeMask(MFRender::MASK_DEBUG);
     mDebugOtherLightNode->setName("debug other light node");
-
-    mModelCache = nullptr;
 }
 
 osg::ref_ptr<osg::Node> OSGStaticSceneLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
@@ -129,7 +128,7 @@ osg::ref_ptr<osg::Node> OSGStaticSceneLoader::load(MFFormat::DataFormatScene2BIN
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("scene2.bin");
     MFLogger::Logger::info("loading scene2.bin", OSGSCENE2BIN_MODULE_STR);
-    MFFormat::OSG4DSLoader loader4DS;
+    MFFormat::OSGModelLoader loader4DS;
     loader4DS.setBaseDir(mBaseDir);
 
     
@@ -171,41 +170,7 @@ osg::ref_ptr<osg::Node> OSGStaticSceneLoader::load(MFFormat::DataFormatScene2BIN
 
                 logStr += "model: " + object.mModelName;
 
-                objectNode = (osg::Node *) getFromCache(object.mModelName).get();
-
-                if (!objectNode)
-                {
-                    MFFormat::DataFormat4DS *model = nullptr;
-                    if (mModelCache) {
-                        model = mModelCache->getObject(object.mModelName);
-
-                        loadModel:
-                        if (!model) {
-                            model = new MFFormat::DataFormat4DS();
-
-                            std::ifstream f;
-                            if (!mFileSystem->open(f, "models/" + object.mModelName))
-                            {
-                                MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
-                            }
-                            else
-                            {
-                                model->load(f);
-                                f.close();
-                            }
-
-                            if (mModelCache)
-                                mModelCache->storeObject(object.mModelName, model);
-                        }
-                    }
-                    else {
-                        goto loadModel;
-                    }
-
-                    objectNode = loader4DS.load(model, object.mModelName);
-                    storeToCache(object.mModelName, objectNode);
-                    objectNode->setName(object.mModelName);
-                }
+                objectNode = (osg::Node *) mObjectFactory->loadModel(object.mModelName);
 
                 break;
             }

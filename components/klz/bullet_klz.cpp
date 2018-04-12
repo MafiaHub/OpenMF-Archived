@@ -3,7 +3,7 @@
 namespace MFPhysics
 {
 
-void BulletTreeKlzLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds)
+void BulletStaticCollisionLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds)
 {
     MFFormat::DataFormatTreeKLZ klz;
     klz.load(srcFile);
