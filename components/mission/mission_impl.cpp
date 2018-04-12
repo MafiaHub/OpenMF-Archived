@@ -268,7 +268,7 @@ void MissionImpl::createMissionEntities()
 
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_CHARACTER:
                     {
-                        auto entityId = mEngine->getSpatialEntityFactory()->createPawnEntity(object.mModelName, 0.0f);
+                        auto entityId = mEngine->getSpatialEntityFactory()->createPawnEntity(object.mModelName, 1000.0f);
                         entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
                     }
                     break;

@@ -40,18 +40,22 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string mod
 {
     MFUtil::FullRigidBody body;
 
-    body.mMotionState = std::make_shared<btDefaultMotionState>(
-        btTransform(btQuaternion(0, 0, 0, mass),
-        btVector3(0, 0, 0)));
+    btTransform transform;
+    transform.setIdentity();
 
-    btVector3 inertia;
-    mPhysicalCapsuleShape->calculateLocalInertia(mass,inertia);
+    body.mMotionState = std::make_shared<btDefaultMotionState>(transform);
+
+    btVector3 inertia(0,0,0);
+
+    if (mass)
+        mPhysicalCapsuleShape->calculateLocalInertia(mass,inertia);
+
     body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mPhysicalCapsuleShape.get(), inertia);
     
-    if (mass)
+    if (mass) {
         body.mBody->setActivationState(DISABLE_DEACTIVATION);
-
-    body.mBody->setFriction(0);
+        body.mBody->setFriction(0);
+    }
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
 
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
