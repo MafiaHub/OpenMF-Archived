@@ -3,16 +3,13 @@
 namespace MFPhysics
 {
 
-void BulletStaticCollisionLoader::load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds)
+void BulletStaticCollisionLoader::load(MFFormat::DataFormatTreeKLZ *klz, MFFormat::DataFormat4DS &scene4ds)
 {
-    MFFormat::DataFormatTreeKLZ klz;
-    klz.load(srcFile);
-
-    std::vector<std::string> linkStrings = klz.getLinkStrings();
+    std::vector<std::string> linkStrings = klz->getLinkStrings();
 
     #define loopBegin(getFunc)\
     {\
-        auto cols = klz.getFunc(); \
+        auto cols = klz->getFunc(); \
         for (int i = 0; i < (int) cols.size(); ++i)\
         {\
             auto col = cols[i];\
@@ -84,7 +81,7 @@ void BulletStaticCollisionLoader::load(std::ifstream &srcFile, MFFormat::DataFor
 
     // load face collisions:
 
-    auto cols = klz.getFaceCols();
+    auto cols = klz->getFaceCols();
 
     int currentLink = -1;
     MeshFaceCollision faceCol;

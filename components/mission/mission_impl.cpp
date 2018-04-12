@@ -33,13 +33,13 @@ bool MissionImpl::load()
     MFFormat::OSGModelLoader l4ds;
     MFFormat::OSGStaticSceneLoader lScene2;
     MFFormat::OSGCachedCityLoader lCache;
+    MFPhysics::BulletStaticCollisionLoader lTreeKlz;
 
     l4ds.setLoaderCache(mRenderer->getLoaderCache());
     lScene2.setLoaderCache(mRenderer->getLoaderCache());
     lScene2.setObjectFactory(mEngine->getSpatialEntityFactory());
     lCache.setLoaderCache(mRenderer->getLoaderCache());
     lCache.setObjectFactory(mEngine->getSpatialEntityFactory());
-
     
     l4ds.setNodeMap(&mNodeMap);
     lScene2.setNodeMap(&mNodeMap);
@@ -96,6 +96,15 @@ bool MissionImpl::load()
     if (mFileSystem->open(fileTreeKlz, treeKlzPath)) {
         mStaticColsData.load(fileTreeKlz);
         fileTreeKlz.close();
+    }
+
+    lTreeKlz.load(&mStaticColsData, mSceneModel);
+    mEngine->getPhysicsWorld()->setTreeKlzBodies(lTreeKlz.mRigidBodies);
+    auto treeKlzBodies = lTreeKlz.mRigidBodies;
+    for (int i = 0; i < (int)treeKlzBodies.size(); ++i)
+    {
+        treeKlzBodies[i].mRigidBody.mBody->setActivationState(0);
+        mEngine->getPhysicsWorld()->getWorld()->addRigidBody(treeKlzBodies[i].mRigidBody.mBody.get());
     }
 
     ////NOTE(DavoSK): Only for debug 

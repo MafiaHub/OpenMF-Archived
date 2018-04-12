@@ -21,7 +21,7 @@ namespace MFPhysics
 class BulletStaticCollisionLoader
 {
 public:
-    void load(std::ifstream &srcFile, MFFormat::DataFormat4DS &scene4ds);
+    void load(MFFormat::DataFormatTreeKLZ *klz, MFFormat::DataFormat4DS &scene4ds);
 
     std::vector<MFUtil::NamedRigidBody> mRigidBodies;
 

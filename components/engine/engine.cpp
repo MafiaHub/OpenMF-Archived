@@ -118,9 +118,6 @@ bool Engine::loadMission(std::string missionName)
 { 
     mMissionManager->loadMission(missionName);
 
-    if (mEngineSettings.mLoadTreeKlz)
-        mPhysicsWorld->loadMission(missionName);
-
     return true;   // TODO: perform some actual checks
 }
 
