@@ -31,6 +31,8 @@ public:
     virtual bool importFile() override;
     virtual bool exportFile() override;
 
+    MFFormat::DataFormatScene2BIN *getSceneData() { return &mSceneData; }
+
 protected:
     MFFormat::DataFormat4DS mSceneModel;
     MFFormat::DataFormatScene2BIN mSceneData;

@@ -64,6 +64,8 @@ public:
     typedef enum {
         SPECIAL_OBJECT_TYPE_NONE = 0,
         SPECIAL_OBJECT_TYPE_PHYSICAL = 0x23,
+        SPECIAL_OBJECT_TYPE_PLAYER = 0x02,
+        SPECIAL_OBJECT_TYPE_CHARACTER = 0x1B,
     } SpecialObjectType;
 
     typedef enum {

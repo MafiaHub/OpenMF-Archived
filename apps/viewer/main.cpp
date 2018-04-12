@@ -46,10 +46,11 @@ public:
 
         if (keyCode == OMF_SCANCODE_SPACE)   // SPACE
         {
+            auto mission = mEngine->getMissionManager()->getCurrentMission();
+            if (!mission) return;
+
             MFGame::SpatialEntity *e = mEngine->getSpatialEntityManager()->getEntityById(
-                mCounter % 2 == 0 ?
-                    mEngine->getSpatialEntityFactory()->createTestBallEntity() :
-                    mEngine->getSpatialEntityFactory()->createTestBoxEntity());
+                mEngine->getSpatialEntityFactory()->createPropEntity("bedna02.4ds"));
 
             MFMath::Vec3 f,r,u;
             mEngine->getRenderer()->getCameraVectors(f,r,u);

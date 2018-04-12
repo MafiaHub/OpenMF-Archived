@@ -266,6 +266,13 @@ void MissionImpl::createMissionEntities()
                     }
                     break;
 
+                    case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_CHARACTER:
+                    {
+                        auto entityId = mEngine->getSpatialEntityFactory()->createPawnEntity(object.mModelName, 0.0f);
+                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                    }
+                    break;
+
                     default:
                         break;
                 }

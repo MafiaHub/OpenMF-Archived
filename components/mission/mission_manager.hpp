@@ -18,6 +18,7 @@ public:
     ~MissionManager() = default;
 
     void loadMission(std::string missionName);
+    Mission *getCurrentMission() { return mCurrentMission; }
 
 private:
     MFGame::Engine *mEngine;

@@ -36,11 +36,10 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string modelName)
+MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string modelName, btScalar mass)
 {
     MFUtil::FullRigidBody body;
 
-    btScalar mass = 150.0f;
     body.mMotionState = std::make_shared<btDefaultMotionState>(
         btTransform(btQuaternion(0, 0, 0, mass),
         btVector3(0, 0, 0)));
@@ -48,7 +47,10 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string mod
     btVector3 inertia;
     mPhysicalCapsuleShape->calculateLocalInertia(mass,inertia);
     body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mPhysicalCapsuleShape.get(), inertia);
-    body.mBody->setActivationState(DISABLE_DEACTIVATION);
+    
+    if (mass)
+        body.mBody->setActivationState(DISABLE_DEACTIVATION);
+
     body.mBody->setFriction(0);
     mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
 
@@ -151,6 +153,38 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(MFFormat::DataF
     mRenderer->getRootNode()->addChild(visualTransform);
 
     return createEntity(visualTransform.get(), body, motionState, "dynamic " + object->mName, SpatialEntity::RIGID);
+}
+
+MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(std::string modelName, btScalar mass)
+{
+    btTransform transform;
+    transform.setIdentity();
+    auto motionState = std::make_shared<btDefaultMotionState>(transform);
+
+    btVector3 inertia = btVector3(0, 0, 0);
+
+    auto btMesh = loadFaceCols(modelName);
+
+    auto shape = new btConvexTriangleMeshShape(btMesh, true);
+    shape->setMargin(0.05f);
+    shape->calculateLocalInertia(mass, inertia);
+    auto body = std::make_shared<btRigidBody>(mass, motionState.get(), shape, inertia);
+    mPhysicsWorld->getWorld()->addRigidBody(body.get());
+
+    osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+
+    auto cache = mRenderer->getLoaderCache();
+    auto node = (osg::Node *)cache->getObject(modelName).get();
+
+    if (!node) {
+        node = loadModel(modelName);
+    }
+
+    visualTransform->addChild(node);
+
+    mRenderer->getRootNode()->addChild(visualTransform);
+
+    return createEntity(visualTransform.get(), body, motionState, "dynamic (undefined)", SpatialEntity::RIGID);
 }
 
 osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)

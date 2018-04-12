@@ -73,6 +73,7 @@ public:
     MFGame::SpatialEntityFactory *getSpatialEntityFactory() { return mSpatialEntityFactory; };
     MFGame::SpatialEntityManager *getSpatialEntityManager() { return mSpatialEntityManager; };
     MFInput::InputManager *getInputManager()                { return mInputManager;         };
+    MFGame::MissionManager *getMissionManager()             { return mMissionManager; };
     
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
     void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().

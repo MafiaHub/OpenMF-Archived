@@ -67,10 +67,11 @@ public:
 
     MFGame::SpatialEntity::Id createTestBallEntity();
     MFGame::SpatialEntity::Id createTestBoxEntity();
-    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="");
+    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f);
     MFGame::SpatialEntity::Id createCameraEntity();
     MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
     MFGame::SpatialEntity::Id createPropEntity(MFFormat::DataFormatScene2BIN::Object *object);
+    MFGame::SpatialEntity::Id createPropEntity(std::string modelName, btScalar mass=20.0f);
 
 protected: 
     MFGame::SpatialEntityManager *mEntityManager;
