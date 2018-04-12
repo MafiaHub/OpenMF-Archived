@@ -13,17 +13,22 @@
 namespace MFGame
 {
 
+    typedef MFFormat::LoaderCache<MFFormat::DataFormat4DS*> ModelCache;
+    typedef MFFormat::LoaderCache<btTriangleMesh*> FaceColsCache;
+
 class ObjectFactory {
 public:
     ObjectFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld);
     
     osg::ref_ptr<osg::Node> loadModel(std::string modelName);
     MFFormat::DataFormat4DS *loadModelData(std::string modelName);
+    btTriangleMesh *loadFaceCols(std::string modelName, int meshId=0);
     
     void setDebugMode(bool enable) { mDebugMode = enable; };
 
 protected:
-    MFFormat::ModelCache mModelCache;
+    ModelCache mModelCache;
+    FaceColsCache mFaceColsCache;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFFile::FileSystem *mFileSystem;
     MFRender::OSGRenderer *mRenderer;

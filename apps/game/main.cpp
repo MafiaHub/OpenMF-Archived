@@ -95,6 +95,9 @@ int main(int argc, char** argv)
     settings.mVsync = arguments.count("vsync") > 1;
     MafiaEngine engine(settings);
 
+    ((MFRender::OSGRenderer *) engine.getRenderer())->setRenderMask(3);
+    engine.getSpatialEntityFactory()->setDebugMode(true);
+
     switch (scenario)
     {
         case 1:

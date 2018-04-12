@@ -122,41 +122,36 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisio
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createDynamicEntity(MFFormat::DataFormatScene2BIN::Object * object)
 {
-    /*MFUtil::FullRigidBody body;
-
     btScalar mass = object->mSpecialProps.mWeight;
-    body.mMotionState = std::make_shared<btDefaultMotionState>(
-        btTransform(btQuaternion(0, 0, 0, mass),
-            btVector3(0, 0, 0)));
+    btTransform transform;
+    transform.setIdentity();
+    auto motionState = std::make_shared<btDefaultMotionState>(transform);
 
-    btVector3 inertia;
-    mTestPhysicalSphereShape->calculateLocalInertia(mass, inertia);
-    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mTestPhysicalSphereShape.get(), inertia);
-    body.mBody->setActivationState(DISABLE_DEACTIVATION);
-    body.mBody->setFriction(0);
-    mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());*/
+    btVector3 inertia = btVector3(0,0,0);
 
+    auto btMesh = loadFaceCols(object->mModelName);
+
+    auto shape = new btConvexTriangleMeshShape(btMesh, true);
+    shape->setMargin(0.05f);
+    shape->calculateLocalInertia(mass, inertia);
+    auto body = std::make_shared<btRigidBody>(mass, motionState.get(), shape, inertia);
+    body->setActivationState(DISABLE_DEACTIVATION);
+    mPhysicsWorld->getWorld()->addRigidBody(body.get());
+    
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
 
-    if (object->mModelName.length() == 0)
-    {
-        visualTransform->addChild(mTestBoxNode.get());
-    }
-    else
-    {
-        auto cache = mRenderer->getLoaderCache();
-        auto node = (osg::Node *)cache->getObject(object->mModelName).get();
+    auto cache = mRenderer->getLoaderCache();
+    auto node = (osg::Node *)cache->getObject(object->mModelName).get();
 
-        if (!node) {
-            node = loadModel(object->mModelName);
-        }
-
-        visualTransform->addChild(node);
+    if (!node) {
+        node = loadModel(object->mModelName);
     }
+
+    visualTransform->addChild(node);
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), nullptr, nullptr, "dynamic " + object->mName, SpatialEntity::RIGID);
+    return createEntity(visualTransform.get(), body, motionState, "dynamic " + object->mName, SpatialEntity::RIGID);
 }
 
 osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
@@ -194,6 +189,47 @@ MFFormat::DataFormat4DS * ObjectFactory::loadModelData(std::string modelName)
     }
     
     return model;
+}
+
+btTriangleMesh *ObjectFactory::loadFaceCols(std::string modelName, int meshId)
+{
+    auto btMesh = mFaceColsCache.getObject(modelName);
+
+    if (!btMesh) {
+        auto model = loadModelData(modelName);
+
+        if (!model) {
+            return nullptr;
+        }
+
+        btMesh = new btTriangleMesh();
+
+        auto mesh = model->getModel().mMeshes[meshId];
+        // TODO support more types?
+        if (mesh.mMeshType == MFFormat::DataFormat4DS::MESHTYPE_STANDARD && mesh.mVisualMeshType == MFFormat::DataFormat4DS::VISUALMESHTYPE_STANDARD) {
+            auto lod = mesh.mStandard.mLODs[0];
+            for (auto faceGroup : lod.mFaceGroups) {
+                for (auto face : faceGroup.mFaces) {
+                    auto i1 = face.mA;
+                    auto i2 = face.mB;
+                    auto i3 = face.mC;
+
+                    auto p1 = lod.mVertices[i1].mPos;
+                    auto p2 = lod.mVertices[i2].mPos;
+                    auto p3 = lod.mVertices[i3].mPos;
+
+                    btVector3 v1 = MFUtil::mafiaVec3ToBullet(p1.x, p1.y, p1.z);
+                    btVector3 v2 = MFUtil::mafiaVec3ToBullet(p2.x, p2.y, p2.z);
+                    btVector3 v3 = MFUtil::mafiaVec3ToBullet(p3.x, p3.y, p3.z);
+                    btMesh->addTriangle(v1, v2, v3);
+                }
+            }
+        }
+
+        mFaceColsCache.storeObject(modelName, btMesh);
+    }
+
+    return btMesh;
 }
 
 MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()

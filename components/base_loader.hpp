@@ -15,9 +15,6 @@ namespace MFGame { class ObjectFactory; }
 namespace MFFormat
 {
 
-    class DataFormat4DS;
-    typedef MFFormat::LoaderCache<MFFormat::DataFormat4DS*> ModelCache;
-
 class OSGLoader
 {
 public:

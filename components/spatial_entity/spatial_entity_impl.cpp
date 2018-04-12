@@ -354,6 +354,7 @@ void SpatialEntityImpl::makePhysicsDebugOSGNode()        ///< Creates a visual r
             break;
         }
 
+        case BroadphaseNativeTypes::CONVEX_SHAPE_PROXYTYPE:
         case BroadphaseNativeTypes::TRIANGLE_MESH_SHAPE_PROXYTYPE:
         {
             auto *mesh =

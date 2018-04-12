@@ -263,7 +263,6 @@ void MissionImpl::createMissionEntities()
                     {
                         auto entityId = mEngine->getSpatialEntityFactory()->createDynamicEntity(&object);
                         entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
-                        printf("%s\n", entity->getName().c_str());
                     }
                     break;
 
@@ -300,11 +299,12 @@ void MissionImpl::createMissionEntities()
             entity->setRotation(rot);
         }
         else {
-            auto pos = object.mPos;
-            auto rot = object.mRot;
+            MFFormat::OSGStaticSceneLoader l;
+            auto pos = l.toOSG(object.mPos);
+            auto rot = l.toOSG(object.mRot);
 
-            entity->setPosition(pos);
-            entity->setRotation(rot);
+            entity->setPosition(MFMath::Vec3(pos.x(), pos.y(), pos.z()));
+            entity->setRotation(MFMath::Quat(rot.x(), rot.y(), rot.z(), rot.w()));
         }
     }
 }
