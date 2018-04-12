@@ -120,6 +120,45 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisio
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
 }
 
+MFGame::SpatialEntity::Id SpatialEntityFactory::createDynamicEntity(MFFormat::DataFormatScene2BIN::Object * object)
+{
+    /*MFUtil::FullRigidBody body;
+
+    btScalar mass = object->mSpecialProps.mWeight;
+    body.mMotionState = std::make_shared<btDefaultMotionState>(
+        btTransform(btQuaternion(0, 0, 0, mass),
+            btVector3(0, 0, 0)));
+
+    btVector3 inertia;
+    mTestPhysicalSphereShape->calculateLocalInertia(mass, inertia);
+    body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mTestPhysicalSphereShape.get(), inertia);
+    body.mBody->setActivationState(DISABLE_DEACTIVATION);
+    body.mBody->setFriction(0);
+    mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());*/
+
+    osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+
+    if (object->mModelName.length() == 0)
+    {
+        visualTransform->addChild(mTestBoxNode.get());
+    }
+    else
+    {
+        auto cache = mRenderer->getLoaderCache();
+        auto node = (osg::Node *)cache->getObject(object->mModelName).get();
+
+        if (!node) {
+            node = loadModel(object->mModelName);
+        }
+
+        visualTransform->addChild(node);
+    }
+
+    mRenderer->getRootNode()->addChild(visualTransform);
+
+    return createEntity(visualTransform.get(), nullptr, nullptr, "dynamic " + object->mName, SpatialEntity::RIGID);
+}
+
 osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
 {
     osg::ref_ptr<osg::Node> node = nullptr;
@@ -137,29 +176,23 @@ osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
 MFFormat::DataFormat4DS * ObjectFactory::loadModelData(std::string modelName)
 {
     MFFormat::DataFormat4DS *model = nullptr;
-    if (mModelCache) {
-        model = mModelCache->getObject(modelName);
+    
+    model = mModelCache.getObject(modelName);
 
-    loadModel:
-        if (!model) {
-            model = new MFFormat::DataFormat4DS();
-            std::ifstream file4DS;
-            if (!mFileSystem->open(file4DS, "models/" + modelName)) {
-                MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
-            }
-            else {
-                model->load(file4DS);
-                file4DS.close();
-            }
-
-            if (mModelCache)
-                mModelCache->storeObject(modelName, model);
+    if (!model) {
+        model = new MFFormat::DataFormat4DS();
+        std::ifstream file4DS;
+        if (!mFileSystem->open(file4DS, "models/" + modelName)) {
+            MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
         }
-    }
-    else {
-        goto loadModel;
-    }
+        else {
+            model->load(file4DS);
+            file4DS.close();
+        }
 
+        mModelCache.storeObject(modelName, model);
+    }
+    
     return model;
 }
 
@@ -173,129 +206,8 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBoxEntity()
     return createTestShapeEntity(mTestPhysicalBoxShape.get(),mTestBoxNode.get());
 }
 
-class CreateEntitiesFromSceneVisitor: public osg::NodeVisitor
-{
-public:
-    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, MFGame::SpatialEntityFactory *entityFactory): osg::NodeVisitor()
-    {
-        mTreeKlzBodies = treeKlzBodies;
-        mEntityFactory = entityFactory;
-        mModelName = "";
-
-        for (int i = 0; i < (int) treeKlzBodies->size(); ++i)
-        {
-            std::string name = (*treeKlzBodies)[i].mName;
-            mNameToBody.insert(std::pair<std::string,MFUtil::NamedRigidBody *>(name,&((*treeKlzBodies)[i])));
-        }
-    }
-
-    virtual void apply(osg::Node &n) override
-    {
-        MFUtil::traverse(this,n);
-    }
-
-    virtual void apply(osg::MatrixTransform &n) override
-    {
-        std::string modelName = "";
-
-        if (n.getUserDataContainer())
-        {
-            std::vector<std::string> descriptions = n.getUserDataContainer()->getDescriptions();
-
-            if (descriptions.size() > 0)
-            {
-                if (descriptions[0].compare("scene2.bin model") == 0)
-                {
-                    modelName = n.getName();
-                }
-                else if (descriptions[0].compare("4ds mesh") == 0)
-                {
-                    std::vector<MFUtil::NamedRigidBody *> matches = findCollisions(n.getName());
-                    std::string fullName = mModelName.length() > 0 ? mModelName + "." + n.getName() : n.getName();
-
-                    if (matches.size() == 0)
-                    {
-                        MFLogger::Logger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").",SPATIAL_ENTITY_FACTORY_MODULE_STR);
-                        mEntityFactory->createEntity(&n,0,0,fullName);
-                    }
-                    else
-                    {
-                        for (int i = 0; i < (int) matches.size(); ++i)
-                        {
-                            mEntityFactory->createEntity(&n, matches[i]->mRigidBody.mBody,matches[i]->mRigidBody.mMotionState,fullName);
-                            mMatchedBodies.insert(matches[i]->mName);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (modelName.size() > 0)
-            mModelName = modelName;          // traverse downwards with given name prefix
-
-        MFUtil::traverse(this,n);
-
-        if (modelName.size() > 0)
-            mModelName = "";                 // going back up => clear the name prefix
-    }
-
-    std::set<std::string> mMatchedBodies;
-
-protected:
-    std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
-    MFGame::SpatialEntityFactory *mEntityFactory;
-    std::string mModelName;                  // when traversing into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
-    std::multimap<std::string,MFUtil::NamedRigidBody *> mNameToBody;
-
-    std::vector<MFUtil::NamedRigidBody *> findCollisions(std::string visualName)
-    {
-        std::vector<MFUtil::NamedRigidBody *> result;
-
-        auto found = mNameToBody.equal_range(visualName);
-
-        for (auto it = found.first; it != found.second; ++it)
-            result.push_back(it->second);
-
-        found = mNameToBody.equal_range(mModelName);
-
-        for (auto it = found.first; it != found.second; ++it)
-            result.push_back(it->second);
-
-        found = mNameToBody.equal_range(mModelName + "." + visualName);
-
-        for (auto it = found.first; it != found.second; ++it)
-            result.push_back(it->second);
-
-        return result;
-    }
-};
-
-void SpatialEntityFactory::createMissionEntities()
-{
-    auto treeKlzBodies = mPhysicsWorld->getTreeKlzBodies();
-
-    CreateEntitiesFromSceneVisitor v(&treeKlzBodies,this);
-    mRenderer->getRootNode()->accept(v);
-
-    // process the unmatched rigid bodies:
-
-    for (int i = 0; i < (int) treeKlzBodies.size(); ++i)
-    {
-        if (v.mMatchedBodies.find(treeKlzBodies[i].mName) != v.mMatchedBodies.end())
-            continue;
-
-        createEntity(0,
-            treeKlzBodies[i].mRigidBody.mBody,
-            treeKlzBodies[i].mRigidBody.mMotionState,
-            treeKlzBodies[i].mName);
-    }
-
-    // TODO: set the static flag to the loaded bodies here
-}
-
 ObjectFactory::ObjectFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld)
 {
-    mModelCache = nullptr;
     mDebugMode = false;
 
     mFileSystem = MFFile::FileSystem::getInstance();

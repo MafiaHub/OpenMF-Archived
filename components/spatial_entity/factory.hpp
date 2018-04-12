@@ -16,15 +16,14 @@ namespace MFGame
 class ObjectFactory {
 public:
     ObjectFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld);
-    void setModelCache(MFFormat::ModelCache *modelCache) { mModelCache = modelCache; }
-
+    
     osg::ref_ptr<osg::Node> loadModel(std::string modelName);
     MFFormat::DataFormat4DS *loadModelData(std::string modelName);
     
     void setDebugMode(bool enable) { mDebugMode = enable; };
 
 protected:
-    MFFormat::ModelCache *mModelCache;
+    MFFormat::ModelCache mModelCache;
     MFPhysics::BulletPhysicsWorld *mPhysicsWorld;
     MFFile::FileSystem *mFileSystem;
     MFRender::OSGRenderer *mRenderer;
@@ -53,7 +52,6 @@ class SpatialEntityFactory : public ObjectFactory
 {
 public:
     SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
-    void createMissionEntities();
 
     MFGame::SpatialEntity::Id createEntity(
         osg::MatrixTransform *graphicNode,
@@ -67,6 +65,7 @@ public:
     MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="");
     MFGame::SpatialEntity::Id createCameraEntity();
     MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+    MFGame::SpatialEntity::Id createDynamicEntity(MFFormat::DataFormatScene2BIN::Object *object);
 
 protected: 
     MFGame::SpatialEntityManager *mEntityManager;

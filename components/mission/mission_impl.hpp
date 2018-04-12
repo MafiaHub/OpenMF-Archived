@@ -58,7 +58,7 @@ protected:
     MFFormat::DataFormatCacheBIN mCacheData;
     MFFormat::DataFormatTreeKLZ mStaticColsData;
 
-    MFFormat::ModelCache *mModelCache;
+    MFFormat::OSGLoader::NodeMap mNodeMap;
 
 private:
     MFFile::FileSystem *mFileSystem;

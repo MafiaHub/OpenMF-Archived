@@ -46,8 +46,7 @@ Engine::Engine(EngineSettings settings)
     mInputManager = new MFInput::InputManagerImpl();
     mSpatialEntityManager = new SpatialEntityManager();
     mSpatialEntityFactory = new SpatialEntityFactory(mRenderer,mPhysicsWorld,mSpatialEntityManager);
-    mSpatialEntityFactory->setModelCache(&mModelCache);
-
+    
     mInputManager->initWindow(
         mEngineSettings.mInitWindowWidth,
         mEngineSettings.mInitWindowHeight,
@@ -121,8 +120,6 @@ bool Engine::loadMission(std::string missionName)
 
     if (mEngineSettings.mLoadTreeKlz)
         mPhysicsWorld->loadMission(missionName);
-
-    mSpatialEntityFactory->createMissionEntities();
 
     return true;   // TODO: perform some actual checks
 }
