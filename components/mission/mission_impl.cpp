@@ -1,12 +1,14 @@
 #include "mission/mission_impl.hpp"
+#include "engine/engine.hpp"
 
 namespace MFGame
 {
 
-MissionImpl::MissionImpl(std::string missionName, MFRender::OSGRenderer *renderer): Mission(missionName)
+MissionImpl::MissionImpl(std::string missionName, MFGame::Engine *engine): Mission(missionName)
 {
     mFileSystem = MFFile::FileSystem::getInstance();
-    mRenderer = renderer;
+    mRenderer = (MFRender::OSGRenderer *)engine->getRenderer();
+    mEngine = engine;
 }
 
 MissionImpl::~MissionImpl()
@@ -27,19 +29,21 @@ bool MissionImpl::load()
     std::ifstream fileCheckBin;
 
     MFFormat::OSG4DSLoader l4ds;
-    MFFormat::OSGScene2BinLoader lScene2;
-    MFFormat::OSGCacheBinLoader lCache;
+    MFFormat::OSGStaticSceneLoader lScene2;
+    MFFormat::OSGCachedCityLoader lCache;
 
     l4ds.setLoaderCache(mRenderer->getLoaderCache());
     lScene2.setLoaderCache(mRenderer->getLoaderCache());
+    lScene2.setModelCache(&mModelCache);
     lCache.setLoaderCache(mRenderer->getLoaderCache());
+    lCache.setModelCache(&mModelCache);
 
     MFFormat::OSGLoader::NodeMap nodeMap;
     l4ds.setNodeMap(&nodeMap);
     lScene2.setNodeMap(&nodeMap);
 
     if (mFileSystem->open(file4DS, scene4dsPath)) {
-        mSceneModel.load(file4DS);
+        if (!mSceneModel.load(file4DS)) return false;
         file4DS.close();
 
         osg::ref_ptr<osg::Node> n = l4ds.load(&mSceneModel);
@@ -54,7 +58,7 @@ bool MissionImpl::load()
 
     if (mFileSystem->open(fileScene2Bin, scene2BinPath))
     {
-        mSceneData.load(fileScene2Bin);
+        if (!mSceneData.load(fileScene2Bin)) return false;
         osg::ref_ptr<osg::Node> n = lScene2.load(&mSceneData);
 
         if (!n)
@@ -76,7 +80,7 @@ bool MissionImpl::load()
 
     if (mFileSystem->open(fileCacheBin, cacheBinPath))
     {
-        mCacheData.load(fileCacheBin);
+        if (!mCacheData.load(fileCacheBin)) return false;
         osg::ref_ptr<osg::Node> n = lCache.load(&mCacheData);
 
         if (!n)
@@ -99,10 +103,12 @@ bool MissionImpl::load()
     //    fileCheckBin.close();
     //}
 
-    //setViewDistance(viewDistance);
-    //optimize();
-    //mLoaderCache.logStats();
-    return false;
+    createMissionEntities();
+
+    mRenderer->setViewDistance(viewDistance);
+    mRenderer->optimize();
+    mRenderer->getLoaderCache()->logStats();
+    return true;
 }
 
 bool MissionImpl::unload()
@@ -118,6 +124,33 @@ bool MissionImpl::importFile()
 bool MissionImpl::exportFile()
 {
     return false;
+}
+
+void MissionImpl::createMissionEntities()
+{
+    for (auto pair : mSceneData.getObjects()) {
+        auto object = pair.second;
+
+        switch (object.mType) {
+            case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
+            {
+                switch (object.mSpecialType) {
+                    case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL:
+                    {
+                        MFFormat::OSG4DSLoader model;
+                    }
+                    break;
+
+                    default:
+                        break;
+                }
+            }
+            break;
+
+            default:
+                break;
+        }
+    }
 }
 
 }

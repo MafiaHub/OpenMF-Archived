@@ -1,5 +1,7 @@
 #pragma once
 
+#define MISSION_MANAGER_MODULE_STR "MissionManager"
+
 #include "mission/mission.hpp"
 
 #include <unordered_map>

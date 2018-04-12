@@ -21,10 +21,13 @@ void MissionManager::loadMission(std::string missionName)
         mCurrentMission = it->second;
     }
     else {
-        Mission *mission = new MissionImpl(missionName, (MFRender::OSGRenderer*)mEngine->getRenderer());
+        Mission *mission = new MissionImpl(missionName, mEngine);
         if (mission->load()) {
             mCurrentMission = mission;
             mMissions.insert(std::make_pair(missionName, mission));
+        }
+        else {
+            MFLogger::Logger::fatal("Could not load mission: " + missionName, MISSION_MANAGER_MODULE_STR);
         }
     }
 }

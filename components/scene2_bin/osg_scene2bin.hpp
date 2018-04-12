@@ -27,12 +27,12 @@
 namespace MFFormat
 {
 
-class OSGScene2BinLoader : public OSGLoader
+class OSGStaticSceneLoader : public OSGLoader
 {
 public:
     typedef std::vector<osg::ref_ptr<osg::LightSource>> LightList;
 
-    OSGScene2BinLoader();
+    OSGStaticSceneLoader();
     osg::ref_ptr<osg::Node> load(MFFormat::DataFormatScene2BIN *format, std::string fileName="");
     LightList getLightNodes()            { return mLightNodes;           };
     osg::Group *getCameraRelativeGroup() { return mCameraRelative.get(); };

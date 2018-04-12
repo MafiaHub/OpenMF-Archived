@@ -34,7 +34,7 @@ protected:
     osg::Texture::WrapMode mWrapMode;
 };
 
-OSGScene2BinLoader::OSGScene2BinLoader(): OSGLoader()
+OSGStaticSceneLoader::OSGStaticSceneLoader(): OSGLoader()
 {
     mViewDistance = 0;
     mDebugPointLightNode = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3f(0,0,0),1));
@@ -48,9 +48,11 @@ OSGScene2BinLoader::OSGScene2BinLoader(): OSGLoader()
     mDebugOtherLightNode = new osg::ShapeDrawable(new osg::Box(osg::Vec3f(0,0,0),1));
     mDebugOtherLightNode->setNodeMask(MFRender::MASK_DEBUG);
     mDebugOtherLightNode->setName("debug other light node");
+
+    mModelCache = nullptr;
 }
 
-osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
+osg::ref_ptr<osg::Node> OSGStaticSceneLoader::makeLightNode(MFFormat::DataFormatScene2BIN::Object object)
 {
     osg::ref_ptr<osg::Group> lightGroup = new osg::Group;
     lightGroup->setName(MFFormat::DataFormatScene2BIN::lightTypeToStr(object.mLightType));
@@ -122,7 +124,7 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::makeLightNode(MFFormat::DataFormatSc
     return lightGroup;
 }
 
-osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(MFFormat::DataFormatScene2BIN *format, std::string fileName)
+osg::ref_ptr<osg::Node> OSGStaticSceneLoader::load(MFFormat::DataFormatScene2BIN *format, std::string fileName)
 {
     osg::ref_ptr<osg::Group> group = new osg::Group();
     group->setName("scene2.bin");
@@ -164,26 +166,45 @@ osg::ref_ptr<osg::Node> OSGScene2BinLoader::load(MFFormat::DataFormatScene2BIN *
 
             case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
             {
+                // Check if object is special (is not static)
+                if (object.mSpecialType) continue;
+
                 logStr += "model: " + object.mModelName;
 
                 objectNode = (osg::Node *) getFromCache(object.mModelName).get();
 
                 if (!objectNode)
                 {
-                    std::ifstream f;
-                        
-                    if (!mFileSystem->open(f,"models/" + object.mModelName))
-                    {
-                        MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
+                    MFFormat::DataFormat4DS *model = nullptr;
+                    if (mModelCache) {
+                        model = mModelCache->getObject(object.mModelName);
+
+                        loadModel:
+                        if (!model) {
+                            model = new MFFormat::DataFormat4DS();
+
+                            std::ifstream f;
+                            if (!mFileSystem->open(f, "models/" + object.mModelName))
+                            {
+                                MFLogger::Logger::warn("Could not load model " + object.mModelName + ".", OSGSCENE2BIN_MODULE_STR);
+                            }
+                            else
+                            {
+                                model->load(f);
+                                f.close();
+                            }
+
+                            if (mModelCache)
+                                mModelCache->storeObject(object.mModelName, model);
+                        }
                     }
-                    else
-                    {
-                        MFFormat::DataFormat4DS model; model.load(f);
-                        objectNode = loader4DS.load(&model,object.mModelName);   
-                        storeToCache(object.mModelName,objectNode);
-                        f.close();
-                        objectNode->setName(object.mModelName);
+                    else {
+                        goto loadModel;
                     }
+
+                    objectNode = loader4DS.load(model, object.mModelName);
+                    storeToCache(object.mModelName, objectNode);
+                    objectNode->setName(object.mModelName);
                 }
 
                 break;

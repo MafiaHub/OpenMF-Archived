@@ -10,7 +10,7 @@
 namespace MFFormat
 {
 
-class OSGCacheBinLoader : public OSGLoader
+class OSGCachedCityLoader : public OSGLoader
 {
 public:
     osg::ref_ptr<osg::Node> load(MFFormat::DataFormatCacheBIN *format, std::string fileName = "");

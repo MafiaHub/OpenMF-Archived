@@ -38,10 +38,12 @@
 namespace MFGame
 {
 
+    class Engine;
+
 class MissionImpl: public Mission
 {
 public:
-    MissionImpl(std::string missionName, MFRender::OSGRenderer *renderer);
+    MissionImpl(std::string missionName, MFGame::Engine *engine);
     virtual ~MissionImpl() override;
 
     virtual bool load() override;
@@ -54,9 +56,14 @@ protected:
     MFFormat::DataFormatScene2BIN mSceneData;
     MFFormat::DataFormatCacheBIN mCacheData;
 
+    MFFormat::ModelCache mModelCache;
+
 private:
     MFFile::FileSystem *mFileSystem;
     MFRender::OSGRenderer *mRenderer;
+    MFGame::Engine *mEngine;
+
+    void createMissionEntities();
 
 };
 

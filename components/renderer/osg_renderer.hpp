@@ -67,14 +67,14 @@ public:
 
     void setUpLights(std::vector<osg::ref_ptr<osg::LightSource>> *lightNodes);
 
+    void optimize();
+
 protected:
     osg::ref_ptr<osgViewer::Viewer> mViewer;    
     osg::ref_ptr<osg::Group> mRootNode;            ///< root node of the whole scene being rendered
     osg::ref_ptr<ImGuiHandler> mImGuiHandler;
     MFFile::FileSystem *mFileSystem;
     OSGCache mLoaderCache;
-
-    void optimize();
 
     osg::ref_ptr<osg::Drawable> mSelected;           ///< debug selection
     osg::ref_ptr<osg::Material> mHighlightMaterial;  ///< for highlighting debug selection

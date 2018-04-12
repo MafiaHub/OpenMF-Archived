@@ -2,6 +2,7 @@
 #define FORMAT_PARSERS_4DS_H
 
 #include <base_parser.hpp>
+#include <loader_cache.hpp>
 #include <cstring>
 #include <utils/math.hpp>
 
