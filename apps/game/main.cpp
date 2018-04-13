@@ -45,7 +45,7 @@ public:
         if (spawnEntity) {
             auto pos = spawnEntity->getPosition();
             auto spat = (MFGame::EntityImpl *)spawnEntity;
-            setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
+            setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 2)); // +1 due to player being moved in the middle of the ground
 
             if (mPlayerEntity->getVisualNode() == mPlayerNode) {
                 mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
@@ -81,7 +81,7 @@ public:
             }
 
             if (keyCode == OMF_SCANCODE_3) {
-                mEngine->loadMission("mise20-galery");
+                mEngine->loadMission("mise14-parnik");
                 mEngine->useDefaultPlayer();
             }
         }
