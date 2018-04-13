@@ -157,11 +157,7 @@ int main(int argc, char** argv)
     if (arguments.count("d") < 1) {
         engine.useDefaultPlayer();
     }
-
-    auto entityId = engine.getEntityFactory()->createPawnEntity("Tommy.4ds");
-    engine.getEntityManager()->removeEntity(entityId);
-
-
+    
     engine.getRenderer()->setCameraParameters(true,90,0,0.25,2000);
     engine.run();
 
