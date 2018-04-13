@@ -3,37 +3,13 @@
 #include <controllers/player_controller.hpp>
 #include <cxxopts.hpp>
 
-class KeyCallback : public MFInput::KeyInputCallback
-{
-public:
-    KeyCallback(MFGame::Engine *engine) : MFInput::KeyInputCallback()
-    {
-        mEngine = engine;
-        mCounter = 0;
-    }
-
-    virtual void call(bool down, unsigned int keyCode) override
-    {
-        if (!down)
-            return;
-
-        if (keyCode == OMF_SCANCODE_F3) // F3
-        {
-            mEngine->getRenderer()->showProfiler();
-        }
-    }
-
-protected:
-    MFGame::Engine *mEngine;
-    unsigned int mCounter;
-};
-
 class MafiaEngine: public MFGame::Engine
 {
 public:
     MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
         mPlayerEntity = (MFGame::EntityImpl *)mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds"));
+        mPlayerNode = mPlayerEntity->getVisualNode();
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
 
@@ -71,14 +47,53 @@ public:
             auto spat = (MFGame::EntityImpl *)spawnEntity;
             setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
 
-            mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
+            if (mPlayerEntity->getVisualNode() == mPlayerNode) {
+                mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
+                mPlayerNode = nullptr;
+            }
 
             mPlayerEntity->setVisualNode(spat->getVisualNode());
         }
     };
 
+    class KeyCallback : public MFInput::KeyInputCallback
+    {
+    public:
+        KeyCallback(MafiaEngine *engine) : MFInput::KeyInputCallback()
+        {
+            mEngine = engine;
+            mCounter = 0;
+        }
+
+        virtual void call(bool down, unsigned int keyCode) override
+        {
+            if (!down)
+                return;
+
+            if (keyCode == OMF_SCANCODE_F3) // F3
+            {
+                mEngine->getRenderer()->showProfiler();
+            }
+
+            if (keyCode == OMF_SCANCODE_0) {
+                mEngine->loadMission("tutorial");
+                mEngine->useDefaultPlayer();
+            }
+
+            if (keyCode == OMF_SCANCODE_3) {
+                mEngine->loadMission("mise20-galery");
+                mEngine->useDefaultPlayer();
+            }
+        }
+
+    protected:
+        MafiaEngine * mEngine;
+        unsigned int mCounter;
+    };
+
 protected:
     MFGame::EntityImpl *mPlayerEntity;
+    osg::ref_ptr<osg::Group> mPlayerNode;
     MFGame::PlayerController *mPlayerController;
 };
 

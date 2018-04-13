@@ -15,6 +15,8 @@
 #include "klz/parser_klz.hpp"
 #include "renderer/osg_renderer.hpp"
 
+#include "entity/entity.hpp"
+
 namespace MFGame
 {
 
@@ -40,6 +42,10 @@ protected:
     MFFormat::DataFormatTreeKLZ mStaticColsData;
 
     MFFormat::OSGLoader::NodeMap mNodeMap;
+    osg::ref_ptr<osg::Group> mSceneModelNode;
+    osg::ref_ptr<osg::Group> mCachedCityNode;
+    osg::ref_ptr<osg::Group> mSceneNode;
+    std::vector<MFGame::Entity*> mLoadedEntities;
 
 private:
     MFFile::FileSystem *mFileSystem;

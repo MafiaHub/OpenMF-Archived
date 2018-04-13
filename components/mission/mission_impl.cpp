@@ -13,6 +13,7 @@ MissionImpl::MissionImpl(std::string missionName, MFGame::Engine *engine): Missi
 
 MissionImpl::~MissionImpl()
 {
+    
 }
 
 bool MissionImpl::load()
@@ -44,11 +45,11 @@ bool MissionImpl::load()
     l4ds.setNodeMap(&mNodeMap);
     lScene2.setNodeMap(&mNodeMap);
 
-    if (mFileSystem->open(file4DS, scene4dsPath)) {
-        if (!mSceneModel.load(file4DS)) return false;
+    if (mFileSystem->open(file4DS, scene4dsPath)) {   
         file4DS.close();
 
         osg::ref_ptr<osg::Node> n = l4ds.load(&mSceneModel);
+        mSceneModelNode = n->asGroup();
         mRenderer->getRootNode()->addChild(n);
     }
     else
@@ -60,8 +61,8 @@ bool MissionImpl::load()
 
     if (mFileSystem->open(fileScene2Bin, scene2BinPath))
     {
-        if (!mSceneData.load(fileScene2Bin)) return false;
         osg::ref_ptr<osg::Node> n = lScene2.load(&mSceneData);
+        mSceneNode = n->asGroup();
 
         if (!n)
             MFLogger::Logger::warn("Could not parse scene2.bin file: " + scene2BinPath + ".", OSGRENDERER_MODULE_STR);
@@ -82,8 +83,8 @@ bool MissionImpl::load()
 
     if (mFileSystem->open(fileCacheBin, cacheBinPath))
     {
-        if (!mCacheData.load(fileCacheBin)) return false;
         osg::ref_ptr<osg::Node> n = lCache.load(&mCacheData);
+        mCachedCityNode = n->asGroup();
 
         if (!n)
             MFLogger::Logger::warn("Could not parse cache.bin file: " + cacheBinPath + ".", OSGRENDERER_MODULE_STR);
@@ -91,11 +92,6 @@ bool MissionImpl::load()
             mRenderer->getRootNode()->addChild(n);
 
         fileCacheBin.close();
-    }
-
-    if (mFileSystem->open(fileTreeKlz, treeKlzPath)) {
-        mStaticColsData.load(fileTreeKlz);
-        fileTreeKlz.close();
     }
 
     lTreeKlz.load(&mStaticColsData, mSceneModel);
@@ -129,12 +125,65 @@ bool MissionImpl::load()
 
 bool MissionImpl::unload()
 {
-    return false;
+    mRenderer->getRootNode()->removeChild(mSceneModelNode);
+    mRenderer->getRootNode()->removeChild(mSceneNode);
+    mRenderer->getRootNode()->removeChild(mCachedCityNode);
+
+
+    auto phys = (MFPhysics::BulletPhysicsWorld *)mEngine->getPhysicsWorld();
+    auto bodies = phys->getTreeKlzBodies();
+    for (auto body : bodies) {
+        phys->getWorld()->removeRigidBody(body.mRigidBody.mBody.get());
+    }
+
+    for (auto entity : mLoadedEntities) {
+        mEngine->getEntityManager()->removeEntity(entity->getId());
+    }
+
+    mLoadedEntities.clear();
+
+    mNodeMap.clear();
+
+    return true;
 }
 
 bool MissionImpl::importFile()
 {
-    return false;
+    std::string missionDir = "missions/" + mMissionName;
+    std::string scene4dsPath = missionDir + "/scene.4ds";
+    std::string scene2BinPath = missionDir + "/scene2.bin";
+    std::string cacheBinPath = missionDir + "/cache.bin";
+    std::string checkBinPath = missionDir + "/check.bin";
+    std::string treeKlzPath = missionDir + "/tree.klz";
+
+    std::ifstream file4DS;
+    std::ifstream fileScene2Bin;
+    std::ifstream fileCacheBin;
+    std::ifstream fileCheckBin;
+    std::ifstream fileTreeKlz;
+
+    if (mFileSystem->open(file4DS, scene4dsPath)) {
+        if (!mSceneModel.load(file4DS)) return false;
+        file4DS.close();
+    }
+    if (mFileSystem->open(fileScene2Bin, scene2BinPath))
+    {
+        if (!mSceneData.load(fileScene2Bin)) return false;
+        fileScene2Bin.close();
+    }
+
+    if (mFileSystem->open(fileCacheBin, cacheBinPath))
+    {
+        if (!mCacheData.load(fileCacheBin)) return false;
+        fileCacheBin.close();
+    }
+
+    if (mFileSystem->open(fileTreeKlz, treeKlzPath)) {
+        if (!mStaticColsData.load(fileTreeKlz)) return false;
+        fileTreeKlz.close();
+    }
+
+    return true;
 }
 
 bool MissionImpl::exportFile()
@@ -349,6 +398,8 @@ void MissionImpl::createMissionEntities()
             entity->setPosition(MFMath::Vec3(pos.x(), pos.y(), pos.z()));
             entity->setRotation(MFMath::Quat(rot.x(), rot.y(), rot.z(), rot.w()));
         }
+
+        mLoadedEntities.push_back(entity);
     }
 }
 

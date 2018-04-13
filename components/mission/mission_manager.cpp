@@ -8,22 +8,28 @@ namespace MFGame
 MissionManager::MissionManager(MFGame::Engine *engine)
 {
     mEngine = engine;
+    mCurrentMission = nullptr;
 }
 
 void MissionManager::loadMission(std::string missionName)
 {
     auto it = mMissions.find(missionName);
 
-    if (it != mMissions.end()) {
-        if (mCurrentMission && mCurrentMission != it->second) {
+    if (it != mMissions.end()) {   
+        if (mCurrentMission) {
             mCurrentMission->unload();
         }
         mCurrentMission = it->second;
+        mCurrentMission->load();
     }
     else {
         Mission *mission = new MissionImpl(missionName, mEngine);
-        if (mission->load()) {
+        if (mission->importFile()) {
+            if (mCurrentMission) 
+                mCurrentMission->unload();
+
             mCurrentMission = mission;
+            mission->load();
             mMissions.insert(std::make_pair(missionName, mission));
         }
         else {
