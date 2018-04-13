@@ -1,5 +1,11 @@
+#include "spatial_entity_impl.hpp"
 #include <spatial_entity/spatial_entity_impl.hpp>
 #include <utils/logger.hpp>
+
+#include "renderer/osg_renderer.hpp"
+#include "physics/bullet_physics_world.hpp"
+
+#include "engine/engine.hpp"
 
 namespace MFGame
 {
@@ -248,7 +254,9 @@ SpatialEntityImpl::SpatialEntityImpl(): SpatialEntity()
 }
 
 SpatialEntityImpl::~SpatialEntityImpl()
-= default;
+{
+    
+}
 
 void SpatialEntityImpl::update(double dt)
 {
@@ -297,6 +305,24 @@ void SpatialEntityImpl::ready()
     mInitialScale = mScale;
 
     mReady = true;
+}
+
+void SpatialEntityImpl::destroy()
+{
+    if (mOSGNode) {
+        auto rend = (MFRender::OSGRenderer *)mEngine->getRenderer();
+        if (rend->getRootNode())
+            rend->getRootNode()->removeChild(mOSGNode);
+
+        mOSGNode = nullptr;
+    }
+
+    if (mBulletBody) {
+        auto phys = (MFPhysics::BulletPhysicsWorld *)mEngine->getPhysicsWorld();
+        phys->getWorld()->removeRigidBody(mBulletBody.get());
+        mBulletBody = nullptr;
+        mBulletMotionState = nullptr;
+    }
 }
 
 void SpatialEntityImpl::makePhysicsDebugOSGNode()        ///< Creates a visual representation of the physical representation.

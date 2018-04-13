@@ -56,6 +56,7 @@ MFGame::SpatialEntity::Id SpatialEntityManager::addEntity(std::shared_ptr<Spatia
         return MFGame::SpatialEntity::NullId;
     }
 
+    entity->setEngine(mEngine);
     mEntities[id] = entity;
 
     mNumEntities++;
@@ -70,6 +71,9 @@ void SpatialEntityManager::removeEntity(MFGame::SpatialEntity::Id ident)
         MFLogger::Logger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
         return;
     }
+    entity->destroy();
+    entity.reset();
+
     mEntities.erase(ident);
     mNumEntities--;
 }

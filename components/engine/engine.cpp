@@ -44,7 +44,7 @@ Engine::Engine(EngineSettings settings)
     mRenderer = new MFRender::OSGRenderer();
     mPhysicsWorld = new MFPhysics::BulletPhysicsWorld();
     mInputManager = new MFInput::InputManagerImpl();
-    mSpatialEntityManager = new SpatialEntityManager();
+    mSpatialEntityManager = new SpatialEntityManager(this);
     mSpatialEntityFactory = new SpatialEntityFactory(mRenderer,mPhysicsWorld,mSpatialEntityManager);
     
     mInputManager->initWindow(

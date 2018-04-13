@@ -26,6 +26,7 @@ public:
     ~SpatialEntityImpl();
     virtual void update(double dt) override;
     virtual void ready() override;
+    virtual void destroy() override;
     virtual std::string toString() override;
     virtual void setPosition(MFMath::Vec3 position) override;
     virtual void setVelocity(MFMath::Vec3 velocity) override;

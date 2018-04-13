@@ -10,6 +10,8 @@
 namespace MFGame
 {
 
+    class Engine;
+
 /**
   Abstract interface for something that exists in 3D world and has a graphical and/or
   physical and/or sound etc. representations.
@@ -37,6 +39,8 @@ public:
       is ready to work.
     */
     virtual void ready()=0;
+    virtual void destroy()=0;
+    void setEngine(MFGame::Engine *engine)              { mEngine = engine;            };
     virtual std::string toString()                      { return "";                   };
     MFMath::Vec3 getPosition()                          { return mPosition;            };
     virtual void setPosition(MFMath::Vec3 position)     { mPosition = position;        };   ///< Sets position without collisions.
@@ -71,6 +75,7 @@ protected:
     MFMath::Vec3 mPosition;
     MFMath::Vec3 mScale;
     MFMath::Quat mRotation;
+    MFGame::Engine *mEngine;
 
     std::string mName;
     bool mReady;

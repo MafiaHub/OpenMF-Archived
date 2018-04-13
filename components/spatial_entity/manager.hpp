@@ -11,11 +11,28 @@
 namespace MFGame
 {
 
+    class Engine;
+
 class SpatialEntityManager
 {
 public:
     typedef std::unordered_map<uint64_t, std::shared_ptr<SpatialEntity>> EntityMap;
-    SpatialEntityManager() {};
+    SpatialEntityManager(MFGame::Engine *engine) {
+        mEngine = engine;
+    };
+    ~SpatialEntityManager() {
+        for (auto pair : mEntities)
+        {
+            if (pair.second && pair.second.get())
+            {
+                auto entity = pair.second.get();
+                entity->destroy();
+                pair.second.reset();
+            }
+        }
+
+        mEntities.clear();
+    }
     SpatialEntity *getEntityById(MFGame::SpatialEntity::Id id);
 
     /**
@@ -49,6 +66,8 @@ public:
 protected:
     EntityMap mEntities;
     size_t mNumEntities;
+
+    MFGame::Engine *mEngine;
 };
 
 }

@@ -158,6 +158,10 @@ int main(int argc, char** argv)
         engine.useDefaultPlayer();
     }
 
+    auto entityId = engine.getSpatialEntityFactory()->createPawnEntity("Tommy.4ds");
+    engine.getSpatialEntityManager()->removeEntity(entityId);
+
+
     engine.getRenderer()->setCameraParameters(true,90,0,0.25,2000);
     engine.run();
 

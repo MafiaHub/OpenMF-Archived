@@ -64,25 +64,12 @@ BulletPhysicsWorld::BulletPhysicsWorld()
 
 BulletPhysicsWorld::~BulletPhysicsWorld()
 {
-    // TODO Unless we free all Bullet resources before freeing the physics world
-    // we won't be able to free it since we get occasional crash related to this condition
-    // This shouldn't be an issue unless we need to use multiple Physics World objects in the same process, which
-    // would lead to a memory leak
-    //
-    //for each (MFUtil::NamedRigidBody body in mTreeKlzBodies)
-    //{
-    //    mWorld->removeRigidBody(body.mRigidBody.mBody.get());
-    //}
-
-    //// TODO remove all Bullet-related objects to avoid crash
-    //
-    //delete mWorld;
-    //delete mSolver;
-    //delete mCollisionDispatcher;
-    //delete mConfiguration;
-    //delete mBroadphaseInterface;
-    //delete mPairCache;
-
+    delete mWorld;
+    delete mSolver;
+    delete mCollisionDispatcher;
+    delete mConfiguration;
+    delete mBroadphaseInterface;
+    delete mPairCache;
 }
 
 MFGame::SpatialEntity::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
