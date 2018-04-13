@@ -27,5 +27,6 @@ xcopy %OSG_THIRD_PARTY_DIR%\bin\zlib.dll %OPENMF_INSTALL_DIR%\
 echo Purging extra files...
 pushd %OPENMF_INSTALL_DIR%
 del *.exp
+del *.pdb
 del *.lib
 popd
