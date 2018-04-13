@@ -1,5 +1,5 @@
-#ifndef SPATIAL_ENTITY_H
-#define SPATIAL_ENTITY_H
+#ifndef ENTITY_H
+#define ENTITY_H
 
 #include <utils/math.hpp>
 #include <string>
@@ -17,7 +17,7 @@ namespace MFGame
   physical and/or sound etc. representations.
  */
 
-class SpatialEntity
+class Entity
 {
 public:
     typedef enum
@@ -31,7 +31,7 @@ public:
     typedef uint32_t Id;
     static const Id NullId = 0;
 
-    SpatialEntity();
+    Entity();
     virtual void update(double dt)=0;
 
     /**

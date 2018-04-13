@@ -1,14 +1,14 @@
-#ifndef SPATIAL_ENTITY_FACTORY
-#define SPATIAL_ENTITY_FACTORY
+#ifndef ENTITY_FACTORY
+#define ENTITY_FACTORY
 
 #include <osg/Group>
 #include <physics/bullet_physics_world.hpp>
-#include <spatial_entity/spatial_entity_impl.hpp>
+#include <entity/entity_impl.hpp>
 #include <renderer/osg_renderer.hpp>
-#include <spatial_entity/manager.hpp>
+#include <entity/manager.hpp>
 #include <vfs/vfs.hpp>
 
-#define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
+#define ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 
 namespace MFGame
 {
@@ -53,28 +53,28 @@ protected:
     bool mDebugMode;
 };
 
-class SpatialEntityFactory : public ObjectFactory
+class EntityFactory : public ObjectFactory
 {
 public:
-    SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager);
+    EntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::EntityManager *entityManager);
 
-    MFGame::SpatialEntity::Id createEntity(
+    MFGame::Entity::Id createEntity(
         osg::MatrixTransform *graphicNode,
         std::shared_ptr<btRigidBody> physicsBody=0,
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="",
-        SpatialEntity::PhysicsBehavior physicsBehavior=SpatialEntity::RIGID);
+        Entity::PhysicsBehavior physicsBehavior=Entity::RIGID);
 
-    MFGame::SpatialEntity::Id createTestBallEntity();
-    MFGame::SpatialEntity::Id createTestBoxEntity();
-    MFGame::SpatialEntity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f);
-    MFGame::SpatialEntity::Id createCameraEntity();
-    MFGame::SpatialEntity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
-    MFGame::SpatialEntity::Id createPropEntity(MFFormat::DataFormatScene2BIN::Object *object);
-    MFGame::SpatialEntity::Id createPropEntity(std::string modelName, btScalar mass=20.0f);
+    MFGame::Entity::Id createTestBallEntity();
+    MFGame::Entity::Id createTestBoxEntity();
+    MFGame::Entity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f);
+    MFGame::Entity::Id createCameraEntity();
+    MFGame::Entity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
+    MFGame::Entity::Id createPropEntity(MFFormat::DataFormatScene2BIN::Object *object);
+    MFGame::Entity::Id createPropEntity(std::string modelName, btScalar mass=20.0f);
 
 protected: 
-    MFGame::SpatialEntityManager *mEntityManager;
+    MFGame::EntityManager *mEntityManager;
 };
 
 }

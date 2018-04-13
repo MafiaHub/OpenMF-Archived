@@ -20,7 +20,7 @@ public:
     BulletPhysicsWorld();
     virtual ~BulletPhysicsWorld();
     virtual void frame(double dt) override;
-    virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position) override;
+    virtual MFGame::Entity::Id pointCollision(MFMath::Vec3 position) override;
     virtual double castRay(MFMath::Vec3 origin, MFMath::Vec3 direction) override;
     virtual void getWorldAABBox(MFMath::Vec3 &min, MFMath::Vec3 &max) override;
     btDiscreteDynamicsWorld *getWorld() { return mWorld; }

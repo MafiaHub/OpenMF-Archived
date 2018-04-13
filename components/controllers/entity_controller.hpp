@@ -1,7 +1,7 @@
 #ifndef ENTITY_CONTROLLER_H
 #define ENTITY_CONTROLLER_H
 
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 
 namespace MFGame
 {
@@ -9,17 +9,17 @@ namespace MFGame
 class EntityController
 {
 public:
-    EntityController(SpatialEntity *entity);
+    EntityController(Entity *entity);
 
     /**
       Set the velocity vector relatively to where the entity is facing.
     */
 
     void setRelativeVelocityVector(MFMath::Vec3 vector);
-    SpatialEntity *getEntity()    { return mEntity;   };
+    Entity *getEntity()    { return mEntity;   };
 
 protected:
-    SpatialEntity *mEntity;
+    Entity *mEntity;
 };
 
 }

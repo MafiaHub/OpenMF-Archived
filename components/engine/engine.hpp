@@ -2,9 +2,9 @@
 #define ENGINE_H
 
 #include <input/input_manager_impl.hpp>
-#include <spatial_entity/spatial_entity.hpp>
-#include <spatial_entity/manager.hpp>
-#include <spatial_entity/factory.hpp>
+#include <entity/entity.hpp>
+#include <entity/manager.hpp>
+#include <entity/factory.hpp>
 #include <renderer/base_renderer.hpp>
 #include <mission/mission_manager.hpp>
 #include <string>
@@ -60,8 +60,8 @@ public:
     Engine(EngineSettings settings);
     virtual ~Engine();
 
-    virtual void frame(double dt=-1) {};           ///< This can be overriden to perform something each frame.
-    virtual void step() {};            ///< This can be overriden to perform something each update step.
+    virtual void frame(double dt=-1) {};           ///< This can be overridden to perform something each frame.
+    virtual void step() {};            ///< This can be overridden to perform something each update step.
     virtual void update(double dt=-1);   ///< Performs one iteration of the game loop, positive dt can be used to step out of real-time.
     virtual void run();
 
@@ -70,8 +70,8 @@ public:
 
     MFRender::Renderer *getRenderer()                       { return mRenderer;             };
     MFPhysics::BulletPhysicsWorld *getPhysicsWorld()        { return mPhysicsWorld; };
-    MFGame::SpatialEntityFactory *getSpatialEntityFactory() { return mSpatialEntityFactory; };
-    MFGame::SpatialEntityManager *getSpatialEntityManager() { return mSpatialEntityManager; };
+    MFGame::EntityFactory *getEntityFactory()               { return mEntityFactory; };
+    MFGame::EntityManager *getEntityManager()               { return mEntityManager; };
     MFInput::InputManager *getInputManager()                { return mInputManager;         };
     MFGame::MissionManager *getMissionManager()             { return mMissionManager; };
     
@@ -91,8 +91,8 @@ protected:
     unsigned long long mFrameNumber;
 
     MFInput::InputManagerImpl *mInputManager;
-    MFGame::SpatialEntityManager        *mSpatialEntityManager;
-    MFGame::SpatialEntityFactory        *mSpatialEntityFactory;
+    MFGame::EntityManager        *mEntityManager;
+    MFGame::EntityFactory        *mEntityFactory;
     MFRender::OSGRenderer               *mRenderer;
     MFPhysics::BulletPhysicsWorld       *mPhysicsWorld;
     MFGame::MissionManager              *mMissionManager;

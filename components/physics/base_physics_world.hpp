@@ -1,7 +1,7 @@
 #ifndef MF_PHYSICS_WORLD_H
 #define MF_PHYSICS_WORLD_H
 
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 #include <utils/math.hpp>
 
 namespace MFPhysics
@@ -21,7 +21,7 @@ public:
     /**
       Perform collision query on given point in the world, return colliding entity ID or -1.
     */
-    virtual MFGame::SpatialEntity::Id pointCollision(MFMath::Vec3 position)=0;
+    virtual MFGame::Entity::Id pointCollision(MFMath::Vec3 position)=0;
 
     /**
       Perform a ray cast from given point in given direction. Returns the distance of the first

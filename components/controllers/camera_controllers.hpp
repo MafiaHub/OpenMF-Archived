@@ -4,7 +4,7 @@
 #include <renderer/base_renderer.hpp>
 #include <input/base_input_manager.hpp>
 #include <utils/math.hpp>
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 #include <physics/base_physics_world.hpp>
 
 namespace MFGame
@@ -53,16 +53,16 @@ public:
       @param physicsWorld Optional pointer to physics world - if provided, the camera will collide. 
     */
 
-    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld=nullptr);
+    OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, Entity *entity, MFPhysics::PhysicsWorld *physicsWorld=nullptr);
     virtual ~OrbitEntityCameraController() = default;
-    SpatialEntity *getEntity()                   { return mEntity;           };
+    Entity *getEntity()                   { return mEntity;           };
     void setRelativeOffset(MFMath::Vec3 offset)  { mRelativeOffset = offset; };
 
 protected:
     MFPhysics::PhysicsWorld *mPhysicsWorld;
     virtual void applyRotation() override;
     MFMath::Vec3 mRelativeOffset;
-    SpatialEntity *mEntity;
+    Entity *mEntity;
     float mMaxCameraDistance;
 };
 
@@ -97,12 +97,12 @@ protected:
 class RigidCameraController: public FreeCameraController
 {
 public:
-    RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity);
+    RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, Entity *entity);
     virtual ~RigidCameraController() = default;
 
 protected:
     virtual void handleMovement(MFMath::Vec3 offset) override;
-    SpatialEntity *mCameraEntity;
+    Entity *mCameraEntity;
 };
 
 }

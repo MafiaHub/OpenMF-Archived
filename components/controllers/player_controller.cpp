@@ -41,7 +41,7 @@ void PlayerController::update(double dt)
     instantRotate(MFMath::Vec3(camRot.x - MFMath::PI / 2.0,0,0).toQuat());
 }
 
-PlayerController::PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld):
+PlayerController::PlayerController(MFGame::Entity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld):
     CharacterEntityController(playerEntity, physicsWorld)
 {
     mRenderer = renderer;

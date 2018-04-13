@@ -33,11 +33,11 @@ class MafiaEngine: public MFGame::Engine
 public:
     MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = (MFGame::SpatialEntityImpl *)mSpatialEntityManager->getEntityById(mSpatialEntityFactory->createPawnEntity("tommy.4ds"));
+        mPlayerEntity = (MFGame::EntityImpl *)mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds"));
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
 
-        mSpatialEntityFactory->setDebugMode(false);
+        mEntityFactory->setDebugMode(false);
 
         std::shared_ptr<KeyCallback> cb = std::make_shared<KeyCallback>(this);
         mInputManager->addKeyCallback(cb);
@@ -64,11 +64,11 @@ public:
 
     void useDefaultPlayer()
     {
-        auto spawnEntity = mSpatialEntityManager->getEntityByName("player start");
+        auto spawnEntity = mEntityManager->getEntityByName("player start");
 
         if (spawnEntity) {
             auto pos = spawnEntity->getPosition();
-            auto spat = (MFGame::SpatialEntityImpl *)spawnEntity;
+            auto spat = (MFGame::EntityImpl *)spawnEntity;
             setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 1)); // +1 due to player being moved in the middle of the ground
 
             mRenderer->getRootNode()->removeChild(mPlayerEntity->getVisualNode());
@@ -78,7 +78,7 @@ public:
     };
 
 protected:
-    MFGame::SpatialEntityImpl *mPlayerEntity;
+    MFGame::EntityImpl *mPlayerEntity;
     MFGame::PlayerController *mPlayerController;
 };
 
@@ -158,8 +158,8 @@ int main(int argc, char** argv)
         engine.useDefaultPlayer();
     }
 
-    auto entityId = engine.getSpatialEntityFactory()->createPawnEntity("Tommy.4ds");
-    engine.getSpatialEntityManager()->removeEntity(entityId);
+    auto entityId = engine.getEntityFactory()->createPawnEntity("Tommy.4ds");
+    engine.getEntityManager()->removeEntity(entityId);
 
 
     engine.getRenderer()->setCameraParameters(true,90,0,0.25,2000);

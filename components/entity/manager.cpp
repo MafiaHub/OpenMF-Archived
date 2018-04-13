@@ -1,27 +1,27 @@
-#include <spatial_entity/manager.hpp>
+#include <entity/manager.hpp>
 
 namespace MFGame
 {
 
-SpatialEntity *SpatialEntityManager::getEntityById(MFGame::SpatialEntity::Id id)
+Entity *EntityManager::getEntityById(MFGame::Entity::Id id)
 {
-    if (id == MFGame::SpatialEntity::NullId)
+    if (id == MFGame::Entity::NullId)
         return nullptr;
 
     auto entity = mEntities[id];
 
     if (!entity.get())
     {
-        MFLogger::Logger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
+        MFLogger::Logger::warn("Can't retrieve invalid entity.", ENTITY_MANAGER_MODULE_STR);
         return nullptr;
     }
 
     return entity.get();
 }
 
-SpatialEntity *SpatialEntityManager::getEntityByName(std::string name)
+Entity *EntityManager::getEntityByName(std::string name)
 {
-    std::shared_ptr<SpatialEntity> entity = nullptr;
+    std::shared_ptr<Entity> entity = nullptr;
 
     for (auto const pair : mEntities) {
         if (pair.second && !pair.second->getName().compare(name)) {
@@ -32,28 +32,28 @@ SpatialEntity *SpatialEntityManager::getEntityByName(std::string name)
 
     if (!entity.get())
     {
-        MFLogger::Logger::warn("Can't retrieve invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
+        MFLogger::Logger::warn("Can't retrieve invalid entity.", ENTITY_MANAGER_MODULE_STR);
         return nullptr;
     }
 
     return entity.get();
 }
 
-bool SpatialEntityManager::isValid(MFGame::SpatialEntity::Id ident)
+bool EntityManager::isValid(MFGame::Entity::Id ident)
 {
     auto entity = mEntities[ident];
     return entity.get() != nullptr;
 }
 
-MFGame::SpatialEntity::Id SpatialEntityManager::addEntity(std::shared_ptr<SpatialEntity> entity)
+MFGame::Entity::Id EntityManager::addEntity(std::shared_ptr<Entity> entity)
 {
     auto id = entity->getId();
     auto ourEntity = mEntities[id];
     if (ourEntity.get())
     {
         MFLogger::Logger::warn("Entity with existing ID (" + std::to_string(id) +
-            ") being added - ignoring.",SPATIAL_ENTITY_MANAGER_MODULE_STR);
-        return MFGame::SpatialEntity::NullId;
+            ") being added - ignoring.",ENTITY_MANAGER_MODULE_STR);
+        return MFGame::Entity::NullId;
     }
 
     entity->setEngine(mEngine);
@@ -63,12 +63,12 @@ MFGame::SpatialEntity::Id SpatialEntityManager::addEntity(std::shared_ptr<Spatia
     return id;
 }
 
-void SpatialEntityManager::removeEntity(MFGame::SpatialEntity::Id ident)
+void EntityManager::removeEntity(MFGame::Entity::Id ident)
 {
     auto entity = mEntities[ident];
     if (!entity.get())
     {
-        MFLogger::Logger::warn("Can't remove invalid entity.", SPATIAL_ENTITY_MANAGER_MODULE_STR);
+        MFLogger::Logger::warn("Can't remove invalid entity.", ENTITY_MANAGER_MODULE_STR);
         return;
     }
     entity->destroy();
@@ -78,7 +78,7 @@ void SpatialEntityManager::removeEntity(MFGame::SpatialEntity::Id ident)
     mNumEntities--;
 }
 
-void SpatialEntityManager::update(double dt)
+void EntityManager::update(double dt)
 {
     for (auto pair : mEntities)
     {
@@ -87,12 +87,12 @@ void SpatialEntityManager::update(double dt)
     }
 }
 
-unsigned int SpatialEntityManager::getNumEntities()
+unsigned int EntityManager::getNumEntities()
 {
     return mNumEntities;
 }
 
-unsigned int SpatialEntityManager::getNumEntitySlots()
+unsigned int EntityManager::getNumEntitySlots()
 {
     return mEntities.size();
 }

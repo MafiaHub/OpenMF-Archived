@@ -3,7 +3,7 @@
 namespace MFGame
 {
 
-EntityController::EntityController(SpatialEntity *entity)
+EntityController::EntityController(Entity *entity)
 {
     mEntity = entity;
 }

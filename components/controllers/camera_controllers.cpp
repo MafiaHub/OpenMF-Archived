@@ -57,7 +57,7 @@ void MouseRotateCameraController::update(double dt)
     mPreviouslyCentered = true;
 }
 
-OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld):
+OrbitEntityCameraController::OrbitEntityCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, Entity *entity, MFPhysics::PhysicsWorld *physicsWorld):
     MouseRotateCameraController(renderer,inputManager)
 {
     mEntity = entity;
@@ -180,7 +180,7 @@ void FreeCameraController::handleMovement(MFMath::Vec3 offset)
     mRenderer->setCameraPositionRotation(mPosition,rot);
 }
 
-RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, SpatialEntity *entity): FreeCameraController(renderer, inputManager)
+RigidCameraController::RigidCameraController(MFRender::Renderer *renderer, MFInput::InputManager *inputManager, Entity *entity): FreeCameraController(renderer, inputManager)
 {
     mCameraEntity = entity;
 }

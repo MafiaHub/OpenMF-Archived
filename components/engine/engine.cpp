@@ -44,8 +44,8 @@ Engine::Engine(EngineSettings settings)
     mRenderer = new MFRender::OSGRenderer();
     mPhysicsWorld = new MFPhysics::BulletPhysicsWorld();
     mInputManager = new MFInput::InputManagerImpl();
-    mSpatialEntityManager = new SpatialEntityManager(this);
-    mSpatialEntityFactory = new SpatialEntityFactory(mRenderer,mPhysicsWorld,mSpatialEntityManager);
+    mEntityManager = new EntityManager(this);
+    mEntityFactory = new EntityFactory(mRenderer,mPhysicsWorld,mEntityManager);
     
     mInputManager->initWindow(
         mEngineSettings.mInitWindowWidth,
@@ -144,8 +144,8 @@ Engine::~Engine()
 
     delete mRenderer;
     delete mInputManager;
-    delete mSpatialEntityManager;
-    delete mSpatialEntityFactory;
+    delete mEntityManager;
+    delete mEntityFactory;
     delete mPhysicsWorld;
 }
 
@@ -173,7 +173,7 @@ void Engine::update(double dt)
     while (mUnprocessedTime >= mEngineSettings.mUpdatePeriod)
     {
         mInputManager->processEvents();
-        mSpatialEntityManager->update(mEngineSettings.mUpdatePeriod);
+        mEntityManager->update(mEngineSettings.mUpdatePeriod);
 
         if (mEngineSettings.mSimulatePhysics) {
             if (physicsTimeBegin == 0.0f)

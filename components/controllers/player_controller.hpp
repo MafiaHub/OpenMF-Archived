@@ -13,7 +13,7 @@ namespace MFGame
 class PlayerController: public CharacterEntityController
 {
 public:
-    PlayerController(MFGame::SpatialEntity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld=0);
+    PlayerController(MFGame::Entity *playerEntity, MFRender::Renderer *renderer, MFInput::InputManager *inputManager, MFPhysics::PhysicsWorld *physicsWorld=0);
     virtual ~PlayerController();
     void update(double dt);
 

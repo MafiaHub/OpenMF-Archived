@@ -1,26 +1,26 @@
-#ifndef SPATIAL_ENTITY_MANAGER_H
-#define SPATIAL_ENTITY_MANAGER_H
+#ifndef ENTITY_MANAGER_H
+#define ENTITY_MANAGER_H
 
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 #include <utils/logger.hpp>
 
 #include <unordered_map>
 
-#define SPATIAL_ENTITY_MANAGER_MODULE_STR "spatial entity manager"
+#define ENTITY_MANAGER_MODULE_STR "spatial entity manager"
 
 namespace MFGame
 {
 
     class Engine;
 
-class SpatialEntityManager
+class EntityManager
 {
 public:
-    typedef std::unordered_map<uint64_t, std::shared_ptr<SpatialEntity>> EntityMap;
-    SpatialEntityManager(MFGame::Engine *engine) {
+    typedef std::unordered_map<uint64_t, std::shared_ptr<Entity>> EntityMap;
+    EntityManager(MFGame::Engine *engine) {
         mEngine = engine;
     };
-    ~SpatialEntityManager() {
+    ~EntityManager() {
         for (auto pair : mEntities)
         {
             if (pair.second && pair.second.get())
@@ -33,18 +33,18 @@ public:
 
         mEntities.clear();
     }
-    SpatialEntity *getEntityById(MFGame::SpatialEntity::Id id);
+    Entity *getEntityById(MFGame::Entity::Id id);
 
     /**
      * Retrieves entity by its name.
      * Note that there might be multiple entities with the same name and this method
      * retrieves only the first one found. This makes the use case much more restricted.
      */
-    SpatialEntity *getEntityByName(std::string name);
+    Entity *getEntityByName(std::string name);
 
-    MFGame::SpatialEntity::Id addEntity(std::shared_ptr<SpatialEntity> entity);
-    void removeEntity(MFGame::SpatialEntity::Id ident);
-    bool isValid(MFGame::SpatialEntity::Id ident);
+    MFGame::Entity::Id addEntity(std::shared_ptr<Entity> entity);
+    void removeEntity(MFGame::Entity::Id ident);
+    bool isValid(MFGame::Entity::Id ident);
 
     /**
       Update all managed entities.

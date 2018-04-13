@@ -72,7 +72,7 @@ BulletPhysicsWorld::~BulletPhysicsWorld()
     delete mPairCache;
 }
 
-MFGame::SpatialEntity::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
+MFGame::Entity::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 position)
 {
     btCollisionShape* sphere = new btSphereShape(0.01);  // can't make a point, so make a small sphere
     btRigidBody::btRigidBodyConstructionInfo ci(0,0,sphere,btVector3(0,0,0));
@@ -89,7 +89,7 @@ MFGame::SpatialEntity::Id BulletPhysicsWorld::pointCollision(MFMath::Vec3 positi
     if (cb.mResult)
         return cb.mResult->getUserIndex();
 
-    return MFGame::SpatialEntity::NullId;
+    return MFGame::Entity::NullId;
 }
 
 void BulletPhysicsWorld::frame(double dt)

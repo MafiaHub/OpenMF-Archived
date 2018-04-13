@@ -47,7 +47,7 @@ void CharacterEntityController::setMafiaPhysicsEmulation(bool state)
     mEmulatesMafiaPhysics = state;
 }
 
-CharacterEntityController::CharacterEntityController(SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld): EntityController(entity)
+CharacterEntityController::CharacterEntityController(Entity *entity, MFPhysics::PhysicsWorld *physicsWorld): EntityController(entity)
 {
     mPhysicsWorld = physicsWorld;
     mMovementState = WALK;

@@ -1,5 +1,5 @@
 #include <cache_bin/osg_cachebin.hpp>
-#include "spatial_entity/factory.hpp"
+#include "entity/factory.hpp"
 
 namespace MFFormat
 {

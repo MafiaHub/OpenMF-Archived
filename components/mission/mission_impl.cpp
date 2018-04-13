@@ -37,9 +37,9 @@ bool MissionImpl::load()
 
     l4ds.setLoaderCache(mRenderer->getLoaderCache());
     lScene2.setLoaderCache(mRenderer->getLoaderCache());
-    lScene2.setObjectFactory(mEngine->getSpatialEntityFactory());
+    lScene2.setObjectFactory(mEngine->getEntityFactory());
     lCache.setLoaderCache(mRenderer->getLoaderCache());
-    lCache.setObjectFactory(mEngine->getSpatialEntityFactory());
+    lCache.setObjectFactory(mEngine->getEntityFactory());
     
     l4ds.setNodeMap(&mNodeMap);
     lScene2.setNodeMap(&mNodeMap);
@@ -145,7 +145,7 @@ bool MissionImpl::exportFile()
 class CreateEntitiesFromSceneVisitor : public osg::NodeVisitor
 {
 public:
-    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, MFGame::SpatialEntityFactory *entityFactory) : osg::NodeVisitor()
+    CreateEntitiesFromSceneVisitor(std::vector<MFUtil::NamedRigidBody> *treeKlzBodies, MFGame::EntityFactory *entityFactory) : osg::NodeVisitor()
     {
         mTreeKlzBodies = treeKlzBodies;
         mEntityFactory = entityFactory;
@@ -184,7 +184,7 @@ public:
 
                     if (matches.size() == 0)
                     {
-                        MFLogger::Logger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").", SPATIAL_ENTITY_FACTORY_MODULE_STR);
+                        MFLogger::Logger::warn("Could not find matching collision for visual node \"" + n.getName() + "\" (model: \"" + mModelName + "\").", ENTITY_FACTORY_MODULE_STR);
                         mEntityFactory->createEntity(&n, 0, 0, fullName);
                     }
                     else
@@ -212,7 +212,7 @@ public:
 
 protected:
     std::vector<MFUtil::NamedRigidBody> *mTreeKlzBodies;
-    MFGame::SpatialEntityFactory *mEntityFactory;
+    MFGame::EntityFactory *mEntityFactory;
     std::string mModelName;                  // when traversing into a model loaded from scene2.bin, this will contain the model name (needed as the name prefix)
     std::multimap<std::string, MFUtil::NamedRigidBody *> mNameToBody;
 
@@ -243,7 +243,7 @@ void MissionImpl::createMissionEntities()
 {
     auto treeKlzBodies = mEngine->getPhysicsWorld()->getTreeKlzBodies();
 
-    CreateEntitiesFromSceneVisitor v(&treeKlzBodies, mEngine->getSpatialEntityFactory());
+    CreateEntitiesFromSceneVisitor v(&treeKlzBodies, mEngine->getEntityFactory());
     mRenderer->getRootNode()->accept(v);
 
     // process the unmatched rigid bodies:
@@ -253,7 +253,7 @@ void MissionImpl::createMissionEntities()
         if (v.mMatchedBodies.find(treeKlzBodies[i].mName) != v.mMatchedBodies.end())
             continue;
 
-        mEngine->getSpatialEntityFactory()->createEntity(0,
+        mEngine->getEntityFactory()->createEntity(0,
             treeKlzBodies[i].mRigidBody.mBody,
             treeKlzBodies[i].mRigidBody.mMotionState,
             treeKlzBodies[i].mName);
@@ -262,7 +262,7 @@ void MissionImpl::createMissionEntities()
     for (auto pair : mSceneData.getObjects()) {
         auto object = pair.second;
 
-        MFGame::SpatialEntityImpl *entity = nullptr;
+        MFGame::EntityImpl *entity = nullptr;
 
         switch (object.mType) {
             case MFFormat::DataFormatScene2BIN::OBJECT_TYPE_MODEL:
@@ -270,8 +270,8 @@ void MissionImpl::createMissionEntities()
                 switch (object.mSpecialType) {
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PHYSICAL:
                     {
-                        auto entityId = mEngine->getSpatialEntityFactory()->createPropEntity(&object);
-                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                        auto entityId = mEngine->getEntityFactory()->createPropEntity(&object);
+                        entity = (MFGame::EntityImpl *)mEngine->getEntityManager()->getEntityById(entityId);
                     }
                     break;
 
@@ -279,20 +279,20 @@ void MissionImpl::createMissionEntities()
                     {
                         // TODO real character support
 
-                        auto entityId = mEngine->getSpatialEntityFactory()->createPawnEntity(object.mModelName, 1000.0f);
-                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                        auto entityId = mEngine->getEntityFactory()->createPawnEntity(object.mModelName, 1000.0f);
+                        entity = (MFGame::EntityImpl *)mEngine->getEntityManager()->getEntityById(entityId);
                     }
                     break;
 
                     case MFFormat::DataFormatScene2BIN::SPECIAL_OBJECT_TYPE_PLAYER:
                     {
                         osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
-                        auto node = mEngine->getSpatialEntityFactory()->loadModel(object.mModelName);
+                        auto node = mEngine->getEntityFactory()->loadModel(object.mModelName);
                         transform->addChild(node);
                         mRenderer->getRootNode()->addChild(transform);
 
-                        auto entityId = mEngine->getSpatialEntityFactory()->createEntity(transform, 0, 0, "player start");
-                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                        auto entityId = mEngine->getEntityFactory()->createEntity(transform, 0, 0, "player start");
+                        entity = (MFGame::EntityImpl *)mEngine->getEntityManager()->getEntityById(entityId);
                     }
                     break;
 
@@ -302,14 +302,14 @@ void MissionImpl::createMissionEntities()
                         MFLogger::Logger::info("Unsupported special object: " + object.mName + " with type: " + std::to_string(object.mSpecialType), MISSION_MANAGER_MODULE_STR);
                         
                         if (object.mModelName.length() == 0) continue;
-                        auto node = mEngine->getSpatialEntityFactory()->loadModel(object.mModelName);
+                        auto node = mEngine->getEntityFactory()->loadModel(object.mModelName);
 
                         osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
                         transform->addChild(node);
                         mRenderer->getRootNode()->addChild(transform);
 
-                        auto entityId = mEngine->getSpatialEntityFactory()->createEntity(transform, 0, 0, object.mName);
-                        entity = (MFGame::SpatialEntityImpl *)mEngine->getSpatialEntityManager()->getEntityById(entityId);
+                        auto entityId = mEngine->getEntityFactory()->createEntity(transform, 0, 0, object.mName);
+                        entity = (MFGame::EntityImpl *)mEngine->getEntityManager()->getEntityById(entityId);
                     }
                     break;
                 }

@@ -1,6 +1,6 @@
 #include <scene2_bin/osg_scene2bin.hpp>
 #include <4ds/osg_4ds.hpp>
-#include "spatial_entity/factory.hpp"
+#include "entity/factory.hpp"
 
 namespace MFFormat
 {

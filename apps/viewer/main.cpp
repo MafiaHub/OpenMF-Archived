@@ -1,7 +1,7 @@
 #include <engine/engine.hpp>
 #include <cxxopts.hpp>
 #include <controllers/camera_controllers.hpp>
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 
 #define VIEWER_MODULE_STR "viewer"
 
@@ -49,8 +49,8 @@ public:
             auto mission = mEngine->getMissionManager()->getCurrentMission();
             if (!mission) return;
 
-            MFGame::SpatialEntity *e = mEngine->getSpatialEntityManager()->getEntityById(
-                mEngine->getSpatialEntityFactory()->createPropEntity("bedna02.4ds"));
+            MFGame::Entity *e = mEngine->getEntityManager()->getEntityById(
+                mEngine->getEntityFactory()->createPropEntity("bedna02.4ds"));
 
             MFMath::Vec3 f,r,u;
             mEngine->getRenderer()->getCameraVectors(f,r,u);
@@ -98,8 +98,8 @@ public:
         }
         else
         {
-            auto cameraEntity = mSpatialEntityFactory->createCameraEntity();
-            auto cameraPtr = mSpatialEntityManager->getEntityById(cameraEntity);
+            auto cameraEntity = mEntityFactory->createCameraEntity();
+            auto cameraPtr = mEntityManager->getEntityById(cameraEntity);
             auto pos = mRenderer->getCameraPosition();
 
             cameraPtr->setPosition(pos);
@@ -126,8 +126,8 @@ public:
                 std::cout << "col: ";
 
                 MFMath::Vec3 pos = mRenderer->getCameraPosition();
-                MFGame::SpatialEntity::Id entityID = mPhysicsWorld->pointCollision(pos);
-                MFGame::SpatialEntity *e = mSpatialEntityManager->getEntityById(entityID);
+                MFGame::Entity::Id entityID = mPhysicsWorld->pointCollision(pos);
+                MFGame::Entity *e = mEntityManager->getEntityById(entityID);
 
                 std::cout << (e ? e->toString() : "none") << std::endl;
             }
@@ -234,7 +234,7 @@ int main(int argc, char** argv)
     if (arguments.count("m") > 0)
     {
         ((MFRender::OSGRenderer *) engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
-        engine.getSpatialEntityFactory()->setDebugMode(true);
+        engine.getEntityFactory()->setDebugMode(true);
     }
 
     engine.loadMission(inputFile);

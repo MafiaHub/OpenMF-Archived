@@ -1,29 +1,29 @@
-#include <spatial_entity/factory.hpp>
+#include <entity/factory.hpp>
 #include <4ds/osg_4ds.hpp>
 #include <4ds/parser_4ds.hpp>
 
-#define SPATIAL_ENTITY_FACTORY_MODULE_STR "spatial entity factory"
+#define ENTITY_FACTORY_MODULE_STR "spatial entity factory"
 
 namespace MFGame
 {
 
-SpatialEntityFactory::SpatialEntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::SpatialEntityManager *entityManager):
+EntityFactory::EntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::EntityManager *entityManager):
     ObjectFactory(renderer, physicsWorld)
 {
     mEntityManager = entityManager;
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
+MFGame::Entity::Id EntityFactory::createEntity(
     osg::MatrixTransform *graphicNode,
     std::shared_ptr<btRigidBody> physicsBody,
     std::shared_ptr<btDefaultMotionState> physicsMotionsState, 
     std::string name,
-    SpatialEntity::PhysicsBehavior physicsBehavior)
+    Entity::PhysicsBehavior physicsBehavior)
 {
     if (physicsBody && physicsMotionsState && physicsBody->getMotionState() != physicsMotionsState.get())
         physicsBody->setMotionState(physicsMotionsState.get());
 
-    std::shared_ptr<MFGame::SpatialEntityImpl> newEntity = std::make_shared<MFGame::SpatialEntityImpl>();
+    std::shared_ptr<MFGame::EntityImpl> newEntity = std::make_shared<MFGame::EntityImpl>();
     newEntity->setName(name);
     newEntity->setDebugMode(mDebugMode);
     newEntity->setOSGRootNode(mRenderer->getRootNode());
@@ -36,7 +36,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createEntity(
     return newEntity->getId();
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string modelName, btScalar mass)
+MFGame::Entity::Id EntityFactory::createPawnEntity(std::string modelName, btScalar mass)
 {
     MFUtil::FullRigidBody body;
 
@@ -81,10 +81,10 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPawnEntity(std::string mod
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", SpatialEntity::RIGID_PAWN);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "capsule", Entity::RIGID_PAWN);
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
+MFGame::Entity::Id EntityFactory::createCameraEntity()
 {
     MFUtil::FullRigidBody body;
 
@@ -103,10 +103,10 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createCameraEntity()
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", SpatialEntity::RIGID_PAWN);
+    return createEntity(visualTransform.get(), body.mBody, body.mMotionState, "camera", Entity::RIGID_PAWN);
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
+MFGame::Entity::Id EntityFactory::createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode)
 {
     osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
     visualTransform->addChild(visualNode);
@@ -126,7 +126,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createTestShapeEntity(btCollisio
     return createEntity(visualTransform.get(),physicalBody,motionState,"test");
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(MFFormat::DataFormatScene2BIN::Object * object)
+MFGame::Entity::Id EntityFactory::createPropEntity(MFFormat::DataFormatScene2BIN::Object * object)
 {
     btScalar mass = object->mSpecialProps.mWeight;
     btTransform transform;
@@ -156,10 +156,10 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(MFFormat::DataF
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body, motionState, object->mName, SpatialEntity::RIGID);
+    return createEntity(visualTransform.get(), body, motionState, object->mName, Entity::RIGID);
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(std::string modelName, btScalar mass)
+MFGame::Entity::Id EntityFactory::createPropEntity(std::string modelName, btScalar mass)
 {
     btTransform transform;
     transform.setIdentity();
@@ -188,7 +188,7 @@ MFGame::SpatialEntity::Id SpatialEntityFactory::createPropEntity(std::string mod
 
     mRenderer->getRootNode()->addChild(visualTransform);
 
-    return createEntity(visualTransform.get(), body, motionState, "(undefined)", SpatialEntity::RIGID);
+    return createEntity(visualTransform.get(), body, motionState, "(undefined)", Entity::RIGID);
 }
 
 osg::ref_ptr<osg::Node> ObjectFactory::loadModel(std::string modelName)
@@ -215,7 +215,7 @@ MFFormat::DataFormat4DS * ObjectFactory::loadModelData(std::string modelName)
         model = new MFFormat::DataFormat4DS();
         std::ifstream file4DS;
         if (!mFileSystem->open(file4DS, "models/" + modelName)) {
-            MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", SPATIAL_ENTITY_FACTORY_MODULE_STR);
+            MFLogger::Logger::warn("Couldn't not open 4ds file: " + modelName + ".", ENTITY_FACTORY_MODULE_STR);
         }
         else {
             model->load(file4DS);
@@ -269,12 +269,12 @@ btTriangleMesh *ObjectFactory::loadFaceCols(std::string modelName, int meshId)
     return btMesh;
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBallEntity()
+MFGame::Entity::Id EntityFactory::createTestBallEntity()
 {
     return createTestShapeEntity(mTestPhysicalSphereShape.get(),mTestSphereNode.get());
 }
 
-MFGame::SpatialEntity::Id SpatialEntityFactory::createTestBoxEntity()
+MFGame::Entity::Id EntityFactory::createTestBoxEntity()
 {
     return createTestShapeEntity(mTestPhysicalBoxShape.get(),mTestBoxNode.get());
 }

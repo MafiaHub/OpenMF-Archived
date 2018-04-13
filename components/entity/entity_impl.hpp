@@ -1,7 +1,7 @@
-#ifndef SPATIAL_ENTITY_IMPLEMENTATION_H
-#define SPATIAL_ENTITY_IMPLEMENTATION_H
+#ifndef ENTITY_IMPLEMENTATION_H
+#define ENTITY_IMPLEMENTATION_H
 
-#include <spatial_entity/spatial_entity.hpp>
+#include <entity/entity.hpp>
 #include <osg/Node>
 #include <osg/PolygonMode>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
@@ -14,16 +14,16 @@
 #include <osg/Geometry>
 #include <osg/Geode>
 
-#define SPATIAL_ENTITY_IMPLEMENTATION_MODULE_STR "spatial entity"
+#define ENTITY_IMPLEMENTATION_MODULE_STR "spatial entity"
 
 namespace MFGame
 {
 
-class SpatialEntityImpl: public SpatialEntity
+class EntityImpl: public Entity
 {
 public:
-    SpatialEntityImpl();
-    ~SpatialEntityImpl();
+    EntityImpl();
+    ~EntityImpl();
     virtual void update(double dt) override;
     virtual void ready() override;
     virtual void destroy() override;
@@ -39,7 +39,7 @@ public:
     virtual bool hasPhysics() override;
     virtual bool hasCollision() override;
     virtual bool canBeMoved() override;
-    virtual void setPhysicsBehavior(SpatialEntity::PhysicsBehavior behavior) override;
+    virtual void setPhysicsBehavior(Entity::PhysicsBehavior behavior) override;
     virtual void setFriction(double factor) override;
     virtual MFMath::Vec3 getSize() override;
     virtual void setRotation(MFMath::Quat rotation) override;

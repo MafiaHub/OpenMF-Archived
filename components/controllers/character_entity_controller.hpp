@@ -18,7 +18,7 @@ public:
         CROUCH,
     } MovementState;
 
-    CharacterEntityController(SpatialEntity *entity, MFPhysics::PhysicsWorld *physicsWorld);
+    CharacterEntityController(Entity *entity, MFPhysics::PhysicsWorld *physicsWorld);
 
     void setSpeeds(float crouch, float walk, float run)
     {
