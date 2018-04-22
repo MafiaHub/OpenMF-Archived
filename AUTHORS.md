@@ -12,6 +12,9 @@
 - Vladyslav Hrytsenko (inlife)
 - volca02
 
+# logo created by
+- area55 (area55git)
+
 # special thanks
 
 - ASM
