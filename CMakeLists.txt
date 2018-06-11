@@ -204,6 +204,8 @@ set(THIRD_PARTY_LIBS
 
 if(WIN32)
     set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} opengl32)
+elseif(APPLE)
+    set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} "-framework OpenGL -framework CoreFoundation")
 else(WIN32)
     set(THIRD_PARTY_LIBS ${THIRD_PARTY_LIBS} GL)
 endif(WIN32)
