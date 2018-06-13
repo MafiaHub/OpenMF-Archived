@@ -11,6 +11,7 @@
 - Pavel V. (RoadTrain)
 - Vladyslav Hrytsenko (inlife)
 - volca02
+- Nmzik
 
 # logo created by
 - area55 (area55git)
