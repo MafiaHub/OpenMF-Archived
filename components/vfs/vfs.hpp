@@ -35,7 +35,7 @@ public:
     }
 
     bool open(std::ifstream &file, std::string fileName, std::ios_base::openmode mode = std::ios::binary);
-    std::string getFileLocation(std::string fileName);
+    std::string getFileLocation(const std::string& fileName);
 
     void                     addPath(std::string path);
     void                     prependPath(std::string path);

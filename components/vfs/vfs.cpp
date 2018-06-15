@@ -51,11 +51,12 @@ void FileSystem::addPath(std::string path, size_t index)
 	mSearchPaths.insert(mSearchPaths.begin() + index, path);
 }
 
-std::string FileSystem::getFileLocation(std::string fileName)
+std::string FileSystem::getFileLocation(const std::string& fileName)
 {
-    for (auto path : mSearchPaths)     // TODO: what's the fastest way to check a file existence?
+    for (const auto& path : mSearchPaths)     // TODO: what's the fastest way to check a file existence?
     {
-        std::string realPath = path + "/" + fileName;
+        std::string realPath = path + "/";
+        realPath.append(fileName);
 
         std::ifstream f;
         f.open(realPath);
