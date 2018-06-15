@@ -8,7 +8,7 @@ class MafiaEngine: public MFGame::Engine
 public:
     MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = (MFGame::EntityImpl *)mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds"));
+        mPlayerEntity = static_cast<MFGame::EntityImpl *>(mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds")));
         mPlayerNode = mPlayerEntity->getVisualNode();
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
@@ -33,7 +33,7 @@ public:
         }
     };
 
-    void setPlayerPosition(MFMath::Vec3 pos)
+    void setPlayerPosition(MFMath::Vec3 pos) const
     {
         mPlayerEntity->setPosition(pos);
     };
@@ -44,7 +44,7 @@ public:
 
         if (spawnEntity) {
             auto pos = spawnEntity->getPosition();
-            auto spat = (MFGame::EntityImpl *)spawnEntity;
+            auto spat = static_cast<MFGame::EntityImpl *>(spawnEntity);
             setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 2)); // +1 due to player being moved in the middle of the ground
 
             if (mPlayerEntity->getVisualNode() == mPlayerNode) {
@@ -59,7 +59,7 @@ public:
     class KeyCallback : public MFInput::KeyInputCallback
     {
     public:
-        KeyCallback(MafiaEngine *engine) : MFInput::KeyInputCallback()
+        KeyCallback(MafiaEngine *engine) : KeyInputCallback()
         {
             mEngine = engine;
             mCounter = 0;

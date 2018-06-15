@@ -46,7 +46,7 @@ public:
 
         if (keyCode == OMF_SCANCODE_SPACE)   // SPACE
         {
-            auto mission = mEngine->getMissionManager()->getCurrentMission();
+            const auto mission = mEngine->getMissionManager()->getCurrentMission();
             if (!mission) return;
 
             MFGame::Entity *e = mEngine->getEntityManager()->getEntityById(
@@ -83,10 +83,10 @@ public:
         if (cameraInitString.length() > 0)
             setCameraFromString(cameraInitString);
 
-        std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(this);
+        const std::shared_ptr<RightButtonCallback> rbcb = std::make_shared<RightButtonCallback>(this);
         mInputManager->addButtonCallback(rbcb);
 
-        std::shared_ptr<KeyCallback> kcb = std::make_shared<KeyCallback>(this);
+        const std::shared_ptr<KeyCallback> kcb = std::make_shared<KeyCallback>(this);
         mInputManager->addKeyCallback(kcb);
 
         mPrintCameraInfo = printCameraInfo;
@@ -98,9 +98,9 @@ public:
         }
         else
         {
-            auto cameraEntity = mEntityFactory->createCameraEntity();
+            const auto cameraEntity = mEntityFactory->createCameraEntity();
             auto cameraPtr = mEntityManager->getEntityById(cameraEntity);
-            auto pos = mRenderer->getCameraPosition();
+            const auto pos = mRenderer->getCameraPosition();
 
             cameraPtr->setPosition(pos);
             mCameraController = new MFGame::RigidCameraController(mRenderer,mInputManager,cameraPtr);
@@ -125,8 +125,8 @@ public:
             {
                 std::cout << "col: ";
 
-                MFMath::Vec3 pos = mRenderer->getCameraPosition();
-                MFGame::Entity::Id entityID = mPhysicsWorld->pointCollision(pos);
+                const MFMath::Vec3 pos = mRenderer->getCameraPosition();
+                const MFGame::Entity::Id entityID = mPhysicsWorld->pointCollision(pos);
                 MFGame::Entity *e = mEntityManager->getEntityById(entityID);
 
                 std::cout << (e ? e->toString() : "none") << std::endl;
@@ -134,7 +134,7 @@ public:
         }
     }
 
-    void setCameraSpeed(double speed)
+    void setCameraSpeed(double speed) const
     {
         mCameraController->setSpeed(speed);
     }
@@ -204,12 +204,12 @@ int main(int argc, char** argv)
         arguments.count("r") > 0,
         cameraString);
 
-    std::string inputFile = arguments["i"].as<std::string>();
+    const std::string inputFile = arguments["i"].as<std::string>();
 
-    double fov = arguments.count("f") > 0 ? arguments["f"].as<int>() : DEFAULT_CAMERA_FOV;
+    const double fov = arguments.count("f") > 0 ? arguments["f"].as<int>() : DEFAULT_CAMERA_FOV;
     engine.getRenderer()->setCameraParameters(true,fov,0,0.25,2000);
 
-    double camSpeed = arguments.count("s") > 0 ? arguments["s"].as<double>() : DEFAULT_CAMERA_SPEED;
+    const double camSpeed = arguments.count("s") > 0 ? arguments["s"].as<double>() : DEFAULT_CAMERA_SPEED;
     engine.setCameraSpeed(camSpeed);
 
     if (arguments.count("v") > 0)
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("m") > 0)
     {
-        ((MFRender::OSGRenderer *) engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
+        static_cast<MFRender::OSGRenderer *>(engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
         engine.getEntityFactory()->setDebugMode(true);
     }
 

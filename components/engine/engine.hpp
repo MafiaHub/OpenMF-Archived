@@ -68,25 +68,25 @@ public:
     bool loadMission(std::string missionName); 
     bool exportScene(std::string outputFileName);
 
-    MFRender::Renderer *getRenderer()                       { return mRenderer;             };
-    MFPhysics::BulletPhysicsWorld *getPhysicsWorld()        { return mPhysicsWorld; };
-    MFGame::EntityFactory *getEntityFactory()               { return mEntityFactory; };
-    MFGame::EntityManager *getEntityManager()               { return mEntityManager; };
-    MFInput::InputManager *getInputManager()                { return mInputManager;         };
-    MFGame::MissionManager *getMissionManager()             { return mMissionManager; };
+    MFRender::Renderer *getRenderer() const { return mRenderer;             };
+    MFPhysics::BulletPhysicsWorld *getPhysicsWorld() const { return mPhysicsWorld; };
+    MFGame::EntityFactory *getEntityFactory() const { return mEntityFactory; };
+    MFGame::EntityManager *getEntityManager() const { return mEntityManager; };
+    MFInput::InputManager *getInputManager() const { return mInputManager;         };
+    MFGame::MissionManager *getMissionManager() const { return mMissionManager; };
     
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
-    void setCameraFromString(std::string cameraString);    ///< For debug - set current camera from string returned by getCameraInfoString().
+    void setCameraFromString(const std::string& cameraString) const;    ///< For debconst ug - set cu&rrent camera from string returned by getCameraInfoString().
     void RequestExit();
 
 protected:
-    double getTime();
-    void yield();
+    double getTime() const;
+    static void yield();
 
 
-    double mLastTime;
-    double mUnprocessedTime;
-    float mRenderTime;
+    double mLastTime{};
+    double mUnprocessedTime{};
+    float mRenderTime{};
 
     unsigned long long mFrameNumber;
 

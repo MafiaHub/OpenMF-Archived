@@ -88,17 +88,16 @@ std::string Engine::getCameraInfoString()
     return camStr;
 }
 
-void Engine::setCameraFromString(std::string cameraString)
+void Engine::setCameraFromString(const std::string& cameraString) const
 {
     double cam[6];
 
-    char *token;
     char cStr[256];
     char delims[] = ",; ";
 
     strncpy(cStr,cameraString.c_str(),256);
 
-    token = strtok(cStr,delims);
+    char *token = strtok(cStr,delims);
 
     for (int i = 0; i < 6; ++i)
     {
@@ -121,7 +120,7 @@ bool Engine::loadMission(std::string missionName)
     return true;   // TODO: perform some actual checks
 }
 
-double Engine::getTime()
+double Engine::getTime() const
 {
     static auto epoch = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - epoch).count() / 1000000000.0;
@@ -158,8 +157,8 @@ void Engine::update(double dt)
     }
 
     bool render = false;
-    double startTime = getTime();
-    double passedTime = startTime - mLastTime;
+    const double startTime = getTime();
+    const double passedTime = startTime - mLastTime;
     mLastTime = startTime;
     mUnprocessedTime += passedTime;
 
@@ -203,7 +202,7 @@ void Engine::update(double dt)
     if (mRenderer->done())
         mIsRunning = false;
 
-    auto frameNumber = mRenderer->getViewer()->getFrameStamp()->getFrameNumber();
+    const auto frameNumber = mRenderer->getViewer()->getFrameStamp()->getFrameNumber();
     auto stats = mRenderer->getViewer()->getViewerStats();
     if (stats) 
     {

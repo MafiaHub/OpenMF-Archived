@@ -11,18 +11,21 @@ namespace MFInput
 class KeyInputCallback
 {
 public:
+    virtual ~KeyInputCallback() = default;
     virtual void call(bool down, unsigned int keyCode)=0;
 };
 
 class ButtonInputCallback
 {
 public:
+    virtual ~ButtonInputCallback() = default;
     virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y)=0;
 };
 
 class WindowResizeCallback
 {
 public:
+    virtual ~WindowResizeCallback() = default;
     virtual void call(unsigned int width, unsigned int height)=0;
 };
 

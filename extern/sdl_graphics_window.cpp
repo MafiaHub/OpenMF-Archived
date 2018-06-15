@@ -11,8 +11,8 @@ GraphicsWindowSDL2::~GraphicsWindowSDL2()
 }
 
 GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits)
-    : mWindow(0)
-    , mContext(0)
+    : mWindow(nullptr)
+    , mContext(nullptr)
     , mValid(false)
     , mRealized(false)
     , mOwnsWindow(false)
@@ -77,9 +77,9 @@ void GraphicsWindowSDL2::init()
         return;
 
     WindowData *inheritedWindowData = dynamic_cast<WindowData*>(_traits->inheritedWindowData.get());
-    mWindow = inheritedWindowData ? inheritedWindowData->mWindow : NULL;
+    mWindow = inheritedWindowData ? inheritedWindowData->mWindow : nullptr;
 
-    mOwnsWindow = (mWindow == 0);
+    mOwnsWindow = (mWindow == nullptr);
     if(mOwnsWindow)
     {
         OSG_FATAL<<"Error: No SDL window provided."<<std::endl;
@@ -89,7 +89,7 @@ void GraphicsWindowSDL2::init()
     // SDL will change the current context when it creates a new one, so we
     // have to get the current one to be able to restore it afterward.
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
-    SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
+    const SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
    
 #if defined(OPENGL_ES) || defined(ANDROID)
      SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -153,7 +153,7 @@ bool GraphicsWindowSDL2::releaseContextImplementation()
         return false;
     }
 
-    return SDL_GL_MakeCurrent(NULL, NULL)==0;
+    return SDL_GL_MakeCurrent(nullptr, nullptr)==0;
 }
 
 
@@ -161,11 +161,11 @@ void GraphicsWindowSDL2::closeImplementation()
 {
     if(mContext)
         SDL_GL_DeleteContext(mContext);
-    mContext = NULL;
+    mContext = nullptr;
 
     if(mWindow && mOwnsWindow)
         SDL_DestroyWindow(mWindow);
-    mWindow = NULL;
+    mWindow = nullptr;
 
     mValid = false;
     mRealized = false;
@@ -181,7 +181,7 @@ void GraphicsWindowSDL2::swapBuffersImplementation()
 void GraphicsWindowSDL2::setSyncToVBlank(bool on)
 {
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
-    SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
+    const SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
 
     SDL_GL_MakeCurrent(mWindow, mContext);
 
