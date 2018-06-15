@@ -17,8 +17,7 @@ std::string convertPathToCanonical(std::string path)
 
 FileSystem::FileSystem()
 {
-    mSearchPaths.push_back("resources");
-    mSearchPaths.push_back("mafia");
+    mSearchPaths.emplace_back("resources", "mafia");
     
     char const *envMafiaDir = getenv(MAFIA_INSTALL_DIR); // TODO: Use Config for this.
     if (envMafiaDir)
