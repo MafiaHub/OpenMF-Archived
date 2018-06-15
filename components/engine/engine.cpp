@@ -131,7 +131,7 @@ void Engine::yield()
 #if defined(_WIN32)
     YieldProcessor();
 #elif defined (__GNUC__) && (__i386 || __x86_64__)
-    asm("pause")
+    asm("pause");
 #endif
 }
 

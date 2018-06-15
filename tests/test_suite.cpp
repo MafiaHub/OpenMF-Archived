@@ -30,17 +30,17 @@ bool testEngine()
     MFGame::Engine::EngineSettings settings;
     MFGame::Engine *testEngine = new MFGame::Engine(settings);
 
-    auto entityManager = testEngine->getSpatialEntityManager();
-    auto entityFactory = testEngine->getSpatialEntityFactory();
+    auto entityManager = testEngine->getEntityManager();
+    auto entityFactory = testEngine->getEntityFactory();
 
     ass(entityManager->getEntityById(10) == 0);
 
     message("Create an entity.");
-    MFGame::SpatialEntity::Id entity1Id = entityFactory->createTestBallEntity();
+    MFGame::Entity::Id entity1Id = entityFactory->createTestBallEntity();
     message("New entity id: " + std::to_string(entity1Id));
     ass(entityManager->getEntityById(entity1Id) != 0);
     auto entity1 = entityManager->getEntityById(entity1Id);
-    ass(entityManager->getEntityById(MFGame::SpatialEntity::NullId) == 0);
+    ass(entityManager->getEntityById(MFGame::Entity::NullId) == 0);
 
     MFMath::Vec3 initPos = entity1->getPosition();
     message("entity position: " + initPos.str());

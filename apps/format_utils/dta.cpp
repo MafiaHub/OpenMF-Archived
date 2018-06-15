@@ -10,8 +10,9 @@
 #include <vfs/vfs.hpp>
 
 #ifdef _WIN32
-#define ZPL_IMPLEMENTATION
-#include <zpl.h>
+#define ZPL_PATH_SEPARATOR '\\'
+#else
+#define ZPL_PATH_SEPARATOR '/'
 #endif
 
 #define ALIGN 50
