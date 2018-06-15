@@ -130,9 +130,9 @@ double Engine::getTime()
 void Engine::yield()
 {
 #if defined(_WIN32)
-    Sleep(mEngineSettings.mSleepPeriod);
-#else
-    sleep(mEngineSettings.mSleepPeriod); // TODO please check or fix this if required to
+    YieldProcessor();
+#elif defined (__GNUC__) && (__i386 || __x86_64__)
+    asm("pause")
 #endif
 }
 
