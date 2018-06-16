@@ -6,16 +6,16 @@
 class MafiaEngine: public MFGame::Engine
 {
 public:
-    MafiaEngine(MFGame::Engine::EngineSettings settings): MFGame::Engine(settings)
+    MafiaEngine(EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = static_cast<MFGame::EntityImpl *>(mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds")));
+        mPlayerEntity = dynamic_cast<MFGame::EntityImpl *>(mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds")));
         mPlayerNode = mPlayerEntity->getVisualNode();
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
 
         mEntityFactory->setDebugMode(false);
 
-        std::shared_ptr<KeyCallback> cb = std::make_shared<KeyCallback>(this);
+        const std::shared_ptr<KeyCallback> cb = std::make_shared<KeyCallback>(this);
         mInputManager->addKeyCallback(cb);
     };
 
@@ -24,7 +24,7 @@ public:
         delete mPlayerController;
     };
 
-    virtual void step() override
+    void step() override
     {
         mPlayerController->update(mEngineSettings.mUpdatePeriod);
 
@@ -43,8 +43,8 @@ public:
         auto spawnEntity = mEntityManager->getEntityByName("player start");
 
         if (spawnEntity) {
-            auto pos = spawnEntity->getPosition();
-            auto spat = static_cast<MFGame::EntityImpl *>(spawnEntity);
+            const auto pos = spawnEntity->getPosition();
+            auto spat = dynamic_cast<MFGame::EntityImpl *>(spawnEntity);
             setPlayerPosition(MFMath::Vec3(pos.x, pos.y, pos.z + 2)); // +1 due to player being moved in the middle of the ground
 
             if (mPlayerEntity->getVisualNode() == mPlayerNode) {
@@ -59,13 +59,13 @@ public:
     class KeyCallback : public MFInput::KeyInputCallback
     {
     public:
-        KeyCallback(MafiaEngine *engine) : KeyInputCallback()
+        KeyCallback(MafiaEngine *engine)
         {
             mEngine = engine;
             mCounter = 0;
         }
 
-        virtual void call(bool down, unsigned int keyCode) override
+        void call(bool down, unsigned int keyCode) override
         {
             if (!down)
                 return;

@@ -11,12 +11,12 @@
 class RightButtonCallback: public MFInput::ButtonInputCallback
 {
 public:
-    RightButtonCallback(MFGame::Engine *engine): MFInput::ButtonInputCallback()
+    RightButtonCallback(MFGame::Engine *engine)
     {
         mEngine = engine;
     }
 
-    virtual void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y) override
+    void call(bool down, unsigned int buttonNumber, unsigned int x, unsigned int y) override
     {
         if (buttonNumber == 3 && down)
         {
@@ -33,13 +33,13 @@ protected:
 class KeyCallback: public MFInput::KeyInputCallback
 {
 public:
-    KeyCallback(MFGame::Engine *engine): MFInput::KeyInputCallback()
+    KeyCallback(MFGame::Engine *engine)
     {
         mEngine = engine;
         mCounter = 0;
     }
 
-    virtual void call(bool down, unsigned int keyCode) override
+    void call(bool down, unsigned int keyCode) override
     {
         if (!down)
             return;
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 
     if (arguments.count("m") > 0)
     {
-        static_cast<MFRender::OSGRenderer *>(engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
+        dynamic_cast<MFRender::OSGRenderer *>(engine.getRenderer())->setRenderMask(arguments["m"].as<unsigned int>());
         engine.getEntityFactory()->setDebugMode(true);
     }
 

@@ -371,7 +371,7 @@ void MissionImpl::createMissionEntities()
 
         if (!entity) continue;
 
-        auto it = mNodeMap.find(object.mParentName);
+        const auto it = mNodeMap.find(object.mParentName);
 
 
         if (it != mNodeMap.end()) {
