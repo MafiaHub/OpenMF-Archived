@@ -33,6 +33,7 @@ public:
 
     Entity();
     virtual void update(double dt)=0;
+    virtual void think() {};
 
     /**
       Initializes the entity with currently set data (OSG node, Bullet body, ...) so that it
@@ -41,6 +42,7 @@ public:
     virtual void ready()=0;
     virtual void destroy()=0;
     void setEngine(MFGame::Engine *engine)              { mEngine = engine;            };
+    MFGame::Engine *getEngine() const { return mEngine; }
     virtual std::string toString()                      { return "";                   };
     MFMath::Vec3 getPosition()                          { return mPosition;            };
     virtual void setPosition(MFMath::Vec3 position)     { mPosition = position;        };   ///< Sets position without collisions.
@@ -66,6 +68,9 @@ public:
     bool isReady()                                      { return mReady;               };
     Id getId()                                          { return mId;                  };
 
+    void setNextThink(int time) { mNextthink = time; }
+    int  getNextThink() const { return mNextthink; }
+
     virtual void setFriction(double factor)=0;
 
     virtual void setPhysicsBehavior(PhysicsBehavior behavior)=0;
@@ -81,6 +86,7 @@ protected:
     bool mReady;
     Id mId;
     int mPhysicsBehavior;
+    int mNextthink;
 
     static Id sNextId;
 };

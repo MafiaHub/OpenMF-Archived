@@ -1,4 +1,5 @@
 #include <entity/manager.hpp>
+#include <engine/engine.hpp>
 
 namespace MFGame
 {
@@ -84,6 +85,9 @@ void EntityManager::update(double dt)
     {
         if (pair.second && pair.second.get())
             pair.second->update(dt);
+
+        if (pair.second->getNextThink() < mEngine->getTime())
+            pair.second->think();
     }
 }
 

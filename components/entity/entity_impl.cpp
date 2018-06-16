@@ -221,7 +221,12 @@ void EntityImpl::setRotation(MFMath::Quat rotation)
     }
 }
 
-void EntityImpl::setPosition(MFMath::Vec3 position)
+    void EntityImpl::think()
+    {
+
+    }
+
+    void EntityImpl::setPosition(MFMath::Vec3 position)
 {
     Entity::setPosition(position);
     applyCurrentTransform();

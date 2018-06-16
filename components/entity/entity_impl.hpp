@@ -23,7 +23,7 @@ class EntityImpl: public Entity
 {
 public:
     EntityImpl();
-    ~EntityImpl();
+    virtual ~EntityImpl();
     virtual void update(double dt) override;
     virtual void ready() override;
     virtual void destroy() override;
@@ -43,6 +43,7 @@ public:
     virtual void setFriction(double factor) override;
     virtual MFMath::Vec3 getSize() override;
     virtual void setRotation(MFMath::Quat rotation) override;
+    virtual void think() override;
 
     void setVisualNode(osg::MatrixTransform *t)                                    { mOSGNode = t;                     };
     void setPhysicsBody(std::shared_ptr<btRigidBody> body)                         { mBulletBody = body;               };

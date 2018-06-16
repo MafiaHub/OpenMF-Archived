@@ -58,16 +58,82 @@ class EntityFactory : public ObjectFactory
 public:
     EntityFactory(MFRender::OSGRenderer *renderer, MFPhysics::BulletPhysicsWorld *physicsWorld, MFGame::EntityManager *entityManager);
 
+    template <class T = MFGame::EntityImpl>
     MFGame::Entity::Id createEntity(
         osg::MatrixTransform *graphicNode,
         std::shared_ptr<btRigidBody> physicsBody=0,
         std::shared_ptr<btDefaultMotionState> physicsMotionsState=0, 
         std::string name="",
-        Entity::PhysicsBehavior physicsBehavior=Entity::RIGID);
+        Entity::PhysicsBehavior physicsBehavior=Entity::RIGID)
+    {
+        if (physicsBody && physicsMotionsState && physicsBody->getMotionState() != physicsMotionsState.get())
+            physicsBody->setMotionState(physicsMotionsState.get());
+
+        std::shared_ptr<T> newEntity = std::make_shared<T>();
+        newEntity->setName(name);
+        newEntity->setDebugMode(mDebugMode);
+        newEntity->setOSGRootNode(mRenderer->getRootNode());
+        newEntity->setVisualNode(graphicNode);
+        newEntity->setPhysicsBody(physicsBody);
+        newEntity->setPhysicsMotionState(physicsMotionsState);
+        newEntity->ready();
+        mEntityManager->addEntity(newEntity);
+        newEntity->setPhysicsBehavior(physicsBehavior);
+        return newEntity->getId();
+    }
 
     MFGame::Entity::Id createTestBallEntity();
     MFGame::Entity::Id createTestBoxEntity();
-    MFGame::Entity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f);
+
+    template<class T = MFGame::EntityImpl>
+    MFGame::Entity::Id createPawnEntity(std::string modelName="", btScalar mass=150.0f)
+    {
+        MFUtil::FullRigidBody body;
+
+        btTransform transform;
+        transform.setIdentity();
+
+        body.mMotionState = std::make_shared<btDefaultMotionState>(transform);
+
+        btVector3 inertia(0, 0, 0);
+
+        if (mass)
+            mPhysicalCapsuleShape->calculateLocalInertia(mass, inertia);
+
+        body.mBody = std::make_shared<btRigidBody>(mass, body.mMotionState.get(), mPhysicalCapsuleShape.get(), inertia);
+
+        if (mass) {
+            body.mBody->setActivationState(DISABLE_DEACTIVATION);
+            body.mBody->setFriction(0);
+        }
+        mPhysicsWorld->getWorld()->addRigidBody(body.mBody.get());
+
+        osg::ref_ptr<osg::MatrixTransform> visualTransform = new osg::MatrixTransform();
+
+        if (modelName.length() == 0)
+        {
+            visualTransform->addChild(mCapsuleNode);
+        }
+        else
+        {
+            auto cache = mRenderer->getLoaderCache();
+            auto node = (osg::Node *)cache->getObject(modelName).get();
+
+            if (!node) {
+                node = loadModel(modelName);
+            }
+
+            visualTransform->addChild(node);
+
+            // TMP: shift a little down
+            visualTransform->setMatrix(osg::Matrixd::translate(osg::Vec3(0, 0, -1)));
+        }
+
+        mRenderer->getRootNode()->addChild(visualTransform);
+
+        return createEntity<T>(visualTransform.get(), body.mBody, body.mMotionState, "capsule", Entity::RIGID_PAWN);
+    }
+
     MFGame::Entity::Id createCameraEntity();
     MFGame::Entity::Id createTestShapeEntity(btCollisionShape *colShape, osg::ShapeDrawable *visualNode);
     MFGame::Entity::Id createPropEntity(MFFormat::DataFormatScene2BIN::Object *object);

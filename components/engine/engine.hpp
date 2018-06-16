@@ -77,10 +77,11 @@ public:
     
     std::string getCameraInfoString();                     ///< Get camera position and rotation encoded in string.
     void setCameraFromString(const std::string& cameraString) const;    ///< For debconst ug - set cu&rrent camera from string returned by getCameraInfoString().
+    EngineSettingsStruct getSettings() const { return mEngineSettings; }
     void RequestExit();
+    double getTime() const;
 
 protected:
-    double getTime() const;
     static void yield();
 
 

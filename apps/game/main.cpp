@@ -2,16 +2,20 @@
 #include <engine/engine.hpp>
 #include <controllers/player_controller.hpp>
 #include <cxxopts.hpp>
+#include <entity/player.hpp>
 
 class MafiaEngine: public MFGame::Engine
 {
 public:
     MafiaEngine(EngineSettings settings): MFGame::Engine(settings)
     {
-        mPlayerEntity = dynamic_cast<MFGame::EntityImpl *>(mEntityManager->getEntityById(mEntityFactory->createPawnEntity("tommy.4ds")));
+        mPlayerEntity = dynamic_cast<MFGame::Player *>(mEntityManager->getEntityById(mEntityFactory->createPawnEntity<MFGame::Player>("tommy.4ds")));
         mPlayerNode = mPlayerEntity->getVisualNode();
         mPlayerController = new MFGame::PlayerController(mPlayerEntity,mRenderer,mInputManager,mPhysicsWorld);
         mPlayerController->setMafiaPhysicsEmulation(false);
+
+        mPlayerEntity->setPlayerController(mPlayerController);
+        mPlayerEntity->setNextThink(getTime()+0.01);
 
         mEntityFactory->setDebugMode(false);
 
@@ -19,15 +23,10 @@ public:
         mInputManager->addKeyCallback(cb);
     };
 
-    virtual ~MafiaEngine()
-    {
-        delete mPlayerController;
-    };
+    virtual ~MafiaEngine() = default;
 
     void step() override
     {
-        mPlayerController->update(mEngineSettings.mUpdatePeriod);
-
         if (mInputManager->keyPressed(SDL_SCANCODE_ESCAPE)) {
             mIsRunning = false;
         }
@@ -92,7 +91,7 @@ public:
     };
 
 protected:
-    MFGame::EntityImpl *mPlayerEntity;
+    MFGame::Player *mPlayerEntity;
     osg::ref_ptr<osg::Group> mPlayerNode;
     MFGame::PlayerController *mPlayerController;
 };
