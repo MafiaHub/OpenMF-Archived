@@ -174,7 +174,7 @@ int main(int argc, char** argv)
     options.parse_positional({"i"});
     auto arguments = options.parse(argc,argv);
 
-    if (arguments.count("h") > 0)
+    if (arguments.count("h") > 0 || arguments.count("i") < 1)
     {
         std::cout << options.help() << std::endl;
         return 0;
