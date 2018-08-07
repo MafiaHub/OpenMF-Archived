@@ -69,6 +69,7 @@ public:
         SPECIAL_OBJECT_TYPE_CAR = 0x06,
         SPECIAL_OBJECT_TYPE_PUB_VEHICLE = 0x08,
         SPECIAL_OBJECT_TYPE_SCRIPT = 0x05,
+        SPECIAL_OBJECT_TYPE_SCRIPT_MISSION = 0x0C,
     } SpecialObjectType;
 
     typedef enum {
@@ -79,6 +80,7 @@ public:
         LIGHT_TYPE_POINT_AMBIENT = 0x06,
         LIGHT_TYPE_LAYERED_FOG = 0x08,
     } LightType;
+
 
     #pragma pack(push, 1)
     typedef struct

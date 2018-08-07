@@ -25,6 +25,7 @@ TypeName const gObjectTypeNames[] = {
 
 TypeName const gSpecialObjectTypeNames[] = {
     { 0x00, "TYPE_NONE" },
+    { 0x0C, "TYPE_SCRIPT_MISSION" },
     { 0x23, "TYPE_PHYSICAL" },
 };
 

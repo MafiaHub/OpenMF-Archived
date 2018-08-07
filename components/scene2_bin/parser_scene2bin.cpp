@@ -153,6 +153,29 @@ void DataFormatScene2BIN::readObject(std::ifstream &srcFile, Header* header, Obj
                     read(srcFile, &object->mSpecialProps.mMovVal5);
                 }
                 break;
+                case SPECIAL_OBJECT_TYPE_SCRIPT:
+                case SPECIAL_OBJECT_TYPE_SCRIPT_MISSION:
+                {
+                    // skip another header
+                    // TODO: realize what these 14 bytes (4x4 + 2) mean
+                    srcFile.seekg(14, srcFile.cur);
+                    uint32_t lengthOfScriptText = header->mSize-20;
+
+                    // allocate memory for the script itself
+                    char *script= reinterpret_cast<char*>(malloc(lengthOfScriptText + 1));
+                    // read the whole script
+                    read(srcFile, script, lengthOfScriptText);
+                    script[lengthOfScriptText] = '\0';
+                    std::cout << "========================================" << std::endl;
+                    std::cout << "Script '" << object->mName << "'" << std::endl;
+                    std::cout << "========================================" << std::endl;
+                    std::cout << script << std::endl;
+                    std::cout << "========================================" << std::endl;
+                }
+                break;
+                default:
+                    std::cout << "Missing loader for special data" << std::endl;
+                    break;
             }
         }
         break;
